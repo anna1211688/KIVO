@@ -1,0 +1,17 @@
+name: Build SnapPaste EXE
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyinstaller Pillow keyboard
+      - run: pyinstaller --noconfirm --onefile --windowed --name SnapPaste --add-data "Config.ini;." --add-data "ding.wav;." --add-data "Chinese.ini;Language" main.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SnapPaste-Windows
+          path: dist/SnapPaste.exe
