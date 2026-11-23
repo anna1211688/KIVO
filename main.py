@@ -24,7 +24,9 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
 APP_NAME = "SnapPaste 复制粘贴+截图贴图"
-VERSION = "1.4.3"  # v1.4.3: 系统托盘 (点 X 隐藏到右下角托盘, 双击图标打开, 右键菜单截图/贴图/退出; 依赖 pystray) / 标注工具栏改两排并加固放置 + 选区右键菜单兜底 / 识别线条黄改蓝 / 放大镜改 PixPin 式网格+蓝色十字+深色信息卡 (坐标/色块/HEX/RGB 跟随光标) / 文字贴图加关闭提示
+VERSION = "1.4.5"  # v1.4.5: 数据目录改到 %APPDATA%\SnapPaste, 桌面只剩单个 EXE (老数据首次运行自动从 EXE 旁搬移) + v1.4.4 的 Esc 焦点修复
+# v1.4.4: 修复框选/检测元素阶段 Esc 退不出 (覆盖层被热键从别的程序唤起时抢不到键盘焦点, Esc 落到原程序): 打开覆盖层时用 AttachThreadInput 强抢前台焦点, 并挂临时全局 Esc (覆盖层关闭即注销)
+# v1.4.3: 系统托盘 (点 X 隐藏到右下角托盘, 双击图标打开, 右键菜单截图/贴图/退出; 依赖 pystray) / 标注工具栏改两排并加固放置 + 选区右键菜单兜底 / 识别线条黄改蓝 / 放大镜改 PixPin 式网格+蓝色十字+深色信息卡 (坐标/色块/HEX/RGB 跟随光标) / 文字贴图加关闭提示
 # v1.4.2: 工具栏改两排并加固放置 (真机出现标注后找不到保存/复制: 工具栏尺寸在窗口未映射时取到 1x1 被放错位; 改用请求尺寸+显式尺寸+置顶, 并加选区右键菜单兜底) / 文字贴图加关闭提示与右键菜单
 # v1.4.1: 热键吞键 (F7 不再被 WPS 抢) / WPS 打字粘贴 / 粘后自动删 / 截图翻译 / UI 检测三模式 / 贴图动作组 / 长截图 / GIF 录制 / 序号标注 / F5 截图并复制 / 三次审查修复
 MAX_RECORDS = 2000  # 记录上限: 超出时自动丢弃最旧的未锁定记录, 防 records.json 无限膨胀
@@ -34,20 +36,48 @@ DEFAULT_HOTKEYS = {"HotKey8": "F6", "HotKey9": "F7", "HotKey10": "F8",
 # Snipaste 习惯键: F1 截图 / F3 贴图, 放在 Config.ini [Snip] 段
 DEFAULT_SNIP_KEYS = {"SnipKey": "F1", "PinKey": "F3", "CopyKey": "F5", "DelayKey": "无",
                      "ClosePinsKey": "无", "TogglePinsKey": "无", "RestorePinKey": "无", "ClickThroughKey": "无"}
-# 数据目录: 源码运行时在 main.py 旁; 打成 EXE (PyInstaller) 后必须在 EXE 旁,
-# 否则 Config/records/shots 会写进单文件解压的临时目录, 关程序就全丢 (v1.3.2 审查发现)
+# 数据目录: 源码运行时在 main.py 旁; 打成 EXE 后数据统一放 %APPDATA%\SnapPaste,
+# 桌面上只剩一个 SnapPaste.exe (v1.4.5, 用户反馈 Config/records/Language/shots/ding 散落一桌)。
+# 注意也不能用 _MEIPASS 临时目录: 那是单文件解压目录, 关程序就全丢 (v1.3.2 审查发现)。
 if getattr(sys, "frozen", False):
-    BASE = os.path.dirname(os.path.abspath(sys.executable))
-    BUNDLE = getattr(sys, "_MEIPASS", BASE)  # EXE 内置的默认文件 (打包时 --add-data 带入)
+    EXE_DIR = os.path.dirname(os.path.abspath(sys.executable))
+    BUNDLE = getattr(sys, "_MEIPASS", EXE_DIR)  # EXE 内置的默认文件 (打包时 --add-data 带入)
+    BASE = os.path.join(os.environ.get("APPDATA") or EXE_DIR, "SnapPaste")
+    try: os.makedirs(BASE, exist_ok=True)
+    except Exception: BASE = EXE_DIR  # AppData 建不了时退回 EXE 旁 (老行为, 至少能用)
 else:
     BASE = os.path.dirname(os.path.abspath(__file__))
     BUNDLE = BASE
+    EXE_DIR = BASE
 CONFIG_PATH = os.path.join(BASE, "Config.ini")
 RECORDS_PATH = os.path.join(BASE, "records.json")
 
-def ensure_runtime_files():
-    """EXE 首次运行: 把内置的默认 Config.ini / ding.wav / Language 释放到 EXE 旁; 已存在的不覆盖"""
+def _migrate_old_data():
+    """老版本 (<=v1.4.4) 数据在 EXE 旁: 首次用 AppData 数据目录时整套搬过来, 配置/记录/截图不丢"""
+    if not getattr(sys, "frozen", False) or os.path.abspath(BASE) == os.path.abspath(EXE_DIR): return
+    if os.path.exists(os.path.join(BASE, "Config.ini")): return  # 新目录已有数据, 不再搬
     import shutil
+    for rel in ("Config.ini", "records.json", "ding.wav",
+                os.path.join("Language", "Chinese.ini"), os.path.join("Language", "English.ini")):
+        src, dst = os.path.join(EXE_DIR, rel), os.path.join(BASE, rel)
+        if os.path.exists(src) and not os.path.exists(dst):
+            try: os.makedirs(os.path.dirname(dst), exist_ok=True); shutil.copy(src, dst)
+            except Exception: pass
+    old_shots, new_shots = os.path.join(EXE_DIR, "shots"), os.path.join(BASE, "shots")
+    if os.path.isdir(old_shots):
+        try:
+            os.makedirs(new_shots, exist_ok=True)
+            for name in os.listdir(old_shots):
+                s, d = os.path.join(old_shots, name), os.path.join(new_shots, name)
+                if os.path.isfile(s) and not os.path.exists(d):
+                    try: shutil.copy(s, d)
+                    except Exception: pass
+        except Exception: pass
+
+def ensure_runtime_files():
+    """EXE 首次运行: 先搬老数据 (EXE 旁 -> AppData), 再把内置默认文件释放到数据目录; 已存在的不覆盖"""
+    import shutil
+    _migrate_old_data()
     for rel in ("Config.ini", "ding.wav", os.path.join("Language", "Chinese.ini"), os.path.join("Language", "English.ini")):
         src, dst = os.path.join(BUNDLE, rel), os.path.join(BASE, rel)
         if not os.path.exists(dst) and os.path.exists(src):
@@ -973,6 +1003,27 @@ class App(tk.Tk):
             except Exception: pass
             ctrl.after(int(1000 / fps), tick)
         tick()
+    def _force_foreground(self, win):
+        # 把覆盖层抢到前台并拿到键盘焦点: 截图是被全局热键从别的程序 (如 Chrome) 里唤起的,
+        # 普通 focus_set 抢不过 Windows 的前台锁定, Esc 等按键会落到原程序身上
+        # (真机反馈: 框选/检测元素阶段按 Esc 退不出截图)。用 AttachThreadInput 借前台线程的输入队列再 SetForegroundWindow。
+        try: win.focus_force()
+        except Exception: pass
+        if sys.platform != "win32": return
+        try:
+            u32, k32 = ctypes.windll.user32, ctypes.windll.kernel32
+            hwnd = u32.GetAncestor(win.winfo_id(), 2)  # GA_ROOT
+            fg = u32.GetForegroundWindow()
+            if fg and fg != hwnd:
+                tid_fg = u32.GetWindowThreadProcessId(fg, None)
+                tid_me = k32.GetCurrentThreadId()
+                u32.AttachThreadInput(tid_me, tid_fg, True)
+                u32.SetForegroundWindow(hwnd); u32.BringWindowToTop(hwnd)
+                u32.AttachThreadInput(tid_me, tid_fg, False)
+            else:
+                u32.SetForegroundWindow(hwnd)
+        except Exception: pass
+
     def snip_region(self):
         if not HAS_PIL:
             messagebox.showerror("缺少 Pillow", "截图功能需要 Pillow: pip install Pillow"); return
@@ -1057,6 +1108,7 @@ class App(tk.Tk):
                                    font=("Consolas", 12, "bold"), text=f"已复制 {state['hex']}")
                 sel_win.after(900, lambda: canvas.delete("copied"))
         sel_win.bind("<KeyPress>", on_key); sel_win.focus_set()
+        self._force_foreground(sel_win)  # 抢键盘焦点, 保证框选阶段 Esc/+/-/C 都落在截图窗上
         def down(e): state.update(x=e.x, y=e.y); canvas.delete("snap"); show_info(e)
         def drag(e):
             if state["rect"]: canvas.delete(state["rect"])
@@ -1086,6 +1138,21 @@ class App(tk.Tk):
             try: sel_win.destroy()
             except Exception: pass
             self.deiconify()
+        # 全局 Esc 兜底: 就算焦点一时没抢过来 (还停在原程序身上), 框选/调整阶段按 Esc 也能退出;
+        # 覆盖层销毁时自动注销 (finish/取消/长截图/GIF 所有出口都销毁 sel_win), 不影响平时用 Esc
+        state["esc_hk"] = None
+        try:
+            import keyboard as _kb
+            state["esc_hk"] = _kb.add_hotkey("esc", lambda: self._ui_queue.put(close_overlay), suppress=True)
+        except Exception: pass
+        def _drop_esc_hk(e):
+            if e.widget is not sel_win: return
+            if state.get("esc_hk") is not None:
+                try:
+                    import keyboard as _kb2; _kb2.remove_hotkey(state["esc_hk"])
+                except Exception: pass
+                state["esc_hk"] = None
+        sel_win.bind("<Destroy>", _drop_esc_hk)
         def handles_of(box):
             x1, y1, x2, y2 = box; mx, my = (x1 + x2) // 2, (y1 + y2) // 2
             return [(x1, y1), (mx, y1), (x2, y1), (x1, my), (x2, my), (x1, y2), (mx, y2), (x2, y2)]
@@ -1346,7 +1413,7 @@ class App(tk.Tk):
             adj_menu.add_command(label="取消截图 (Esc)", command=close_overlay)
             canvas.bind("<Button-3>", lambda e: adj_menu.tk_popup(e.x_root, e.y_root))
             sel_win.bind("<KeyPress>", lambda e: (adj_key(e), on_key(e))[0] if e.keysym in ("Left", "Right", "Up", "Down", "Return") or (e.keysym.lower() in ("c", "z", "y", "s", "t") and (e.state & 0x0004)) else on_key(e))
-            sel_win.focus_set()
+            sel_win.focus_set(); self._force_foreground(sel_win)
         def _hex_at(e):
             try: r, g, b = full.getpixel((e.x, e.y))[:3]; return f"#{r:02X}{g:02X}{b:02X}"
             except Exception: return state.get("hex", "")
