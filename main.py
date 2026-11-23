@@ -24,7 +24,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
 APP_NAME = "SnapPaste 复制粘贴+截图贴图"
-VERSION = "1.3.2"  # 二次审查修复版, 见 docs/二次审查报告.md
+VERSION = "1.3.3"  # v1.3.3: 真机修复 F6/F7/F8 真正发送 Ctrl+C/Ctrl+V
 MAX_RECORDS = 2000  # 记录上限: 超出时自动丢弃最旧的未锁定记录, 防 records.json 无限膨胀
 # 开箱即用预设热键: 用户不用自己设置, 打开就能用; 想改再去「热键设置」
 DEFAULT_HOTKEYS = {"HotKey8": "F6", "HotKey9": "F7", "HotKey10": "F8",
@@ -51,6 +51,21 @@ def ensure_runtime_files():
             try:
                 os.makedirs(os.path.dirname(dst), exist_ok=True); shutil.copy(src, dst)
             except Exception: pass
+
+# Win32 SendInput 结构: 必须带完整 union, 否则 sizeof(INPUT) 不是系统要求的 40 字节 (x64), 调用会被拒绝
+class _KEYBDINPUT(ctypes.Structure):
+    _fields_ = [("wVk", ctypes.c_ushort), ("wScan", ctypes.c_ushort), ("dwFlags", ctypes.c_uint32),
+                ("time", ctypes.c_uint32), ("dwExtraInfo", ctypes.c_void_p)]
+class _MOUSEINPUT(ctypes.Structure):
+    _fields_ = [("dx", ctypes.c_int), ("dy", ctypes.c_int), ("mouseData", ctypes.c_uint32),
+                ("dwFlags", ctypes.c_uint32), ("time", ctypes.c_uint32),
+                ("dwExtraInfo", ctypes.c_void_p)]
+class _HARDWAREINPUT(ctypes.Structure):
+    _fields_ = [("uMsg", ctypes.c_uint32), ("wParamL", ctypes.c_ushort), ("wParamH", ctypes.c_ushort)]
+class _INPUTUNION(ctypes.Union):
+    _fields_ = [("mi", _MOUSEINPUT), ("ki", _KEYBDINPUT), ("hi", _HARDWAREINPUT)]
+class _INPUT(ctypes.Structure):
+    _fields_ = [("type", ctypes.c_uint32), ("u", _INPUTUNION)]
 
 def enable_hidpi():
     if sys.platform == "win32":
@@ -263,13 +278,69 @@ class App(tk.Tk):
     def separator(self):
         if self.custom_sep.get(): return self.custom_sep.get()
         return {"enter": "\n", "tab": "\t", "none": ""}[self.sep_var.get()]
-    def multi_copy(self): self.add_record(self.clip_get()); self.refresh_list(); self.beep()
+    # ---------- v1.3.3 真机修复: F6/F7/F8 要真的替用户按 Ctrl+C / Ctrl+V ----------
+    # 旧实现只读现成剪贴板: 在别的软件里选好文字按 F6, 剪贴板没变 -> 入队空/旧内容 -> 等于没反应。
+    def _foreground_is_self(self):
+        if sys.platform != "win32": return True
+        try:
+            fg = ctypes.windll.user32.GetForegroundWindow()
+            pid = ctypes.c_ulong()
+            ctypes.windll.user32.GetWindowThreadProcessId(fg, ctypes.byref(pid))
+            return pid.value == os.getpid()
+        except Exception: return False
+    def _send_combo(self, vk_key):
+        """向当前前台窗口发送 Ctrl+<vk_key> (0x43=复制 / 0x56=粘贴); SendInput -> keybd_event -> keyboard 三层兜底"""
+        if sys.platform == "win32":
+            VK_CONTROL, KEYUP = 0x11, 0x0002
+            try:
+                def ev(vk, up=False):
+                    i = _INPUT(); i.type = 1; i.u.ki.wVk = vk; i.u.ki.dwFlags = KEYUP if up else 0; return i
+                seq = (_INPUT * 4)(ev(VK_CONTROL), ev(vk_key), ev(vk_key, True), ev(VK_CONTROL, True))
+                if ctypes.windll.user32.SendInput(4, seq, ctypes.sizeof(_INPUT)) == 4: return True
+            except Exception: pass
+            try:
+                u = ctypes.windll.user32
+                u.keybd_event(VK_CONTROL, 0, 0, 0); u.keybd_event(vk_key, 0, 0, 0)
+                u.keybd_event(vk_key, 0, KEYUP, 0); u.keybd_event(VK_CONTROL, 0, KEYUP, 0)
+                return True
+            except Exception: pass
+        try:
+            import keyboard; keyboard.send("ctrl+c" if vk_key == 0x43 else "ctrl+v"); return True
+        except Exception: return False
+    def _clip_sequence(self):
+        if sys.platform == "win32":
+            try: return ctypes.windll.user32.GetClipboardSequenceNumber()
+            except Exception: pass
+        return None
+    def multi_copy(self):
+        before_seq, before_text = self._clip_sequence(), None
+        if not self._foreground_is_self():
+            before_text = self.clip_get()
+            self._send_combo(0x43)  # 替用户在当前软件里按 Ctrl+C
+            deadline = time.time() + max(0.3, self.sleep_ms / 1000 * 6)  # 等剪贴板真的变了再读, 最多约 0.5 秒
+            while time.time() < deadline:
+                seq = self._clip_sequence()
+                if seq is not None and before_seq is not None:
+                    if seq != before_seq: break
+                elif self.clip_get() != before_text: break
+                time.sleep(0.03)
+        n = len(self.records)
+        self.add_record(self.clip_get())
+        if len(self.records) > n: self.beep()  # 真入队了才响, 没选中文字时不假响
+        self.refresh_list()
+    def _paste_text(self, text):
+        self.clip_set(text)
+        if not self._foreground_is_self():
+            time.sleep(0.03); self._send_combo(0x56)  # Ctrl+V: 真的粘进目标窗口, 不只是放剪贴板
+        self.beep()
     def paste_next(self):
         if not self.records: return
         if self.paste_index >= len(self.records): self.paste_index = 0
-        self.clip_set(self.records[self.paste_index]["text"]); self.paste_index += 1; self.refresh_list(); self.beep()
+        text = self.records[self.paste_index]["text"]; self.paste_index += 1
+        self._paste_text(text); self.refresh_list()
     def paste_all(self):
-        self.clip_set(self.separator().join(r["text"] for r in self.records)); self.beep()
+        if not self.records: return
+        self._paste_text(self.separator().join(r["text"] for r in self.records))
     def paste_selected(self):
         i = self.selected_idx()
         if i >= 0:
