@@ -24,7 +24,8 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
 APP_NAME = "SnapPaste 复制粘贴+截图贴图"
-VERSION = "1.4.6"  # v1.4.6: 标注工具栏改冻结屏同窗 Frame (独立小窗真机反复不显示) + 图片复制补全 Win32 签名并加 PowerShell 备用通道 + 主窗口按内容自适应高度 (底部不再被裁)
+VERSION = "1.4.7"  # v1.4.7: 新增一键截图翻译 (F4 预设, 自动检测源语言, 目标语言主窗口可设中文/English) + v1.4.6 的工具栏同窗/图片复制双通道/窗口自适应高度
+# v1.4.6: 标注工具栏改冻结屏同窗 Frame (独立小窗真机反复不显示) + 图片复制补全 Win32 签名并加 PowerShell 备用通道 + 主窗口按内容自适应高度 (底部不再被裁)
 # v1.4.5: 数据目录改到 %APPDATA%\SnapPaste, 桌面只剩单个 EXE (老数据首次运行自动从 EXE 旁搬移) + v1.4.4 的 Esc 焦点修复
 # v1.4.4: 修复框选/检测元素阶段 Esc 退不出 (覆盖层被热键从别的程序唤起时抢不到键盘焦点, Esc 落到原程序): 打开覆盖层时用 AttachThreadInput 强抢前台焦点, 并挂临时全局 Esc (覆盖层关闭即注销)
 # v1.4.3: 系统托盘 (点 X 隐藏到右下角托盘, 双击图标打开, 右键菜单截图/贴图/退出; 依赖 pystray) / 标注工具栏改两排并加固放置 + 选区右键菜单兜底 / 识别线条黄改蓝 / 放大镜改 PixPin 式网格+蓝色十字+深色信息卡 (坐标/色块/HEX/RGB 跟随光标) / 文字贴图加关闭提示
@@ -35,7 +36,7 @@ MAX_RECORDS = 2000  # 记录上限: 超出时自动丢弃最旧的未锁定记�
 DEFAULT_HOTKEYS = {"HotKey8": "F6", "HotKey9": "F7", "HotKey10": "F8",
                    "HotKey11": "F9", "HotKey12": "SHIFT+F9"}
 # Snipaste 习惯键: F1 截图 / F3 贴图, 放在 Config.ini [Snip] 段
-DEFAULT_SNIP_KEYS = {"SnipKey": "F1", "PinKey": "F3", "CopyKey": "F5", "DelayKey": "无",
+DEFAULT_SNIP_KEYS = {"SnipKey": "F1", "PinKey": "F3", "CopyKey": "F5", "TransKey": "F4", "DelayKey": "无",
                      "ClosePinsKey": "无", "TogglePinsKey": "无", "RestorePinKey": "无", "ClickThroughKey": "无"}
 # 数据目录: 源码运行时在 main.py 旁; 打成 EXE 后数据统一放 %APPDATA%\SnapPaste,
 # 桌面上只剩一个 SnapPaste.exe (v1.4.5, 用户反馈 Config/records/Language/shots/ding 散落一桌)。
@@ -305,7 +306,12 @@ class App(tk.Tk):
         self.ui_detect_var = tk.StringVar(value=self.cfg.get("Snip", "UIDetect", fallback="2"))
         for txt, val in [(self.t("detect_none", "不检测"), "0"), (self.t("detect_win", "仅窗口"), "1"), (self.t("detect_elem", "检测元素"), "2")]:
             ttk.Radiobutton(snip2, text=txt, variable=self.ui_detect_var, value=val, command=self._save_ui_detect).pack(side="left", padx=2)
-        for txt, cmd in [(self.t("snip_region", "区域截图 (F1)"), self.snip_region), (self.t("snip_copy_btn", "截图并复制 (F5)"), self.snip_copy), (self.t("pin_clip", "贴剪贴板 (F3)"), self.pin_clipboard),
+        snip3 = ttk.Frame(snip); snip3.pack(fill="x")
+        ttk.Label(snip3, text=self.t("trans_target", "截图翻译目标语言:")).pack(side="left", padx=(2, 0), pady=2)
+        self.trans_target_var = tk.StringVar(value="中文" if self.trans_target() == "zh-CN" else "English")
+        ttk.Combobox(snip3, textvariable=self.trans_target_var, values=["中文", "English"], width=8, state="readonly").pack(side="left", padx=2)
+        self.trans_target_var.trace_add("write", lambda *_: self._save_trans_target())
+        for txt, cmd in [(self.t("snip_region", "区域截图 (F1)"), self.snip_region), (self.t("snip_copy_btn", "截图并复制 (F5)"), self.snip_copy), (self.t("snip_trans_btn", "截图翻译 (F4)"), self.snip_translate), (self.t("pin_clip", "贴剪贴板 (F3)"), self.pin_clipboard),
                          (self.t("pin_selected", "钉住选中截图"), self.pin_selected_shot), (self.t("gallery", "历史画廊"), self.open_gallery),
                          (self.t("ocr_selected", "OCR 选中截图"), self.ocr_selected_shot), (self.t("open_shots_dir", "打开截图文件夹"), self.open_shots_dir)]:
             ttk.Button(snip, text=txt, command=cmd).pack(side="left", padx=2, pady=4)
@@ -328,6 +334,10 @@ class App(tk.Tk):
     def _save_ui_detect(self):
         if not self.cfg.has_section("Snip"): self.cfg.add_section("Snip")
         self.cfg.set("Snip", "UIDetect", self.ui_detect_var.get()); self.save_config()
+    def _save_trans_target(self):
+        if not self.cfg.has_section("Snip"): self.cfg.add_section("Snip")
+        self.cfg.set("Snip", "TransTarget", "zh-CN" if self.trans_target_var.get() == "中文" else "en")
+        self.save_config()
     def _toggle_paste_remove(self):
         if not self.cfg.has_section("Config"): self.cfg.add_section("Config")
         self.cfg.set("Config", "PasteRemove", "1" if self.paste_remove_var.get() else "0")
@@ -768,7 +778,8 @@ class App(tk.Tk):
                 ("HotKey", "HotKey10", self.t("hk_paste_all", "全部粘贴"), self.paste_all), ("HotKey", "HotKey11", self.t("hk_delete_last", "删除最后一条"), self.delete_last),
                 ("HotKey", "HotKey12", self.t("hk_delete_all", "删除全部记录"), self.delete_all),
                 ("Snip", "SnipKey", self.t("hk_snip", "区域截图"), self.snip_region), ("Snip", "PinKey", self.t("hk_pin", "贴剪贴板"), self.pin_clipboard),
-                ("Snip", "CopyKey", self.t("hk_snip_copy", "截图并复制"), self.snip_copy), ("Snip", "DelayKey", self.t("hk_snip_delay", "延时截图"), self.snip_delayed),
+                ("Snip", "CopyKey", self.t("hk_snip_copy", "截图并复制"), self.snip_copy), ("Snip", "TransKey", self.t("hk_snip_trans", "截图翻译"), self.snip_translate),
+                ("Snip", "DelayKey", self.t("hk_snip_delay", "延时截图"), self.snip_delayed),
                 ("Snip", "ClosePinsKey", self.t("hk_close_pins", "关闭所有贴图"), self.close_all_pins), ("Snip", "TogglePinsKey", self.t("hk_toggle_pins", "隐藏/显示所有贴图"), self.toggle_pins_visible),
                 ("Snip", "RestorePinKey", self.t("hk_restore_pin", "恢复上次关闭的贴图"), self.restore_last_pin), ("Snip", "ClickThroughKey", self.t("hk_click_through", "贴图鼠标穿透开关"), self.toggle_pins_clickthrough)]
     @staticmethod
@@ -1144,6 +1155,8 @@ class App(tk.Tk):
             if box[2] - box[0] > 5 and box[3] - box[1] > 5:
                 if finish_mode == "copy":  # 截图并复制: 框选完直接出图进剪贴板, 不停留标注
                     final = full.crop(box); self.save_shot(final); close_overlay(); self._copy_image_to_clipboard(final)
+                elif finish_mode == "translate":  # 截图翻译: 框选完直接 OCR 并翻译到目标语言, 不停留标注
+                    final = full.crop(box); self.save_shot(final); close_overlay(); self.translate_image(final, self.trans_target())
                 else: enter_adjust(box)
             else: close_overlay()
         canvas.bind("<ButtonPress-1>", down); canvas.bind("<B1-Motion>", drag); canvas.bind("<ButtonRelease-1>", up)
@@ -1469,6 +1482,9 @@ class App(tk.Tk):
     def snip_copy(self):
         """截图并复制: 框选完直接复制到剪贴板, 不停留标注"""
         self._snip_finish_mode = "copy"; self.snip_region()
+    def snip_translate(self):
+        """截图翻译: 框选完直接 OCR + 自动检测源语言 + 翻译到设置的目标语言 (默认中文), 不停留标注"""
+        self._snip_finish_mode = "translate"; self.snip_region()
     def snip_delayed(self):
         """延时截图: 倒计时后才开始, 方便截菜单/提示框这类一动鼠标就消失的画面"""
         try: secs = float(self.cfg.get("Snip", "DelaySeconds", fallback="3"))
@@ -1953,6 +1969,50 @@ try {
             if not t: return None
             out.append(t)
         return "\n".join(out)
+    def trans_target(self):
+        """截图翻译的目标语言: [Snip] TransTarget, zh-CN (默认) 或 en, 主窗口可改"""
+        v = (self.cfg.get("Snip", "TransTarget", fallback="zh-CN") or "zh-CN").strip()
+        return v if v in ("zh-CN", "en") else "zh-CN"
+    @staticmethod
+    def translate_text_to(text, target):
+        """把文字翻译到指定目标语言, 源语言自动检测 (一键截图翻译 F4 用)。
+        Google 接口 (sl=auto) 为主, MyMemory 备用; 原文已是中文且目标也是中文时原样返回; 全部失败返回 None。"""
+        import urllib.request, urllib.parse, json as _json
+        text = (text or "").strip()
+        if not text: return ""
+        cjk = sum(1 for ch in text if "\u4e00" <= ch <= "\u9fff")
+        if target == "zh-CN" and cjk >= 3 and cjk * 2 >= len(text.replace(" ", "")): return text  # 基本已是中文, 不必译
+        has_cjk = cjk > 0
+        groups, cur = [], ""
+        for line in text.splitlines():
+            if cur and len(cur) + len(line) + 1 > 450: groups.append(cur); cur = line
+            else: cur = (cur + "\n" + line) if cur else line
+        if cur: groups.append(cur)
+        def via_google(q):
+            url = "https://translate.googleapis.com/translate_a/single?" + urllib.parse.urlencode(
+                {"client": "gtx", "sl": "auto", "tl": target, "dt": "t", "q": q})
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(req, timeout=12) as r:
+                d = _json.loads(r.read().decode("utf-8"))
+            return "".join(seg[0] for seg in (d[0] or []) if seg and seg[0])
+        def via_mymemory(q):
+            src = "zh-CN" if has_cjk else "en"
+            url = "https://api.mymemory.translated.net/get?" + urllib.parse.urlencode({"q": q, "langpair": f"{src}|{target}"})
+            req = urllib.request.Request(url, headers={"User-Agent": "SnapPaste"})
+            with urllib.request.urlopen(req, timeout=12) as r:
+                d = _json.loads(r.read().decode("utf-8"))
+            return (d.get("responseData") or {}).get("translatedText") or ""
+        out = []
+        for g in groups:
+            t = ""
+            try: t = via_google(g)
+            except Exception: t = ""
+            if not t:
+                try: t = via_mymemory(g)
+                except Exception: return None
+            if not t: return None
+            out.append(t)
+        return "\n".join(out)
     def translate_and_show(self, text):
         """后台线程翻译 (不冻结界面), 完成后回主线程弹结果窗"""
         import threading
@@ -1967,14 +2027,14 @@ try {
                     self.show_text_result("翻译结果", res)
             self._ui_queue.put(show)
         threading.Thread(target=work, daemon=True).start()
-    def translate_image(self, img):
-        """对一张图先 OCR 再翻译 (都在后台线程跑, 不冻结界面)"""
+    def translate_image(self, img, target=None):
+        """对一张图先 OCR 再翻译 (都在后台线程跑, 不冻结界面)。target 给定则译到该语言 (源语言自动检测), 否则英<->中互译"""
         import threading
         def work():
             text = self.ocr_image(img)
             if not text or not text.strip():
                 self._ui_queue.put(lambda: messagebox.showinfo("截图翻译", "这张图没识别出文字, 换个更清晰的截图试试。")); return
-            res = self.translate_text(text)
+            res = self.translate_text_to(text, target) if target else self.translate_text(text)
             def show():
                 if res is None:
                     messagebox.showinfo("截图翻译", "翻译失败: 用的是免费在线翻译接口, 需要联网, 检查网络后重试。")
@@ -2072,6 +2132,7 @@ try {
                 pystray.MenuItem("显示主窗口", lambda icon, item: self._ui_queue.put(self._show_main), default=True),
                 pystray.MenuItem("区域截图", lambda icon, item: self._ui_queue.put(self.snip_region)),
                 pystray.MenuItem("截图并复制", lambda icon, item: self._ui_queue.put(self.snip_copy)),
+                pystray.MenuItem("截图翻译", lambda icon, item: self._ui_queue.put(self.snip_translate)),
                 pystray.MenuItem("贴剪贴板内容", lambda icon, item: self._ui_queue.put(self.pin_clipboard)),
                 pystray.Menu.SEPARATOR,
                 pystray.MenuItem("退出 SnapPaste", lambda icon, item: self._ui_queue.put(self._quit_app)),
