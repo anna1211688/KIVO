@@ -24,7 +24,8 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
 APP_NAME = "SnapPaste 复制粘贴+截图贴图"
-VERSION = "1.4.5"  # v1.4.5: 数据目录改到 %APPDATA%\SnapPaste, 桌面只剩单个 EXE (老数据首次运行自动从 EXE 旁搬移) + v1.4.4 的 Esc 焦点修复
+VERSION = "1.4.6"  # v1.4.6: 标注工具栏改冻结屏同窗 Frame (独立小窗真机反复不显示) + 图片复制补全 Win32 签名并加 PowerShell 备用通道 + 主窗口按内容自适应高度 (底部不再被裁)
+# v1.4.5: 数据目录改到 %APPDATA%\SnapPaste, 桌面只剩单个 EXE (老数据首次运行自动从 EXE 旁搬移) + v1.4.4 的 Esc 焦点修复
 # v1.4.4: 修复框选/检测元素阶段 Esc 退不出 (覆盖层被热键从别的程序唤起时抢不到键盘焦点, Esc 落到原程序): 打开覆盖层时用 AttachThreadInput 强抢前台焦点, 并挂临时全局 Esc (覆盖层关闭即注销)
 # v1.4.3: 系统托盘 (点 X 隐藏到右下角托盘, 双击图标打开, 右键菜单截图/贴图/退出; 依赖 pystray) / 标注工具栏改两排并加固放置 + 选区右键菜单兜底 / 识别线条黄改蓝 / 放大镜改 PixPin 式网格+蓝色十字+深色信息卡 (坐标/色块/HEX/RGB 跟随光标) / 文字贴图加关闭提示
 # v1.4.2: 工具栏改两排并加固放置 (真机出现标注后找不到保存/复制: 工具栏尺寸在窗口未映射时取到 1x1 被放错位; 改用请求尺寸+显式尺寸+置顶, 并加选区右键菜单兜底) / 文字贴图加关闭提示与右键菜单
@@ -132,6 +133,7 @@ class App(tk.Tk):
         self.cfg = self.load_config()
         self._load_lang()
         self.build_ui()
+        self._fit_window_to_content()
         self.load_records()
         self.refresh_list()
         self.refresh_shots()
@@ -141,6 +143,18 @@ class App(tk.Tk):
         if self.cfg.get("Config", "MiniFormSet", fallback="0") == "1": self.after(300, self.show_mini)  # 常显模式: 启动即显示迷你窗口
         self.after(60, self._poll_ui_queue)
         self.protocol("WM_DELETE_WINDOW", self.on_close)
+    def _fit_window_to_content(self):
+        # 按内容实际需要的尺寸定窗口大小: 写死的 680x580 在高缩放 (125%/150%) 屏幕上装不下全部功能,
+        # 底部截图按钮和状态栏会被裁掉, 要手动往下拉高才看得全 (真机反馈)。打开即按内容定高, 最小高度也锁到内容高度。
+        try:
+            self.update_idletasks()
+            req_w, req_h = self.winfo_reqwidth(), self.winfo_reqheight()
+            sw, sh = self.winfo_screenwidth(), self.winfo_screenheight()
+            w = min(max(680, req_w), sw)
+            h = min(req_h, max(500, sh - 50))
+            self.geometry(f"{w}x{h}")
+            self.minsize(min(620, w), h)
+        except Exception: pass
     def _poll_ui_queue(self):
         try:
             while True:
@@ -495,7 +509,10 @@ class App(tk.Tk):
         try:
             u, k = ctypes.windll.user32, ctypes.windll.kernel32
             k.GlobalAlloc.restype = ctypes.c_void_p; k.GlobalLock.restype = ctypes.c_void_p
-            u.SetClipboardData.argtypes = [ctypes.c_uint, ctypes.c_void_p]
+            k.GlobalAlloc.argtypes = [ctypes.c_uint, ctypes.c_size_t]  # 尺寸是 SIZE_T (64 位): 不声明会被按 32 位传, 高位带垃圾可能分配失败
+            k.GlobalFree.argtypes = [ctypes.c_void_p]
+            u.OpenClipboard.argtypes = [ctypes.c_void_p]
+            u.SetClipboardData.argtypes = [ctypes.c_uint, ctypes.c_void_p]; u.SetClipboardData.restype = ctypes.c_void_p
             data = (text + "\0").encode("utf-16-le")
             h = k.GlobalAlloc(0x0002, len(data))  # GMEM_MOVEABLE
             if not h: return False
@@ -1181,8 +1198,8 @@ class App(tk.Tk):
             x1, y1, x2, y2 = state["box"]
             tx = min(max(0, x1), max(0, full.width - tw))
             ty = y2 + 8 if y2 + 8 + th <= full.height else (y1 - th - 8 if y1 - th - 8 >= 0 else max(0, full.height - th))
-            tb.geometry(f"{tw}x{th}+{tx}+{ty}")  # 尺寸和位置一起给死, 不靠系统猜
-            tb.deiconify(); tb.lift(); tb.attributes("-topmost", True)  # 明确压到冻结屏之上
+            tb.place(x=tx, y=ty, width=tw, height=th)  # 同窗 Frame: place 到冻结屏画布之上, 坐标就是画布坐标
+            tb.lift()
         def shift_ops(dx, dy):
             if dx or dy:
                 for items in state["op_items"]:
@@ -1225,13 +1242,13 @@ class App(tk.Tk):
                     messagebox.showinfo("复制到剪贴板", "图片复制失败, 已存进截图历史, 可在历史里打开")
             elif kind == "save": self._save_as(final)
         def build_toolbar():
-            tb = tk.Toplevel(sel_win); tb.overrideredirect(True); tb.attributes("-topmost", True); tb.configure(bg="#F2F2F2")
+            # 工具栏是冻结屏窗口内部的一个 Frame, 不再是独立小窗 (v1.4.6): 独立 Toplevel 在真机上
+            # 反复出现不显示 (窗口层级/焦点/放置时机都可能出问题), 同窗 Frame 不存在这些问题, 必然可见。
+            # 按键也不用单独绑: 按钮和 sel_win 同窗, Esc/方向键/回车经 bindtags 都会走到 sel_win 的绑定。
+            tb = tk.Frame(sel_win, bg="#F2F2F2", bd=1, relief="solid")
             state["tb"] = tb
             r1 = tk.Frame(tb, bg="#F2F2F2"); r1.pack(fill="x")
             r2 = tk.Frame(tb, bg="#F2F2F2"); r2.pack(fill="x")
-            # 焦点在工具栏时 Esc/回车/方向键也要有效 (否则点过工具栏按钮后 Esc 取消不了, 真机反馈过)
-            tb.bind("<Escape>", lambda e: close_overlay())
-            tb.bind("<KeyPress>", lambda e: (adj_key(e), on_key(e))[0] if e.keysym in ("Left", "Right", "Up", "Down", "Return") or (e.keysym.lower() in ("c", "z", "y", "s", "t") and (e.state & 0x0004)) else on_key(e))
             tool_btns = {}
             def set_tool(name):
                 state["tool"] = name
@@ -1527,9 +1544,37 @@ class App(tk.Tk):
         p = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG", "*.png")])
         if p: img.save(p)
     def _copy_image_to_clipboard(self, img):
-        """把图片放进系统剪贴板 (Snipaste 截图完成的主动作); Windows 用 CF_DIB, 无第三方依赖。
-        剪贴板常被别的程序 (WPS/微信/剪贴板管理器) 短暂占用: 打开要重试, 只试一次很容易失败 (真机反馈过)。"""
+        """把图片放进系统剪贴板 (Snipaste 截图完成的主动作): 先走 Win32 CF_DIB, 失败再走 PowerShell 备用通道。
+        v1.4.5 真机仍报复制失败: Win32 通道里 GlobalAlloc 的尺寸参数 (SIZE_T) 没声明类型, 64 位下可能传错;
+        这次补全所有参数签名, 并加一条和 OCR 共用、真机验证过的 PowerShell 桥作双保险。"""
         if sys.platform != "win32": return False
+        return self._copy_image_win32(img) or self._copy_image_powershell(img)
+
+    def _copy_image_powershell(self, img):
+        """备用通道: 借 PowerShell 的 Windows.Forms 把图片放进剪贴板。图片路径走环境变量传, 避开中文路径编码问题。"""
+        import subprocess, tempfile
+        path = None
+        try:
+            fd, path = tempfile.mkstemp(suffix=".png"); os.close(fd)
+            img.save(path, "PNG")
+            ps = ("Add-Type -AssemblyName System.Windows.Forms; Add-Type -AssemblyName System.Drawing; "
+                  "$img = [System.Drawing.Image]::FromFile($env:SP_CLIP_PATH); "
+                  "[System.Windows.Forms.Clipboard]::SetImage($img); $img.Dispose()")
+            env = dict(os.environ); env["SP_CLIP_PATH"] = path
+            r = subprocess.run(["powershell", "-NoProfile", "-STA", "-Command", ps],
+                               capture_output=True, timeout=20, env=env,
+                               creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+            if r.returncode != 0: return False
+            try: return bool(ctypes.windll.user32.IsClipboardFormatAvailable(8))  # CF_DIB 在 = 图已进剪贴板
+            except Exception: return True
+        except Exception: return False
+        finally:
+            if path:
+                try: os.remove(path)
+                except Exception: pass
+
+    def _copy_image_win32(self, img):
+        """Win32 CF_DIB 通道。剪贴板常被别的程序短暂占用: 打开要重试, 只试一次很容易失败。"""
         try:
             import io
             bio = io.BytesIO(); img.convert("RGB").save(bio, "BMP")
@@ -1537,7 +1582,11 @@ class App(tk.Tk):
             user32, kernel32 = ctypes.windll.user32, ctypes.windll.kernel32
             kernel32.GlobalAlloc.restype = ctypes.c_void_p
             kernel32.GlobalLock.restype = ctypes.c_void_p
+            kernel32.GlobalAlloc.argtypes = [ctypes.c_uint, ctypes.c_size_t]
+            kernel32.GlobalFree.argtypes = [ctypes.c_void_p]
+            user32.OpenClipboard.argtypes = [ctypes.c_void_p]
             user32.SetClipboardData.argtypes = [ctypes.c_uint, ctypes.c_void_p]
+            user32.SetClipboardData.restype = ctypes.c_void_p
             user32.GetClipboardData.restype = ctypes.c_void_p
             h = kernel32.GlobalAlloc(0x0002, len(data))  # GMEM_MOVEABLE
             if not h: return False
