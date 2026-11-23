@@ -24,7 +24,8 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
 APP_NAME = "SnapPaste 复制粘贴+截图贴图"
-VERSION = "1.4.1"  # v1.4.1: 热键吞键 (F7 不再被 WPS 抢) / WPS 打字粘贴 / 粘后自动删 / 截图翻译 / UI 检测三模式 / 贴图动作组 / 长截图 / GIF 录制 / 序号标注 / F5 截图并复制 / 三次审查修复
+VERSION = "1.4.2"  # v1.4.2: 工具栏改两排并加固放置 (真机出现标注后找不到保存/复制: 工具栏尺寸在窗口未映射时取到 1x1 被放错位; 改用请求尺寸+显式尺寸+置顶, 并加选区右键菜单兜底) / 文字贴图加关闭提示与右键菜单
+# v1.4.1: 热键吞键 (F7 不再被 WPS 抢) / WPS 打字粘贴 / 粘后自动删 / 截图翻译 / UI 检测三模式 / 贴图动作组 / 长截图 / GIF 录制 / 序号标注 / F5 截图并复制 / 三次审查修复
 MAX_RECORDS = 2000  # 记录上限: 超出时自动丢弃最旧的未锁定记录, 防 records.json 无限膨胀
 # 开箱即用预设热键: 用户不用自己设置, 打开就能用; 想改再去「热键设置」
 DEFAULT_HOTKEYS = {"HotKey8": "F6", "HotKey9": "F7", "HotKey10": "F8",
@@ -1084,11 +1085,14 @@ class App(tk.Tk):
         def place_toolbar():
             tb = state.get("tb")
             if tb is None: return
-            tb.update_idletasks(); tw, th = tb.winfo_width(), tb.winfo_height()
+            tb.update_idletasks()
+            tw, th = tb.winfo_reqwidth(), tb.winfo_reqheight()  # 用请求尺寸: 窗口未真正映射时 winfo_width 可能只有 1, 工具栏会被放错位 (真机出现过工具栏找不到)
+            if tw <= 1 or th <= 1: tw, th = 700, 76
             x1, y1, x2, y2 = state["box"]
             tx = min(max(0, x1), max(0, full.width - tw))
-            ty = y2 + 8 if y2 + 8 + th <= full.height else (y1 - th - 8 if y1 - th - 8 >= 0 else max(0, y2 - th - 4))
-            tb.geometry(f"+{tx}+{ty}")
+            ty = y2 + 8 if y2 + 8 + th <= full.height else (y1 - th - 8 if y1 - th - 8 >= 0 else max(0, full.height - th))
+            tb.geometry(f"{tw}x{th}+{tx}+{ty}")  # 尺寸和位置一起给死, 不靠系统猜
+            tb.deiconify(); tb.lift(); tb.attributes("-topmost", True)  # 明确压到冻结屏之上
         def shift_ops(dx, dy):
             if dx or dy:
                 for items in state["op_items"]:
@@ -1133,6 +1137,8 @@ class App(tk.Tk):
         def build_toolbar():
             tb = tk.Toplevel(sel_win); tb.overrideredirect(True); tb.attributes("-topmost", True); tb.configure(bg="#F2F2F2")
             state["tb"] = tb
+            r1 = tk.Frame(tb, bg="#F2F2F2"); r1.pack(fill="x")
+            r2 = tk.Frame(tb, bg="#F2F2F2"); r2.pack(fill="x")
             # 焦点在工具栏时 Esc/回车/方向键也要有效 (否则点过工具栏按钮后 Esc 取消不了, 真机反馈过)
             tb.bind("<Escape>", lambda e: close_overlay())
             tb.bind("<KeyPress>", lambda e: (adj_key(e), on_key(e))[0] if e.keysym in ("Left", "Right", "Up", "Down", "Return") or (e.keysym.lower() in ("c", "z", "y", "s", "t") and (e.state & 0x0004)) else on_key(e))
@@ -1142,14 +1148,14 @@ class App(tk.Tk):
                 for k2, b in tool_btns.items(): b.configure(bg="#BDD7EE" if k2 == name else "#F2F2F2")
             for txt, name in [("移动", None), ("矩形", "rect"), ("椭圆", "ellipse"), ("箭头", "arrow"), ("直线", "line"),
                               ("画笔", "pen"), ("文字", "text"), ("序号", "seq"), ("马赛克", "mosaic"), ("模糊", "blur")]:
-                b = tk.Button(tb, text=txt, font=("Microsoft YaHei", 9), relief="flat", bg="#F2F2F2",
+                b = tk.Button(r1, text=txt, font=("Microsoft YaHei", 9), relief="flat", bg="#F2F2F2",
                               command=lambda n=name: set_tool(n)); b.pack(side="left", padx=1, pady=2); tool_btns[name] = b
             set_tool(None)
             for cname in ("#FF0000", "#FFD800", "#00B050", "#0070FF", "#000000", "#FFFFFF"):
-                tk.Button(tb, bg=cname, width=2, relief="ridge",
+                tk.Button(r1, bg=cname, width=2, relief="ridge",
                           command=lambda cc=cname: state.update(color=cc)).pack(side="left", padx=1)
             width_var = tk.IntVar(value=3)
-            ttk.Combobox(tb, textvariable=width_var, values=[1, 2, 3, 5, 8], width=3).pack(side="left", padx=2)
+            ttk.Combobox(r1, textvariable=width_var, values=[1, 2, 3, 5, 8], width=3).pack(side="left", padx=2)
             width_var.trace_add("write", lambda *_: state.update(width=width_var.get()))
             def do_undo():
                 if state["ops"]:
@@ -1158,11 +1164,11 @@ class App(tk.Tk):
             def do_redo():
                 if state["undone"]:
                     op = state["undone"].pop(); state["ops"].append(op); state["op_items"].append(draw_op(op))
-            tk.Button(tb, text="撤销", font=("Microsoft YaHei", 9), relief="flat", bg="#F2F2F2", command=do_undo).pack(side="left", padx=1)
-            tk.Button(tb, text="重做", font=("Microsoft YaHei", 9), relief="flat", bg="#F2F2F2", command=do_redo).pack(side="left", padx=1)
-            tk.Button(tb, text="OCR", font=("Microsoft YaHei", 9), relief="flat", bg="#F2F2F2",
+            tk.Button(r1, text="撤销", font=("Microsoft YaHei", 9), relief="flat", bg="#F2F2F2", command=do_undo).pack(side="left", padx=1)
+            tk.Button(r1, text="重做", font=("Microsoft YaHei", 9), relief="flat", bg="#F2F2F2", command=do_redo).pack(side="left", padx=1)
+            tk.Button(r2, text="OCR", font=("Microsoft YaHei", 9), relief="flat", bg="#F2F2F2",
                       command=lambda: self.recognize(self.render_ops(full.crop(state["box"]), state["ops"]), "ocr")).pack(side="left", padx=1)
-            tk.Button(tb, text="翻译", font=("Microsoft YaHei", 9), relief="flat", bg="#F2F2F2",
+            tk.Button(r2, text="翻译", font=("Microsoft YaHei", 9), relief="flat", bg="#F2F2F2",
                       command=lambda: self.translate_image(self.render_ops(full.crop(state["box"]), state["ops"]))).pack(side="left", padx=1)
             def do_long():
                 box = state["box"]
@@ -1178,17 +1184,20 @@ class App(tk.Tk):
                 try: sel_win.destroy()
                 except Exception: pass
                 self.after(250, lambda: self._run_gif_record(box))
-            tk.Button(tb, text="长截图", font=("Microsoft YaHei", 9), relief="flat", bg="#F2F2F2", command=do_long).pack(side="left", padx=1)
-            tk.Button(tb, text="GIF录制", font=("Microsoft YaHei", 9), relief="flat", bg="#F2F2F2", command=do_gif).pack(side="left", padx=1)
+            tk.Button(r2, text="长截图", font=("Microsoft YaHei", 9), relief="flat", bg="#F2F2F2", command=do_long).pack(side="left", padx=1)
+            tk.Button(r2, text="GIF录制", font=("Microsoft YaHei", 9), relief="flat", bg="#F2F2F2", command=do_gif).pack(side="left", padx=1)
             for txt, kind in [("钉图", "pin"), ("保存", "save")]:
-                tk.Button(tb, text=txt, font=("Microsoft YaHei", 9), relief="flat", bg="#F2F2F2",
+                tk.Button(r2, text=txt, font=("Microsoft YaHei", 9), relief="flat", bg="#F2F2F2",
                           command=lambda k=kind: finish(k)).pack(side="left", padx=1)
-            tk.Button(tb, text="✕", font=("Microsoft YaHei", 9), relief="flat", bg="#F2F2F2", command=close_overlay).pack(side="left", padx=1)
-            tk.Button(tb, text="✓ 复制", font=("Microsoft YaHei", 9, "bold"), relief="flat", bg="#BDD7EE",
+            tk.Button(r2, text="✕", font=("Microsoft YaHei", 9), relief="flat", bg="#F2F2F2", command=close_overlay).pack(side="left", padx=1)
+            tk.Button(r2, text="✓ 复制", font=("Microsoft YaHei", 9, "bold"), relief="flat", bg="#BDD7EE",
                       command=lambda: finish("copy")).pack(side="left", padx=1)
-            for ch in tb.winfo_children():  # 工具栏按钮不抢键盘焦点, 焦点留在选区窗, Esc 等快捷键始终有效
-                try: ch.configure(takefocus=0)
-                except Exception: pass
+            def _no_focus(w):  # 工具栏按钮不抢键盘焦点, 焦点留在选区窗, Esc 等快捷键始终有效 (含两排子框架, 递归处理)
+                for ch in w.winfo_children():
+                    try: ch.configure(takefocus=0)
+                    except Exception: pass
+                    _no_focus(ch)
+            _no_focus(tb)
         def restart_from(e):
             """调整阶段点到选区外: 不用 Esc 重来, 清掉当前选区/标注, 直接从点击处重新框选"""
             try:
@@ -1302,6 +1311,17 @@ class App(tk.Tk):
             canvas.bind("<Motion>", lambda e: state.update(hex=_hex_at(e)))
             canvas.bind("<ButtonPress-1>", adj_down); canvas.bind("<B1-Motion>", adj_drag); canvas.bind("<ButtonRelease-1>", adj_up)
             canvas.bind("<Double-Button-1>", lambda e: finish("copy"))
+            # 右键菜单兜底: 万一工具栏没显示出来, 保存/复制/钉图从这里也能完成 (真机反馈过工具栏找不到)
+            adj_menu = tk.Menu(sel_win, tearoff=0)
+            adj_menu.add_command(label="✓ 复制 (Enter)", command=lambda: finish("copy"))
+            adj_menu.add_command(label="钉图 (Ctrl+T)", command=lambda: finish("pin"))
+            adj_menu.add_command(label="另存为 (Ctrl+S)", command=lambda: finish("save"))
+            adj_menu.add_separator()
+            adj_menu.add_command(label="OCR 识别", command=lambda: self.recognize(self.render_ops(full.crop(state["box"]), state["ops"]), "ocr"))
+            adj_menu.add_command(label="翻译图中文字", command=lambda: self.translate_image(self.render_ops(full.crop(state["box"]), state["ops"])))
+            adj_menu.add_separator()
+            adj_menu.add_command(label="取消截图 (Esc)", command=close_overlay)
+            canvas.bind("<Button-3>", lambda e: adj_menu.tk_popup(e.x_root, e.y_root))
             sel_win.bind("<KeyPress>", lambda e: (adj_key(e), on_key(e))[0] if e.keysym in ("Left", "Right", "Up", "Down", "Return") or (e.keysym.lower() in ("c", "z", "y", "s", "t") and (e.state & 0x0004)) else on_key(e))
             sel_win.focus_set()
         def _hex_at(e):
@@ -1880,6 +1900,11 @@ try {
     def pin_text(self, text):
         win = tk.Toplevel(self); win.overrideredirect(True); win.attributes("-topmost", True); win.geometry("+140+140")
         tk.Label(win, text=text[:2000], bg="#fffbe6", bd=2, relief="solid", justify="left", wraplength=420, padx=8, pady=6).pack()
+        ttk.Label(win, text="文字贴图 · 拖动移动 · 双击关闭 · 右键有菜单", background="#fffbe6", foreground="#888888").pack()
+        tmenu = tk.Menu(win, tearoff=0)
+        tmenu.add_command(label="复制文字", command=lambda: self.clip_set(text))
+        tmenu.add_command(label="关闭贴图 (双击也可)", command=win.destroy)
+        win.bind("<Button-3>", lambda e: tmenu.tk_popup(e.x_root, e.y_root))
         self._draggable(win); win.bind("<Double-Button-1>", lambda e: win.destroy())
         self._pins.append(win)  # 文字贴图也登记: 「关闭所有贴图/隐藏全部」对它同样生效 (它没有图片, 不进恢复逻辑)
         win.bind("<Destroy>", lambda e: self._pins.remove(win) if e.widget is win and win in self._pins else None)
