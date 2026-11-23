@@ -24,7 +24,8 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
 APP_NAME = "SnapPaste 复制粘贴+截图贴图"
-VERSION = "1.4.2"  # v1.4.2: 工具栏改两排并加固放置 (真机出现标注后找不到保存/复制: 工具栏尺寸在窗口未映射时取到 1x1 被放错位; 改用请求尺寸+显式尺寸+置顶, 并加选区右键菜单兜底) / 文字贴图加关闭提示与右键菜单
+VERSION = "1.4.3"  # v1.4.3: 系统托盘 (点 X 隐藏到右下角托盘, 双击图标打开, 右键菜单截图/贴图/退出; 依赖 pystray) / 标注工具栏改两排并加固放置 + 选区右键菜单兜底 / 识别线条黄改蓝 / 放大镜改 PixPin 式网格+蓝色十字+深色信息卡 (坐标/色块/HEX/RGB 跟随光标) / 文字贴图加关闭提示
+# v1.4.2: 工具栏改两排并加固放置 (真机出现标注后找不到保存/复制: 工具栏尺寸在窗口未映射时取到 1x1 被放错位; 改用请求尺寸+显式尺寸+置顶, 并加选区右键菜单兜底) / 文字贴图加关闭提示与右键菜单
 # v1.4.1: 热键吞键 (F7 不再被 WPS 抢) / WPS 打字粘贴 / 粘后自动删 / 截图翻译 / UI 检测三模式 / 贴图动作组 / 长截图 / GIF 录制 / 序号标注 / F5 截图并复制 / 三次审查修复
 MAX_RECORDS = 2000  # 记录上限: 超出时自动丢弃最旧的未锁定记录, 防 records.json 无限膨胀
 # 开箱即用预设热键: 用户不用自己设置, 打开就能用; 想改再去「热键设置」
@@ -90,6 +91,8 @@ class App(tk.Tk):
         self._last_closed_pin = None   # 最近关闭的那张贴图的图片, 供「恢复上次关闭的贴图」
         self._pins_clickthrough = False
         self._snip_finish_mode = None  # 本次截图的特殊完成方式 (如 "copy" = 框选完直接复制, 不停留标注)
+        self._tray = None              # 系统托盘图标 (pystray), 没装该库时为 None, 点 X 直接退出
+        self._tray_notified = False    # 「已隐藏到托盘」的气泡只提示一次
         self.paste_index = 0
         self._hk_handles = []      # keyboard 包返回的句柄, 改热键时注销旧的
         self._oc_handle = None     # 全局切换热键的句柄 (单独管理, 关掉全部热键时它要留着)
@@ -104,6 +107,7 @@ class App(tk.Tk):
         self.refresh_shots()
         self.apply_hotkeys()
         self.apply_autorun()
+        self._setup_tray()
         if self.cfg.get("Config", "MiniFormSet", fallback="0") == "1": self.after(300, self.show_mini)  # 常显模式: 启动即显示迷你窗口
         self.after(60, self._poll_ui_queue)
         self.protocol("WM_DELETE_WINDOW", self.on_close)
@@ -1004,25 +1008,44 @@ class App(tk.Tk):
                     if child and (child[2] - child[0]) * (child[3] - child[1]) < (snap[2] - snap[0]) * (snap[3] - snap[1]): snap = child
                 state["snap"] = snap
                 canvas.delete("snap")
-                if snap: canvas.create_rectangle(*snap, outline="yellow", width=2, dash=(6, 3), tags="snap")
-            try: r, g, b = full.getpixel((e.x, e.y))[:3]; color = f"#{r:02X}{g:02X}{b:02X} RGB({r},{g},{b})"; state["hex"] = f"#{r:02X}{g:02X}{b:02X}"
-            except Exception: color = ""
-            canvas.create_text(10, 10, anchor="nw", tags="info", fill="yellow",
-                               font=("Consolas", 12, "bold"), text=f"({e.x},{e.y}) {color} {extra}  [C 复制颜色 · +/- 调放大镜]")
-            # 放大镜 (Snipaste 同款): 光标周围 25x25 像素放大 6 倍显示, 带中心十字
+                if snap: canvas.create_rectangle(*snap, outline="#1E90FF", width=2, tags="snap")  # 识别线: 蓝色实线 (用户反馈黄色刺眼、虚线不如实线清楚, 对照 PixPin)
+            try: r, g, b = full.getpixel((e.x, e.y))[:3]; state["hex"] = f"#{r:02X}{g:02X}{b:02X}"; state["rgb"] = (r, g, b)
+            except Exception: state["rgb"] = None
+            # 放大镜 + 信息卡 (PixPin 式): 带像素网格和蓝色十字的放大图在上, 深色信息卡贴在下方,
+            # 坐标/色块/HEX/RGB/操作提示都跟着光标走 (用户对照 PixPin 反馈: 这样看起来清楚; 旧版是文字飘在屏幕左上角)
             try:
                 R, Z = 12, state.get("zoom", 6)
                 x0, y0 = max(0, e.x - R), max(0, e.y - R)
-                zoom = full.crop((x0, y0, min(full.width, e.x + R + 1), min(full.height, e.y + R + 1))).resize(((min(full.width, e.x + R + 1) - x0) * Z, (min(full.height, e.y + R + 1) - y0) * Z), Image.NEAREST)
+                x1c, y1c = min(full.width, e.x + R + 1), min(full.height, e.y + R + 1)
+                zoom = full.crop((x0, y0, x1c, y1c)).resize(((x1c - x0) * Z, (y1c - y0) * Z), Image.NEAREST).convert("RGB")
+                zd = ImageDraw.Draw(zoom)
+                for gx in range(0, zoom.width, Z): zd.line([gx, 0, gx, zoom.height], fill=(190, 190, 190))   # 像素网格
+                for gy in range(0, zoom.height, Z): zd.line([0, gy, zoom.width, gy], fill=(190, 190, 190))
+                ccx, ccy = (e.x - x0) * Z, (e.y - y0) * Z  # 中心像素: 蓝色十字带 + 描边, 一眼看清当前取的是哪个像素
+                zd.line([ccx + Z // 2, 0, ccx + Z // 2, zoom.height], fill=(30, 144, 255), width=2)
+                zd.line([0, ccy + Z // 2, zoom.width, ccy + Z // 2], fill=(30, 144, 255), width=2)
+                zd.rectangle([ccx, ccy, ccx + Z - 1, ccy + Z - 1], outline=(30, 144, 255), width=2)
                 state["loupe"] = ImageTk.PhotoImage(zoom)
-                lx = e.x + 24 if e.x + 24 + zoom.width < full.width else e.x - 24 - zoom.width
-                ly = e.y + 24 if e.y + 24 + zoom.height < full.height else e.y - 24 - zoom.height
+                PH = 58  # 信息卡高度
+                pw = max(zoom.width, 216)  # 信息卡宽度: 要放得下拖动时的「选区 WxH」
+                total_h = zoom.height + PH
+                lx = e.x + 24 if e.x + 24 + pw < full.width else e.x - 24 - pw
+                ly = e.y + 24 if e.y + 24 + total_h < full.height else e.y - 24 - total_h
                 canvas.delete("loupe")
-                canvas.create_image(lx, ly, anchor="nw", image=state["loupe"], tags="loupe")
-                canvas.create_rectangle(lx, ly, lx + zoom.width, ly + zoom.height, outline="yellow", width=1, tags="loupe")
-                cx, cy = lx + (e.x - x0) * Z, ly + (e.y - y0) * Z
-                canvas.create_line(cx, ly, cx, ly + zoom.height, fill="red", tags="loupe")
-                canvas.create_line(lx, cy, lx + zoom.width, cy, fill="red", tags="loupe")
+                ix = lx + (pw - zoom.width) // 2  # 放大图在卡片上方居中
+                canvas.create_image(ix, ly, anchor="nw", image=state["loupe"], tags="loupe")
+                canvas.create_rectangle(lx, ly, lx + pw, ly + total_h, outline="#1E90FF", width=1, tags="loupe")
+                py0 = ly + zoom.height
+                canvas.create_rectangle(lx, py0, lx + pw, ly + total_h, fill="#222222", outline="", tags="loupe")
+                rgb = state.get("rgb")
+                if rgb:
+                    canvas.create_rectangle(lx + 8, py0 + 7, lx + 20, py0 + 19, fill="#%02X%02X%02X" % rgb, outline="white", tags="loupe")
+                    canvas.create_text(lx + 26, py0 + 13, anchor="w", tags="loupe", fill="white", font=("Consolas", 10, "bold"),
+                                       text=f"({e.x},{e.y}) {state['hex']} {extra}")
+                    canvas.create_text(lx + 8, py0 + 32, anchor="w", tags="loupe", fill="white", font=("Consolas", 9),
+                                       text=f"RGB({rgb[0]}, {rgb[1]}, {rgb[2]})")
+                canvas.create_text(lx + 8, py0 + 49, anchor="w", tags="loupe", fill="#AAAAAA", font=("Microsoft YaHei UI", 8),
+                                   text="C 复制颜色值 · +/- 调放大镜倍数")
             except Exception: pass
         def on_key(e):
             if e.keysym in ("plus", "equal", "KP_Add"): state["zoom"] = min(16, state.get("zoom", 6) + 1); return
@@ -1037,7 +1060,7 @@ class App(tk.Tk):
         def down(e): state.update(x=e.x, y=e.y); canvas.delete("snap"); show_info(e)
         def drag(e):
             if state["rect"]: canvas.delete(state["rect"])
-            state["rect"] = canvas.create_rectangle(state["x"], state["y"], e.x, e.y, outline="red", width=2)
+            state["rect"] = canvas.create_rectangle(state["x"], state["y"], e.x, e.y, outline="#1E90FF", width=2)
             show_info(e, f"| 选区 {abs(e.x-state['x'])}x{abs(e.y-state['y'])}")
         canvas.bind("<Motion>", show_info)
         def up(e):
@@ -1909,10 +1932,73 @@ try {
         self._pins.append(win)  # 文字贴图也登记: 「关闭所有贴图/隐藏全部」对它同样生效 (它没有图片, 不进恢复逻辑)
         win.bind("<Destroy>", lambda e: self._pins.remove(win) if e.widget is win and win in self._pins else None)
 
-    def on_close(self):
+    # ---------- 系统托盘 (像 Snipaste/PixPin 一样藏在右下角) ----------
+    @staticmethod
+    def _make_tray_icon():
+        img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+        d = ImageDraw.Draw(img)
+        d.rounded_rectangle([6, 10, 58, 60], radius=8, fill=(30, 144, 255, 255))    # 蓝色底板
+        d.rounded_rectangle([16, 20, 48, 52], radius=3, fill=(255, 255, 255, 255))     # 白纸
+        d.rounded_rectangle([24, 4, 40, 16], radius=4, fill=(90, 90, 90, 255))         # 夹子
+        for yy, xe in ((30, 43), (38, 43), (46, 36)):
+            d.line([21, yy, xe, yy], fill=(30, 144, 255, 255), width=3)
+        return img
+
+    def _setup_tray(self):
+        # 托盘回调在 pystray 自己的线程里触发, 一律排队回主线程执行 (和全局热键同一机制)
+        import threading
+        try:
+            import pystray
+        except Exception:
+            return  # 没装 pystray 就不启用托盘 (EXE 打包时会装上; 源码运行 pip install pystray)
+        try:
+            menu = pystray.Menu(
+                pystray.MenuItem("显示主窗口", lambda icon, item: self._ui_queue.put(self._show_main), default=True),
+                pystray.MenuItem("区域截图", lambda icon, item: self._ui_queue.put(self.snip_region)),
+                pystray.MenuItem("截图并复制", lambda icon, item: self._ui_queue.put(self.snip_copy)),
+                pystray.MenuItem("贴剪贴板内容", lambda icon, item: self._ui_queue.put(self.pin_clipboard)),
+                pystray.Menu.SEPARATOR,
+                pystray.MenuItem("退出 SnapPaste", lambda icon, item: self._ui_queue.put(self._quit_app)),
+            )
+            self._tray = pystray.Icon("SnapPaste", self._make_tray_icon(), "SnapPaste 剪贴板工作台", menu)
+            threading.Thread(target=self._tray.run, daemon=True).start()
+        except Exception:
+            self._tray = None
+
+    def _show_main(self):
+        self.deiconify(); self.lift()
+        try: self.focus_force()
+        except Exception: pass
+
+    def _hide_to_tray(self):
         try: self.cfg.set("Config", "SleepTime", self.sleep_var.get() or "80")
         except Exception: pass
-        self.save_config(); self.save_records(); self.destroy()
+        self.save_config(); self.save_records()
+        self.withdraw()
+        if not self._tray_notified:
+            self._tray_notified = True
+            try: self._tray.notify("SnapPaste 还在后台运行: 点托盘图标打开主窗口, 右键托盘图标可以退出", "已隐藏到托盘")
+            except Exception: pass
+
+    def _quit_app(self):
+        try: self.cfg.set("Config", "SleepTime", self.sleep_var.get() or "80")
+        except Exception: pass
+        self.save_config(); self.save_records()
+        if self._tray is not None:
+            try: self._tray.stop()
+            except Exception: pass
+            self._tray = None
+        try:
+            import keyboard; keyboard.unhook_all()
+        except Exception: pass
+        self.destroy()
+
+    def on_close(self):
+        # 点主窗口的 X: 有托盘就藏到右下角托盘继续后台待命 (热键照常可用), 真正退出走托盘右键菜单
+        if self._tray is not None:
+            self._hide_to_tray()
+        else:
+            self._quit_app()
 
 if __name__ == "__main__":
     App().mainloop()
