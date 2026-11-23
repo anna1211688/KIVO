@@ -24,7 +24,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
 APP_NAME = "SnapPaste 复制粘贴+截图贴图"
-VERSION = "1.3.3"  # v1.3.3: 真机修复 F6/F7/F8 真正发送 Ctrl+C/Ctrl+V
+VERSION = "1.3.4"  # v1.3.4: F6 多行内容按行自动拆条 (WPS 表格/列表) + v1.3.3 的 Ctrl+C/V 真机修复
 MAX_RECORDS = 2000  # 记录上限: 超出时自动丢弃最旧的未锁定记录, 防 records.json 无限膨胀
 # 开箱即用预设热键: 用户不用自己设置, 打开就能用; 想改再去「热键设置」
 DEFAULT_HOTKEYS = {"HotKey8": "F6", "HotKey9": "F7", "HotKey10": "F8",
@@ -325,7 +325,12 @@ class App(tk.Tk):
                 elif self.clip_get() != before_text: break
                 time.sleep(0.03)
         n = len(self.records)
-        self.add_record(self.clip_get())
+        text = self.clip_get()
+        lines = [ln for ln in text.splitlines() if ln.strip()]
+        if len(lines) > 1:
+            for ln in lines: self.add_record(ln)  # v1.3.4: WPS 表格/列表整块复制时按行自动拆成多条, F7 才能一条条粘
+        else:
+            self.add_record(text)
         if len(self.records) > n: self.beep()  # 真入队了才响, 没选中文字时不假响
         self.refresh_list()
     def _paste_text(self, text):
