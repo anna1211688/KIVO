@@ -24,7 +24,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
 APP_NAME = "SnapPaste 复制粘贴+截图贴图"
-VERSION = "1.3.4"  # v1.3.4: F6 多行内容按行自动拆条 (WPS 表格/列表) + v1.3.3 的 Ctrl+C/V 真机修复
+VERSION = "1.4.0"  # v1.4.0: 中英双语 / 原版热键组对齐 / 迷你窗口重做 / 两列列表 / WPS 粘贴修复 / 顺序粘贴自动回车 / OCR 改用系统引擎 / 截图 Snipaste 式就地界面
 MAX_RECORDS = 2000  # 记录上限: 超出时自动丢弃最旧的未锁定记录, 防 records.json 无限膨胀
 # 开箱即用预设热键: 用户不用自己设置, 打开就能用; 想改再去「热键设置」
 DEFAULT_HOTKEYS = {"HotKey8": "F6", "HotKey9": "F7", "HotKey10": "F8",
@@ -45,7 +45,7 @@ RECORDS_PATH = os.path.join(BASE, "records.json")
 def ensure_runtime_files():
     """EXE 首次运行: 把内置的默认 Config.ini / ding.wav / Language 释放到 EXE 旁; 已存在的不覆盖"""
     import shutil
-    for rel in ("Config.ini", "ding.wav", os.path.join("Language", "Chinese.ini")):
+    for rel in ("Config.ini", "ding.wav", os.path.join("Language", "Chinese.ini"), os.path.join("Language", "English.ini")):
         src, dst = os.path.join(BUNDLE, rel), os.path.join(BASE, rel)
         if not os.path.exists(dst) and os.path.exists(src):
             try:
@@ -86,13 +86,19 @@ class App(tk.Tk):
         self._ui_queue = queue.Queue()  # 全局热键在 keyboard 线程触发, 只能排队回主线程执行 Tk 操作
         self.paste_index = 0
         self._hk_handles = []      # keyboard 包返回的句柄, 改热键时注销旧的
+        self._oc_handle = None     # 全局切换热键的句柄 (单独管理, 关掉全部热键时它要留着)
+        self._hk_enabled = True
+        self._mini_win = None; self._mini_after = None
         self._tk_sequences = []    # 窗口内绑定的序列, 改热键时解绑旧的
         self.cfg = self.load_config()
+        self._load_lang()
         self.build_ui()
         self.load_records()
         self.refresh_list()
         self.refresh_shots()
         self.apply_hotkeys()
+        self.apply_autorun()
+        if self.cfg.get("Config", "MiniFormSet", fallback="0") == "1": self.after(300, self.show_mini)  # 常显模式: 启动即显示迷你窗口
         self.after(60, self._poll_ui_queue)
         self.protocol("WM_DELETE_WINDOW", self.on_close)
     def _poll_ui_queue(self):
@@ -109,15 +115,29 @@ class App(tk.Tk):
     def load_config(self):
         c = configparser.ConfigParser()
         defaults = {f"HotKey{i}": "无" for i in range(13)}; defaults.update(DEFAULT_HOTKEYS)
-        c.read_dict({"Config": {"SleepTime": "80", "WaveSet": "0", "AutoRun": "0",
-                                "MiniFormTime": "5", "AddChar": "1", "LetterSet": "0"},
-                     "HotKey": defaults, "Snip": dict(DEFAULT_SNIP_KEYS)})
+        c.read_dict({"Config": {"SleepTime": "80", "WaveSet": "0", "AutoRun": "0", "Language": "Chinese", "PasteEnter": "0",
+                                "MiniFormTime": "5", "MiniFormSet": "0", "AddChar": "1", "LetterSet": "0"},
+                     "HotKey": defaults, "Snip": dict(DEFAULT_SNIP_KEYS),
+                     "OCHotKey": {"HotKey": "无", "OCAutoSet": "0"}})
         if os.path.exists(CONFIG_PATH):
             # 原版是 GBK, 新版是 UTF-8: 依次尝试, 不再乱码
             for enc in ("utf-8-sig", "gbk"):
                 try: c.read(CONFIG_PATH, encoding=enc); break
                 except Exception: continue
         return c
+    def _load_lang(self):
+        """语言: 读 Language/<Language>.ini 的 [UI] 段 (沿用原版的语言文件机制); 缺键时回退到代码里的中文原文"""
+        self.lang = self.cfg.get("Config", "Language", fallback="Chinese").strip() or "Chinese"
+        self._strings = {}
+        p = os.path.join(BASE, "Language", f"{self.lang}.ini")
+        if os.path.exists(p):
+            lp = configparser.ConfigParser()
+            for enc in ("utf-8-sig", "gbk"):
+                try: lp.read(p, encoding=enc); break
+                except Exception: continue
+            if lp.has_section("UI"): self._strings = dict(lp.items("UI"))
+    def t(self, key, zh):
+        return self._strings.get(key, zh)
     def save_config(self):
         # v1.1 修复: 原地更新已有 key, 保住 Config.ini 里的注释和排版 (旧版 configparser.write 会全抹掉)
         if not os.path.exists(CONFIG_PATH):
@@ -139,7 +159,7 @@ class App(tk.Tk):
         # (旧写法一律在文件尾追加 [段], 会造出重复段, 下次读取 DuplicateSectionError 后静默丢配置)
         by_sec = {}
         known_case = {k.lower(): k for k in list(DEFAULT_HOTKEYS) + list(DEFAULT_SNIP_KEYS) +
-                      ["SleepTime", "WaveSet", "WaveFile", "AutoRun", "AutoSet", "MiniFormTime", "MiniFormSet",
+                      ["SleepTime", "WaveSet", "WaveFile", "AutoRun", "AutoSet", "MiniFormTime", "MiniFormSet", "Language", "PasteEnter",
                        "SplitPos", "AddChar", "LetterSet", "HotKey", "OCAutoSet", "Form1XY", "Form2XY"]}
         for (sec, k), v in pending.items(): by_sec.setdefault(sec, []).append((known_case.get(k, k), v))
         for sec, items in by_sec.items():
@@ -156,70 +176,206 @@ class App(tk.Tk):
     # ---------- UI ----------
     def build_ui(self):
         bar = ttk.Frame(self); bar.pack(fill="x", padx=8, pady=6)
-        for txt, cmd in [("加载配置", self.reload), ("保存配置", self.save_config),
-                         ("热键设置", self.open_hotkey_dialog),
-                         ("导入文本", self.import_txt), ("导出文本", self.export_txt)]:
+        for txt, cmd in [(self.t("load_config", "加载配置"), self.reload), (self.t("save_config", "保存配置"), self.save_config),
+                         (self.t("hotkey_settings", "热键设置"), self.open_hotkey_dialog),
+                         (self.t("import_text", "导入文本"), self.import_txt), (self.t("export_text", "导出文本"), self.export_txt)]:
             ttk.Button(bar, text=txt, command=cmd).pack(side="left", padx=2)
         self.search_var = tk.StringVar(); self.search_var.trace_add("write", lambda *a: self.refresh_list())
-        ttk.Entry(bar, textvariable=self.search_var, width=18).pack(side="right")
-        ttk.Label(bar, text="搜索:").pack(side="right")
+        ttk.Entry(bar, textvariable=self.search_var, width=14).pack(side="right")
+        ttk.Label(bar, text=self.t("search", "搜索:")).pack(side="right")
+        self.lang_var = tk.StringVar(value=self.lang)
+        lang_box = ttk.Combobox(bar, textvariable=self.lang_var, width=9, state="readonly", values=["Chinese", "English"])
+        lang_box.pack(side="right", padx=(0, 6)); lang_box.bind("<<ComboboxSelected>>", self._switch_language)
+        ttk.Label(bar, text=self.t("lang_label", "语言:")).pack(side="right")
 
         mid = ttk.Frame(self); mid.pack(fill="both", expand=True, padx=8)
-        self.listbox = tk.Listbox(mid, activestyle="dotbox")
+        # 记录列表按原版分两列: 序号 | 文本内容 (Treeview; 内部沿用 listbox 这个名字, 行 id 存 _row_iids 与 _visible 对齐)
+        self.listbox = ttk.Treeview(mid, columns=("no", "text"), show="headings", selectmode="browse")
+        self.listbox.heading("no", text=self.t("col_no", "序号")); self.listbox.heading("text", text=self.t("col_text", "文本内容"))
+        self.listbox.column("no", width=52, anchor="center", stretch=False); self.listbox.column("text", anchor="w")
         self.listbox.pack(side="left", fill="both", expand=True)
         sb = ttk.Scrollbar(mid, command=self.listbox.yview); sb.pack(side="left", fill="y")
         self.listbox.config(yscrollcommand=sb.set)
+        self._row_iids = []
         ops = ttk.Frame(mid); ops.pack(side="left", fill="y", padx=6)
-        for txt, cmd in [("锁定/解锁", self.toggle_lock), ("删除选定", self.delete_sel),
-                         ("删除全部", self.delete_all), ("上移", lambda: self.move(-1)),
-                         ("下移", lambda: self.move(1)), ("去重", self.dedupe)]:
+        for txt, cmd in [(self.t("lock_unlock", "锁定/解锁"), self.toggle_lock), (self.t("delete_selected", "删除选定"), self.delete_sel),
+                         (self.t("delete_all", "删除全部"), self.delete_all), (self.t("move_up", "上移"), lambda: self.move(-1)),
+                         (self.t("move_down", "下移"), lambda: self.move(1)), (self.t("dedupe", "去重"), self.dedupe)]:
             ttk.Button(ops, text=txt, command=cmd).pack(fill="x", pady=2)
 
-        opt = ttk.LabelFrame(self, text="粘贴选项"); opt.pack(fill="x", padx=8, pady=6)
+        opt = ttk.LabelFrame(self, text=self.t("paste_options", "粘贴选项")); opt.pack(fill="x", padx=8, pady=6)
         self.sep_var = tk.StringVar(value="enter")
-        for txt, val in [("记录间回车", "enter"), ("记录间 TAB", "tab"), ("无分隔", "none")]:
+        for txt, val in [(self.t("sep_enter", "记录间回车"), "enter"), (self.t("sep_tab", "记录间 TAB"), "tab"), (self.t("sep_none", "无分隔"), "none")]:
             ttk.Radiobutton(opt, text=txt, variable=self.sep_var, value=val).pack(side="left", padx=4)
-        ttk.Label(opt, text="自定义:").pack(side="left"); self.custom_sep = ttk.Entry(opt, width=6); self.custom_sep.pack(side="left")
-        ttk.Label(opt, text="间隔(ms):").pack(side="left", padx=(10,0))
+        ttk.Label(opt, text=self.t("custom", "自定义:")).pack(side="left"); self.custom_sep = ttk.Entry(opt, width=6); self.custom_sep.pack(side="left")
+        ttk.Label(opt, text=self.t("interval", "间隔(ms):")).pack(side="left", padx=(10,0))
         self.sleep_var = tk.StringVar(value=str(self.sleep_ms))
         ttk.Entry(opt, textvariable=self.sleep_var, width=6).pack(side="left")
+        self.autorun_var = tk.BooleanVar(value=self.cfg.get("Config", "AutoRun", fallback="0") == "1")
+        ttk.Checkbutton(opt, text=self.t("autorun", "开机自动运行"), variable=self.autorun_var, command=self._toggle_autorun).pack(side="left", padx=(10, 0))
+        self.paste_enter_var = tk.BooleanVar(value=self.cfg.get("Config", "PasteEnter", fallback="0") == "1")
+        ttk.Checkbutton(opt, text=self.t("paste_enter", "顺序粘贴后自动回车"), variable=self.paste_enter_var, command=self._toggle_paste_enter).pack(side="left", padx=(10, 0))
+
+        mini = ttk.LabelFrame(self, text=self.t("mini_frame", "迷你窗口 (复制/粘贴时自动悬浮)")); mini.pack(fill="x", padx=8, pady=6)
+        ttk.Label(mini, text=self.t("mini_time", "悬浮显示时间(秒, 0=不显示):")).pack(side="left")
+        self.mini_time_var = tk.StringVar(value=self.cfg.get("Config", "MiniFormTime", fallback="5"))
+        _me = ttk.Entry(mini, textvariable=self.mini_time_var, width=5); _me.pack(side="left")
+        _me.bind("<FocusOut>", lambda _e: self._save_mini_settings()); _me.bind("<Return>", lambda _e: self._save_mini_settings())
+        self.mini_always_var = tk.BooleanVar(value=self.cfg.get("Config", "MiniFormSet", fallback="0") == "1")
+        ttk.Checkbutton(mini, text=self.t("mini_always", "常显 (不自动隐藏)"), variable=self.mini_always_var, command=self._save_mini_settings).pack(side="left", padx=6)
+        ttk.Button(mini, text=self.t("mini_show_btn", "立即显示"), command=lambda: self.show_mini()).pack(side="left", padx=4)
 
         act = ttk.Frame(self); act.pack(fill="x", padx=8, pady=4)
-        for txt, cmd in [("多次复制 (加入队列)", self.multi_copy), ("顺序粘贴下一条", self.paste_next),
-                         ("全部粘贴", self.paste_all), ("强力粘贴选定", self.paste_selected)]:
+        for txt, cmd in [(self.t("multi_copy_btn", "多次复制 (加入队列)"), self.multi_copy), (self.t("paste_next_btn", "顺序粘贴下一条"), self.paste_next),
+                         (self.t("paste_all_btn", "全部粘贴"), self.paste_all), (self.t("power_paste_btn", "强力粘贴选定"), self.paste_selected)]:
             ttk.Button(act, text=txt, command=cmd).pack(side="left", padx=2)
 
-        split = ttk.LabelFrame(self, text="剪切/复制时分割 (可选)"); split.pack(fill="x", padx=8, pady=6)
-        ttk.Label(split, text="分割字符:").pack(side="left"); self.split_entry = ttk.Entry(split, width=8); self.split_entry.pack(side="left")
+        split = ttk.LabelFrame(self, text=self.t("split_frame", "剪切/复制时分割 (可选)")); split.pack(fill="x", padx=8, pady=6)
+        ttk.Label(split, text=self.t("split_char", "分割字符:")).pack(side="left"); self.split_entry = ttk.Entry(split, width=8); self.split_entry.pack(side="left")
         self.regex_var = tk.StringVar(value="")
-        ttk.Combobox(split, textvariable=self.regex_var, width=14, values=["", "所有数字", "所有小写字母", "所有大写字母", "回车符", "制表符"]).pack(side="left", padx=4)
+        ttk.Combobox(split, textvariable=self.regex_var, width=14, values=["", self.t("regex_numbers", "所有数字"), self.t("regex_lower", "所有小写字母"), self.t("regex_upper", "所有大写字母"), self.t("regex_enter", "回车符"), self.t("regex_tab", "制表符")]).pack(side="left", padx=4)
         self.case_var = tk.StringVar(value="")
-        ttk.Combobox(split, textvariable=self.case_var, width=10, values=["", "转大写", "转小写"]).pack(side="left", padx=4)
-        ttk.Button(split, text="按分割导入剪贴板", command=self.import_clipboard_split).pack(side="left", padx=4)
+        ttk.Combobox(split, textvariable=self.case_var, width=10, values=["", self.t("case_upper", "转大写"), self.t("case_lower", "转小写")]).pack(side="left", padx=4)
+        self.splitpos_var = tk.StringVar(value=self.t("splitpos_none", "不保留分隔符"))
+        ttk.Combobox(split, textvariable=self.splitpos_var, width=12, values=[self.t("splitpos_none", "不保留分隔符"), self.t("splitpos_after", "分隔符留在前段"), self.t("splitpos_before", "分隔符留在后段")]).pack(side="left", padx=4)
+        ttk.Button(split, text=self.t("split_import_btn", "按分割导入剪贴板"), command=self.import_clipboard_split).pack(side="left", padx=4)
 
-        snip = ttk.LabelFrame(self, text="截图贴图 (合并自 Snipaste 核心功能, 需 Pillow)")
+        snip = ttk.LabelFrame(self, text=self.t("snip_frame", "截图贴图 (合并自 Snipaste 核心功能, 需 Pillow)"))
         snip.pack(fill="x", padx=8, pady=6)
-        for txt, cmd in [("区域截图 (F1)", self.snip_region), ("贴剪贴板 (F3)", self.pin_clipboard),
-                         ("钉住选中截图", self.pin_selected_shot), ("历史画廊", self.open_gallery),
-                         ("OCR 选中截图", self.ocr_selected_shot), ("打开截图文件夹", self.open_shots_dir)]:
+        for txt, cmd in [(self.t("snip_region", "区域截图 (F1)"), self.snip_region), (self.t("pin_clip", "贴剪贴板 (F3)"), self.pin_clipboard),
+                         (self.t("pin_selected", "钉住选中截图"), self.pin_selected_shot), (self.t("gallery", "历史画廊"), self.open_gallery),
+                         (self.t("ocr_selected", "OCR 选中截图"), self.ocr_selected_shot), (self.t("open_shots_dir", "打开截图文件夹"), self.open_shots_dir)]:
             ttk.Button(snip, text=txt, command=cmd).pack(side="left", padx=2, pady=4)
         self.shots_list = tk.Listbox(snip, height=3); self.shots_list.pack(side="left", fill="x", expand=True, padx=6, pady=4)
         self.shots_list.bind("<<ListboxSelect>>", self.preview_shot)
-        self.shot_preview = tk.Label(snip, text="(选中截图\n看预览)", fg="gray"); self.shot_preview.pack(side="left", padx=4)
+        self.shot_preview = tk.Label(snip, text=self.t("shot_preview", "(选中截图\n看预览)"), fg="gray"); self.shot_preview.pack(side="left", padx=4)
 
-        self.status = tk.StringVar(value="就绪")
+        self.status = tk.StringVar(value=self.t("ready", "就绪"))
         ttk.Label(self, textvariable=self.status, anchor="w").pack(fill="x", padx=8, pady=4)
         self.bind("<Delete>", lambda e: self.delete_sel())
 
+    def _toggle_autorun(self):
+        if not self.cfg.has_section("Config"): self.cfg.add_section("Config")
+        self.cfg.set("Config", "AutoRun", "1" if self.autorun_var.get() else "0")
+        self.save_config(); self.apply_autorun()
+    def _toggle_paste_enter(self):
+        if not self.cfg.has_section("Config"): self.cfg.add_section("Config")
+        self.cfg.set("Config", "PasteEnter", "1" if self.paste_enter_var.get() else "0")
+        self.save_config()
+    def _save_mini_settings(self):
+        if not self.cfg.has_section("Config"): self.cfg.add_section("Config")
+        try: secs = max(0, int(self.mini_time_var.get()))
+        except Exception: secs = 5
+        self.mini_time_var.set(str(secs))
+        self.cfg.set("Config", "MiniFormTime", str(secs))
+        self.cfg.set("Config", "MiniFormSet", "1" if self.mini_always_var.get() else "0")
+        self.save_config()
+        if self.mini_always_var.get(): self.show_mini()
+    def apply_autorun(self):
+        """开机自启 (原版 AutoRun): 写/删 HKCU Run 项; 只对 Windows 生效"""
+        if sys.platform != "win32": return
+        try:
+            import winreg
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_SET_VALUE)
+            if self.cfg.get("Config", "AutoRun", fallback="0") == "1":
+                exe = sys.executable
+                cmd = f'"{exe}"' if getattr(sys, "frozen", False) else f'"{exe}" "{os.path.abspath(__file__)}"'
+                winreg.SetValueEx(key, "SnapPaste", 0, winreg.REG_SZ, cmd)
+            else:
+                try: winreg.DeleteValue(key, "SnapPaste")
+                except FileNotFoundError: pass
+            winreg.CloseKey(key)
+        except Exception: pass
+    def _refresh_mini(self):
+        """迷你窗口的列表与主列表保持同步 (迷你窗不带搜索过滤, 行号即记录号; 同样分 序号|文本内容 两列)"""
+        try:
+            if self._mini_win is None or not self._mini_win.winfo_exists() or not hasattr(self, "_mini_list"): return
+            sel_row = self._mini_row()
+            self._mini_list.delete(*self._mini_list.get_children()); self._mini_iids = []
+            for i, r in enumerate(self.records):
+                prefix = "🔒 " if r["locked"] else ""
+                no = f"▶{i + 1}" if i == self.paste_index else str(i + 1)
+                self._mini_iids.append(self._mini_list.insert("", "end", values=(no, f"{prefix}{r['text'][:80]}")))
+            if 0 <= sel_row < len(self._mini_iids): self._mini_list.selection_set(self._mini_iids[sel_row])
+        except Exception: pass
+    def _mini_row(self):
+        try:
+            sel = self._mini_list.selection()
+            return self._mini_iids.index(sel[0]) if sel and sel[0] in self._mini_iids else -1
+        except Exception: return -1
+    def show_mini(self, text=None):
+        """迷你窗口 (原版 MiniForm): 独立小窗, 里面是完整记录列表 + 锁定/删除/删除全部/上移/下移按钮;
+        双击某行 = 从该行开始顺序粘贴。MiniFormSet=1 常显, 否则操作后显示 MiniFormTime 秒"""
+        always = self.cfg.get("Config", "MiniFormSet", fallback="0") == "1"
+        secs = self.cfg.getint("Config", "MiniFormTime", fallback=5)
+        if not always and secs <= 0: return
+        try:
+            if self._mini_win is None or not self._mini_win.winfo_exists():
+                w = tk.Toplevel(self); w.title("迷你窗口"); w.attributes("-topmost", True)
+                w.geometry(f"300x360+{max(0, w.winfo_screenwidth() - 330)}+80")
+                w.protocol("WM_DELETE_WINDOW", self._hide_mini)
+                frame = ttk.Frame(w); frame.pack(fill="both", expand=True, padx=4, pady=4)
+                self._mini_list = ttk.Treeview(frame, columns=("no", "text"), show="headings", selectmode="browse", height=12)
+                self._mini_list.heading("no", text=self.t("col_no", "序号")); self._mini_list.heading("text", text=self.t("col_text", "文本内容"))
+                self._mini_list.column("no", width=44, anchor="center", stretch=False); self._mini_list.column("text", anchor="w")
+                self._mini_iids = []
+                sb = ttk.Scrollbar(frame, orient="vertical", command=self._mini_list.yview)
+                self._mini_list.config(yscrollcommand=sb.set)
+                self._mini_list.pack(side="left", fill="both", expand=True); sb.pack(side="right", fill="y")
+                bar = ttk.Frame(w); bar.pack(fill="x", padx=4, pady=(0, 4))
+                def mini_lock():
+                    i = self._mini_row()
+                    if i >= 0: self.records[i]["locked"] = not self.records[i]["locked"]; self.save_records(); self.refresh_list()
+                def mini_del():
+                    i = self._mini_row()
+                    if i >= 0 and not self.records[i]["locked"]:
+                        del self.records[i]
+                        if i < self.paste_index: self.paste_index -= 1
+                        self.save_records(); self.refresh_list()
+                def mini_move(d):
+                    i = self._mini_row(); j = i + d
+                    if 0 <= i < len(self.records) and 0 <= j < len(self.records):
+                        self.records[i], self.records[j] = self.records[j], self.records[i]
+                        self.save_records(); self.refresh_list()
+                        self._mini_list.selection_set(self._mini_iids[j])
+                def mini_goto(_e=None):
+                    i = self._mini_row()
+                    if i >= 0: self.paste_index = i; self.refresh_list()
+                ttk.Button(bar, text="锁定", width=5, command=mini_lock).pack(side="left", padx=1)
+                ttk.Button(bar, text="删除", width=5, command=mini_del).pack(side="left", padx=1)
+                ttk.Button(bar, text="删全部", width=6, command=self.delete_all).pack(side="left", padx=1)
+                ttk.Button(bar, text="↑", width=3, command=lambda: mini_move(-1)).pack(side="left", padx=1)
+                ttk.Button(bar, text="↓", width=3, command=lambda: mini_move(1)).pack(side="left", padx=1)
+                self._mini_list.bind("<Double-Button-1>", mini_goto)
+                self._mini_win = w
+            self._refresh_mini()
+            w = self._mini_win; w.deiconify(); w.lift()
+            if self._mini_after: self.after_cancel(self._mini_after); self._mini_after = None
+            if not always: self._mini_after = self.after(secs * 1000, self._hide_mini)
+        except Exception: pass
+    def _hide_mini(self):
+        self._mini_after = None
+        try:
+            if self._mini_win is not None: self._mini_win.withdraw()
+        except Exception: pass
+    def _switch_language(self, _e=None):
+        new = self.lang_var.get().strip()
+        if new == self.lang: return
+        if not self.cfg.has_section("Config"): self.cfg.add_section("Config")
+        self.cfg.set("Config", "Language", new); self.save_config()
+        messagebox.showinfo(self.t("lang_label", "语言:"), self.t("lang_applied", "语言设置已保存, 重启软件后生效"))
+
     # ---------- records ----------
     def refresh_list(self):
-        q = self.search_var.get().strip(); self.listbox.delete(0, "end"); self._visible = []
+        q = self.search_var.get().strip()
+        self.listbox.delete(*self.listbox.get_children()); self._visible = []; self._row_iids = []
         for i, r in enumerate(self.records):
             if q and q not in r["text"]: continue
             self._visible.append(i)
             prefix = "🔒 " if r["locked"] else ""
-            self.listbox.insert("end", f"{i+1}. {prefix}{r['text'][:120]}")
-        self.status.set(f"当前记录总数: {len(self.records)}  |  粘贴进度: {self.paste_index}/{len(self.records)}")
+            self._row_iids.append(self.listbox.insert("", "end", values=(i + 1, f"{prefix}{r['text'][:120]}")))
+        self.status.set(f"{self.t('status_total', '当前记录总数')}: {len(self.records)}  |  {self.t('status_progress', '粘贴进度')}: {self.paste_index}/{len(self.records)}")
+        self._refresh_mini()
     def load_records(self):
         if os.path.exists(RECORDS_PATH):
             try: self.records = json.loads(open(RECORDS_PATH, encoding="utf-8").read())
@@ -229,8 +385,8 @@ class App(tk.Tk):
     def add_record(self, text, dedupe=True):
         text = text.strip("\r\n")
         if not text: return
-        if self.case_var.get() == "转大写": text = text.upper()
-        if self.case_var.get() == "转小写": text = text.lower()
+        if self.case_var.get() in ("转大写", "UPPERCASE"): text = text.upper()
+        if self.case_var.get() in ("转小写", "lowercase"): text = text.lower()
         if dedupe and any(r["text"] == text for r in self.records): return
         self.records.append({"text": text, "locked": False})
         while len(self.records) > MAX_RECORDS:  # 上限保护: 丢最旧的未锁定记录 (刚加的和锁定的不动)
@@ -239,10 +395,10 @@ class App(tk.Tk):
             del self.records[idx]
         self.save_records()
     def selected_idx(self):
-        """列表框选中的是第几条 records (经搜索过滤映射); 没选返回 -1"""
-        s = self.listbox.curselection()
-        if not s or s[0] >= len(self._visible): return -1
-        return self._visible[s[0]]
+        """列表选中的是第几条 records (经搜索过滤映射); 没选返回 -1"""
+        s = self.listbox.selection()
+        if not s or s[0] not in self._row_iids: return -1
+        return self._visible[self._row_iids.index(s[0])]
     def toggle_lock(self):
         i = self.selected_idx()
         if i >= 0: self.records[i]["locked"] = not self.records[i]["locked"]; self.save_records(); self.refresh_list()
@@ -262,7 +418,7 @@ class App(tk.Tk):
         i = self.selected_idx(); j = i + d
         if 0 <= i < len(self.records) and 0 <= j < len(self.records):
             self.records[i], self.records[j] = self.records[j], self.records[i]; self.save_records(); self.refresh_list()
-            if j in self._visible: self.listbox.selection_set(self._visible.index(j))
+            if j in self._visible: self.listbox.selection_set(self._row_iids[self._visible.index(j)])
     def dedupe(self):
         seen, out = set(), []
         for r in self.records:
@@ -273,7 +429,33 @@ class App(tk.Tk):
     def clip_get(self):
         try: return self.clipboard_get()
         except tk.TclError: return ""
+    @staticmethod
+    def _win32_set_clipboard_text(text):
+        """用 Win32 API 直接写剪贴板 (CF_UNICODETEXT, 立即提供数据)。
+        Tk 的剪贴板是延迟渲染, WPS 等软件粘贴时可能取到空; 原版 (原生程序) 用的就是这条路。"""
+        if sys.platform != "win32": return False
+        try:
+            u, k = ctypes.windll.user32, ctypes.windll.kernel32
+            k.GlobalAlloc.restype = ctypes.c_void_p; k.GlobalLock.restype = ctypes.c_void_p
+            u.SetClipboardData.argtypes = [ctypes.c_uint, ctypes.c_void_p]
+            data = (text + "\0").encode("utf-16-le")
+            h = k.GlobalAlloc(0x0002, len(data))  # GMEM_MOVEABLE
+            if not h: return False
+            ptr = k.GlobalLock(h); ctypes.memmove(ptr, data, len(data)); k.GlobalUnlock(h)
+            opened = False
+            for _ in range(5):  # 剪贴板可能被别的程序短暂占用, 重试几次
+                if u.OpenClipboard(None): opened = True; break
+                time.sleep(0.02)
+            if not opened: k.GlobalFree(ctypes.c_void_p(h)); return False
+            try:
+                u.EmptyClipboard()
+                if not u.SetClipboardData(13, h):  # CF_UNICODETEXT; 成功后内存归系统, 不能再 Free
+                    k.GlobalFree(ctypes.c_void_p(h)); return False
+                return True
+            finally: u.CloseClipboard()
+        except Exception: return False
     def clip_set(self, text):
+        if self._win32_set_clipboard_text(text): return
         self.clipboard_clear(); self.clipboard_append(text); self.update()
     def separator(self):
         if self.custom_sep.get(): return self.custom_sep.get()
@@ -288,20 +470,26 @@ class App(tk.Tk):
             ctypes.windll.user32.GetWindowThreadProcessId(fg, ctypes.byref(pid))
             return pid.value == os.getpid()
         except Exception: return False
+    @staticmethod
+    def _scan(vk):
+        """虚拟键码 -> 硬件扫描码。WPS 等软件会忽略没有扫描码的模拟按键 (原版原生程序带扫描码, 所以能用)"""
+        try: return ctypes.windll.user32.MapVirtualKeyW(vk, 0)
+        except Exception: return 0
     def _send_combo(self, vk_key):
         """向当前前台窗口发送 Ctrl+<vk_key> (0x43=复制 / 0x56=粘贴); SendInput -> keybd_event -> keyboard 三层兜底"""
         if sys.platform == "win32":
             VK_CONTROL, KEYUP = 0x11, 0x0002
             try:
                 def ev(vk, up=False):
-                    i = _INPUT(); i.type = 1; i.u.ki.wVk = vk; i.u.ki.dwFlags = KEYUP if up else 0; return i
+                    i = _INPUT(); i.type = 1; i.u.ki.wVk = vk; i.u.ki.wScan = self._scan(vk)
+                    i.u.ki.dwFlags = KEYUP if up else 0; return i
                 seq = (_INPUT * 4)(ev(VK_CONTROL), ev(vk_key), ev(vk_key, True), ev(VK_CONTROL, True))
                 if ctypes.windll.user32.SendInput(4, seq, ctypes.sizeof(_INPUT)) == 4: return True
             except Exception: pass
             try:
                 u = ctypes.windll.user32
-                u.keybd_event(VK_CONTROL, 0, 0, 0); u.keybd_event(vk_key, 0, 0, 0)
-                u.keybd_event(vk_key, 0, KEYUP, 0); u.keybd_event(VK_CONTROL, 0, KEYUP, 0)
+                u.keybd_event(VK_CONTROL, self._scan(VK_CONTROL), 0, 0); u.keybd_event(vk_key, self._scan(vk_key), 0, 0)
+                u.keybd_event(vk_key, self._scan(vk_key), KEYUP, 0); u.keybd_event(VK_CONTROL, self._scan(VK_CONTROL), KEYUP, 0)
                 return True
             except Exception: pass
         try:
@@ -312,11 +500,12 @@ class App(tk.Tk):
             try: return ctypes.windll.user32.GetClipboardSequenceNumber()
             except Exception: pass
         return None
-    def multi_copy(self):
+    def multi_cut(self): self.multi_copy(cut=True)  # 多次剪切: 与多次复制成对 (原版 HotKey7)
+    def multi_copy(self, cut=False):
         before_seq, before_text = self._clip_sequence(), None
         if not self._foreground_is_self():
             before_text = self.clip_get()
-            self._send_combo(0x43)  # 替用户在当前软件里按 Ctrl+C
+            self._send_combo(0x58 if cut else 0x43)  # 替用户在当前软件里按 Ctrl+X / Ctrl+C
             deadline = time.time() + max(0.3, self.sleep_ms / 1000 * 6)  # 等剪贴板真的变了再读, 最多约 0.5 秒
             while time.time() < deadline:
                 seq = self._clip_sequence()
@@ -331,35 +520,98 @@ class App(tk.Tk):
             for ln in lines: self.add_record(ln)  # v1.3.4: WPS 表格/列表整块复制时按行自动拆成多条, F7 才能一条条粘
         else:
             self.add_record(text)
-        if len(self.records) > n: self.beep()  # 真入队了才响, 没选中文字时不假响
+        if len(self.records) > n:
+            self.beep()  # 真入队了才响, 没选中文字时不假响
+            self.show_mini(f"{self.t('mini_total', '共')} {len(self.records)} {self.t('mini_records', '条')} · {self.t('mini_next', '下一条')}: {self.records[self.paste_index]['text'][:26] if self.records else ''}")
         self.refresh_list()
-    def _paste_text(self, text):
+    def _send_enter(self):
+        """向当前前台窗口发送一次回车 (确认/提交); SendInput -> keybd_event -> keyboard 三层兜底"""
+        if sys.platform == "win32":
+            try:
+                def ev(up=False):
+                    i = _INPUT(); i.type = 1; i.u.ki.wVk = 0x0D; i.u.ki.wScan = self._scan(0x0D)
+                    i.u.ki.dwFlags = 0x0002 if up else 0; return i
+                seq = (_INPUT * 2)(ev(), ev(True))
+                if ctypes.windll.user32.SendInput(2, seq, ctypes.sizeof(_INPUT)) == 2: return True
+            except Exception: pass
+            try:
+                u = ctypes.windll.user32
+                u.keybd_event(0x0D, self._scan(0x0D), 0, 0); u.keybd_event(0x0D, self._scan(0x0D), 0x0002, 0); return True
+            except Exception: pass
+        try:
+            import keyboard; keyboard.send("enter"); return True
+        except Exception: return False
+    def _paste_text(self, text, enter=False):
         self.clip_set(text)
         if not self._foreground_is_self():
             time.sleep(0.03); self._send_combo(0x56)  # Ctrl+V: 真的粘进目标窗口, 不只是放剪贴板
+            if enter:  # 粘完稍等目标程序处理完再回车确认 (太快回车会赶在粘贴落地之前)
+                time.sleep(0.15); self._send_enter()
         self.beep()
     def paste_next(self):
         if not self.records: return
         if self.paste_index >= len(self.records): self.paste_index = 0
         text = self.records[self.paste_index]["text"]; self.paste_index += 1
-        self._paste_text(text); self.refresh_list()
+        self._paste_text(text, enter=self.paste_enter_var.get()); self.refresh_list(); self.show_mini()
     def paste_all(self):
         if not self.records: return
-        self._paste_text(self.separator().join(r["text"] for r in self.records))
+        self._paste_text(self.separator().join(r["text"] for r in self.records)); self.show_mini()
     def paste_selected(self):
         i = self.selected_idx()
         if i >= 0:
             time.sleep(self.sleep_ms / 1000); self.clip_set(self.records[i]["text"]); self.beep()
+            if not self._foreground_is_self(): self._type_text(self.records[i]["text"])  # 强力粘贴: 逐字打进目标窗口
+    # ---------- 原版基础热键组 (HotKey1-5) 与强力粘贴 ----------
+    def act_select_all(self):
+        if not self._foreground_is_self(): self._send_combo(0x41)  # Ctrl+A
+    def act_cut(self):
+        if not self._foreground_is_self(): self._send_combo(0x58)  # Ctrl+X
+    def act_copy(self):
+        if not self._foreground_is_self(): self._send_combo(0x43)  # Ctrl+C
+    def act_paste(self):
+        if not self._foreground_is_self(): self._send_combo(0x56)  # Ctrl+V
+    def act_power_paste(self):
+        text = self.clip_get()
+        if text and not self._foreground_is_self(): self._type_text(text)
+    def _type_text(self, text):
+        """逐字输入 (强力粘贴): 对付屏蔽 Ctrl+V 的窗口; Win32 用 SendInput Unicode, 其余兜底 keyboard.write"""
+        if sys.platform == "win32":
+            try:
+                u = ctypes.windll.user32
+                def ev(scan, vk=0, up=False, unicode_=False):
+                    i = _INPUT(); i.type = 1; i.u.ki.wVk = vk; i.u.ki.wScan = scan
+                    i.u.ki.dwFlags = (0x0004 if unicode_ else 0) | (0x0002 if up else 0); return i
+                batch = []
+                for ch in text:
+                    if ch == "\r": continue
+                    if ch == "\n": batch += [ev(0, 0x0D), ev(0, 0x0D, up=True)]
+                    elif ch == "\t": batch += [ev(0, 0x09), ev(0, 0x09, up=True)]
+                    else: batch += [ev(ord(ch), unicode_=True), ev(ord(ch), up=True, unicode_=True)]
+                for j in range(0, len(batch), 200):  # 分批发送, 防超长文本一次塞爆
+                    chunk = (_INPUT * len(batch[j:j+200]))(*batch[j:j+200])
+                    u.SendInput(len(batch[j:j+200]), chunk, ctypes.sizeof(_INPUT))
+                return True
+            except Exception: pass
+        try:
+            import keyboard; keyboard.write(text); return True
+        except Exception: return False
     def import_clipboard_split(self):
         text = self.clip_get()
         if not text: return
         pattern = {"所有数字": r"\d+", "所有小写字母": r"[a-z]+", "所有大写字母": r"[A-Z]+",
-                   "回车符": None, "制表符": None}.get(self.regex_var.get(), None)
-        if self.regex_var.get() in ("回车符",): parts = text.splitlines()
-        elif self.regex_var.get() in ("制表符",): parts = text.split("\t")
+                   "All Numbers": r"\d+", "All lowercase letters": r"[a-z]+", "All UPPERCASE letters": r"[A-Z]+",
+                   "回车符": None, "制表符": None, "Enter (newline)": None, "Tab": None}.get(self.regex_var.get(), None)
+        sep_used = None
+        if self.regex_var.get() in ("回车符", "Enter (newline)"): parts = text.splitlines()
+        elif self.regex_var.get() in ("制表符", "Tab"): parts = text.split("\t"); sep_used = "\t"
         elif pattern: parts = re.findall(pattern, text)
-        elif self.split_entry.get(): parts = text.split(self.split_entry.get())
+        elif self.split_entry.get(): sep_used = self.split_entry.get(); parts = text.split(sep_used)
         else: parts = [text]
+        # 分隔符保存位置 (原版「分割字符串前/后」): 留在前段末尾或后段开头, 只对字面分隔符生效
+        if sep_used and len(parts) > 1:
+            pos = self.splitpos_var.get()
+            if pos in ("分隔符留在前段", "Separator stays with previous"): parts = [p + sep_used for p in parts[:-1]] + parts[-1:]
+            elif pos in ("分隔符留在后段", "Separator stays with next"): parts = parts[:1] + [sep_used + p for p in parts[1:]]
         for p in parts: self.add_record(p)
         self.refresh_list()
     def beep(self):
@@ -397,10 +649,16 @@ class App(tk.Tk):
     # Config.ini [HotKey] 字段 -> (显示名, 动作). 用户在「热键设置」里改, 也可直接改 ini 后点「加载配置」。
     def hotkey_actions(self):
         # (section, key, 显示名, 动作)
-        return [("HotKey", "HotKey8", "多次复制", self.multi_copy), ("HotKey", "HotKey9", "顺序粘贴", self.paste_next),
-                ("HotKey", "HotKey10", "全部粘贴", self.paste_all), ("HotKey", "HotKey11", "删除最后一条", self.delete_last),
-                ("HotKey", "HotKey12", "删除全部记录", self.delete_all),
-                ("Snip", "SnipKey", "区域截图", self.snip_region), ("Snip", "PinKey", "贴剪贴板", self.pin_clipboard)]
+        return [("HotKey", "HotKey1", self.t("hk_select_all", "全选"), self.act_select_all),
+                ("HotKey", "HotKey2", self.t("hk_cut", "剪切"), self.act_cut),
+                ("HotKey", "HotKey3", self.t("hk_copy", "复制"), self.act_copy),
+                ("HotKey", "HotKey4", self.t("hk_paste", "粘贴"), self.act_paste),
+                ("HotKey", "HotKey5", self.t("hk_power_paste", "强力粘贴"), self.act_power_paste),
+                ("HotKey", "HotKey7", self.t("hk_multi_cut", "多次剪切"), self.multi_cut),
+                ("HotKey", "HotKey8", self.t("hk_multi_copy", "多次复制"), self.multi_copy), ("HotKey", "HotKey9", self.t("hk_paste_next", "顺序粘贴"), self.paste_next),
+                ("HotKey", "HotKey10", self.t("hk_paste_all", "全部粘贴"), self.paste_all), ("HotKey", "HotKey11", self.t("hk_delete_last", "删除最后一条"), self.delete_last),
+                ("HotKey", "HotKey12", self.t("hk_delete_all", "删除全部记录"), self.delete_all),
+                ("Snip", "SnipKey", self.t("hk_snip", "区域截图"), self.snip_region), ("Snip", "PinKey", self.t("hk_pin", "贴剪贴板"), self.pin_clipboard)]
     @staticmethod
     def normalize_hotkey(raw):
         """'无'/空 -> None; 其余统一成 keyboard 包格式, 如 'ctrl+alt+v' / 'f6'"""
@@ -426,6 +684,10 @@ class App(tk.Tk):
             for h in self._hk_handles:
                 try: keyboard.remove_hotkey(h)
                 except Exception: pass
+            if self._oc_handle is not None:
+                try: keyboard.remove_hotkey(self._oc_handle)
+                except Exception: pass
+                self._oc_handle = None
         except Exception: keyboard = None
         self._hk_handles = []
         for seq in self._tk_sequences:
@@ -447,11 +709,32 @@ class App(tk.Tk):
                 except Exception: pass
         scope = "全局热键" if global_ok else "窗口内热键 (装 keyboard 包后可全局)"
         self.status.set(f"{scope}已启用: " + (" / ".join(labels) if labels else "未设置, 点「热键设置」添加"))
+        # 全局切换热键 (原版 [OCHotKey]): 单独注册, 不归 toggle 管, 这样关掉后还能按它恢复
+        self._oc_handle = None
+        oc = self.normalize_hotkey(self.cfg.get("OCHotKey", "HotKey", fallback="无"))
+        if oc and keyboard is not None:
+            try: self._oc_handle = keyboard.add_hotkey(oc, lambda: self._ui_queue.put(self.toggle_hotkeys))
+            except Exception: pass
+        self._hk_enabled = True
+    def toggle_hotkeys(self):
+        """全局切换: 一键停用/恢复全部动作热键 (切换键本身始终有效)"""
+        try: import keyboard
+        except Exception: keyboard = None
+        if self._hk_enabled:
+            if keyboard is not None:
+                for h in self._hk_handles:
+                    try: keyboard.remove_hotkey(h)
+                    except Exception: pass
+            self._hk_handles = []; self._hk_enabled = False
+            self.status.set(self.t("hk_off", "全局热键已关闭 (按全局切换热键恢复)"))
+        else:
+            self.apply_hotkeys()
+            self.status.set(self.t("hk_on", "全局热键已开启"))
     def open_hotkey_dialog(self):
-        win = tk.Toplevel(self); win.title("热键设置"); win.geometry("430x380"); win.transient(self); win.grab_set()
-        ttk.Label(win, text="点「录入」后直接按下组合键 (如 Ctrl+Alt+V), 或手动输入。\n留空或填「无」= 不启用该热键。避开 F1(帮助)/F2(重命名) 和 Ctrl+C/V 等系统键。").pack(padx=10, pady=8, anchor="w")
+        win = tk.Toplevel(self); win.title(self.t("hotkey_settings", "热键设置")); win.geometry("450x620"); win.transient(self); win.grab_set()
+        ttk.Label(win, text="点「录入」后直接按下组合键, 或手动输入。任何按键都可以设, 包括 F1、F2、Ctrl+C 这类常用键, 按你的习惯来。\n留空或填「无」= 不启用该热键。同一个键设给两个功能时, 会提示你确认, 后设的生效、先设的自动清空。").pack(padx=10, pady=8, anchor="w")
         vars_ = {}
-        for section, cfg_key, label, _fn in self.hotkey_actions():
+        for section, cfg_key, label, _fn in self.hotkey_actions() + [("OCHotKey", "HotKey", self.t("hk_toggle", "全局切换热键"), None)]:
             row = ttk.Frame(win); row.pack(fill="x", padx=10, pady=3)
             ttk.Label(row, text=label, width=14).pack(side="left")
             var = tk.StringVar(value=self.cfg.get(section, cfg_key, fallback="无")); vars_[(section, cfg_key)] = var
@@ -470,12 +753,21 @@ class App(tk.Tk):
             ttk.Button(row, text="录入", command=capture).pack(side="left", padx=4)
             ttk.Button(row, text="清除", command=lambda v=var: v.set("无")).pack(side="left")
         def save():
-            seen = {}
-            for (section, cfg_key), var in vars_.items():
-                hk = self.normalize_hotkey(var.get())
-                if hk and hk in seen:
-                    messagebox.showerror("热键设置", "热键设置重复，请重新设置！", parent=win); return
-                if hk: seen[hk] = cfg_key
+            # 不避开任何热键: 重复不再直接拦下, 而是问一句 —— 确认后后设的生效, 先设的自动清空
+            entries = [(key, var, self.normalize_hotkey(var.get())) for key, var in vars_.items()]
+            by_hk = {}
+            for key, var, hk in entries:
+                if hk: by_hk.setdefault(hk, []).append(key)
+            conflicts = {hk: keys for hk, keys in by_hk.items() if len(keys) > 1}
+            if conflicts:
+                label_of = {(s, c): l for s, c, l, _f in self.hotkey_actions() + [("OCHotKey", "HotKey", self.t("hk_toggle", "全局切换热键"), None)]}
+                detail = "\n".join(f"{hk.upper()}: " + "、".join(label_of.get(k, k[1]) for k in keys) for hk, keys in conflicts.items())
+                if not messagebox.askyesno("热键设置", f"下面这些键被设给了多个功能:\n{detail}\n\n点「是」: 后设的生效, 先设的自动清空; 点「否」: 回去改。", parent=win):
+                    return
+                for hk, keys in conflicts.items():
+                    for k in keys[:-1]: vars_[k].set("无")
+                entries = [(key, var, self.normalize_hotkey(var.get())) for key, var in vars_.items()]
+            for (section, cfg_key), var, hk in entries:
                 if not self.cfg.has_section(section): self.cfg.add_section(section)
                 self.cfg.set(section, cfg_key, hk.upper() if hk else "无")
             self.save_config(); self.apply_hotkeys(); win.destroy()
@@ -517,17 +809,42 @@ class App(tk.Tk):
         sel_win = tk.Toplevel(self); sel_win.attributes("-fullscreen", True); sel_win.attributes("-topmost", True)
         canvas = tk.Canvas(sel_win, cursor="crosshair", highlightthickness=0); canvas.pack(fill="both", expand=True)
         photo = ImageTk.PhotoImage(full); canvas.create_image(0, 0, anchor="nw", image=photo); canvas.image = photo
-        state = {"x": 0, "y": 0, "rect": None, "snap": None}
+        state = {"x": 0, "y": 0, "rect": None, "snap": None, "hex": "", "phase": "select",
+                 "box": None, "ops": [], "op_items": [], "undone": [], "tool": None,
+                 "color": "#FF0000", "width": 3, "drag": None, "tb": None}
         def show_info(e, extra=""):
             canvas.delete("info")
             if snap_rects and not (e.state & 0x0100):  # 没按住鼠标时: 吸附高亮鼠标所在窗口 (单击即截整窗)
                 snap = self.pick_window(e.x, e.y, snap_rects); state["snap"] = snap
                 canvas.delete("snap")
                 if snap: canvas.create_rectangle(*snap, outline="yellow", width=2, dash=(6, 3), tags="snap")
-            try: r, g, b = full.getpixel((e.x, e.y))[:3]; color = f"#{r:02X}{g:02X}{b:02X} RGB({r},{g},{b})"
+            try: r, g, b = full.getpixel((e.x, e.y))[:3]; color = f"#{r:02X}{g:02X}{b:02X} RGB({r},{g},{b})"; state["hex"] = f"#{r:02X}{g:02X}{b:02X}"
             except Exception: color = ""
             canvas.create_text(10, 10, anchor="nw", tags="info", fill="yellow",
-                               font=("Consolas", 12, "bold"), text=f"({e.x},{e.y}) {color} {extra}")
+                               font=("Consolas", 12, "bold"), text=f"({e.x},{e.y}) {color} {extra}  [按 C 复制颜色值]")
+            # 放大镜 (Snipaste 同款): 光标周围 25x25 像素放大 6 倍显示, 带中心十字
+            try:
+                R, Z = 12, 6
+                x0, y0 = max(0, e.x - R), max(0, e.y - R)
+                zoom = full.crop((x0, y0, min(full.width, e.x + R + 1), min(full.height, e.y + R + 1))).resize(((min(full.width, e.x + R + 1) - x0) * Z, (min(full.height, e.y + R + 1) - y0) * Z), Image.NEAREST)
+                state["loupe"] = ImageTk.PhotoImage(zoom)
+                lx = e.x + 24 if e.x + 24 + zoom.width < full.width else e.x - 24 - zoom.width
+                ly = e.y + 24 if e.y + 24 + zoom.height < full.height else e.y - 24 - zoom.height
+                canvas.delete("loupe")
+                canvas.create_image(lx, ly, anchor="nw", image=state["loupe"], tags="loupe")
+                canvas.create_rectangle(lx, ly, lx + zoom.width, ly + zoom.height, outline="yellow", width=1, tags="loupe")
+                cx, cy = lx + (e.x - x0) * Z, ly + (e.y - y0) * Z
+                canvas.create_line(cx, ly, cx, ly + zoom.height, fill="red", tags="loupe")
+                canvas.create_line(lx, cy, lx + zoom.width, cy, fill="red", tags="loupe")
+            except Exception: pass
+        def on_key(e):
+            if e.keysym.lower() == "c" and state.get("hex") and not (e.state & 0x0004):
+                self.clip_set(state["hex"])
+                canvas.delete("copied")
+                canvas.create_text(e.x + 14, e.y - 14, anchor="w", tags="copied", fill="#00FF88",
+                                   font=("Consolas", 12, "bold"), text=f"已复制 {state['hex']}")
+                sel_win.after(900, lambda: canvas.delete("copied"))
+        sel_win.bind("<KeyPress>", on_key); sel_win.focus_set()
         def down(e): state.update(x=e.x, y=e.y); canvas.delete("snap"); show_info(e)
         def drag(e):
             if state["rect"]: canvas.delete(state["rect"])
@@ -537,11 +854,206 @@ class App(tk.Tk):
         def up(e):
             box = (min(state["x"], e.x), min(state["y"], e.y), max(state["x"], e.x), max(state["y"], e.y))
             if box[2] - box[0] <= 5 and box[3] - box[1] <= 5 and state.get("snap"): box = tuple(state["snap"])
-            sel_win.destroy(); self.deiconify()
-            if box[2] - box[0] > 5 and box[3] - box[1] > 5:
-                self.open_editor(full.crop(box))
+            if box[2] - box[0] > 5 and box[3] - box[1] > 5: enter_adjust(box)
+            else: close_overlay()
         canvas.bind("<ButtonPress-1>", down); canvas.bind("<B1-Motion>", drag); canvas.bind("<ButtonRelease-1>", up)
-        sel_win.bind("<Escape>", lambda e: (sel_win.destroy(), self.deiconify()))
+        # ---------- 第二阶段 (Snipaste 式): 选区停在冻结屏上, 就地调整 + 标注 + 工具栏 ----------
+        def close_overlay():
+            try:
+                if state.get("tb") is not None: state["tb"].destroy()
+            except Exception: pass
+            try: sel_win.destroy()
+            except Exception: pass
+            self.deiconify()
+        def handles_of(box):
+            x1, y1, x2, y2 = box; mx, my = (x1 + x2) // 2, (y1 + y2) // 2
+            return [(x1, y1), (mx, y1), (x2, y1), (x1, my), (x2, my), (x1, y2), (mx, y2), (x2, y2)]
+        def draw_sel():
+            canvas.delete("sel")
+            x1, y1, x2, y2 = state["box"]; W, H = full.width, full.height
+            for r in ((0, 0, W, y1), (0, y2, W, H), (0, y1, x1, y2), (x2, y1, W, y2)):  # 选区外压暗
+                if r[2] > r[0] and r[3] > r[1]: canvas.create_rectangle(*r, fill="black", stipple="gray50", outline="", tags="sel")
+            canvas.create_rectangle(x1, y1, x2, y2, outline="#1E90FF", width=2, tags="sel")
+            for hx, hy in handles_of(state["box"]):
+                canvas.create_rectangle(hx - 4, hy - 4, hx + 4, hy + 4, fill="white", outline="#1E90FF", width=1, tags="sel")
+            label = f"{x1},{y1}  {x2 - x1} × {y2 - y1} px"
+            ly = y1 - 20 if y1 >= 22 else y1 + 6
+            tid = canvas.create_text(x1 + 2, ly, anchor="nw", text=label, fill="white", font=("Consolas", 10, "bold"), tags="sel")
+            bb = canvas.bbox(tid)
+            if bb:
+                bg = canvas.create_rectangle(bb[0] - 4, bb[1] - 2, bb[2] + 4, bb[3] + 2, fill="#333333", outline="", tags="sel")
+                canvas.tag_lower(bg, tid)
+            canvas.tag_raise("op")  # 标注画在选区框之上
+        def place_toolbar():
+            tb = state.get("tb")
+            if tb is None: return
+            tb.update_idletasks(); tw, th = tb.winfo_width(), tb.winfo_height()
+            x1, y1, x2, y2 = state["box"]
+            tx = min(max(0, x1), max(0, full.width - tw))
+            ty = y2 + 8 if y2 + 8 + th <= full.height else (y1 - th - 8 if y1 - th - 8 >= 0 else max(0, y2 - th - 4))
+            tb.geometry(f"+{tx}+{ty}")
+        def shift_ops(dx, dy):
+            if dx or dy:
+                for items in state["op_items"]:
+                    for it in items: canvas.move(it, dx, dy)
+        def draw_op(op):
+            """把一条标注画到冻结屏画布上 (坐标: 存的是相对选区原点的图内坐标, 这里加回原点)"""
+            ox, oy = state["box"][0], state["box"][1]
+            t, c, w = op["type"], op["color"], op["width"]; ids = []
+            if t in ("rect", "mosaic", "blur"):
+                x1, y1, x2, y2 = [v + (ox if k % 2 == 0 else oy) for k, v in enumerate(op["box"])]
+                kw = dict(outline=c, width=w) if t == "rect" else dict(fill="#888888", stipple="gray25", outline=c, width=1)
+                ids.append(canvas.create_rectangle(x1, y1, x2, y2, tags="op", **kw))
+            elif t == "ellipse":
+                x1, y1, x2, y2 = [v + (ox if k % 2 == 0 else oy) for k, v in enumerate(op["box"])]
+                ids.append(canvas.create_oval(x1, y1, x2, y2, outline=c, width=w, tags="op"))
+            elif t in ("line", "arrow"):
+                x1, y1, x2, y2 = [v + (ox if k % 2 == 0 else oy) for k, v in enumerate(op["box"])]
+                ids.append(canvas.create_line(x1, y1, x2, y2, fill=c, width=w, tags="op"))
+                if t == "arrow":
+                    import math; ang = math.atan2(y2 - y1, x2 - x1); L = 10 + w * 2
+                    for da in (2.8, -2.8):
+                        ids.append(canvas.create_line(x2, y2, x2 + L * math.cos(ang + da), y2 + L * math.sin(ang + da), fill=c, width=w, tags="op"))
+            elif t == "pen":
+                pts = [(x + ox, y + oy) for x, y in op["points"]]
+                if len(pts) > 1: ids.append(canvas.create_line(pts, fill=c, width=w, tags="op"))
+            elif t == "text":
+                ids.append(canvas.create_text(op["at"][0] + ox, op["at"][1] + oy, anchor="nw", text=op["text"],
+                                              fill=c, font=("Microsoft YaHei", 14 + w * 3), tags="op"))
+            return ids
+        def finish(kind):
+            box = state["box"]; final = self.render_ops(full.crop(box), state["ops"])
+            self.save_shot(final); close_overlay()
+            if kind == "pin": self.pin_image(final)
+            elif kind == "copy":
+                if not self._copy_image_to_clipboard(final):
+                    messagebox.showinfo("复制到剪贴板", "图片复制失败, 已存进截图历史, 可在历史里打开")
+            elif kind == "save": self._save_as(final)
+        def build_toolbar():
+            tb = tk.Toplevel(sel_win); tb.overrideredirect(True); tb.attributes("-topmost", True); tb.configure(bg="#F2F2F2")
+            state["tb"] = tb
+            tool_btns = {}
+            def set_tool(name):
+                state["tool"] = name
+                for k2, b in tool_btns.items(): b.configure(bg="#BDD7EE" if k2 == name else "#F2F2F2")
+            for txt, name in [("移动", None), ("矩形", "rect"), ("椭圆", "ellipse"), ("箭头", "arrow"), ("直线", "line"),
+                              ("画笔", "pen"), ("文字", "text"), ("马赛克", "mosaic"), ("模糊", "blur")]:
+                b = tk.Button(tb, text=txt, font=("Microsoft YaHei", 9), relief="flat", bg="#F2F2F2",
+                              command=lambda n=name: set_tool(n)); b.pack(side="left", padx=1, pady=2); tool_btns[name] = b
+            set_tool(None)
+            for cname in ("#FF0000", "#FFD800", "#00B050", "#0070FF", "#000000", "#FFFFFF"):
+                tk.Button(tb, bg=cname, width=2, relief="ridge",
+                          command=lambda cc=cname: state.update(color=cc)).pack(side="left", padx=1)
+            width_var = tk.IntVar(value=3)
+            ttk.Combobox(tb, textvariable=width_var, values=[1, 2, 3, 5, 8], width=3).pack(side="left", padx=2)
+            width_var.trace_add("write", lambda *_: state.update(width=width_var.get()))
+            def do_undo():
+                if state["ops"]:
+                    state["undone"].append(state["ops"].pop())
+                    for it in state["op_items"].pop(): canvas.delete(it)
+            def do_redo():
+                if state["undone"]:
+                    op = state["undone"].pop(); state["ops"].append(op); state["op_items"].append(draw_op(op))
+            tk.Button(tb, text="撤销", font=("Microsoft YaHei", 9), relief="flat", bg="#F2F2F2", command=do_undo).pack(side="left", padx=1)
+            tk.Button(tb, text="重做", font=("Microsoft YaHei", 9), relief="flat", bg="#F2F2F2", command=do_redo).pack(side="left", padx=1)
+            tk.Button(tb, text="OCR", font=("Microsoft YaHei", 9), relief="flat", bg="#F2F2F2",
+                      command=lambda: self.recognize(self.render_ops(full.crop(state["box"]), state["ops"]), "ocr")).pack(side="left", padx=1)
+            for txt, kind in [("钉图", "pin"), ("保存", "save")]:
+                tk.Button(tb, text=txt, font=("Microsoft YaHei", 9), relief="flat", bg="#F2F2F2",
+                          command=lambda k=kind: finish(k)).pack(side="left", padx=1)
+            tk.Button(tb, text="✕", font=("Microsoft YaHei", 9), relief="flat", bg="#F2F2F2", command=close_overlay).pack(side="left", padx=1)
+            tk.Button(tb, text="✓ 复制", font=("Microsoft YaHei", 9, "bold"), relief="flat", bg="#BDD7EE",
+                      command=lambda: finish("copy")).pack(side="left", padx=1)
+        def adj_down(e):
+            x1, y1, x2, y2 = state["box"]
+            for idx, (hx, hy) in enumerate(handles_of(state["box"])):
+                if abs(e.x - hx) <= 6 and abs(e.y - hy) <= 6:
+                    state["drag"] = ("resize", idx, state["box"]); return
+            if state["tool"] and x1 <= e.x <= x2 and y1 <= e.y <= y2:
+                state["drag"] = ("draw", (e.x - x1, e.y - y1), [(e.x - x1, e.y - y1)], None)
+                if state["tool"] == "text":
+                    from tkinter import simpledialog
+                    txt = simpledialog.askstring("文字标注", "输入文字:", parent=sel_win)
+                    if txt:
+                        op = {"type": "text", "at": (e.x - x1, e.y - y1), "text": txt, "color": state["color"], "width": state["width"]}
+                        state["ops"].append(op); state["undone"].clear(); state["op_items"].append(draw_op(op))
+                    state["drag"] = None
+                return
+            if x1 <= e.x <= x2 and y1 <= e.y <= y2: state["drag"] = ("move", (e.x, e.y), state["box"])
+        def adj_drag(e):
+            d = state.get("drag")
+            if not d: return
+            x1, y1, x2, y2 = state["box"]
+            if d[0] == "move":
+                dx, dy = e.x - d[1][0], e.y - d[1][1]
+                dx = min(max(dx, -x1), full.width - x2); dy = min(max(dy, -y1), full.height - y2)
+                state["box"] = (x1 + dx, y1 + dy, x2 + dx, y2 + dy); shift_ops(dx, dy); draw_sel(); place_toolbar()
+            elif d[0] == "resize":
+                idx, (ox1, oy1, ox2, oy2) = d[1], d[2]
+                nx1, ny1, nx2, ny2 = ox1, oy1, ox2, oy2
+                if idx in (0, 3, 5): nx1 = min(max(0, e.x), ox2 - 8)
+                if idx in (2, 4, 7): nx2 = max(min(full.width, e.x), ox1 + 8)
+                if idx in (0, 1, 2): ny1 = min(max(0, e.y), oy2 - 8)
+                if idx in (5, 6, 7): ny2 = max(min(full.height, e.y), oy1 + 8)
+                shift_ops(nx1 - x1, ny1 - y1)
+                state["box"] = (nx1, ny1, nx2, ny2); draw_sel(); place_toolbar()
+            elif d[0] == "draw":
+                kind, start, points, temp = d
+                if temp: canvas.delete(temp)
+                cx, cy = e.x - x1, e.y - y1; tool = state["tool"]; c, w = state["color"], state["width"]
+                if tool == "pen":
+                    points.append((cx, cy))
+                    temp = canvas.create_line([(px + x1, py + y1) for px, py in points], fill=c, width=w, tags="op")
+                elif tool in ("rect", "mosaic", "blur"):
+                    temp = canvas.create_rectangle(start[0] + x1, start[1] + y1, e.x, e.y, outline=c, width=w, tags="op")
+                elif tool == "ellipse":
+                    temp = canvas.create_oval(start[0] + x1, start[1] + y1, e.x, e.y, outline=c, width=w, tags="op")
+                else:
+                    temp = canvas.create_line(start[0] + x1, start[1] + y1, e.x, e.y, fill=c, width=w, tags="op")
+                state["drag"] = (kind, start, points, temp)
+        def adj_up(e):
+            d = state.get("drag"); state["drag"] = None
+            if not d or d[0] != "draw": return
+            _, start, points, temp = d
+            if temp: canvas.delete(temp)
+            x1, y1 = state["box"][0], state["box"][1]
+            ex, ey = e.x - x1, e.y - y1; tool = state["tool"]; c, w = state["color"], state["width"]
+            if tool == "pen":
+                if len(points) < 2: return
+                op = {"type": "pen", "points": list(points), "color": c, "width": w}
+            elif tool in ("rect", "ellipse", "mosaic", "blur"):
+                op = {"type": tool, "box": (min(start[0], ex), min(start[1], ey), max(start[0], ex), max(start[1], ey)), "color": c, "width": w}
+            elif tool in ("arrow", "line"):
+                op = {"type": tool, "box": (start[0], start[1], ex, ey), "color": c, "width": w}
+            else: return
+            state["ops"].append(op); state["undone"].clear(); state["op_items"].append(draw_op(op))
+        def adj_key(e):
+            if state["phase"] != "adjust": return
+            step = 10 if (e.state & 0x0001) else 1
+            x1, y1, x2, y2 = state["box"]; dx = dy = 0
+            if e.keysym == "Left": dx = -step
+            elif e.keysym == "Right": dx = step
+            elif e.keysym == "Up": dy = -step
+            elif e.keysym == "Down": dy = step
+            elif e.keysym == "Return": finish("copy"); return
+            else: return
+            dx = min(max(dx, -x1), full.width - x2); dy = min(max(dy, -y1), full.height - y2)
+            if dx or dy:
+                state["box"] = (x1 + dx, y1 + dy, x2 + dx, y2 + dy); shift_ops(dx, dy); draw_sel(); place_toolbar()
+        def enter_adjust(box):
+            state["phase"] = "adjust"; state["box"] = box
+            canvas.delete("info"); canvas.delete("loupe"); canvas.delete("snap")
+            if state["rect"]: canvas.delete(state["rect"]); state["rect"] = None
+            draw_sel(); build_toolbar(); place_toolbar()
+            canvas.bind("<Motion>", lambda e: state.update(hex=_hex_at(e)))
+            canvas.bind("<ButtonPress-1>", adj_down); canvas.bind("<B1-Motion>", adj_drag); canvas.bind("<ButtonRelease-1>", adj_up)
+            canvas.bind("<Double-Button-1>", lambda e: finish("copy"))
+            sel_win.bind("<KeyPress>", lambda e: (adj_key(e), on_key(e))[0] if e.keysym in ("Left", "Right", "Up", "Down", "Return") else on_key(e))
+            sel_win.focus_set()
+        def _hex_at(e):
+            try: r, g, b = full.getpixel((e.x, e.y))[:3]; return f"#{r:02X}{g:02X}{b:02X}"
+            except Exception: return state.get("hex", "")
+        sel_win.bind("<Escape>", lambda e: close_overlay())
     def pin_clipboard(self):
         # Snipaste 的 F3: 剪贴板是图就贴图, 是文字就贴文字条
         if HAS_PIL:
@@ -589,6 +1101,7 @@ class App(tk.Tk):
         for pct in (100, 80, 60, 40):
             alpha.add_command(label=f"不透明度 {pct}%", command=lambda a=pct/100: win.attributes("-alpha", a))
         menu.add_cascade(label="透明度", menu=alpha)
+        menu.add_command(label="复制图片到剪贴板", command=lambda: self._copy_image_to_clipboard(state["img"]))
         menu.add_command(label="另存为 PNG", command=lambda: self._save_as(state["img"]))
         menu.add_command(label="关闭贴图 (双击也可)", command=win.destroy)
         # 事件只绑在 label 上并 return "break": 旧版 win 和 label 各绑一份, 事件沿 bindtags 传播会缩放两次
@@ -604,6 +1117,27 @@ class App(tk.Tk):
     def _save_as(self, img):
         p = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG", "*.png")])
         if p: img.save(p)
+    def _copy_image_to_clipboard(self, img):
+        """把图片放进系统剪贴板 (Snipaste 截图完成的主动作); Windows 用 CF_DIB, 无第三方依赖"""
+        if sys.platform != "win32": return False
+        try:
+            import io
+            bio = io.BytesIO(); img.convert("RGB").save(bio, "BMP")
+            data = bio.getvalue()[14:]  # 去掉 BITMAPFILEHEADER, 剩下就是 DIB
+            user32, kernel32 = ctypes.windll.user32, ctypes.windll.kernel32
+            kernel32.GlobalAlloc.restype = ctypes.c_void_p
+            kernel32.GlobalLock.restype = ctypes.c_void_p
+            user32.SetClipboardData.argtypes = [ctypes.c_uint, ctypes.c_void_p]
+            h = kernel32.GlobalAlloc(0x0002, len(data))  # GMEM_MOVEABLE
+            if not h: return False
+            ptr = kernel32.GlobalLock(h)
+            ctypes.memmove(ptr, data, len(data)); kernel32.GlobalUnlock(h)
+            if not user32.OpenClipboard(None): return False
+            try:
+                user32.EmptyClipboard()
+                return bool(user32.SetClipboardData(8, h))  # CF_DIB = 8
+            finally: user32.CloseClipboard()
+        except Exception: return False
     # ---------- 标注编辑器 (v1.1, 对标 Snipaste 标注) ----------
     @staticmethod
     def _font(size):
@@ -648,7 +1182,7 @@ class App(tk.Tk):
         base = base_img.convert("RGB")
         win = tk.Toplevel(self); win.title("标注 - 画完点「完成并钉图」"); win.attributes("-topmost", True)
         tool = tk.StringVar(value="rect"); color = tk.StringVar(value="#FF0000"); width = tk.IntVar(value=3)
-        ops, state = [], {"start": None, "points": [], "temp": None}
+        ops, undone, state = [], [], {"start": None, "points": [], "temp": None}
         bar = ttk.Frame(win); bar.pack(fill="x", padx=6, pady=4)
         for txt, val in [("矩形", "rect"), ("椭圆", "ellipse"), ("箭头", "arrow"), ("直线", "line"),
                          ("画笔", "pen"), ("文字", "text"), ("马赛克", "mosaic"), ("模糊", "blur")]:
@@ -674,7 +1208,7 @@ class App(tk.Tk):
             if tool.get() == "text":
                 from tkinter import simpledialog
                 txt = simpledialog.askstring("文字标注", "输入文字:", parent=win)
-                if txt: ops.append({"type": "text", "at": state["start"], "text": txt, "color": color.get(), "width": width.get()}); redraw()
+                if txt: ops.append({"type": "text", "at": state["start"], "text": txt, "color": color.get(), "width": width.get()}); undone.clear(); redraw()
                 state["start"] = None
         def drag(e):
             if state["start"] is None: return
@@ -689,21 +1223,34 @@ class App(tk.Tk):
         def up(e):
             if state["start"] is None: return
             x1, y1 = state["start"]; ex, ey = to_img(e); t = tool.get()
-            if t == "pen": ops.append({"type": "pen", "points": list(state["points"]), "color": color.get(), "width": width.get()})
+            if t == "pen": ops.append({"type": "pen", "points": list(state["points"]), "color": color.get(), "width": width.get()}); undone.clear()
             elif t in ("rect", "ellipse", "arrow", "line", "mosaic", "blur"):
                 ops.append({"type": t, "box": (min(x1, ex), min(y1, ey), max(x1, ex), max(y1, ey)) if t in ("rect", "ellipse", "mosaic", "blur") else (x1, y1, ex, ey),
-                            "color": color.get(), "width": width.get()})
+                            "color": color.get(), "width": width.get()}); undone.clear()
             state["start"] = None; state["temp"] = None; redraw()
         canvas.bind("<ButtonPress-1>", down); canvas.bind("<B1-Motion>", drag); canvas.bind("<ButtonRelease-1>", up)
         btns = ttk.Frame(win); btns.pack(fill="x", padx=6, pady=6)
-        ttk.Button(btns, text="撤销", command=lambda: (ops.pop() if ops else None, redraw())).pack(side="left", padx=2)
+        def do_undo():
+            if ops: undone.append(ops.pop()); redraw()
+        def do_redo():
+            if undone: ops.append(undone.pop()); redraw()
+        ttk.Button(btns, text="撤销", command=do_undo).pack(side="left", padx=2)
+        ttk.Button(btns, text="重做", command=do_redo).pack(side="left", padx=2)
         ttk.Button(btns, text="OCR 识别文字", command=lambda: self.recognize(self.render_ops(base, ops), "ocr")).pack(side="left", padx=2)
         ttk.Button(btns, text="扫二维码/条码", command=lambda: self.recognize(self.render_ops(base, ops), "code")).pack(side="left", padx=2)
-        ttk.Button(btns, text="清空标注", command=lambda: (ops.clear(), redraw())).pack(side="left", padx=2)
+        ttk.Button(btns, text="清空标注", command=lambda: (ops.clear(), undone.clear(), redraw())).pack(side="left", padx=2)
         def finish(pin=True):
             final = self.render_ops(base, ops); self.save_shot(final); win.destroy()
             if pin: self.pin_image(final)
+        def finish_copy():
+            final = self.render_ops(base, ops); self.save_shot(final)
+            ok = self._copy_image_to_clipboard(final); win.destroy()
+            if not ok: messagebox.showinfo("复制到剪贴板", "图片复制到剪贴板失败, 已存进截图历史, 可在历史里打开")
+        def finish_save_as():
+            final = self.render_ops(base, ops); self.save_shot(final); win.destroy(); self._save_as(final)
         ttk.Button(btns, text="完成并钉图", command=lambda: finish(True)).pack(side="right", padx=2)
+        ttk.Button(btns, text="复制到剪贴板", command=finish_copy).pack(side="right", padx=2)
+        ttk.Button(btns, text="另存为", command=finish_save_as).pack(side="right", padx=2)
         ttk.Button(btns, text="只保存不钉图", command=lambda: finish(False)).pack(side="right", padx=2)
         ttk.Button(btns, text="放弃", command=win.destroy).pack(side="right", padx=2)
 
@@ -730,9 +1277,59 @@ class App(tk.Tk):
 
     # ---------- OCR / 扫码 (v1.2, 可选引擎, 没装时优雅提示) ----------
     _ocr_engine = None  # RapidOCR 实例缓存: 旧版每次识别都重建引擎、重加载模型 (数秒), 只建一次
+    # Windows 内置 OCR 脚本 (与 Snipaste 同款引擎 Windows.Media.Ocr, 零依赖, EXE 里也能用)
+    _WIN_OCR_PS1 = r"""
+param([string]$ImgPath, [string]$OutPath)
+$ErrorActionPreference = 'Stop'
+try {
+  Add-Type -AssemblyName System.Runtime.WindowsRuntime
+  $null = [Windows.Storage.StorageFile, Windows.Storage, ContentType = WindowsRuntime]
+  $null = [Windows.Graphics.Imaging.BitmapDecoder, Windows.Foundation, ContentType = WindowsRuntime]
+  $null = [Windows.Media.Ocr.OcrEngine, Windows.Foundation, ContentType = WindowsRuntime]
+  $null = [Windows.Globalization.Language, Windows.Globalization, ContentType = WindowsRuntime]
+  $asTask = ([System.WindowsRuntimeSystemExtensions].GetMethods() | Where-Object { $_.Name -eq 'AsTask' -and $_.GetParameters().Count -eq 1 -and $_.GetParameters()[0].ParameterType.Name -eq 'IAsyncOperation`1' })[0]
+  function Await($op, $type) { $m = $asTask.MakeGenericMethod($type); $t = $m.Invoke($null, @($op)); $t.Wait(-1) | Out-Null; $t.Result }
+  $file = Await ([Windows.Storage.StorageFile]::GetFileFromPathAsync($ImgPath)) ([Windows.Storage.StorageFile])
+  $stream = Await ($file.OpenAsync([Windows.Storage.FileAccessMode]::Read)) ([Windows.Storage.Streams.IRandomAccessStream])
+  $decoder = Await ([Windows.Graphics.Imaging.BitmapDecoder]::CreateAsync($stream)) ([Windows.Graphics.Imaging.BitmapDecoder])
+  $bitmap = Await ($decoder.GetSoftwareBitmapAsync()) ([Windows.Graphics.Imaging.SoftwareBitmap])
+  $engine = [Windows.Media.Ocr.OcrEngine]::TryCreateFromUserProfileLanguages()
+  if ($null -eq $engine) { $engine = [Windows.Media.Ocr.OcrEngine]::TryCreateFromLanguage((New-Object Windows.Globalization.Language 'zh-Hans-CN')) }
+  if ($null -eq $engine) { throw 'NO_OCR_LANGUAGE' }
+  $result = Await ($engine.RecognizeAsync($bitmap)) ([Windows.Media.Ocr.OcrResult])
+  [System.IO.File]::WriteAllText($OutPath, $result.Text, (New-Object System.Text.UTF8Encoding $false))
+} catch {
+  [System.IO.File]::WriteAllText($OutPath, ('ERROR: ' + $_.Exception.Message), (New-Object System.Text.UTF8Encoding $false))
+}
+"""
+    @classmethod
+    def _ocr_windows_builtin(cls, img):
+        """Windows 自带 OCR: 有结果返回文字, 没文字返回 '', 引擎/语言包不可用返回 None"""
+        if sys.platform != "win32": return None
+        import subprocess, tempfile
+        tmp = tempfile.mkdtemp(prefix="snappaste_ocr_")
+        img_path, out_path, ps_path = (os.path.join(tmp, n) for n in ("in.png", "out.txt", "ocr.ps1"))
+        try:
+            img.save(img_path)
+            with open(ps_path, "w", encoding="utf-8") as f: f.write(cls._WIN_OCR_PS1)
+            subprocess.run(["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ps_path,
+                            "-ImgPath", img_path, "-OutPath", out_path],
+                           capture_output=True, timeout=30, creationflags=0x08000000)
+            if not os.path.exists(out_path): return None
+            txt = open(out_path, encoding="utf-8-sig").read().strip()
+            if txt.startswith("ERROR:"):
+                return None if "NO_OCR_LANGUAGE" in txt else ""
+            # Windows OCR 会在汉字之间插空格, 清理掉 CJK 之间的空格
+            return re.sub(r"(?<=[\u4e00-\u9fff])\s+(?=[\u4e00-\u9fff])", "", txt)
+        except Exception:
+            return None
+        finally:
+            import shutil; shutil.rmtree(tmp, ignore_errors=True)
     @classmethod
     def ocr_image(cls, img):
-        """有引擎返回识别文字 (可能为空串); 没引擎返回 None。引擎优先级: RapidOCR -> pytesseract"""
+        """有引擎返回识别文字 (可能为空串); 没引擎返回 None。优先级: Windows 内置 OCR -> RapidOCR -> pytesseract"""
+        builtin = cls._ocr_windows_builtin(img)
+        if builtin is not None: return builtin
         try:
             from rapidocr_onnxruntime import RapidOCR
             import numpy as np
@@ -770,7 +1367,11 @@ class App(tk.Tk):
         if kind == "ocr":
             res = self.ocr_image(img)
             if res is None:
-                messagebox.showinfo("OCR 未启用", "还没装 OCR 引擎, 装一次即可 (离线可用):\n\npip install rapidocr-onnxruntime\n\n或装 Tesseract 程序 + pip install pytesseract"); return
+                hint = ("OCR 用的是 Windows 自带识别引擎, 现在不可用, 多半是系统没装中文语言包:\n"
+                        "到 Windows「设置 → 时间和语言 → 语言和区域」添加「中文(简体)」, 装好后重启本软件再试。") \
+                    if getattr(sys, "frozen", False) else \
+                    ("还没装 OCR 引擎, 装一次即可 (离线可用):\n\npip install rapidocr-onnxruntime\n\n或装 Tesseract 程序 + pip install pytesseract")
+                messagebox.showinfo("OCR 未启用", hint); return
             self.show_text_result("OCR 识别结果", res or "(没识别到文字, 换个更清晰的截图试试)")
         else:
             res = self.decode_codes(img)
