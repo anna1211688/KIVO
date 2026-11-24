@@ -24,7 +24,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
 APP_NAME = "SnapPaste 复制粘贴+截图贴图"
-VERSION = "1.4.13"  # v1.4.13: 翻译结果窗「复制译图」改「复制原文」; 截图标注新增水印工具 (文字/平铺或四角居中/不透明度/大小/间距/字体, 截图工具栏与编辑器都有); 去掉标注工具栏的「移动」工具, 默认画笔  # v1.4.12: 全量审查优化: 配置/记录原子写+记录备份恢复; OCR/长截图改后台线程不冻界面; 放大镜节流/贴图缩放合并/搜索防抖/批量存盘; 热键垃圾值校验; 截图防重入; 字体缓存
+VERSION = "1.4.14"  # v1.4.14: 语言文件改读 EXE 内置版 (AppData 旧语言文件不再盖住新文案, 「截图贴图」括号说明真机上真正去掉); 主窗口截图按钮的 (F1) 标注跟随热键设置同步刷新
 # v1.4.7: 新增一键截图翻译 (F4 预设, 自动检测源语言, 目标语言主窗口可设中文/English) + v1.4.6 的工具栏同窗/图片复制双通道/窗口自适应高度
 # v1.4.6: 标注工具栏改冻结屏同窗 Frame (独立小窗真机反复不显示) + 图片复制补全 Win32 签名并加 PowerShell 备用通道 + 主窗口按内容自适应高度 (底部不再被裁)
 # v1.4.5: 数据目录改到 %APPDATA%\SnapPaste, 桌面只剩单个 EXE (老数据首次运行自动从 EXE 旁搬移) + v1.4.4 的 Esc 焦点修复
@@ -193,7 +193,11 @@ class App(tk.Tk):
         """语言: 读 Language/<Language>.ini 的 [UI] 段 (沿用原版的语言文件机制); 缺键时回退到代码里的中文原文"""
         self.lang = self.cfg.get("Config", "Language", fallback="Chinese").strip() or "Chinese"
         self._strings = {}
-        p = os.path.join(BASE, "Language", f"{self.lang}.ini")
+        # 语言文件是程序自带资源而不是用户数据: 优先读 EXE 内置的那份 (BUNDLE), 升级后新文案立刻生效;
+        # 早期版本把语言文件释放到数据目录 (AppData) 且从不更新, 旧文件会一直盖住新文案 —— 真机上已经去掉的
+        # 「(合并自 Snipaste 核心功能, 需 Pillow)」还一直显示就是这个原因; 数据目录里的只作兜底。
+        p = os.path.join(BUNDLE, "Language", f"{self.lang}.ini")
+        if not os.path.exists(p): p = os.path.join(BASE, "Language", f"{self.lang}.ini")
         if os.path.exists(p):
             lp = configparser.ConfigParser()
             for enc in ("utf-8-sig", "gbk"):
@@ -341,10 +345,17 @@ class App(tk.Tk):
         ttk.Combobox(snip3, textvariable=self.trans_target_var, values=["中文", "English"], width=8, state="readonly").pack(side="left", padx=2)
         self.trans_target_var.trace_add("write", lambda *_: self._save_trans_target())
         ttk.Button(snip3, text="翻译服务", command=self.open_translate_settings).pack(side="left", padx=4)
-        for txt, cmd in [(self.t("snip_region", "区域截图 (F1)"), self.snip_region), (self.t("snip_copy_btn", "截图并复制 (F5)"), self.snip_copy), (self.t("snip_trans_btn", "截图翻译 (F4)"), self.snip_translate), (self.t("pin_clip", "贴剪贴板 (F3)"), self.pin_clipboard),
-                         (self.t("pin_selected", "钉住选中截图"), self.pin_selected_shot), (self.t("gallery", "历史截图"), self.open_gallery),
+        self._snip_key_btns = []  # 带热键标注的四个按钮: 标注要跟热键设置同步 (改了键这里跟着变, 设「无」就不带括号)
+        for cfg_key, txt, cmd in [("SnipKey", self.t("snip_region", "区域截图 (F1)"), self.snip_region),
+                                  ("CopyKey", self.t("snip_copy_btn", "截图并复制 (F5)"), self.snip_copy),
+                                  ("TransKey", self.t("snip_trans_btn", "截图翻译 (F4)"), self.snip_translate),
+                                  ("PinKey", self.t("pin_clip", "贴剪贴板 (F3)"), self.pin_clipboard)]:
+            b = ttk.Button(snip, text=txt, command=cmd); b.pack(side="left", padx=2, pady=4)
+            self._snip_key_btns.append((cfg_key, re.sub(r"\s*\([^)]*\)\s*$", "", txt), b))
+        for txt, cmd in [(self.t("pin_selected", "钉住选中截图"), self.pin_selected_shot), (self.t("gallery", "历史截图"), self.open_gallery),
                          (self.t("ocr_selected", "OCR 选中截图"), self.ocr_selected_shot), (self.t("open_shots_dir", "打开截图文件夹"), self.open_shots_dir)]:
             ttk.Button(snip, text=txt, command=cmd).pack(side="left", padx=2, pady=4)
+        self._refresh_snip_btn_labels()
         self.shots_list = tk.Listbox(snip, height=3); self.shots_list.pack(side="left", fill="x", expand=True, padx=6, pady=4)
         self.shots_list.bind("<<ListboxSelect>>", self.preview_shot)
         self.shot_preview = tk.Label(snip, text=self.t("shot_preview", "(选中截图\n看预览)"), fg="gray"); self.shot_preview.pack(side="left", padx=4)
@@ -862,6 +873,13 @@ class App(tk.Tk):
         key_tk = key.upper() if re.fullmatch(r"f\d{1,2}", key) else (key.upper() if len(key) == 1 else key.capitalize())
         prefix = "-".join(mod_map[m] for m in mods)
         return f"<{prefix + '-' if prefix else ''}{key_tk}>"
+    def _refresh_snip_btn_labels(self):
+        """主窗口截图按钮上的 (F1) 标注跟随当前热键设置刷新 (apply_hotkeys 后调用, 启动时也调一次)"""
+        for cfg_key, base, btn in getattr(self, "_snip_key_btns", []):
+            try:
+                hk = self.cfg.get("Snip", cfg_key, fallback=DEFAULT_SNIP_KEYS.get(cfg_key, "无")).strip()
+                btn.config(text=base if hk in ("", "无") else f"{base} ({hk})")
+            except Exception: pass
     def apply_hotkeys(self):
         # 注销旧的全局热键和窗口绑定
         try:
@@ -908,6 +926,7 @@ class App(tk.Tk):
                 try: self._oc_handle = keyboard.add_hotkey(oc, lambda: self._ui_queue.put(self.toggle_hotkeys))
                 except Exception: pass
         self._hk_enabled = True
+        self._refresh_snip_btn_labels()  # 热键刚按新设置注册完, 主窗口按钮标注同步刷新
     def toggle_hotkeys(self):
         """全局切换: 一键停用/恢复全部动作热键 (切换键本身始终有效)"""
         try: import keyboard
