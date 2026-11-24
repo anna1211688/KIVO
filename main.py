@@ -24,7 +24,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
 APP_NAME = "SnapPaste 复制粘贴+截图贴图"
-VERSION = "1.4.11"  # v1.4.11: 翻译结果窗改有道式: 检测语言⇄目标语言 (中/英可切换重译) + 对照翻译开关 (关只显译图, 偏好记忆)
+VERSION = "1.4.11"  # v1.4.11: 翻译结果窗改有道式: 检测语言⇄目标语言 (中/英可切换重译) + 对照翻译开关 (关只显译图, 偏好记忆); 结果窗支持 Esc 关闭
 # v1.4.7: 新增一键截图翻译 (F4 预设, 自动检测源语言, 目标语言主窗口可设中文/English) + v1.4.6 的工具栏同窗/图片复制双通道/窗口自适应高度
 # v1.4.6: 标注工具栏改冻结屏同窗 Frame (独立小窗真机反复不显示) + 图片复制补全 Win32 签名并加 PowerShell 备用通道 + 主窗口按内容自适应高度 (底部不再被裁)
 # v1.4.5: 数据目录改到 %APPDATA%\SnapPaste, 桌面只剩单个 EXE (老数据首次运行自动从 EXE 旁搬移) + v1.4.4 的 Esc 焦点修复
@@ -2355,6 +2355,9 @@ try {
         st = {"target": target, "translations": list(translations),
               "img": self._render_translated(orig, lines, translations)}
         win = tk.Toplevel(self); win.title("截图翻译结果"); win.attributes("-topmost", True)
+        win.bind("<Escape>", lambda e: win.destroy())  # Esc 关闭结果窗
+        try: win.focus_force()
+        except Exception: pass
         head = ttk.Frame(win); head.pack(side="top", fill="x", padx=8, pady=6)
         ttk.Label(head, text=f"检测到{src_name}").pack(side="left")
         ttk.Label(head, text=" ⇄ ").pack(side="left")
@@ -2444,6 +2447,7 @@ try {
         threading.Thread(target=work, daemon=True).start()
     def show_text_result(self, title, text, translate=False):
         win = tk.Toplevel(self); win.title(title); win.geometry("520x340"); win.attributes("-topmost", True)
+        win.bind("<Escape>", lambda e: win.destroy())  # Esc 关闭结果窗 (与截图翻译结果窗一致)
         # 按钮栏必须先 pack 到底部占位: 旧写法先 pack 文本框, 它默认请求 24 行高, 超过窗高后
         # 后 pack 的按钮栏被挤到窗口外看不见 (真机实证: 结果窗只有文字没有按钮)
         bar = ttk.Frame(win); bar.pack(side="bottom", fill="x", padx=8, pady=6)
