@@ -323,7 +323,7 @@ _ICON_PNG_B64 = (
     "fhKa7I1ceuRULY1torkdtZwuvMul1WcAGrWturLY7VdKa1XpyG33Z+bD4SMJwscZY05QwglgjgAOAVmDMAoqDZJJSv7YLHWNn5T8"
     "UdJSAsqgZgWZUvCYoB5SWt8l6Luc0NlecdWD9U04qrrgCofdGxTnnmtWS2kfp/8PwxajA1prQxYAAAAASUVORK5CYII="
 )
-VERSION = "1.4.17"  # v1.4.17: ①截图翻译识别加固+内置 RapidOCR 离线引擎 (首选, Windows OCR 兜底) ②界面美化 (品牌蓝主题) ③F2 唤出主窗口热键 ④常用语库 ⑤AI 看图翻译+智能回复 (云端免费接口, 智谱默认) ⑥网络搜索窗 (谷歌/必应/百度+历史) ⑦三轮审查整改共 21 项 (输入框按键守卫/截图文字框 Esc/emoji 打字/AI 分服务存 key/截图模式防泄漏/过滤下移动换可见条/编辑器线宽保护 等)
+VERSION = "1.4.18"  # v1.4.18: ①截图翻译修复 (OCR 碎片合并+整段翻译, 结果窗改纯文本) ②翻译结果窗内嵌 AI 智能回复 ③AI/热键/翻译设置全并入系统设置 ④AI 功能改内嵌面板+豆包式侧边栏+最近对话存档 (圆角气泡) ⑤主窗口简约重设计 (方角) ⑥货币汇率 ⑦计算器 ⑧常用语库面板化+序号 ⑨世界时间 (全球城市自选+当地天气) ⑩无水印下载 (FB/IG/小红书等, 保存位置可每次询问或固定) ⑪历史截图保存设置 (张数/不保存, 含 GIF) ⑫移除网络搜索 ⑬三轮深查整改: AI 回复防串话/时钟计时链/天气失败重试/设置窗滚轮隔离/下载实际文件名/汇率过期刷新/AI 回复增量渲染 (320ms→24ms)/单实例保护/单对话存档封顶 200 条
 # v1.4.7: 新增一键截图翻译 (F4 预设, 自动检测源语言, 目标语言主窗口可设中文/English) + v1.4.6 的工具栏同窗/图片复制双通道/窗口自适应高度
 # v1.4.6: 标注工具栏改冻结屏同窗 Frame (独立小窗真机反复不显示) + 图片复制补全 Win32 签名并加 PowerShell 备用通道 + 主窗口按内容自适应高度 (底部不再被裁)
 # v1.4.5: 数据目录改到 %APPDATA%\SnapPaste, 桌面只剩单个 EXE (老数据首次运行自动从 EXE 旁搬移) + v1.4.4 的 Esc 焦点修复
@@ -354,7 +354,7 @@ else:
 CONFIG_PATH = os.path.join(BASE, "Config.ini")
 RECORDS_PATH = os.path.join(BASE, "records.json")
 PHRASES_PATH = os.path.join(BASE, "phrases.json")  # 常用语库: 与临时队列分开存, 不被删全部/去重/上限清理影响
-SEARCHES_PATH = os.path.join(BASE, "searches.json")  # 网络搜索历史: 最近搜过的词, 与常用语库同款存法
+AI_CHATS_PATH = os.path.join(BASE, "ai_chats.json")  # AI 最近对话: 多个对话存档, 与常用语库同款存法
 
 def _atomic_write(path, text):
     """原子写: 先写临时文件再 os.replace 换名。直接覆盖写时若断电/崩溃, 文件会写一半损坏,
@@ -370,7 +370,7 @@ def _migrate_old_data():
     if os.path.exists(os.path.join(BASE, "Config.ini")): return  # 新目录已有数据, 不再搬
     import shutil
     def _copy_from(src_dir):
-        for rel in ("Config.ini", "records.json", "records.json.bak", "phrases.json", "phrases.json.bak", "searches.json", "searches.json.bak", "ding.wav",
+        for rel in ("Config.ini", "records.json", "records.json.bak", "phrases.json", "phrases.json.bak", "ai_chats.json", "ai_chats.json.bak", "ding.wav",
                     os.path.join("Language", "Chinese.ini"), os.path.join("Language", "English.ini")):
             src, dst = os.path.join(src_dir, rel), os.path.join(BASE, rel)
             if os.path.exists(src) and not os.path.exists(dst):
@@ -425,6 +425,73 @@ def enable_hidpi():
             try: ctypes.windll.user32.SetProcessDPIAware()
             except Exception: pass
 
+def _rrect_pts(w, h, r):
+    """圆角矩形点列: 四角弧线采样, Canvas smooth 后是真圆角"""
+    import math
+    r = max(2, min(r, w // 2, h // 2))
+    pts = []
+    for cx, cy, a0 in ((w - r, r, -90), (w - r, h - r, 0), (r, h - r, 90), (r, r, 180)):
+        for a in range(a0, a0 + 91, 15):
+            rad = math.radians(a)
+            pts += [cx + r * math.cos(rad), cy + r * math.sin(rad)]
+    return pts
+
+
+class _PillButton(tk.Canvas):
+    """圆角胶囊按钮 (画布绘制): primary=品牌蓝实心白字 / soft=浅灰底深字 / outline=白底蓝字浅蓝边。
+    支持 config(text=) 改字并自动改宽 (主窗口截图按钮的热键标注刷新靠它), 也支持 cget("text")"""
+    _VARIANTS = {
+        "primary": ("#0F6FD6", "#0F6FD6", "#FFFFFF", "#2B83E6"),
+        "soft": ("#EDF0F4", "#EDF0F4", "#2A3440", "#DFE6EE"),
+        "outline": ("#FFFFFF", "#BFD9F2", "#0F6FD6", "#EFF6FE"),
+    }
+
+    def __init__(self, parent, text="", command=None, variant="soft", font=None, bg="#FFFFFF", height=30, pad_x=14):
+        from tkinter import font as tkfont
+        self._font_tuple = font or ("TkDefaultFont", 10)
+        self._measure = tkfont.Font(font=self._font_tuple)
+        self._text = text; self._command = command; self._variant = variant
+        self._h = height; self._pad_x = pad_x
+        w = self._measure.measure(text) + pad_x * 2
+        super().__init__(parent, width=w, height=height, highlightthickness=0, background=bg, cursor="hand2", borderwidth=0)
+        fill, outline, fg, _hov = self._VARIANTS.get(variant, self._VARIANTS["soft"])
+        self._fill, self._outline = fill, outline
+        self._poly = self.create_polygon(_rrect_pts(w, height, height // 2), smooth=True, fill=fill, outline=outline)
+        self._tid = self.create_text(w // 2, height // 2, text=text, font=self._font_tuple, fill=fg)
+        self.bind("<Button-1>", lambda e: self._command() if self._command else None)
+        self.bind("<Enter>", self._on_hover)
+        self.bind("<Leave>", self._on_leave)
+
+    def _on_hover(self, _e=None):
+        hov = self._VARIANTS.get(self._variant, self._VARIANTS["soft"])[3]
+        if self._variant == "outline":
+            self.itemconfigure(self._poly, fill=hov)
+        else:
+            self.itemconfigure(self._poly, fill=hov, outline=hov)
+
+    def _on_leave(self, _e=None):
+        self.itemconfigure(self._poly, fill=self._fill, outline=self._outline)
+
+    def configure(self, cnf=None, **kw):
+        if cnf is None and not kw:
+            return super().configure()
+        if cnf and isinstance(cnf, dict): kw.update(cnf)
+        if "text" in kw:
+            self._text = kw.pop("text")
+            w = self._measure.measure(self._text) + self._pad_x * 2
+            super().configure(width=w)
+            self.coords(self._poly, *_rrect_pts(w, self._h, self._h // 2))
+            self.coords(self._tid, w // 2, self._h // 2)
+            self.itemconfigure(self._tid, text=self._text)
+        if "command" in kw: self._command = kw.pop("command")
+        if kw: super().configure(**kw)
+    config = configure
+
+    def cget(self, key):
+        if key == "text": return self._text
+        return super().cget(key)
+
+
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -457,7 +524,6 @@ class App(tk.Tk):
         self._fit_window_to_content()
         self.load_records()
         self.load_phrases()
-        self.load_searches()
         self.refresh_list()
         self.refresh_shots()
         self.apply_hotkeys()
@@ -515,7 +581,7 @@ class App(tk.Tk):
         c = configparser.ConfigParser(strict=False)  # strict=False: 老版本 ini 里万一有重复段, 取最后的值而不是整份配置静默回退默认
         defaults = {f"HotKey{i}": "无" for i in range(13)}; defaults.update(DEFAULT_HOTKEYS)
         c.read_dict({"Config": {"SleepTime": "80", "WaveSet": "0", "AutoRun": "0", "Language": "Chinese", "PasteEnter": "0", "PasteRemove": "1",
-                                "MiniFormTime": "5", "MiniFormSet": "0", "AddChar": "1", "LetterSet": "0", "ShowHotKey": "F2", "SearchEngine": "google"},
+                                "MiniFormTime": "5", "MiniFormSet": "0", "AddChar": "1", "LetterSet": "0", "ShowHotKey": "F2"},
                      "HotKey": defaults, "Snip": dict(DEFAULT_SNIP_KEYS),
                      "OCHotKey": {"HotKey": "无", "OCAutoSet": "0"}})
         if os.path.exists(CONFIG_PATH):
@@ -573,7 +639,7 @@ class App(tk.Tk):
         known_case = {k.lower(): k for k in list(DEFAULT_HOTKEYS) + list(DEFAULT_SNIP_KEYS) +
                       ["SleepTime", "WaveSet", "WaveFile", "AutoRun", "AutoSet", "MiniFormTime", "MiniFormSet", "Language", "PasteEnter", "PasteRemove",
                        "SplitPos", "AddChar", "LetterSet", "HotKey", "OCAutoSet", "Form1XY", "Form2XY", "UIDetect", "HistoryMax", "DelaySeconds",
-                       "Separator", "CustomSep", "SplitChar", "RegexSel", "CaseSel", "TransTarget", "ShowHotKey", "SearchEngine",
+                       "Separator", "CustomSep", "SplitChar", "RegexSel", "CaseSel", "TransTarget", "ShowHotKey", "HistorySave", "DownloadDir", "DownloadAsk", "ClockCities",
                        "Service", "BaiduAppId", "BaiduKey", "YoudaoAppId", "YoudaoSecret", "GoogleKey", "TransCompare",
                        "ReplyKey", "ApiKey", "Model", "BaseUrl",
                        "ZhipuKey", "ZhipuModel", "ZhipuBase", "BailianKey", "BailianModel", "BailianBase",
@@ -593,17 +659,18 @@ class App(tk.Tk):
         except Exception: return 80  # 间隔被写成非数字 (旧版托盘保存没校验) 时别让软件启动就崩
 
     # ---------- 界面主题 (v1.4.17 美化: 全软件统一一套视觉语言, 与 SPST 图标同系的品牌蓝) ----------
-    UI_BG = "#F4F6F9"        # 窗口底色: 极浅蓝灰
+    UI_BG = "#F7F8FA"        # 窗口底色: 极浅蓝灰
     UI_SURFACE = "#FFFFFF"   # 输入框/列表等内容面
-    UI_BORDER = "#D7E0E9"    # 描边
-    UI_TEXT = "#1C2733"      # 主文字
-    UI_MUTED = "#68778A"     # 次要文字
+    UI_BORDER = "#E3E7ED"    # 描边
+    UI_TEXT = "#171A1F"      # 主文字
+    UI_MUTED = "#8A94A6"     # 次要文字
     UI_ACCENT = "#0F6FD6"    # 品牌蓝: 主按钮/焦点/选中
     UI_ACCENT_HOVER = "#2B8BE8"
     UI_ACCENT_PRESS = "#0B5CB3"
-    UI_SEL_BG = "#CFE8FF"    # 列表选中行底色
-    UI_HEAD_BG = "#EAF1F8"   # 表头底色
-    UI_STRIPE = "#F6FAFD"    # 列表斑马纹 (奇数行)
+    UI_SEL_BG = "#D9EAFB"    # 列表选中行底色
+    UI_HEAD_BG = "#F2F4F7"   # 表头底色
+    UI_STRIPE = "#F8FAFC"    # 列表斑马纹 (奇数行)
+    UI_SOFT = "#EDF0F4"      # 胶囊按钮/搜索框的浅灰底
     def _ui_font(self, size=10, bold=False):
         fam = "Microsoft YaHei UI" if sys.platform == "win32" else "Noto Sans CJK SC"
         return (fam, size, "bold") if bold else (fam, size)
@@ -625,6 +692,15 @@ class App(tk.Tk):
                          padding=(10, 5), relief="solid", borderwidth=1, focusthickness=0)
             st.map("TButton", background=[("active", "#EAF3FC"), ("pressed", "#D9EAFA")],
                    bordercolor=[("focus", self.UI_ACCENT)])
+            st.configure("Outline.TButton", background="#FFFFFF", foreground=self.UI_ACCENT,
+                         bordercolor="#BFD9F2", padding=(10, 5), relief="solid", borderwidth=1, focusthickness=0)
+            st.map("Outline.TButton", background=[("active", "#EFF6FE"), ("pressed", "#E1EEFC")])
+            st.configure("Danger.TButton", background="#FDECEC", foreground="#C0392B", bordercolor="#F0C4C4",
+                         padding=(10, 5), relief="solid", borderwidth=1, focusthickness=0)
+            st.map("Danger.TButton", background=[("active", "#FBDADA"), ("pressed", "#F6C8C8")])
+            st.configure("Small.TButton", background=self.UI_SURFACE, foreground=tx, bordercolor=bd,
+                         padding=(8, 3), font=self._ui_font(9), relief="solid", borderwidth=1, focusthickness=0)
+            st.map("Small.TButton", background=[("active", "#EAF3FC"), ("pressed", "#D9EAFA")])
             st.configure("Accent.TButton", background=self.UI_ACCENT, foreground="#FFFFFF",
                          bordercolor=self.UI_ACCENT, padding=(12, 6), font=fb, focusthickness=0)
             st.map("Accent.TButton", background=[("active", self.UI_ACCENT_HOVER), ("pressed", self.UI_ACCENT_PRESS)],
@@ -633,11 +709,15 @@ class App(tk.Tk):
             st.map("TEntry", bordercolor=[("focus", self.UI_ACCENT)])
             st.configure("TCombobox", fieldbackground=self.UI_SURFACE, bordercolor=bd, padding=4)
             st.map("TCombobox", bordercolor=[("focus", self.UI_ACCENT)])
+            st.configure("Card.TFrame", background="#FFFFFF")
+            st.configure("Card.TLabel", background="#FFFFFF", foreground=tx)
+            st.configure("Card.TRadiobutton", background="#FFFFFF", foreground=tx)
+            st.configure("Card.TCheckbutton", background="#FFFFFF", foreground=tx)
             st.configure("TCheckbutton", background=bg, foreground=tx)
             st.configure("TRadiobutton", background=bg, foreground=tx)
             st.configure("Treeview", background=self.UI_SURFACE, fieldbackground=self.UI_SURFACE,
-                         foreground=tx, rowheight=27, bordercolor=bd, relief="solid", borderwidth=1)
-            st.configure("Treeview.Heading", background=self.UI_HEAD_BG, foreground="#33506E",
+                         foreground=tx, rowheight=30, bordercolor=bd, relief="flat", borderwidth=0)
+            st.configure("Treeview.Heading", background=self.UI_HEAD_BG, foreground=self.UI_MUTED,
                          font=fb, relief="flat", borderwidth=0)
             st.map("Treeview", background=[("selected", self.UI_SEL_BG)], foreground=[("selected", "#0B3556")])
             st.map("Treeview.Heading", background=[("active", "#DCE9F5")])
@@ -653,19 +733,46 @@ class App(tk.Tk):
 
     # ---------- UI ----------
     def build_ui(self):
-        bar = ttk.Frame(self); bar.pack(fill="x", padx=10, pady=(8, 6))
-        for txt, cmd in [(self.t("system_settings", "系统设置"), self.open_system_settings),
-                         (self.t("hotkey_settings", "热键设置"), self.open_hotkey_dialog),
-                         (self.t("phrase_library", "常用语库"), self.open_phrases),
-                         (self.t("web_search", "网络搜索"), self.open_search_window),
-                         (self.t("import_text", "导入文本"), self.import_txt), (self.t("export_text", "导出文本"), self.export_txt)]:
-            ttk.Button(bar, text=txt, command=cmd).pack(side="left", padx=3)
+        # ===== 新设计 (简约时尚): 白色品牌头 + 圆角胶囊按钮 + 白色卡片分区, 去掉旧的描边分组框 =====
+        W = "#FFFFFF"
+        # ---------- 品牌头: 图标 + SPST + 副标题, 右侧是系统设置按钮 ----------
+        head = tk.Frame(self, background=W); head.pack(fill="x")
+        hrow = tk.Frame(head, background=W); hrow.pack(fill="x", padx=14, pady=(10, 8))
+        try:
+            _icon = tk.PhotoImage(data=_ICON_PNG_B64).subsample(9, 9)
+            tk.Label(hrow, image=_icon, background=W).pack(side="left")
+            self._head_icon = _icon  # 留引用防被回收
+        except Exception: pass
+        tk.Label(hrow, text="SPST", font=self._ui_font(16, True), background=W, foreground=self.UI_TEXT).pack(side="left", padx=(8, 6))
+        tk.Label(hrow, text=self.t("tagline", "剪贴板工作台"), font=self._ui_font(9), background=W, foreground=self.UI_MUTED).pack(side="left", pady=(7, 0))
         self.search_var = tk.StringVar(); self.search_var.trace_add("write", lambda *a: self._schedule_search_refresh())
-        ttk.Entry(bar, textvariable=self.search_var, width=14).pack(side="right")
-        ttk.Label(bar, text=self.t("search", "搜索:")).pack(side="right")
+        ttk.Button(hrow, text=self.t("system_settings", "系统设置"), command=self.open_system_settings).pack(side="right")  # 系统设置移到右上角 (原搜索框的位置, Jane 要求去掉搜索)
+        tk.Frame(self, background=self.UI_BORDER, height=1).pack(fill="x")
         self.lang_var = tk.StringVar(value=self.lang)  # 语言切换的界面已搬进「系统设置」窗口, 这里只留变量
-
-        mid = ttk.Frame(self); mid.pack(fill="both", expand=True, padx=10)
+        # ---------- 工具栏: 方角按钮 (主窗口不用圆角, Jane 要求; AI 功能用描边款突出一点) ----------
+        bar = tk.Frame(self, background=self.UI_BG); bar.pack(fill="x", padx=12, pady=(10, 0))
+        for txt, cmd, var_ in [(self.t("copy_paste", "复制粘贴"), self._show_main_view, "soft"),
+                               (self.t("ai_chat", "AI 功能"), self.open_ai_chat, "outline"),
+                               (self.t("phrase_library", "常用语库"), self.open_phrases, "soft"),
+                               (self.t("fx_rates", "货币汇率"), self.open_fx, "soft"),
+                               (self.t("calculator", "计算器"), self.open_calc, "soft"),
+                               (self.t("world_clock", "世界时间"), self.open_world_clock, "soft"),
+                               (self.t("media_dl", "无水印下载"), self.open_media_dl, "soft")]:
+            ttk.Button(bar, text=txt, command=cmd, style="Outline.TButton" if var_ == "outline" else "TButton").pack(side="left", padx=3)
+        # 下半区容器: 记录卡/操作行/各设置卡都装在这里; 点「AI 功能」时整块被聊天面板盖住 (Jane 要求不弹新窗)
+        body = tk.Frame(self, background=self.UI_BG); body.pack(fill="both", expand=True)
+        self._body = body
+        # ---------- 记录卡片: 标题行内嵌操作按钮, 列表占满整卡 ----------
+        card = tk.Frame(body, background=W, highlightthickness=1, highlightbackground=self.UI_BORDER, highlightcolor=self.UI_BORDER)
+        card.pack(fill="both", expand=True, padx=12, pady=(10, 2))
+        chead = tk.Frame(card, background=W); chead.pack(fill="x", padx=12, pady=(9, 2))
+        tk.Label(chead, text=self.t("records_title", "复制记录"), font=self._ui_font(10, True), background=W, foreground=self.UI_TEXT).pack(side="left")
+        ops = tk.Frame(chead, background=W); ops.pack(side="right")
+        for txt, cmd in [(self.t("lock_unlock", "锁定/解锁"), self.toggle_lock), (self.t("delete_selected", "删除选定"), self.delete_sel),
+                         (self.t("delete_all", "删除全部"), self.delete_all), (self.t("move_up", "上移"), lambda: self.move(-1)),
+                         (self.t("move_down", "下移"), lambda: self.move(1)), (self.t("dedupe", "去重"), self.dedupe)]:
+            ttk.Button(ops, text=txt, command=cmd, style="Small.TButton").pack(side="left", padx=2)
+        mid = tk.Frame(card, background=W); mid.pack(fill="both", expand=True, padx=6, pady=(2, 6))
         # 记录列表按原版分两列: 序号 | 文本内容 (Treeview; 内部沿用 listbox 这个名字, 行 id 存 _row_iids 与 _visible 对齐)
         self.listbox = ttk.Treeview(mid, columns=("no", "text"), show="headings", selectmode="browse")
         self.listbox.heading("no", text=self.t("col_no", "序号")); self.listbox.heading("text", text=self.t("col_text", "文本内容"))
@@ -675,44 +782,49 @@ class App(tk.Tk):
         self.listbox.config(yscrollcommand=sb.set)
         self.listbox.tag_configure("odd", background=self.UI_STRIPE)  # 斑马纹: 长列表逐行看不串行
         self._row_iids = []
-        ops = ttk.Frame(mid); ops.pack(side="left", fill="y", padx=6)
-        for txt, cmd in [(self.t("lock_unlock", "锁定/解锁"), self.toggle_lock), (self.t("delete_selected", "删除选定"), self.delete_sel),
-                         (self.t("delete_all", "删除全部"), self.delete_all), (self.t("move_up", "上移"), lambda: self.move(-1)),
-                         (self.t("move_down", "下移"), lambda: self.move(1)), (self.t("dedupe", "去重"), self.dedupe)]:
-            ttk.Button(ops, text=txt, command=cmd).pack(fill="x", pady=2)
-
-        opt = ttk.LabelFrame(self, text=self.t("paste_options", "粘贴选项")); opt.pack(fill="x", padx=8, pady=6)
-        opt1 = ttk.Frame(opt); opt1.pack(fill="x")
-        opt2 = ttk.Frame(opt); opt2.pack(fill="x", pady=(4, 0))
+        # ---------- 主操作行: 多次复制是主按钮 (蓝实心), 其余普通按钮 ----------
+        act = tk.Frame(body, background=self.UI_BG); act.pack(fill="x", padx=12, pady=(8, 0))
+        for txt, cmd, var_ in [(self.t("multi_copy_btn", "多次复制 (加入队列)"), self.multi_copy, "primary"),
+                               (self.t("paste_next_btn", "顺序粘贴下一条"), self.paste_next, "soft"),
+                               (self.t("paste_all_btn", "全部粘贴"), self.paste_all, "soft"),
+                               (self.t("power_paste_btn", "强力粘贴选定"), self.paste_selected, "soft"),
+                               (self.t("import_text", "导入文本"), self.import_txt, "soft"),
+                               (self.t("export_text", "导出文本"), self.export_txt, "soft")]:
+            ttk.Button(act, text=txt, command=cmd, style="Accent.TButton" if var_ == "primary" else "TButton").pack(side="left", padx=3)
+        # ---------- 白色卡片分区 (代替旧 LabelFrame) ----------
+        def card_section(title):
+            outer = tk.Frame(body, background=W, highlightthickness=1, highlightbackground=self.UI_BORDER, highlightcolor=self.UI_BORDER)
+            outer.pack(fill="x", padx=12, pady=(10, 0))
+            tk.Label(outer, text=title, font=self._ui_font(10, True), background=W, foreground=self.UI_TEXT).pack(anchor="w", padx=12, pady=(9, 0))
+            inner = tk.Frame(outer, background=W); inner.pack(fill="x", padx=12, pady=(3, 10))
+            return inner
+        # 粘贴选项
+        opt = card_section(self.t("paste_options", "粘贴选项"))
+        opt1 = ttk.Frame(opt, style="Card.TFrame"); opt1.pack(fill="x")
+        opt2 = ttk.Frame(opt, style="Card.TFrame"); opt2.pack(fill="x", pady=(5, 0))
         self.sep_var = tk.StringVar(value=self.cfg.get("Config", "Separator", fallback="enter"))
         for txt, val in [(self.t("sep_enter", "记录间回车"), "enter"), (self.t("sep_tab", "记录间 TAB"), "tab"), (self.t("sep_none", "无分隔"), "none")]:
-            ttk.Radiobutton(opt1, text=txt, variable=self.sep_var, value=val, command=self._save_entry_settings).pack(side="left", padx=4)
-        ttk.Label(opt1, text=self.t("custom", "自定义:")).pack(side="left")
+            ttk.Radiobutton(opt1, text=txt, variable=self.sep_var, value=val, command=self._save_entry_settings, style="Card.TRadiobutton").pack(side="left", padx=4)
+        ttk.Label(opt1, text=self.t("custom", "自定义:"), style="Card.TLabel").pack(side="left")
         self.custom_sep_var = tk.StringVar(value=self.cfg.get("Config", "CustomSep", fallback=""))
         self.custom_sep = ttk.Entry(opt1, width=6, textvariable=self.custom_sep_var); self.custom_sep.pack(side="left")
         self.custom_sep.bind("<FocusOut>", lambda _e: self._save_entry_settings()); self.custom_sep.bind("<Return>", lambda _e: self._save_entry_settings())
-        ttk.Label(opt1, text=self.t("interval", "间隔(ms):")).pack(side="left", padx=(10,0))
+        ttk.Label(opt1, text=self.t("interval", "间隔(ms):"), style="Card.TLabel").pack(side="left", padx=(10, 0))
         self.sleep_var = tk.StringVar(value=str(self.sleep_ms))
         _sle = ttk.Entry(opt1, textvariable=self.sleep_var, width=6); _sle.pack(side="left")
         _sle.bind("<FocusOut>", lambda _e: self._save_entry_settings()); _sle.bind("<Return>", lambda _e: self._save_entry_settings())
         self.autorun_var = tk.BooleanVar(value=self.cfg.get("Config", "AutoRun", fallback="0") == "1")  # 开机自启的勾选框已搬进「系统设置」
         self.wave_var = tk.BooleanVar(value=self.cfg.get("Wave", "WaveSet", fallback=self.cfg.get("Config", "WaveSet", fallback="0")) == "1")  # 提示音开关 (在系统设置里)
         self.paste_enter_var = tk.BooleanVar(value=self.cfg.get("Config", "PasteEnter", fallback="0") == "1")
-        ttk.Checkbutton(opt2, text=self.t("paste_enter", "顺序粘贴后自动回车"), variable=self.paste_enter_var, command=self._toggle_paste_enter).pack(side="left", padx=4)
+        ttk.Checkbutton(opt2, text=self.t("paste_enter", "顺序粘贴后自动回车"), variable=self.paste_enter_var, command=self._toggle_paste_enter, style="Card.TCheckbutton").pack(side="left", padx=4)
         self.paste_remove_var = tk.BooleanVar(value=self.cfg.get("Config", "PasteRemove", fallback="1") == "1")
-        ttk.Checkbutton(opt2, text=self.t("paste_remove", "顺序粘贴后自动删除该条"), variable=self.paste_remove_var, command=self._toggle_paste_remove).pack(side="left", padx=(10, 0))
-
+        ttk.Checkbutton(opt2, text=self.t("paste_remove", "顺序粘贴后自动删除该条"), variable=self.paste_remove_var, command=self._toggle_paste_remove, style="Card.TCheckbutton").pack(side="left", padx=(10, 0))
         # 迷你窗口的设置界面已搬进「系统设置」窗口, 这里只建变量供各处读写 (改设置走 _save_mini_settings)
         self.mini_time_var = tk.StringVar(value=self.cfg.get("Config", "MiniFormTime", fallback="5"))
         self.mini_always_var = tk.BooleanVar(value=self.cfg.get("Config", "MiniFormSet", fallback="0") == "1")
-
-        act = ttk.Frame(self); act.pack(fill="x", padx=8, pady=4)
-        for txt, cmd in [(self.t("multi_copy_btn", "多次复制 (加入队列)"), self.multi_copy), (self.t("paste_next_btn", "顺序粘贴下一条"), self.paste_next),
-                         (self.t("paste_all_btn", "全部粘贴"), self.paste_all), (self.t("power_paste_btn", "强力粘贴选定"), self.paste_selected)]:
-            ttk.Button(act, text=txt, command=cmd).pack(side="left", padx=2)
-
-        split = ttk.LabelFrame(self, text=self.t("split_frame", "剪切/复制时分割 (可选)")); split.pack(fill="x", padx=8, pady=6)
-        ttk.Label(split, text=self.t("split_char", "分割字符:")).pack(side="left")
+        # 剪切/复制时分割
+        split = card_section(self.t("split_frame", "剪切/复制时分割 (可选)"))
+        ttk.Label(split, text=self.t("split_char", "分割字符:"), style="Card.TLabel").pack(side="left")
         self.split_var = tk.StringVar(value=self.cfg.get("Config", "SplitChar", fallback=""))
         self.split_entry = ttk.Entry(split, width=8, textvariable=self.split_var); self.split_entry.pack(side="left")
         self.split_entry.bind("<FocusOut>", lambda _e: self._save_entry_settings()); self.split_entry.bind("<Return>", lambda _e: self._save_entry_settings())
@@ -725,46 +837,46 @@ class App(tk.Tk):
         except Exception: _sp_idx = 0
         self.splitpos_var = tk.StringVar(value=self._splitpos_values[_sp_idx if 0 <= _sp_idx < 3 else 0])
         ttk.Combobox(split, textvariable=self.splitpos_var, width=12, values=self._splitpos_values).pack(side="left", padx=4)
-        ttk.Button(split, text=self.t("split_import_btn", "按分割导入剪贴板"), command=self.import_clipboard_split).pack(side="left", padx=4)
-
-        snip = ttk.LabelFrame(self, text=self.t("snip_frame", "截图贴图"))
-        snip.pack(fill="x", padx=8, pady=6)
-        snip2 = ttk.Frame(snip); snip2.pack(fill="x")
-        ttk.Label(snip2, text=self.t("ui_detect", "UI 检测:")).pack(side="left", padx=(2, 0), pady=2)
+        ttk.Button(split, text=self.t("split_import_btn", "按分割导入剪贴板"), command=self.import_clipboard_split, style="Small.TButton").pack(side="left", padx=4)
+        # 截图贴图
+        snip = card_section(self.t("snip_frame", "截图贴图"))
+        snip2 = ttk.Frame(snip, style="Card.TFrame"); snip2.pack(fill="x")
+        ttk.Label(snip2, text=self.t("ui_detect", "UI 检测:"), style="Card.TLabel").pack(side="left", padx=(2, 0), pady=2)
         self.ui_detect_var = tk.StringVar(value=self.cfg.get("Snip", "UIDetect", fallback="2"))
         for txt, val in [(self.t("detect_none", "不检测"), "0"), (self.t("detect_win", "仅窗口"), "1"), (self.t("detect_elem", "检测元素"), "2")]:
-            ttk.Radiobutton(snip2, text=txt, variable=self.ui_detect_var, value=val, command=self._save_ui_detect).pack(side="left", padx=2)
-        snip3 = ttk.Frame(snip); snip3.pack(fill="x")
-        ttk.Label(snip3, text=self.t("trans_target", "截图翻译目标语言:")).pack(side="left", padx=(2, 0), pady=2)
+            ttk.Radiobutton(snip2, text=txt, variable=self.ui_detect_var, value=val, command=self._save_ui_detect, style="Card.TRadiobutton").pack(side="left", padx=2)
+        snip3 = ttk.Frame(snip, style="Card.TFrame"); snip3.pack(fill="x", pady=(3, 0))
+        ttk.Label(snip3, text=self.t("trans_target", "截图翻译目标语言:"), style="Card.TLabel").pack(side="left", padx=(2, 0), pady=2)
         self.trans_target_var = tk.StringVar(value="中文" if self.trans_target() == "zh-CN" else "English")
         ttk.Combobox(snip3, textvariable=self.trans_target_var, values=["中文", "English"], width=8, state="readonly").pack(side="left", padx=2)
         self.trans_target_var.trace_add("write", lambda *_: self._save_trans_target())
-        ttk.Button(snip3, text="翻译服务", command=self.open_translate_settings).pack(side="left", padx=4)
-        ttk.Button(snip3, text="AI 设置", command=self.open_ai_settings).pack(side="left", padx=2)
+        snip_btns = tk.Frame(snip, background=W); snip_btns.pack(fill="x", pady=(7, 0))
         self._snip_key_btns = []  # 带热键标注的截图按钮: 标注要跟热键设置同步 (改了键这里跟着变, 设「无」就不带括号)
-        for cfg_key, txt, cmd in [("SnipKey", self.t("snip_region", "区域截图 (F1)"), self.snip_region),
-                                  ("CopyKey", self.t("snip_copy_btn", "截图并复制 (F5)"), self.snip_copy),
-                                  ("TransKey", self.t("snip_trans_btn", "截图翻译 (F4)"), self.snip_translate),
-                                  ("ReplyKey", self.t("ai_reply", "智能回复 (Shift+F4)"), self.snip_reply),
-                                  ("PinKey", self.t("pin_clip", "贴剪贴板 (F3)"), self.pin_clipboard)]:
-            b = ttk.Button(snip, text=txt, command=cmd, style="Accent.TButton"); b.pack(side="left", padx=2, pady=4)
+        for cfg_key, txt, cmd, var_ in [("SnipKey", self.t("snip_region", "区域截图 (F1)"), self.snip_region, "primary"),
+                                        ("CopyKey", self.t("snip_copy_btn", "截图并复制 (F5)"), self.snip_copy, "outline"),
+                                        ("TransKey", self.t("snip_trans_btn", "截图翻译 (F4)"), self.snip_translate, "outline"),
+                                        ("ReplyKey", self.t("ai_reply", "智能回复 (Shift+F4)"), self.snip_reply, "outline"),
+                                        ("PinKey", self.t("pin_clip", "贴剪贴板 (F3)"), self.pin_clipboard, "outline")]:
+            b = ttk.Button(snip_btns, text=txt, command=cmd, style="Accent.TButton" if var_ == "primary" else "Outline.TButton")
+            b.pack(side="left", padx=2)
             self._snip_key_btns.append((cfg_key, re.sub(r"\s*\([^)]*\)\s*$", "", txt), b))
+        self._refresh_snip_btn_labels()
+        snip_more = tk.Frame(snip, background=W); snip_more.pack(fill="x", pady=(7, 0))
         for txt, cmd in [(self.t("pin_selected", "钉住选中截图"), self.pin_selected_shot), (self.t("gallery", "历史截图"), self.open_gallery),
                          (self.t("ocr_selected", "OCR 选中截图"), self.ocr_selected_shot), (self.t("open_shots_dir", "打开截图文件夹"), self.open_shots_dir)]:
-            ttk.Button(snip, text=txt, command=cmd).pack(side="left", padx=2, pady=4)
-        self._refresh_snip_btn_labels()
-        self.shots_list = tk.Listbox(snip, height=3, font=self._ui_font(9), bg=self.UI_SURFACE, fg=self.UI_TEXT,
+            ttk.Button(snip_more, text=txt, command=cmd, style="Small.TButton").pack(side="left", padx=2)
+        self.shots_list = tk.Listbox(snip_more, height=3, font=self._ui_font(9), bg=W, fg=self.UI_TEXT,
                                      selectbackground=self.UI_SEL_BG, selectforeground="#0B3556", activestyle="none",
                                      relief="solid", bd=1, highlightthickness=1,
                                      highlightbackground=self.UI_BORDER, highlightcolor=self.UI_ACCENT)
-        self.shots_list.pack(side="left", fill="x", expand=True, padx=6, pady=4)
+        self.shots_list.pack(side="left", fill="x", expand=True, padx=6)
         self.shots_list.bind("<<ListboxSelect>>", self.preview_shot)
-        self.shot_preview = tk.Label(snip, text=self.t("shot_preview", "(选中截图\n看预览)"), fg=self.UI_MUTED,
-                                     bg=self.UI_BG, font=self._ui_font(9)); self.shot_preview.pack(side="left", padx=4)
-
+        self.shot_preview = tk.Label(snip_more, text=self.t("shot_preview", "(选中截图\n看预览)"), fg=self.UI_MUTED,
+                                     bg=W, font=self._ui_font(9)); self.shot_preview.pack(side="left", padx=4)
+        # ---------- 状态栏 ----------
         self.status = tk.StringVar(value=self.t("ready", "就绪"))
-        ttk.Separator(self).pack(fill="x", padx=10, pady=(4, 0))
-        ttk.Label(self, textvariable=self.status, anchor="w", style="Muted.TLabel").pack(fill="x", padx=10, pady=(3, 6))
+        self._status_sep = ttk.Separator(self); self._status_sep.pack(fill="x", padx=12, pady=(8, 0))
+        ttk.Label(self, textvariable=self.status, anchor="w", style="Muted.TLabel").pack(fill="x", padx=12, pady=(3, 7))
         self.bind("<Delete>", lambda e: None if self._focus_in_input() else self.delete_sel())  # 在输入框里按 Delete 是删字, 不是删记录
         for _v in (self.regex_var, self.case_var, self.splitpos_var):  # 分割区的下拉改完即存
             _v.trace_add("write", lambda *_: self._save_entry_settings())
@@ -911,7 +1023,8 @@ class App(tk.Tk):
         self.cfg.set("Wave", "WaveSet", "1" if self.wave_var.get() else "0")
         self.save_config()
     def open_system_settings(self):
-        """系统设置窗口: 开机自启/语言/提示音/迷你窗口从主窗口各处归拢到一起 (用户要求归类), 改完即存, Esc 关闭"""
+        """系统设置窗口: 开机自启/语言/提示音/迷你窗口/AI 设置/翻译服务/热键设置全归拢到一起 (用户要求归类);
+        内容比屏幕高时整窗可滚动 (关闭按钮钉在底部永远够得到), 改完即存, Esc 关闭"""
         if getattr(self, "_sys_win", None) is not None:
             try: self._sys_win.lift(); self._sys_win.focus_set(); return
             except Exception: self._sys_win = None
@@ -920,7 +1033,18 @@ class App(tk.Tk):
         def close():
             self._sys_win = None; win.destroy()
         win.protocol("WM_DELETE_WINDOW", close); win.bind("<Escape>", lambda e: close())
-        frm = ttk.Frame(win); frm.pack(padx=12, pady=10)
+        bar = ttk.Frame(win); bar.pack(side="bottom", fill="x", pady=8)
+        ttk.Button(bar, text=self.t("close", "关闭"), command=close).pack()
+        outer = ttk.Frame(win); outer.pack(fill="both", expand=True)
+        cv = tk.Canvas(outer, highlightthickness=0)
+        sb = ttk.Scrollbar(outer, orient="vertical", command=cv.yview)
+        frm = ttk.Frame(cv, padding=(12, 10, 12, 6))
+        frm.bind("<Configure>", lambda e: cv.configure(scrollregion=cv.bbox("all")))
+        win_id = cv.create_window((0, 0), window=frm, anchor="nw")
+        cv.bind("<Configure>", lambda e: cv.itemconfigure(win_id, width=e.width))
+        cv.configure(yscrollcommand=sb.set)
+        cv.pack(side="left", fill="both", expand=True); sb.pack(side="right", fill="y")
+        win.bind("<MouseWheel>", lambda e: cv.yview_scroll(int(-e.delta / 120), "units"))  # 绑在本窗口: 只管设置窗自己, 关窗自动失效 (旧写法 bind_all + 关窗 unbind_all 会把 AI 面板的滚轮绑定一起摘掉, 聊天区就滚不动了)
         ttk.Checkbutton(frm, text=self.t("autorun", "开机自动运行"), variable=self.autorun_var, command=self._toggle_autorun).pack(anchor="w", pady=3)
         lrow = ttk.Frame(frm); lrow.pack(fill="x", pady=3)
         ttk.Label(lrow, text=self.t("lang_label", "语言:")).pack(side="left")
@@ -935,7 +1059,38 @@ class App(tk.Tk):
         me.bind("<FocusOut>", lambda _e: self._save_mini_settings()); me.bind("<Return>", lambda _e: self._save_mini_settings())
         ttk.Checkbutton(mrow, text=self.t("mini_always", "常显 (不自动隐藏)"), variable=self.mini_always_var, command=self._save_mini_settings).pack(side="left", padx=6)
         ttk.Button(mfrm, text=self.t("mini_show_btn", "立即显示"), command=lambda: self.show_mini()).pack(anchor="w", padx=4, pady=(0, 4))
-        ttk.Button(frm, text=self.t("close", "关闭"), command=close).pack(pady=(10, 0))
+        hfrm = ttk.LabelFrame(frm, text="历史截图"); hfrm.pack(fill="x", pady=(8, 2))
+        self._hist_save_var = tk.BooleanVar(value=self.cfg.get("Snip", "HistorySave", fallback="1").strip() != "0")
+        self._hist_max_var = tk.StringVar(value=self.cfg.get("Snip", "HistoryMax", fallback="100"))
+        hrow = ttk.Frame(hfrm); hrow.pack(fill="x", pady=4, padx=4)
+        hentry = ttk.Entry(hrow, textvariable=self._hist_max_var, width=6)
+        def apply_hist():
+            try: keep = int((self._hist_max_var.get() or "").strip())
+            except Exception: keep = 100
+            keep = min(9999, max(1, keep))
+            self._hist_max_var.set(str(keep))
+            self.cfg.set("Snip", "HistorySave", "1" if self._hist_save_var.get() else "0")
+            self.cfg.set("Snip", "HistoryMax", str(keep))
+            self.save_config()
+            hentry.configure(state="normal" if self._hist_save_var.get() else "disabled")
+            if self._hist_save_var.get(): self._prune_shots(); self.refresh_shots()
+            self.status.set("历史截图设置已保存" + ("" if self._hist_save_var.get() else " (截图与 GIF 都不再存入历史)"))
+        ttk.Checkbutton(hrow, text="保存历史截图", variable=self._hist_save_var, command=apply_hist).pack(side="left")
+        ttk.Label(hrow, text="最多保留").pack(side="left", padx=(10, 2))
+        hentry.pack(side="left")
+        ttk.Label(hrow, text="张").pack(side="left", padx=(2, 0))
+        hentry.bind("<FocusOut>", lambda _e: apply_hist()); hentry.bind("<Return>", lambda _e: apply_hist())
+        if not self._hist_save_var.get(): hentry.configure(state="disabled")
+        ttk.Label(hfrm, text="不勾选 = 截图和 GIF 都不再存入历史 (已存的不会自动删, 可在历史截图里「删除全部」); 上限改小会立即删掉多出的老图。", foreground="#888888").pack(anchor="w", padx=4, pady=(0, 4))
+        aifrm = ttk.LabelFrame(frm, text="AI 设置 (看图翻译/智能回复)"); aifrm.pack(fill="x", pady=(8, 2))
+        self._build_ai_form(aifrm)
+        tfrm = ttk.LabelFrame(frm, text="翻译服务设置"); tfrm.pack(fill="x", pady=(8, 2))
+        self._build_translate_form(tfrm)
+        hkfrm = ttk.LabelFrame(frm, text=self.t("hotkey_settings", "热键设置")); hkfrm.pack(fill="x", pady=(8, 2))
+        self._build_hotkey_form(win, hkfrm)
+        win.update_idletasks()
+        cap = max(420, win.winfo_screenheight() - 170)  # 内容再多, 窗口也不超过屏幕 (剩下的靠滚动)
+        cv.configure(width=frm.winfo_reqwidth(), height=min(frm.winfo_reqheight(), cap))
     # ---------- 常用语库 (长期保存, 与临时复制队列分开; 存 phrases.json, 带 .bak 备份) ----------
     def load_phrases(self):
         self.phrases = []
@@ -955,22 +1110,44 @@ class App(tk.Tk):
             except Exception: pass
         except Exception: pass
     def open_phrases(self):
-        """常用语库窗口: 双击一条 = 关窗并把主窗口藏回托盘, 焦点回到刚才的软件后直接粘贴进去;
+        """常用语库 (工具栏按钮): 跟 AI/汇率/计算器一样盖住主窗口下半区, 不再弹独立窗口 (Jane 要求)"""
+        self._show_phrases_panel()
+
+    def _show_phrases_panel(self):
+        if getattr(self, "_phrases_panel", None) is None:
+            self._build_phrases_panel()
+        try: self._body.pack_forget()
+        except Exception: pass
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel"):
+            p = getattr(self, attr, None)
+            if p is not None:
+                try: p.pack_forget()
+                except Exception: pass
+        self._ai_view_on = False
+        self._wheel_bind(False)
+        self._calc_bind(False)
+        self._phrases_panel.pack(fill="both", expand=True, before=self._status_sep)
+
+    def _build_phrases_panel(self):
+        """常用语库面板: 双击一条 = 切回主界面并把主窗口藏回托盘, 焦点回到刚才的软件后直接粘贴进去;
         也可以复制到剪贴板慢慢用。新增/编辑/删除/排序改完即存, 重启不丢, 队列的删除全部不影响它。"""
-        if getattr(self, "_phrases_win", None) is not None:
-            try: self._phrases_win.lift(); self._phrases_win.focus_set(); return
-            except Exception: self._phrases_win = None
-        win = tk.Toplevel(self); self._phrases_win = win
-        win.title(self.t("phrase_library", "常用语库")); win.geometry("600x520"); win.attributes("-topmost", True)
-        def close():
-            self._phrases_win = None; win.destroy()
-        win.protocol("WM_DELETE_WINDOW", close); win.bind("<Escape>", lambda e: close())
-        lst = ttk.Treeview(win, columns=("text",), show="headings", selectmode="browse", height=9)
+        panel = tk.Frame(self, background=self.UI_BG); self._phrases_panel = panel
+        W = "#FFFFFF"
+        head = tk.Frame(panel, background=self.UI_BG); head.pack(fill="x", padx=14, pady=(10, 4))
+        tk.Label(head, text=self.t("phrase_library", "常用语库"), font=self._ui_font(12, True), background=self.UI_BG, foreground=self.UI_TEXT).pack(side="left")
+        back = tk.Label(head, text="返回", font=self._ui_font(9), background=self.UI_BG, foreground="#5B6B7C", cursor="hand2")
+        back.pack(side="right")
+        back.bind("<Button-1>", lambda e: self._show_main_view())
+        back.bind("<Enter>", lambda e: back.configure(foreground=self.UI_ACCENT))
+        back.bind("<Leave>", lambda e: back.configure(foreground="#5B6B7C"))
+        card = tk.Frame(panel, background=W, highlightthickness=1, highlightbackground=self.UI_BORDER, highlightcolor=self.UI_BORDER)
+        card.pack(fill="both", expand=True, padx=12, pady=(6, 10))
+        lst = ttk.Treeview(card, columns=("text",), show="headings", selectmode="browse")
         lst.heading("text", text="内容 (双击 = 直接粘贴到刚才的软件)"); lst.column("text", anchor="w")
         lst.tag_configure("odd", background=self.UI_STRIPE)
         lst.pack(fill="both", expand=True, padx=10, pady=(10, 2))
-        ttk.Label(win, text="选中一条, 内容会填进下面的编辑区; 改完点「保存修改」。", style="Muted.TLabel").pack(anchor="w", padx=10)
-        editor = tk.Text(win, height=4, font=self._ui_font(10), bg=self.UI_SURFACE, fg=self.UI_TEXT,
+        tk.Label(card, text="选中一条, 内容会填进下面的编辑区; 改完点「保存修改」。", font=self._ui_font(9), background=W, foreground=self.UI_MUTED).pack(anchor="w", padx=10)
+        editor = tk.Text(card, height=4, font=self._ui_font(10), bg=self.UI_SURFACE, fg=self.UI_TEXT,
                          relief="solid", bd=1, padx=6, pady=4, insertbackground=self.UI_ACCENT, wrap="word")
         editor.pack(fill="x", padx=10, pady=(4, 6))
         def sel_idx():
@@ -982,9 +1159,10 @@ class App(tk.Tk):
                 body = p["text"].strip()
                 first = body.splitlines()[0] if body else ""
                 suffix = " …" if (len(body) > len(first) or len(first) > 58) else ""
-                lst.insert("", "end", iid=str(i), values=(first[:58] + suffix,), tags=("odd",) if i % 2 else ())
+                lst.insert("", "end", iid=str(i), values=(f"{i + 1}. {first[:58]}{suffix}",), tags=("odd",) if i % 2 else ())  # 显示带序号 (用户要求, 与 AI 回复候选一致); 序号只是显示, 数据和双击粘贴不受影响
             if keep is not None and 0 <= keep < len(self.phrases):
                 lst.selection_set(str(keep)); lst.see(str(keep))
+        self._phrases_refresh = rows_refresh
         def on_select(_e=None):
             i = sel_idx()
             if i >= 0:
@@ -994,7 +1172,7 @@ class App(tk.Tk):
             i = sel_idx()
             if i < 0: return
             text = self.phrases[i]["text"]
-            close()  # 先关库窗口、再把主窗口藏起来, 焦点才会回到刚才用的软件, 粘贴落得进去
+            self._show_main_view()  # 先切回主界面、再把主窗口藏起来, 焦点才会回到刚才用的软件, 粘贴落得进去
             if self.winfo_viewable():
                 if self._tray is not None: self._hide_to_tray()
                 else: self.withdraw()
@@ -1006,12 +1184,12 @@ class App(tk.Tk):
                 self.clip_set(self.phrases[i]["text"]); self.status.set("已把常用语复制到剪贴板, 到目标软件按 Ctrl+V 即可")
         def do_add():
             text = editor.get("1.0", "end").strip()
-            if not text: messagebox.showinfo("常用语库", "先在编辑区输入内容, 再点「新增」", parent=win); return
+            if not text: messagebox.showinfo("常用语库", "先在编辑区输入内容, 再点「新增」", parent=panel); return
             self.phrases.append({"text": text}); self.save_phrases()
             rows_refresh(keep=len(self.phrases) - 1)
         def do_add_clip():
             text = (self.clip_get() or "").strip()
-            if not text: messagebox.showinfo("常用语库", "剪贴板里没有文字", parent=win); return
+            if not text: messagebox.showinfo("常用语库", "剪贴板里没有文字", parent=panel); return
             self.phrases.append({"text": text}); self.save_phrases()
             rows_refresh(keep=len(self.phrases) - 1); on_select()
         def do_update():
@@ -1028,105 +1206,16 @@ class App(tk.Tk):
             if i < 0 or not (0 <= j < len(self.phrases)): return
             self.phrases[i], self.phrases[j] = self.phrases[j], self.phrases[i]
             self.save_phrases(); rows_refresh(keep=j)
-        bar = ttk.Frame(win); bar.pack(fill="x", padx=10, pady=(0, 4))
+        bar = ttk.Frame(card, style="Card.TFrame"); bar.pack(fill="x", padx=10, pady=(0, 4))
         ttk.Button(bar, text="粘贴选中", command=do_paste, style="Accent.TButton").pack(side="left", padx=2)
         for txt, cmd in [("复制选中", do_copy), ("新增", do_add), ("从剪贴板添加", do_add_clip)]:
             ttk.Button(bar, text=txt, command=cmd).pack(side="left", padx=2)
-        bar2 = ttk.Frame(win); bar2.pack(fill="x", padx=10, pady=(0, 10))
+        bar2 = ttk.Frame(card, style="Card.TFrame"); bar2.pack(fill="x", padx=10, pady=(0, 10))
         for txt, cmd in [("保存修改", do_update), ("删除", do_delete),
                          ("上移", lambda: do_move(-1)), ("下移", lambda: do_move(1))]:
             ttk.Button(bar2, text=txt, command=cmd).pack(side="left", padx=2)
         rows_refresh()
 
-    # ---------- 网络搜索 (谷歌/微软必应/百度 三选一, 仿常用语库: 有历史列表, 双击直接搜) ----------
-    _SEARCH_ENGINES = {"google": ("谷歌 Google", "https://www.google.com/search?q="),
-                       "bing": ("微软必应 Bing", "https://www.bing.com/search?q="),
-                       "baidu": ("百度", "https://www.baidu.com/s?wd=")}
-    def load_searches(self):
-        self.searches = []
-        for p in (SEARCHES_PATH, SEARCHES_PATH + ".bak"):
-            try:
-                if os.path.exists(p):
-                    data = json.loads(open(p, encoding="utf-8").read())
-                    if isinstance(data, list): self.searches = [str(x) for x in data if str(x).strip()][:30]
-                    return
-            except Exception: continue
-    def save_searches(self):
-        try: _atomic_write(SEARCHES_PATH, json.dumps(self.searches, ensure_ascii=False))
-        except Exception: pass
-    def _remember_search(self, q):
-        if q in self.searches: self.searches.remove(q)  # 搜过的词提到最前, 不重复存
-        self.searches.insert(0, q); self.searches = self.searches[:30]
-        self.save_searches()
-    def _do_web_search(self, engine, q):
-        """在默认浏览器打开所选搜索引擎的结果页, 并记住这次选择与关键词"""
-        import webbrowser, urllib.parse
-        name, base = self._SEARCH_ENGINES.get(engine, self._SEARCH_ENGINES["google"])
-        webbrowser.open(base + urllib.parse.quote(q))
-        if not self.cfg.has_section("Config"): self.cfg.add_section("Config")
-        self.cfg.set("Config", "SearchEngine", engine); self.save_config()
-        self._remember_search(q)
-        self.status.set(f"已用{name}搜索: {q[:40]}")
-    def open_search_window(self):
-        """网络搜索窗: 选引擎 (谷歌/必应/百度, 记住上次选择) + 输入关键词回车即搜; 下方是最近搜索, 双击直接再搜。
-        打开时剪贴板里若是短文字会自动填入 —— 在任何地方复制一段话, 回 SPST 点「网络搜索」就能直接搜它。"""
-        if getattr(self, "_search_win", None) is not None:
-            try: self._search_win.lift(); self._search_win.focus_set(); return
-            except Exception: self._search_win = None
-        win = tk.Toplevel(self); self._search_win = win
-        win.title(self.t("web_search", "网络搜索")); win.geometry("560x360"); win.minsize(480, 300); win.attributes("-topmost", True)
-        def close():
-            self._search_win = None; win.destroy()
-        win.protocol("WM_DELETE_WINDOW", close); win.bind("<Escape>", lambda e: close())
-        win.bind("<Destroy>", lambda e: setattr(self, "_search_win", None) if e.widget is win else None)
-        saved = (self.cfg.get("Config", "SearchEngine", fallback="google") or "google").strip().lower()
-        eng_var = tk.StringVar(value=saved if saved in self._SEARCH_ENGINES else "google")
-        ef = ttk.LabelFrame(win, text="搜索引擎"); ef.pack(fill="x", padx=10, pady=(10, 6))
-        for key, (label, _u) in self._SEARCH_ENGINES.items():
-            ttk.Radiobutton(ef, text=label, value=key, variable=eng_var).pack(side="left", padx=10, pady=4)
-        row = ttk.Frame(win); row.pack(fill="x", padx=10, pady=2)
-        var = tk.StringVar()
-        clip = (self.clip_get() or "").strip()
-        if clip and len(clip) <= 200 and "\n" not in clip: var.set(clip)  # 剪贴板短文字预填, 长文/多行不填
-        ent = ttk.Entry(row, textvariable=var); ent.pack(side="left", fill="x", expand=True)
-        ent.focus_set()
-        if var.get(): ent.select_range(0, "end")  # 预填内容全选: 换词直接打字覆盖
-        tree = ttk.Treeview(win, columns=("q",), show="headings", height=7, selectmode="browse")
-        tree.heading("q", text="最近搜索 (双击 = 直接搜索)"); tree.column("q", width=500)
-        tree.pack(fill="both", expand=True, padx=10, pady=(6, 4))
-        def refresh():
-            tree.delete(*tree.get_children())
-            for i, q in enumerate(self.searches):
-                tree.insert("", "end", iid=str(i), values=(q,), tags=("odd",) if i % 2 else ())
-        tree.tag_configure("odd", background=self.UI_STRIPE)
-        refresh()
-        def go():
-            q = var.get().strip()
-            if not q: return
-            self._do_web_search(eng_var.get(), q)
-            refresh(); win.lift(); ent.focus_set(); ent.select_range(0, "end")  # 搜完不关窗: 可以接着换个引擎再搜同一个词
-        ttk.Button(row, text="搜索", style="Accent.TButton", command=go).pack(side="left", padx=(8, 0))
-        ent.bind("<Return>", lambda _e: go())
-        def sel_q():
-            s = tree.selection()
-            return self.searches[int(s[0])] if s and int(s[0]) < len(self.searches) else None
-        def on_pick(_e=None):
-            q = sel_q()
-            if q is not None: var.set(q); ent.focus_set(); ent.icursor("end")
-        tree.bind("<<TreeviewSelect>>", on_pick)
-        def on_dbl(_e=None):
-            q = sel_q()
-            if q is not None: var.set(q); go()
-        tree.bind("<Double-Button-1>", on_dbl)
-        brow = ttk.Frame(win); brow.pack(fill="x", padx=10, pady=(2, 10))
-        def do_del():
-            q = sel_q()
-            if q is not None: self.searches.remove(q); self.save_searches(); refresh()
-        def do_clear():
-            self.searches = []; self.save_searches(); refresh()
-        ttk.Button(brow, text="删除选中", command=do_del).pack(side="left")
-        ttk.Button(brow, text="清空历史", command=do_clear).pack(side="left", padx=6)
-        ttk.Button(brow, text="关闭", command=close).pack(side="right")
     def _switch_language(self, _e=None):
         new = self.lang_var.get().strip()
         if new == self.lang: return
@@ -1580,7 +1669,7 @@ class App(tk.Tk):
                     try: self._hk_handles.append(keyboard.add_hotkey(hk, lambda f=fn: self._ui_queue.put(f))); global_ok = True
                     except Exception: pass
         scope = "全局热键" if global_ok else "窗口内热键 (装 keyboard 包后可全局)"
-        self.status.set(f"{scope}已启用: " + (" / ".join(labels) if labels else "未设置, 点「热键设置」添加"))
+        self.status.set(f"{scope}已启用: " + (" / ".join(labels) if labels else "未设置, 到「系统设置」里的「热键设置」区添加"))
         # 全局切换热键 (原版 [OCHotKey]): 单独注册, 不归 toggle 管, 这样关掉后还能按它恢复
         self._oc_handle = None
         oc = self.normalize_hotkey(self.cfg.get("OCHotKey", "HotKey", fallback="无"))
@@ -1605,25 +1694,13 @@ class App(tk.Tk):
         else:
             self.apply_hotkeys()
             self.status.set(self.t("hk_on", "全局热键已开启"))
-    def open_hotkey_dialog(self):
-        win = tk.Toplevel(self); win.title(self.t("hotkey_settings", "热键设置")); win.geometry("460x640"); win.transient(self); win.grab_set()
-        win.bind("<Escape>", lambda e: win.destroy())  # Esc 关闭
-        ttk.Label(win, text="点「录入」后直接按下组合键, 或手动输入。任何按键都可以设, 包括 F1、F2、Ctrl+C 这类常用键, 按你的习惯来。\n留空或填「无」= 不启用该热键。同一个键设给两个功能时, 会提示你确认, 后设的生效、先设的自动清空。").pack(padx=10, pady=8, anchor="w")
-        # 动作已有 20 行: 列表区做成可滚动, 保证底部的「应用」按钮在任何屏幕上都够得到 (旧版固定高度会把最后几行挤出窗口)
-        wrap = ttk.Frame(win); wrap.pack(fill="both", expand=True, padx=4)
-        cv = tk.Canvas(wrap, highlightthickness=0)
-        sb = ttk.Scrollbar(wrap, orient="vertical", command=cv.yview)
-        inner = ttk.Frame(cv)
-        inner.bind("<Configure>", lambda e: cv.configure(scrollregion=cv.bbox("all")))
-        win_id = cv.create_window((0, 0), window=inner, anchor="nw")
-        cv.bind("<Configure>", lambda e: cv.itemconfigure(win_id, width=e.width))
-        cv.configure(yscrollcommand=sb.set)
-        cv.pack(side="left", fill="both", expand=True); sb.pack(side="right", fill="y")
-        cv.bind_all("<MouseWheel>", lambda e: cv.yview_scroll(int(-e.delta / 120), "units"))
-        win.bind("<Destroy>", lambda e: cv.unbind_all("<MouseWheel>") if e.widget is win else None)
+    def _build_hotkey_form(self, win, parent):
+        """热键设置表单 (嵌在「系统设置」窗口里, 用户要求归类): 20 个动作的热键录入/清除/恢复预设, 点「应用」保存并立即生效;
+        窗口太高时由系统设置整窗滚动兜底, 这里不再自带滚动区"""
+        ttk.Label(parent, text="点「录入」后直接按下组合键, 或手动输入。任何按键都可以设, 包括 F1、F2、Ctrl+C 这类常用键, 按你的习惯来。\n留空或填「无」= 不启用该热键。同一个键设给两个功能时, 会提示你确认, 后设的生效、先设的自动清空。", wraplength=430, justify="left").pack(padx=10, pady=8, anchor="w")
         vars_ = {}
         for section, cfg_key, label, _fn in self.hotkey_actions() + [("OCHotKey", "HotKey", self.t("hk_toggle", "全局切换热键"), None)]:
-            row = ttk.Frame(inner); row.pack(fill="x", padx=10, pady=3)
+            row = ttk.Frame(parent); row.pack(fill="x", padx=10, pady=3)
             ttk.Label(row, text=label, width=14).pack(side="left")
             var = tk.StringVar(value=self.cfg.get(section, cfg_key, fallback="无")); vars_[(section, cfg_key)] = var
             entry = ttk.Entry(row, textvariable=var, width=20); entry.pack(side="left")
@@ -1660,16 +1737,16 @@ class App(tk.Tk):
             for (section, cfg_key), var, hk in entries:
                 if not self.cfg.has_section(section): self.cfg.add_section(section)
                 self.cfg.set(section, cfg_key, hk.upper() if hk else "无")
-            self.save_config(); self.apply_hotkeys(); win.destroy()
-            messagebox.showinfo("热键设置", "已保存并立即生效, 不用重启。")
-        btns = ttk.Frame(win); btns.pack(pady=10)
+            self.save_config(); self.apply_hotkeys()
+            self.status.set("热键已保存并立即生效, 不用重启")
+            messagebox.showinfo("热键设置", "已保存并立即生效, 不用重启。", parent=win)
+        btns = ttk.Frame(parent); btns.pack(pady=10)
         ttk.Button(btns, text="应用", command=save).pack(side="left", padx=6)
         def restore():
             for k, v in DEFAULT_HOTKEYS.items(): vars_[("HotKey", k)].set(v)
             for k, v in DEFAULT_SNIP_KEYS.items(): vars_[("Snip", k)].set(v)
             vars_[("Config", "ShowHotKey")].set("F2")  # 唤出主窗口也回预设 (旧版漏了它, 恢复预设后 F2 不回来)
         ttk.Button(btns, text="恢复预设", command=restore).pack(side="left", padx=6)
-        ttk.Button(btns, text="取消", command=win.destroy).pack(side="left", padx=6)
     # ---------- 截图 / 贴图 (Snipaste 核心) ----------
     @property
     def shots_dir(self):
@@ -1679,18 +1756,26 @@ class App(tk.Tk):
         self.shots_list.delete(0, "end")
         for f in sorted(os.listdir(self.shots_dir), reverse=True):
             if f.lower().endswith((".png", ".gif")): self.shots_list.insert("end", f)
-    def save_shot(self, img):
-        now = datetime.datetime.now()  # 带毫秒: 旧版只到秒, 1 秒内连截两张会同名互相覆盖
-        name = now.strftime("shot_%Y%m%d_%H%M%S_") + f"{now.microsecond // 1000:03d}.png"
-        path = os.path.join(self.shots_dir, name); img.save(path)
-        try:  # 历史截图只保留最近 HistoryMax 张 (默认 100, 对齐 Snipaste 设置), 防文件夹无限膨胀
-            keep = int(self.cfg.get("Snip", "HistoryMax", fallback="100"))
+    def _prune_shots(self):
+        """历史截图只保留最近 HistoryMax 张 (默认 100), 多出的老图删掉防文件夹无限膨胀; 系统设置里改小上限时也立即调一次"""
+        try: keep = int(self.cfg.get("Snip", "HistoryMax", fallback="100"))
+        except Exception: keep = 100
+        keep = max(1, keep)
+        try:
             files = sorted((os.path.join(self.shots_dir, f) for f in os.listdir(self.shots_dir)
                             if (f.startswith("shot_") and f.endswith(".png")) or (f.startswith("gif_") and f.endswith(".gif"))), key=os.path.getmtime)
             for p in files[:max(0, len(files) - keep)]:
                 try: os.remove(p)
                 except OSError: pass
         except Exception: pass
+
+    def save_shot(self, img):
+        if self.cfg.get("Snip", "HistorySave", fallback="1").strip() == "0":
+            return None  # 系统设置里选了不保存历史截图: 截图照常用 (复制/贴图/翻译都不受影响), 只是不落盘进历史
+        now = datetime.datetime.now()  # 带毫秒: 旧版只到秒, 1 秒内连截两张会同名互相覆盖
+        name = now.strftime("shot_%Y%m%d_%H%M%S_") + f"{now.microsecond // 1000:03d}.png"
+        path = os.path.join(self.shots_dir, name); img.save(path)
+        self._prune_shots()
         self.refresh_shots(); return path
     def open_shots_dir(self):
         if sys.platform == "win32": os.startfile(self.shots_dir)  # noqa: S606
@@ -1757,6 +1842,12 @@ class App(tk.Tk):
     def _run_gif_record(self, box, max_seconds=30, fps=8):
         """录制选区为 GIF 动图: 非阻塞逐帧抓取, 屏幕角落有小控制窗 (计时+停止), 结束自动存进截图文件夹。"""
         if not HAS_PIL: return
+        if self.cfg.get("Snip", "HistorySave", fallback="1").strip() == "0":
+            # 与历史截图同一个开关: 选了不保存就别让人白录一段最后却不存盘, 开录前就拦住并说明
+            self._restore_main_after_snip()
+            self.status.set("已设置为不保存历史, GIF 不录制 (到 系统设置 → 历史截图 打开保存)")
+            messagebox.showinfo("GIF 录制", "当前「历史截图」设置为不保存, GIF 也不会保存。\n要录 GIF 请先到 系统设置 → 历史截图 勾选「保存历史截图」。", parent=self)
+            return
         rec = {"stop": False, "frames": [], "t0": time.time()}
         ctrl = tk.Toplevel(self); ctrl.overrideredirect(True); ctrl.attributes("-topmost", True)
         lab = tk.Label(ctrl, text="● GIF 录制中 0s", bg="#222222", fg="#FF6666", font=("Microsoft YaHei", 10))
@@ -1989,6 +2080,8 @@ class App(tk.Tk):
                     final = full.crop(box); self.save_shot(final); close_overlay(); self.translate_image_inplace(final, self.trans_target())
                 elif finish_mode == "reply":  # 智能回复: 框选完直接让 AI 读对话给候选 (聊天截图不存历史, 免得堆一堆隐私图)
                     final = full.crop(box); close_overlay(); self.ai_smart_reply(final)
+                elif finish_mode == "ai":  # 看图翻译 (AI 功能侧边栏入口): 框选完直接让 AI 读图翻译 (不存历史)
+                    final = full.crop(box); close_overlay(); self.ai_translate_image(final)
                 else: enter_adjust(box)
             else: close_overlay()
         canvas.bind("<ButtonPress-1>", down); canvas.bind("<B1-Motion>", drag); canvas.bind("<ButtonRelease-1>", up)
@@ -3012,16 +3105,50 @@ try {
                 cls._ocr_engine_broken = True
                 return None
             return []
+    @staticmethod
+    def _merge_line_fragments(lines):
+        """把同一行的识别碎片合并成整行 (嵌图翻译的关键一步)。
+        RapidOCR 的检测框对带间距的西文常按词组切碎 (实测一整句被切成十几框, 放大重识别也一样),
+        碎片逐个翻译必然词不达意、贴回原图还忽大忽小。合并规则: 纵向中心同行 + 横向间隙 <= 1.2 倍行高;
+        框重叠且边界字相同 (检测把同一个字认进两个框) 时去掉一个重复字; 中文之间不加空格, 西文加空格。
+        纯逻辑, 可单测。"""
+        if not lines or len(lines) == 1: return lines
+        med_h = sorted(l["h"] for l in lines)[len(lines) // 2] or 10
+        rows = []
+        for ln in sorted(lines, key=lambda l: (l["y"] + l["h"] / 2, l["x"])):
+            cy = ln["y"] + ln["h"] / 2
+            if rows and abs(cy - (rows[-1][0]["y"] + rows[-1][0]["h"] / 2)) <= 0.5 * med_h: rows[-1].append(ln)
+            else: rows.append([ln])
+        def cjk(ch): return "\u4e00" <= ch <= "\u9fff"
+        out = []
+        for row in rows:
+            row = sorted(row, key=lambda l: l["x"])
+            cur = dict(row[0])
+            for nxt in row[1:]:
+                gap = nxt["x"] - (cur["x"] + cur["w"])
+                if gap > 1.2 * max(cur["h"], nxt["h"]):  # 间隙太大: 是另一列/另一个元素, 不合并
+                    out.append(cur); cur = dict(nxt); continue
+                a, b = cur["t"], nxt["t"]
+                deduped = gap < 0 and a and b and a[-1] == b[0]
+                if deduped: b = b[1:]  # 重叠区同一个字被认了两次: 去掉重复字且不再加空格 (until t + the -> until the)
+                joiner = "" if (deduped or not a or not b or cjk(a[-1]) or cjk(b[0])) else " "
+                cur["t"] = a + joiner + b
+                cur["w"] = max(cur["x"] + cur["w"], nxt["x"] + nxt["w"]) - cur["x"]
+                cur["h"] = max(cur["y"] + cur["h"], nxt["y"] + nxt["h"]) - cur["y"]
+                cur["y"] = min(cur["y"], nxt["y"])
+            out.append(cur)
+        return out
     @classmethod
     def ocr_lines(cls, img):
-        """带行坐标的 OCR (嵌图翻译用): 内置 RapidOCR 优先 (准、框稳) -> Windows 内置兜底; 都不可用返回 None"""
+        """带行坐标的 OCR (嵌图翻译用): 内置 RapidOCR 优先 (准、框稳) -> Windows 内置兜底; 都不可用返回 None。
+        返回前统一把同行碎片合并成整行 (见 _merge_line_fragments), 否则逐碎片翻译必然词不达意。"""
         rapid = cls._ocr_rapid_lines(img)
-        if rapid: return rapid
+        if rapid: return cls._merge_line_fragments(rapid)
         lines = cls._ocr_windows_lines(img)
         if lines == []:  # 引擎能跑但没认出字: 多半是字太小, 放大一倍再试一次
             retry = cls._ocr_windows_lines(img, boost=1.8)
-            if retry: return retry
-        if lines is not None: return lines
+            if retry: return cls._merge_line_fragments(retry)
+        if lines is not None: return cls._merge_line_fragments(lines)
         return rapid  # rapid=[] 是引擎跑过但没字 (不算不可用); rapid=None 才是两个引擎都不可用
     @classmethod
     def ocr_image(cls, img):
@@ -3138,31 +3265,23 @@ try {
         if d.get("error"): raise RuntimeError(f"谷歌翻译错误 {d['error'].get('code')}: {d['error'].get('message', '')}")
         trs = (d.get("data") or {}).get("translations") or []
         return _html.unescape(trs[0].get("translatedText", "")) if trs else ""
-    def open_translate_settings(self):
-        """翻译服务设置窗 (仿 PixPin): 选服务 + 填 APP ID/密钥 + 测试; 密钥只存本机 Config.ini 的 [Translate] 段。"""
-        if getattr(self, "_trans_win", None) is not None:
-            try: self._trans_win.lift(); self._trans_win.focus_set(); return
-            except Exception: self._trans_win = None
+    def _build_translate_form(self, parent):
+        """翻译服务设置表单 (嵌在「系统设置」窗口里, 用户要求归类): 选服务 + 填 APP ID/密钥 + 测试;
+        四家各存各的槽, 密钥只存本机 Config.ini 的 [Translate] 段"""
         tc = self._trans_cfg()
         names = {"free": "免费接口 (无需密钥)", "baidu": "百度翻译开放平台", "youdao": "有道翻译", "google": "谷歌翻译 (Google Cloud)"}
         creds = {"baidu": [tc["baidu_id"], tc["baidu_key"]], "youdao": [tc["youdao_id"], tc["youdao_secret"]],
                  "google": ["", tc["google_key"]]}
         cur = {"service": tc["service"]}
-        win = tk.Toplevel(self); self._trans_win = win
-        win.title("翻译服务设置"); win.geometry("470x300"); win.attributes("-topmost", True)
-        def close():
-            self._trans_win = None; win.destroy()
-        win.protocol("WM_DELETE_WINDOW", close); win.bind("<Escape>", lambda e: close())  # Esc 关闭 (不保存)
-        win.bind("<Destroy>", lambda e: setattr(self, "_trans_win", None) if e.widget is win else None)
-        ttk.Label(win, text="翻译服务:").grid(row=0, column=0, sticky="e", padx=8, pady=8)
+        ttk.Label(parent, text="翻译服务:").grid(row=0, column=0, sticky="e", padx=8, pady=8)
         svc_var = tk.StringVar(value=names[cur["service"]])
         id_var, key_var = tk.StringVar(), tk.StringVar()
-        svc = ttk.Combobox(win, textvariable=svc_var, values=list(names.values()), width=26, state="readonly")
+        svc = ttk.Combobox(parent, textvariable=svc_var, values=list(names.values()), width=26, state="readonly")
         svc.grid(row=0, column=1, sticky="w", pady=8)
-        ttk.Label(win, text="APP ID:").grid(row=1, column=0, sticky="e", padx=8, pady=6)
-        id_entry = ttk.Entry(win, textvariable=id_var, width=38); id_entry.grid(row=1, column=1, sticky="w", pady=6)
-        ttk.Label(win, text="密钥:").grid(row=2, column=0, sticky="e", padx=8, pady=6)
-        key_entry = ttk.Entry(win, textvariable=key_var, width=38, show="*"); key_entry.grid(row=2, column=1, sticky="w", pady=6)
+        ttk.Label(parent, text="APP ID:").grid(row=1, column=0, sticky="e", padx=8, pady=6)
+        id_entry = ttk.Entry(parent, textvariable=id_var, width=38); id_entry.grid(row=1, column=1, sticky="w", pady=6)
+        ttk.Label(parent, text="密钥:").grid(row=2, column=0, sticky="e", padx=8, pady=6)
+        key_entry = ttk.Entry(parent, textvariable=key_var, width=38, show="*"); key_entry.grid(row=2, column=1, sticky="w", pady=6)
         def load_fields():
             pair = creds.get(cur["service"], ["", ""])
             id_var.set(pair[0]); key_var.set(pair[1])
@@ -3174,10 +3293,10 @@ try {
             cur["service"] = {v: k for k, v in names.items()}[svc_var.get()]
             load_fields()
         svc_var.trace_add("write", on_svc)
-        ttk.Label(win, text="百度/有道到各自开放平台免费申请 APP ID 和密钥; 谷歌在 Google Cloud 开通翻译 API 后创建 API 密钥 (只需填密钥栏)。\n密钥只保存在本机, 不上传别处; 没填或接口出错时自动用免费接口翻译。", foreground="#888888").grid(row=3, column=0, columnspan=2, padx=8, pady=4, sticky="w")
+        ttk.Label(parent, text="百度/有道到各自开放平台免费申请 APP ID 和密钥; 谷歌在 Google Cloud 开通翻译 API 后创建 API 密钥 (只需填密钥栏)。\n密钥只保存在本机, 不上传别处; 没填或接口出错时自动用免费接口翻译。", foreground="#888888", wraplength=440, justify="left").grid(row=3, column=0, columnspan=2, padx=8, pady=4, sticky="w")
         test_var = tk.StringVar()
-        ttk.Label(win, textvariable=test_var, foreground="#0070FF", wraplength=440).grid(row=4, column=0, columnspan=2, padx=8, sticky="w")
-        btns = ttk.Frame(win); btns.grid(row=5, column=0, columnspan=2, pady=10)
+        ttk.Label(parent, textvariable=test_var, foreground="#0070FF", wraplength=440).grid(row=4, column=0, columnspan=2, padx=8, sticky="w")
+        btns = ttk.Frame(parent); btns.grid(row=5, column=0, columnspan=2, pady=10)
         def do_test():
             creds[cur["service"]] = [id_var.get().strip(), key_var.get().strip()]
             svc_key, pair = cur["service"], creds.get(cur["service"], ["", ""])
@@ -3211,9 +3330,8 @@ try {
             self.cfg.set("Translate", "GoogleKey", creds["google"][1])
             self.save_config()
             self.status.set(f"翻译服务已保存: {names[cur['service']]}")
-            close()
+            test_var.set("已保存 ✓")
         ttk.Button(btns, text="保存", command=do_save).pack(side="left", padx=4)
-        ttk.Button(btns, text="取消", command=close).pack(side="left", padx=4)
         load_fields()
     # ---------- AI 视觉接口 (看图翻译/智能回复): 云端免费接口, OpenAI 兼容格式, 在「AI 设置」里选服务填 key ----------
     _AI_PRESETS = {  # 服务 -> (显示名, 接口地址, 默认模型)
@@ -3266,14 +3384,17 @@ try {
         只用标准库 urllib, 不加新依赖; 调用方必须在后台线程里调 (网络往返几秒起)。
         cfg 可显式传入 (设置窗的「测试」用窗里还没保存的值): 旧版靠临时改 self.cfg 实现,
         测试期间用户若触发了任何一次保存, 没点保存的测试 key 就会被写进 Config.ini。"""
+        return self._ai_chat_messages([{"role": "user", "content": [
+            {"type": "text", "text": prompt},
+            {"type": "image_url", "image_url": {"url": self._ai_image_dataurl(img)}}]}], cfg=cfg, temperature=temperature)
+    def _ai_chat_messages(self, messages, cfg=None, temperature=0.7, max_tokens=1024):
+        """把一组 OpenAI 格式消息发给当前 AI 服务, 返回回复纯文本 (看图/纯文本会话共用); 配置缺失/出错抛 RuntimeError。
+        只用标准库 urllib; 调用方必须在后台线程里调。cfg 显式传入时用传入值 (设置窗测试用), 不碰 self.cfg。"""
         import urllib.request, urllib.error, json as _json
         cfg = cfg or self._ai_cfg()
-        if not cfg["key"]: raise RuntimeError("还没填 AI 接口的 API Key: 主窗口「截图贴图」区的「AI 设置」里选服务、填 key 即可 (智谱 GLM-4V-Flash 免费)。")
-        if not cfg["base"] or not cfg["model"]: raise RuntimeError("AI 设置里的接口地址/模型名没填完整, 先到「AI 设置」里补上。")
-        payload = {"model": cfg["model"], "max_tokens": 1024, "temperature": temperature,
-                   "messages": [{"role": "user", "content": [
-                       {"type": "text", "text": prompt},
-                       {"type": "image_url", "image_url": {"url": self._ai_image_dataurl(img)}}]}]}
+        if not cfg["key"]: raise RuntimeError("还没填 AI 接口的 API Key: 「系统设置」窗口的「AI 设置」区里选服务、填 key 即可 (智谱 GLM-4V-Flash 免费)。")
+        if not cfg["base"] or not cfg["model"]: raise RuntimeError("AI 设置里的接口地址/模型名没填完整, 先到「系统设置」里的「AI 设置」区补上。")
+        payload = {"model": cfg["model"], "max_tokens": max_tokens, "temperature": temperature, "messages": messages}
         req = urllib.request.Request(cfg["base"].rstrip("/") + "/chat/completions",
                                      data=_json.dumps(payload).encode("utf-8"),
                                      headers={"Content-Type": "application/json",
@@ -3298,33 +3419,25 @@ try {
         """用 AI 功能前先看 key 填没填: 没填就问一句要不要现在去设置"""
         if self._ai_cfg()["key"]: return True
         if messagebox.askyesno("AI 功能", "还没填 AI 接口的 API Key。\n推荐用智谱 GLM-4V-Flash: 免费, 到 open.bigmodel.cn 注册后在控制台创建 API Key 即可。\n\n现在去设置?"):
-            self.open_ai_settings()
+            self.open_system_settings()
         return False
-    def open_ai_settings(self):
-        """AI 服务设置窗: 选服务 (智谱免费/百炼 Qwen-VL/硅基流动/自定义) + 填 API Key + 模型名, 带测试; 存 Config.ini [AI] 段"""
-        if getattr(self, "_ai_win", None) is not None:
-            try: self._ai_win.lift(); self._ai_win.focus_set(); return
-            except Exception: self._ai_win = None
+    def _build_ai_form(self, parent):
+        """AI 服务设置表单 (嵌在「系统设置」窗口里, 用户要求归类): 选服务 (智谱免费/百炼 Qwen-VL/硅基流动/自定义)
+        + 填 API Key + 模型名, 带测试; 四家各存各的槽, 切来切去互不丢失; 存 Config.ini [AI] 段"""
         cur = {"service": self._ai_cfg()["service"]}
         store = self._ai_store()
         names = {k: v[0] for k, v in self._AI_PRESETS.items()}
-        win = tk.Toplevel(self); self._ai_win = win
-        win.title("AI 服务设置 (看图翻译/智能回复)"); win.geometry("480x320"); win.attributes("-topmost", True)
-        def close():
-            self._ai_win = None; win.destroy()
-        win.protocol("WM_DELETE_WINDOW", close); win.bind("<Escape>", lambda e: close())
-        win.bind("<Destroy>", lambda e: setattr(self, "_ai_win", None) if e.widget is win else None)  # 任何路径关窗都清标记, 不留指向已销毁窗口的引用
-        ttk.Label(win, text="AI 服务:").grid(row=0, column=0, sticky="e", padx=8, pady=8)
+        ttk.Label(parent, text="AI 服务:").grid(row=0, column=0, sticky="e", padx=8, pady=6)
         svc_var = tk.StringVar(value=names[cur["service"]])
         key_var, model_var, base_var = tk.StringVar(), tk.StringVar(), tk.StringVar()
-        svc = ttk.Combobox(win, textvariable=svc_var, values=list(names.values()), width=30, state="readonly")
-        svc.grid(row=0, column=1, sticky="w", pady=8)
-        ttk.Label(win, text="API Key:").grid(row=1, column=0, sticky="e", padx=8, pady=6)
-        ttk.Entry(win, textvariable=key_var, width=40, show="*").grid(row=1, column=1, sticky="w", pady=6)
-        ttk.Label(win, text="模型:").grid(row=2, column=0, sticky="e", padx=8, pady=6)
-        ttk.Entry(win, textvariable=model_var, width=40).grid(row=2, column=1, sticky="w", pady=6)
-        ttk.Label(win, text="接口地址:").grid(row=3, column=0, sticky="e", padx=8, pady=6)
-        ttk.Entry(win, textvariable=base_var, width=40).grid(row=3, column=1, sticky="w", pady=6)
+        svc = ttk.Combobox(parent, textvariable=svc_var, values=list(names.values()), width=30, state="readonly")
+        svc.grid(row=0, column=1, sticky="w", pady=6)
+        ttk.Label(parent, text="API Key:").grid(row=1, column=0, sticky="e", padx=8, pady=4)
+        ttk.Entry(parent, textvariable=key_var, width=40, show="*").grid(row=1, column=1, sticky="w", pady=4)
+        ttk.Label(parent, text="模型:").grid(row=2, column=0, sticky="e", padx=8, pady=4)
+        ttk.Entry(parent, textvariable=model_var, width=40).grid(row=2, column=1, sticky="w", pady=4)
+        ttk.Label(parent, text="接口地址:").grid(row=3, column=0, sticky="e", padx=8, pady=4)
+        ttk.Entry(parent, textvariable=base_var, width=40).grid(row=3, column=1, sticky="w", pady=4)
         def load_fields():
             k, m, b = store[cur["service"]]
             key_var.set(k); model_var.set(m); base_var.set(b)
@@ -3335,10 +3448,10 @@ try {
             cur["service"] = {v: k for k, v in names.items()}[svc_var.get()]
             load_fields()
         svc_var.trace_add("write", on_svc)
-        ttk.Label(win, text="智谱 GLM-4V-Flash 完全免费 (open.bigmodel.cn 注册建 Key); 百炼是通义千问 Qwen-VL (新账号有免费额度); 硅基流动有免费档模型。\nKey 只保存在本机, 截图只发给你选的这家服务。", foreground="#888888", wraplength=450).grid(row=4, column=0, columnspan=2, padx=8, pady=4, sticky="w")
+        ttk.Label(parent, text="智谱 GLM-4V-Flash 完全免费 (open.bigmodel.cn 注册建 Key); 百炼是通义千问 Qwen-VL (新账号有免费额度); 硅基流动有免费档模型。\nKey 只保存在本机, 截图只发给你选的这家服务。", foreground="#888888", wraplength=430).grid(row=4, column=0, columnspan=2, padx=8, pady=4, sticky="w")
         test_var = tk.StringVar()
-        ttk.Label(win, textvariable=test_var, foreground="#0070FF", wraplength=450).grid(row=5, column=0, columnspan=2, padx=8, sticky="w")
-        btns = ttk.Frame(win); btns.grid(row=6, column=0, columnspan=2, pady=10)
+        ttk.Label(parent, textvariable=test_var, foreground="#0070FF", wraplength=430).grid(row=5, column=0, columnspan=2, padx=8, sticky="w")
+        btns = ttk.Frame(parent); btns.grid(row=6, column=0, columnspan=2, pady=8)
         def do_test():
             stash(); test_var.set("测试中 (发一张小图让模型读字)...")
             import threading
@@ -3359,9 +3472,8 @@ try {
             stash()
             self._save_ai_settings(cur["service"], store)
             self.status.set(f"AI 服务已保存: {names[cur['service']]} / {store[cur['service']][1]}")
-            close()
+            test_var.set("已保存 ✓")
         ttk.Button(btns, text="保存", command=do_save).pack(side="left", padx=4)
-        ttk.Button(btns, text="取消", command=close).pack(side="left", padx=4)
         load_fields()
     # ---------- AI 功能: 看图翻译 / 智能回复 ----------
     def ai_translate_image(self, img):
@@ -3414,6 +3526,11 @@ try {
             s = re.sub(r"^\s*(\d+\s*[.、)）:：]|[-•·])\s*", "", ln).strip()
             if s: out.append(s)
         return out[:3] if out else []
+    def snip_ai_translate(self):
+        """看图翻译 (AI 功能侧边栏入口): 先查 key, 再框选一张图 -> AI 直接读图翻译"""
+        if not self._ai_ready(): return
+        self._snip_finish_mode = "ai"; self.snip_region()
+
     def snip_reply(self):
         """智能回复: 框选聊天区域 -> AI 读懂对话给 3 条候选 -> 点一条直接粘进刚才的聊天窗口"""
         if not self._ai_ready(): return  # 先查 key: 没填就别让用户白框选一趟, 截完才弹窗问
@@ -3447,9 +3564,9 @@ try {
                 if self._tray is not None: self._hide_to_tray()
                 else: self.withdraw()
             self.after(180, lambda: self._paste_text(text))  # 与常用语库同一套: 先让焦点回到刚才的软件再粘
-        for c in cands:
+        for i, c in enumerate(cands, 1):
             row = ttk.Frame(win); row.pack(fill="x", padx=10, pady=4)
-            ttk.Label(row, text=c, wraplength=400).pack(side="left", fill="x", expand=True)
+            ttk.Label(row, text=f"{i}. {c}", wraplength=400).pack(side="left", fill="x", expand=True)
             ttk.Button(row, text="粘贴", style="Accent.TButton", command=lambda t=c: paste_it(t)).pack(side="right", padx=2)
             ttk.Button(row, text="复制", command=lambda t=c: self.clip_set(t)).pack(side="right", padx=2)
         bar = ttk.Frame(win); bar.pack(fill="x", padx=10, pady=(6, 10))
@@ -3457,6 +3574,1314 @@ try {
             win.destroy(); self.ai_smart_reply(img)
         ttk.Button(bar, text="换一批", command=again).pack(side="left", padx=2)
         ttk.Button(bar, text="关闭", command=win.destroy).pack(side="right", padx=2)
+    def _load_ai_chats(self):
+        """读 AI 最近对话存档 (ai_chats.json, 带 .bak 兜底): 坏条目逐条丢弃, 不让一份坏档拖垮面板"""
+        for p in (AI_CHATS_PATH, AI_CHATS_PATH + ".bak"):
+            try:
+                if os.path.exists(p):
+                    data = json.loads(open(p, encoding="utf-8").read())
+                    if isinstance(data, list):
+                        out = []
+                        for c in data:
+                            if isinstance(c, dict) and isinstance(c.get("messages"), list):
+                                msgs = [m for m in c["messages"] if isinstance(m, dict) and m.get("role") in ("user", "assistant") and isinstance(m.get("content"), str)][-200:]
+                                if msgs: out.append({"id": c.get("id"), "title": str(c.get("title") or "新对话"), "updated": c.get("updated") or 0, "messages": msgs})
+                        return out
+            except Exception: continue
+        return []
+
+    def _store_ai_chats(self):
+        try:
+            text = json.dumps(self._ai_chats, ensure_ascii=False)
+            _atomic_write(AI_CHATS_PATH, text)
+            try: _atomic_write(AI_CHATS_PATH + ".bak", text)
+            except Exception: pass
+        except Exception: pass
+
+    def _persist_chat(self, hist, cid):
+        """把一段对话历史写入存档并落盘, 返回它的 id (新建时生成)。当前对话和「已切走的对话」都走这里, 不会串话"""
+        if not hist: return cid
+        entry = next((c for c in self._ai_chats if c.get("id") == cid), None)
+        if entry is None:
+            cid = int(time.time() * 1000)
+            first = next((m["content"] for m in hist if m["role"] == "user"), "新对话")
+            entry = {"id": cid, "title": first.replace("\n", " ")[:18], "updated": 0, "messages": []}
+            self._ai_chats.insert(0, entry)
+        entry["messages"] = [dict(m) for m in hist][-200:]  # 单个对话最多存最近 200 条: 防长年累月攒到上千条, 打开时整表渲染会卡 (发给 AI 的上下文只用最近 20 条, 截掉老的无影响)
+        entry["updated"] = time.time()
+        self._ai_chats.sort(key=lambda c: c.get("updated") or 0, reverse=True)
+        del self._ai_chats[30:]
+        self._store_ai_chats()
+        return cid
+
+    def _save_current_chat(self):
+        """把当前对话增量存进最近列表 (发送后/回复后各存一次, 关软件也不丢): 标题取第一条用户消息, 最多留 30 个对话"""
+        hist = getattr(self, "_ai_chat_history", [])
+        if not hist: return
+        self._ai_chat_id = self._persist_chat(hist, getattr(self, "_ai_chat_id", None))
+        if hasattr(self, "_refresh_recent"): self._refresh_recent()
+
+    # ---------- 货币汇率 (实时, 全世界主要货币; 数据 open.er-api.com 免费免 key, 每日更新) ----------
+    _FX_CURRENCIES = [("USD", "美元"), ("CNY", "人民币"), ("HKD", "港币"), ("EUR", "欧元"), ("GBP", "英镑"),
+                      ("JPY", "日元"), ("KRW", "韩元"), ("TWD", "新台币"), ("MOP", "澳门元"), ("AUD", "澳元"),
+                      ("CAD", "加元"), ("CHF", "瑞士法郎"), ("SGD", "新加坡元"), ("NZD", "新西兰元"), ("THB", "泰铢"),
+                      ("MYR", "马来西亚林吉特"), ("IDR", "印尼盾"), ("PHP", "菲律宾比索"), ("VND", "越南盾"), ("INR", "印度卢比"),
+                      ("AED", "阿联酋迪拉姆"), ("SAR", "沙特里亚尔"), ("RUB", "俄罗斯卢布"), ("BRL", "巴西雷亚尔"), ("MXN", "墨西哥比索"),
+                      ("ZAR", "南非兰特"), ("TRY", "土耳其里拉"), ("SEK", "瑞典克朗"), ("NOK", "挪威克朗"), ("DKK", "丹麦克朗"), ("PLN", "波兰兹罗提")]
+
+    @staticmethod
+    def _fx_fetch_rates():
+        """拉美元基准的全部汇率: 返回 (rates, 更新时间UTC字符串)。免费接口, 数据每日更新 (面板上会标明更新时间)"""
+        import urllib.request
+        req = urllib.request.Request("https://open.er-api.com/v6/latest/USD", headers={"User-Agent": "SPST"})
+        with urllib.request.urlopen(req, timeout=20) as r:
+            data = json.loads(r.read().decode("utf-8"))
+        if data.get("result") != "success" or not isinstance(data.get("rates"), dict):
+            raise RuntimeError("汇率接口返回异常")
+        return data["rates"], data.get("time_last_update_utc", "")
+
+    def open_fx(self):
+        """货币汇率 (工具栏按钮): 与 AI 面板一样盖住主窗口下半区, 点「复制粘贴」或面板里「返回」回去"""
+        self._show_fx_panel()
+
+    def _show_fx_panel(self):
+        if getattr(self, "_fx_panel", None) is None:
+            self._build_fx_panel()
+        try: self._body.pack_forget()
+        except Exception: pass
+        if getattr(self, "_ai_panel", None) is not None:
+            try: self._ai_panel.pack_forget()
+            except Exception: pass
+        self._ai_view_on = False
+        self._wheel_bind(False)
+        if getattr(self, "_calc_panel", None) is not None:
+            try: self._calc_panel.pack_forget()
+            except Exception: pass
+        if getattr(self, "_phrases_panel", None) is not None:
+            try: self._phrases_panel.pack_forget()
+            except Exception: pass
+        if getattr(self, "_clock_panel", None) is not None:
+            try: self._clock_panel.pack_forget()
+            except Exception: pass
+        if getattr(self, "_dl_panel", None) is not None:
+            try: self._dl_panel.pack_forget()
+            except Exception: pass
+        self._calc_bind(False)
+        self._fx_panel.pack(fill="both", expand=True, before=self._status_sep)
+        if getattr(self, "_fx_reload", None) is not None and (
+                not getattr(self, "_fx_rates", None) or time.time() - getattr(self, "_fx_fetched_at", 0) > 3600):
+            self._fx_reload()  # 第一次打开自动拉一次; 之后数据超过 1 小时再打开也自动刷新 (免费源每日更新, 不必勤拉)
+
+    def _build_fx_panel(self):
+        panel = tk.Frame(self, background=self.UI_BG); self._fx_panel = panel
+        W = "#FFFFFF"
+        state = {"loading": False}
+        head = tk.Frame(panel, background=self.UI_BG); head.pack(fill="x", padx=14, pady=(10, 4))
+        tk.Label(head, text=self.t("fx_rates", "货币汇率"), font=self._ui_font(12, True), background=self.UI_BG, foreground=self.UI_TEXT).pack(side="left")
+        upd_var = tk.StringVar()
+        tk.Label(head, textvariable=upd_var, font=self._ui_font(9), background=self.UI_BG, foreground=self.UI_MUTED).pack(side="left", padx=8)
+        back = tk.Label(head, text="返回", font=self._ui_font(9), background=self.UI_BG, foreground="#5B6B7C", cursor="hand2")
+        back.pack(side="right")
+        back.bind("<Button-1>", lambda e: self._show_main_view())
+        back.bind("<Enter>", lambda e: back.configure(foreground=self.UI_ACCENT))
+        back.bind("<Leave>", lambda e: back.configure(foreground="#5B6B7C"))
+        refresh_btn = ttk.Button(head, text="刷新", command=lambda: reload())
+        refresh_btn.pack(side="right", padx=(0, 10))
+        status_var = tk.StringVar(value="正在获取最新汇率…")
+        # ---- 换算卡 ----
+        card = tk.Frame(panel, background=W, highlightthickness=1, highlightbackground=self.UI_BORDER, highlightcolor=self.UI_BORDER)
+        card.pack(fill="x", padx=12, pady=(6, 0))
+        tk.Label(card, text="货币换算", font=self._ui_font(10, True), background=W, foreground=self.UI_TEXT).pack(anchor="w", padx=12, pady=(9, 0))
+        row = tk.Frame(card, background=W); row.pack(fill="x", padx=12, pady=(6, 2))
+        names = [f"{c} {n}" for c, n in self._FX_CURRENCIES]
+        amt_var = tk.StringVar(value="100")
+        ttk.Entry(row, textvariable=amt_var, width=12).pack(side="left")
+        from_var = tk.StringVar(value="USD 美元")
+        to_var = tk.StringVar(value="CNY 人民币")
+        ttk.Combobox(row, textvariable=from_var, values=names, width=13, state="readonly").pack(side="left", padx=(8, 0))
+        swap_btn = ttk.Button(row, text="⇄", width=3)
+        swap_btn.pack(side="left", padx=6)
+        def swap():
+            a, b = from_var.get(), to_var.get()
+            from_var.set(b); to_var.set(a)
+        swap_btn.configure(command=swap)
+        ttk.Combobox(row, textvariable=to_var, values=names, width=13, state="readonly").pack(side="left")
+        result_var = tk.StringVar(value="")
+        tk.Label(row, textvariable=result_var, font=self._ui_font(13, True), background=W, foreground=self.UI_ACCENT).pack(side="left", padx=12)
+        hint_var = tk.StringVar()
+        tk.Label(card, textvariable=hint_var, font=self._ui_font(9), background=W, foreground=self.UI_MUTED).pack(anchor="w", padx=12, pady=(0, 9))
+        # ---- 汇率表卡 ----
+        card2 = tk.Frame(panel, background=W, highlightthickness=1, highlightbackground=self.UI_BORDER, highlightcolor=self.UI_BORDER)
+        card2.pack(fill="both", expand=True, padx=12, pady=(10, 0))
+        trow = tk.Frame(card2, background=W); trow.pack(fill="x", padx=12, pady=(9, 4))
+        tk.Label(trow, text="各币种汇率", font=self._ui_font(10, True), background=W, foreground=self.UI_TEXT).pack(side="left")
+        base_var = tk.StringVar(value="USD 美元")
+        ttk.Label(trow, text="基准:", font=self._ui_font(9), background=W, foreground=self.UI_MUTED).pack(side="left", padx=(14, 2))
+        ttk.Combobox(trow, textvariable=base_var, values=names, width=13, state="readonly").pack(side="left")
+        mid = tk.Frame(card2, background=W); mid.pack(fill="both", expand=True, padx=6, pady=(0, 8))
+        tree = ttk.Treeview(mid, columns=("name", "code", "rate"), show="headings", selectmode="browse")
+        tree.heading("name", text="货币"); tree.heading("code", text="代码"); tree.heading("rate", text="汇率")
+        tree.column("name", width=160, anchor="w", stretch=False); tree.column("code", width=80, anchor="center", stretch=False)
+        tree.column("rate", anchor="e")
+        tree.pack(side="left", fill="both", expand=True)
+        tsb = ttk.Scrollbar(mid, command=tree.yview); tsb.pack(side="left", fill="y")
+        tree.config(yscrollcommand=tsb.set)
+        tree.tag_configure("odd", background=self.UI_STRIPE)
+        tk.Label(panel, textvariable=status_var, font=self._ui_font(9), background=self.UI_BG, foreground=self.UI_MUTED).pack(anchor="w", padx=14, pady=(6, 8))
+        def fmt(v):
+            if v >= 100: return f"{v:,.2f}"
+            if v >= 1: return f"{v:,.4f}"
+            return f"{v:.6f}"
+        def code_of(s):
+            return (s or "").split(" ")[0]
+        def fill_table():
+            rates = getattr(self, "_fx_rates", None)
+            tree.delete(*tree.get_children())
+            if not rates: return
+            base = code_of(base_var.get())
+            if base not in rates: return
+            for i, (code, name) in enumerate(self._FX_CURRENCIES):
+                if code in rates:
+                    tree.insert("", "end", values=(name, code, fmt(rates[code] / rates[base])), tags=("odd",) if i % 2 else ())
+        def convert():
+            rates = getattr(self, "_fx_rates", None)
+            if not rates: return
+            try: amt = float((amt_var.get() or "").strip())
+            except Exception:
+                result_var.set(""); hint_var.set("金额填数字"); return
+            fr, to = code_of(from_var.get()), code_of(to_var.get())
+            if fr not in rates or to not in rates: return
+            res = amt * rates[to] / rates[fr]
+            result_var.set(f"= {res:,.2f} {to}")
+            hint_var.set(f"1 {fr} = {fmt(rates[to] / rates[fr])} {to}")
+        def reload():
+            if state["loading"]: return
+            state["loading"] = True
+            refresh_btn.configure(state="disabled")
+            status_var.set("正在获取最新汇率…")
+            import threading
+            def work():
+                try:
+                    rates, upd = self._fx_fetch_rates()
+                    def done():
+                        state["loading"] = False
+                        self._fx_rates = rates
+                        self._fx_fetched_at = time.time()
+                        if not panel.winfo_exists(): return
+                        refresh_btn.configure(state="normal")
+                        upd_var.set(f"更新时间: {upd}" if upd else "")
+                        status_var.set("数据来源: open.er-api.com (免费接口, 每日更新)")
+                        fill_table(); convert()
+                    self._ui_queue.put(done)
+                except Exception as e:
+                    msg = str(e)
+                    def fail():
+                        state["loading"] = False
+                        if not panel.winfo_exists(): return
+                        refresh_btn.configure(state="normal")
+                        status_var.set(f"获取汇率失败: {msg} (检查网络后点刷新)")
+                    self._ui_queue.put(fail)
+            threading.Thread(target=work, daemon=True).start()
+        self._fx_reload = reload
+        self._fx_convert = convert
+        amt_var.trace_add("write", lambda *a: convert())
+        from_var.trace_add("write", lambda *a: convert())
+        to_var.trace_add("write", lambda *a: convert())
+        base_var.trace_add("write", lambda *a: fill_table())
+
+    # ---------- 计算器 (标准四则运算, 面板式盖住下半区; 支持键盘输入) ----------
+    def open_calc(self):
+        """计算器 (工具栏按钮): 盖住主窗口下半区, 点「复制粘贴」或面板里「返回」回去"""
+        self._show_calc_panel()
+
+    def _calc_bind(self, on):
+        h = getattr(self, "_calc_on_key", None)
+        if h is None: return
+        try:
+            if on: self.bind_all("<KeyPress>", h)
+            else: self.unbind_all("<KeyPress>")
+        except Exception: pass
+
+    def _show_calc_panel(self):
+        if getattr(self, "_calc_panel", None) is None:
+            self._build_calc_panel()
+        try: self._body.pack_forget()
+        except Exception: pass
+        for attr in ("_ai_panel", "_fx_panel", "_phrases_panel", "_clock_panel", "_dl_panel"):
+            p = getattr(self, attr, None)
+            if p is not None:
+                try: p.pack_forget()
+                except Exception: pass
+        self._ai_view_on = False
+        self._wheel_bind(False)
+        self._calc_panel.pack(fill="both", expand=True, before=self._status_sep)
+        self._calc_bind(True)
+
+    def _build_calc_panel(self):
+        panel = tk.Frame(self, background=self.UI_BG); self._calc_panel = panel
+        W = "#FFFFFF"
+        head = tk.Frame(panel, background=self.UI_BG); head.pack(fill="x", padx=14, pady=(10, 4))
+        tk.Label(head, text=self.t("calculator", "计算器"), font=self._ui_font(12, True), background=self.UI_BG, foreground=self.UI_TEXT).pack(side="left")
+        back = tk.Label(head, text="返回", font=self._ui_font(9), background=self.UI_BG, foreground="#5B6B7C", cursor="hand2")
+        back.pack(side="right")
+        back.bind("<Button-1>", lambda e: self._show_main_view())
+        back.bind("<Enter>", lambda e: back.configure(foreground=self.UI_ACCENT))
+        back.bind("<Leave>", lambda e: back.configure(foreground="#5B6B7C"))
+        card = tk.Frame(panel, background=W, highlightthickness=1, highlightbackground=self.UI_BORDER, highlightcolor=self.UI_BORDER)
+        card.pack(anchor="n", pady=10)
+        disp_var = tk.StringVar(value="0")
+        trail_var = tk.StringVar(value="")
+        tk.Label(card, textvariable=trail_var, font=self._ui_font(9), background=W, foreground=self.UI_MUTED, anchor="e").pack(fill="x", padx=14, pady=(10, 0))
+        tk.Label(card, textvariable=disp_var, font=self._ui_font(22, True), background=W, foreground=self.UI_TEXT, anchor="e").pack(fill="x", padx=14, pady=(0, 6))
+        st = {"acc": None, "op": None, "fresh": True}
+        def fmt(v):
+            if v != v or v in (float("inf"), float("-inf")): return "错误"
+            if abs(v - round(v)) < 1e-12 and abs(v) < 1e16: return str(int(round(v)))
+            return f"{v:.10f}".rstrip("0").rstrip(".") or "0"
+        def cur():
+            try: return float(disp_var.get())
+            except Exception: return 0.0
+        def apply(a, o, b):
+            if o == "+": return a + b
+            if o == "-": return a - b
+            if o == "×": return a * b
+            if o == "÷":
+                if b == 0: raise ZeroDivisionError
+                return a / b
+            return b
+        def show_error():
+            disp_var.set("错误"); trail_var.set("")
+            st["acc"] = None; st["op"] = None; st["fresh"] = True
+        def press_digit(d):
+            d0 = disp_var.get()
+            if st["fresh"] or d0 in ("0", "错误"):
+                disp_var.set(d); st["fresh"] = False
+            elif len(d0.replace("-", "").replace(".", "")) < 16:
+                disp_var.set(d0 + d)
+        def press_dot():
+            d0 = disp_var.get()
+            if st["fresh"] or d0 == "错误":
+                disp_var.set("0."); st["fresh"] = False
+            elif "." not in d0:
+                disp_var.set(d0 + ".")
+        def press_op(o):
+            if disp_var.get() == "错误": return
+            v = cur()
+            if st["acc"] is not None and st["op"] and not st["fresh"]:
+                try: v = apply(st["acc"], st["op"], v)
+                except ZeroDivisionError: show_error(); return
+                disp_var.set(fmt(v))
+            st["acc"] = v; st["op"] = o; st["fresh"] = True
+            trail_var.set(f"{fmt(v)} {o}")
+        def press_eq():
+            if st["acc"] is None or not st["op"] or disp_var.get() == "错误": return
+            v = cur()
+            try: r = apply(st["acc"], st["op"], v)
+            except ZeroDivisionError: show_error(); return
+            trail_var.set(f"{fmt(st['acc'])} {st['op']} {fmt(v)} =")
+            disp_var.set(fmt(r))
+            st["acc"] = None; st["op"] = None; st["fresh"] = True
+        def press_clear():
+            disp_var.set("0"); trail_var.set("")
+            st["acc"] = None; st["op"] = None; st["fresh"] = True
+        def press_back():
+            if st["fresh"]: return
+            d0 = disp_var.get()[:-1]
+            disp_var.set(d0 if d0 not in ("", "-") else "0")
+        def press_pct():
+            if disp_var.get() == "错误": return
+            disp_var.set(fmt(cur() / 100)); st["fresh"] = True
+        def press_neg():
+            if disp_var.get() == "错误": return
+            v = cur()
+            if v != 0: disp_var.set(fmt(-v))
+        grid = tk.Frame(card, background=W); grid.pack(padx=10, pady=(0, 12))
+        layout = [
+            [("C", press_clear, "Danger.TButton"), ("⌫", press_back, "Outline.TButton"), ("%", press_pct, "Outline.TButton"), ("÷", lambda: press_op("÷"), "Outline.TButton")],
+            [("7", lambda: press_digit("7"), "TButton"), ("8", lambda: press_digit("8"), "TButton"), ("9", lambda: press_digit("9"), "TButton"), ("×", lambda: press_op("×"), "Outline.TButton")],
+            [("4", lambda: press_digit("4"), "TButton"), ("5", lambda: press_digit("5"), "TButton"), ("6", lambda: press_digit("6"), "TButton"), ("−", lambda: press_op("-"), "Outline.TButton")],
+            [("1", lambda: press_digit("1"), "TButton"), ("2", lambda: press_digit("2"), "TButton"), ("3", lambda: press_digit("3"), "TButton"), ("+", lambda: press_op("+"), "Outline.TButton")],
+            [("±", press_neg, "Outline.TButton"), ("0", lambda: press_digit("0"), "TButton"), (".", press_dot, "TButton"), ("=", press_eq, "Accent.TButton")],
+        ]
+        for r, rowbtns in enumerate(layout):
+            for c, (txt, cmd, style) in enumerate(rowbtns):
+                b = ttk.Button(grid, text=txt, command=cmd, style=style, width=5)
+                b.grid(row=r, column=c, padx=2, pady=2, sticky="nsew")
+        self._calc_disp = disp_var  # 测试/调试用
+        def on_key(e):
+            try:
+                if self._focus_in_input(): return
+                k = e.keysym
+                if len(k) == 1 and k.isdigit(): press_digit(k)
+                elif k in ("plus", "KP_Add"): press_op("+")
+                elif k in ("minus", "KP_Subtract"): press_op("-")
+                elif k in ("asterisk", "KP_Multiply"): press_op("×")
+                elif k in ("slash", "KP_Divide"): press_op("÷")
+                elif k in ("Return", "KP_Enter", "equal"): press_eq()
+                elif k == "BackSpace": press_back()
+                elif k in ("period", "KP_Decimal"): press_dot()
+                elif k == "percent": press_pct()
+            except Exception: pass
+        self._calc_on_key = on_key
+
+    # ---------- 世界时间 (各大城市实时时钟, 每秒刷新; 离开面板自动停) ----------
+    _CLOCK_CATALOG = [("北京", "Asia/Shanghai", 8), ("香港", "Asia/Hong_Kong", 8), ("台北", "Asia/Taipei", 8),
+                      ("新加坡", "Asia/Singapore", 8), ("曼谷", "Asia/Bangkok", 7), ("雅加达", "Asia/Jakarta", 7),
+                      ("马尼拉", "Asia/Manila", 8), ("东京", "Asia/Tokyo", 9), ("首尔", "Asia/Seoul", 9),
+                      ("孟买", "Asia/Kolkata", 5.5), ("悉尼", "Australia/Sydney", 10), ("墨尔本", "Australia/Melbourne", 10),
+                      ("奥克兰", "Pacific/Auckland", 12), ("迪拜", "Asia/Dubai", 4), ("伊斯坦布尔", "Europe/Istanbul", 3),
+                      ("莫斯科", "Europe/Moscow", 3), ("开罗", "Africa/Cairo", 2), ("约翰内斯堡", "Africa/Johannesburg", 2),
+                      ("伦敦", "Europe/London", 0), ("巴黎", "Europe/Paris", 1), ("柏林", "Europe/Berlin", 1),
+                      ("罗马", "Europe/Rome", 1), ("纽约", "America/New_York", -5), ("多伦多", "America/Toronto", -5),
+                      ("芝加哥", "America/Chicago", -6), ("丹佛", "America/Denver", -7), ("洛杉矶", "America/Los_Angeles", -8),
+                      ("温哥华", "America/Vancouver", -8), ("圣保罗", "America/Sao_Paulo", -3)]
+    _CLOCK_DEFAULT = ["Asia/Shanghai", "Asia/Tokyo", "Asia/Seoul", "Asia/Singapore", "Australia/Sydney",
+                      "Asia/Dubai", "Europe/Moscow", "Europe/London", "Europe/Paris",
+                      "America/New_York", "America/Los_Angeles"]
+    _CLOCK_WD = ("周一", "周二", "周三", "周四", "周五", "周六", "周日")
+
+    @staticmethod
+    def _clock_tz(name, std_hours):
+        """优先用 zoneinfo (含夏令时; 打包时带 tzdata 数据包), 拿不到时退回固定标准偏移"""
+        try:
+            from zoneinfo import ZoneInfo
+            return ZoneInfo(name)
+        except Exception:
+            from datetime import timezone, timedelta
+            return timezone(timedelta(hours=std_hours))
+
+    def open_world_clock(self):
+        """世界时间 (工具栏按钮): 盖住主窗口下半区"""
+        self._show_clock_panel()
+
+    def _show_clock_panel(self):
+        if getattr(self, "_clock_panel", None) is None:
+            self._build_clock_panel()
+        try: self._body.pack_forget()
+        except Exception: pass
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_dl_panel"):
+            p = getattr(self, attr, None)
+            if p is not None:
+                try: p.pack_forget()
+                except Exception: pass
+        self._ai_view_on = False
+        self._wheel_bind(False)
+        self._calc_bind(False)
+        self._clock_panel.pack(fill="both", expand=True, before=self._status_sep)
+        aid = getattr(self, "_clock_after", None)
+        if aid:
+            try: self.after_cancel(aid)
+            except Exception: pass
+        self._clock_gen = getattr(self, "_clock_gen", 0) + 1  # 每次打开递增代号: 旧计时链靠代号自杀, 防改城市重建面板后多条链叠加空转
+        gen = self._clock_gen
+        self._clock_after = self.after(50, lambda: self._clock_tick(gen))  # 等面板真正显示出来再启表 (刚 pack 完 winfo_ismapped 还是 False, 立刻 tick 会误判隐藏而停摆)
+        self._maybe_fetch_weather()
+
+    def _build_clock_panel(self):
+        panel = tk.Frame(self, background=self.UI_BG); self._clock_panel = panel
+        W = "#FFFFFF"
+        head = tk.Frame(panel, background=self.UI_BG); head.pack(fill="x", padx=14, pady=(10, 4))
+        tk.Label(head, text=self.t("world_clock", "世界时间"), font=self._ui_font(12, True), background=self.UI_BG, foreground=self.UI_TEXT).pack(side="left")
+        back = tk.Label(head, text="返回", font=self._ui_font(9), background=self.UI_BG, foreground="#5B6B7C", cursor="hand2")
+        back.pack(side="right")
+        back.bind("<Button-1>", lambda e: self._show_main_view())
+        back.bind("<Enter>", lambda e: back.configure(foreground=self.UI_ACCENT))
+        back.bind("<Leave>", lambda e: back.configure(foreground="#5B6B7C"))
+        edit = tk.Label(head, text="编辑城市", font=self._ui_font(9), background=self.UI_BG, foreground="#5B6B7C", cursor="hand2")
+        edit.pack(side="right", padx=(0, 12))
+        edit.bind("<Button-1>", lambda e: self.open_clock_settings())
+        edit.bind("<Enter>", lambda e: edit.configure(foreground=self.UI_ACCENT))
+        edit.bind("<Leave>", lambda e: edit.configure(foreground="#5B6B7C"))
+        gridf = tk.Frame(panel, background=self.UI_BG); gridf.pack(fill="both", expand=True, padx=10, pady=(4, 10))
+        items = []
+        weather = []
+        cities = [("本地", None, None)] + list(self._clock_selected())
+        for idx, (name, tzname, stdh) in enumerate(cities):
+            r, c = divmod(idx, 4)
+            gridf.columnconfigure(c, weight=1); gridf.rowconfigure(r, weight=1)
+            card = tk.Frame(gridf, background=W, highlightthickness=1, highlightbackground=self.UI_BORDER, highlightcolor=self.UI_BORDER)
+            card.grid(row=r, column=c, sticky="nsew", padx=4, pady=4)
+            tk.Label(card, text=name, font=self._ui_font(11, True), background=W, foreground=self.UI_ACCENT if idx == 0 else self.UI_TEXT).pack(anchor="w", padx=12, pady=(10, 0))
+            tl = tk.Label(card, text="--:--:--", font=self._ui_font(19, True), background=W, foreground=self.UI_TEXT)
+            tl.pack(anchor="w", padx=12)
+            dl = tk.Label(card, text="", font=self._ui_font(9), background=W, foreground=self.UI_MUTED)
+            dl.pack(anchor="w", padx=12)
+            fl = tk.Label(card, text="", font=self._ui_font(9), background=W, foreground=self.UI_MUTED)
+            fl.pack(anchor="w", padx=12)
+            wl = tk.Label(card, text="", font=self._ui_font(10), background=W, foreground="#3D4756")
+            wl.pack(anchor="w", padx=12, pady=(2, 10))
+            tz = None if tzname is None else self._clock_tz(tzname, stdh)
+            items.append((tz, tl, dl, fl))
+            wkey = tzname if tzname is not None else "__local__"
+            cached = getattr(self, "_wx_data", {}).get(wkey, "")
+            if cached: wl.config(text=cached)
+            weather.append((wkey, tzname, name, wl))
+        self._clock_items = items
+        self._clock_weather = weather
+
+    def _clock_selected(self):
+        """当前要显示的城市 (目录顺序): 读 [Config] ClockCities (逗号分隔的时区名), 没设置过用默认 11 城; 本地卡片永远第一张, 不在这里面"""
+        raw = ""
+        try: raw = self.cfg.get("Config", "ClockCities", fallback="") or ""
+        except Exception: pass
+        picked, seen = [], set()
+        for tz in (x.strip() for x in raw.split(",")):
+            if not tz or tz in seen: continue
+            seen.add(tz)
+            e = self._clock_entry(tz)
+            if e is not None: picked.append(e)
+        if not picked:
+            picked = [e for e in (self._clock_entry(t) for t in self._CLOCK_DEFAULT) if e is not None]
+        return picked[:15]
+
+    def _rebuild_clock_panel(self):
+        p = getattr(self, "_clock_panel", None)
+        if p is not None:
+            try: p.destroy()
+            except Exception: pass
+        self._clock_panel = None
+        self._clock_items = []
+        self._show_clock_panel()
+
+    # ---------- 全球城市选择 (精选 29 城 + zoneinfo 全球时区库, 可搜索) ----------
+    @staticmethod
+    def _clock_zone_name(tz):
+        return tz.rsplit("/", 1)[-1].replace("_", " ")
+
+    def _clock_all_zones(self):
+        """全球时区全集 (约 560 个, 去掉 posix/right/Etc 杂项), 只算一次并缓存"""
+        cache = getattr(self, "_clock_zones_cache", None)
+        if cache is not None: return cache
+        try:
+            from zoneinfo import available_timezones
+            zs = sorted(z for z in available_timezones()
+                        if "/" in z and not z.startswith(("posix/", "right/", "Etc/")))
+        except Exception:
+            zs = []
+        self._clock_zones_cache = zs
+        return zs
+
+    def _clock_entry(self, tz):
+        """时区名 -> (显示名, tz, 标准偏移); 精选目录用中文名, 其余用英文地名; 无效时区返回 None"""
+        for n, t, h in self._CLOCK_CATALOG:
+            if t == tz: return (n, tz, h)
+        try:
+            from zoneinfo import ZoneInfo
+            from datetime import datetime
+            off = datetime(2024, 1, 15, tzinfo=ZoneInfo(tz)).utcoffset()
+            std = off.total_seconds() / 3600.0 if off else 0
+        except Exception:
+            return None
+        return (self._clock_zone_name(tz), tz, std)
+
+    def open_clock_settings(self):
+        """世界时间城市设置: 精选城市直接勾, 也可搜索全球所有时区城市 (英文名如 Tokyo);
+        最多 15 个 (本地不算), 确定后立即重排卡片并存进配置"""
+        if getattr(self, "_clockset_win", None) is not None:
+            try: self._clockset_win.lift(); self._clockset_win.focus_set(); return
+            except Exception: self._clockset_win = None
+        win = tk.Toplevel(self); self._clockset_win = win
+        win.title("选择世界时间城市"); win.geometry("400x580"); win.attributes("-topmost", True)
+        def close():
+            self._clockset_win = None; win.destroy()
+        win.protocol("WM_DELETE_WINDOW", close); win.bind("<Escape>", lambda e: close())
+        win.bind("<Destroy>", lambda e: setattr(self, "_clockset_win", None) if e.widget is win else None)
+        selected = {tz for _n, tz, _h in self._clock_selected()}
+        tk.Label(win, text="勾选要显示的城市（本地永远在第一张）", font=self._ui_font(9), foreground=self.UI_MUTED).pack(anchor="w", padx=12, pady=(10, 2))
+        cnt = tk.Label(win, text="", font=self._ui_font(9, True), foreground=self.UI_ACCENT)
+        cnt.pack(anchor="w", padx=12)
+        srow = ttk.Frame(win); srow.pack(fill="x", padx=12, pady=(2, 2))
+        ttk.Label(srow, text="搜索:").pack(side="left")
+        qvar = tk.StringVar()
+        ent = ttk.Entry(srow, textvariable=qvar); ent.pack(side="left", fill="x", expand=True, padx=(4, 0))
+        ent.focus_set()
+        tk.Label(win, text="不搜索时显示常用城市; 搜英文名可找全球城市, 如 Tokyo、Sydney、Reykjavik。已选的城市不在列表里也会保留。", font=self._ui_font(8), foreground=self.UI_MUTED, wraplength=370, justify="left").pack(anchor="w", padx=12)
+        wrap = ttk.Frame(win); wrap.pack(fill="both", expand=True, padx=8, pady=4)
+        canvas = tk.Canvas(wrap, highlightthickness=0, bg=self.UI_SURFACE)
+        sb = ttk.Scrollbar(wrap, orient="vertical", command=canvas.yview)
+        canvas.configure(yscrollcommand=sb.set)
+        sb.pack(side="right", fill="y"); canvas.pack(side="left", fill="both", expand=True)
+        inner = tk.Frame(canvas, bg=self.UI_SURFACE)
+        wid = canvas.create_window((0, 0), window=inner, anchor="nw")
+        inner.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+        canvas.bind("<Configure>", lambda e: canvas.itemconfigure(wid, width=e.width))
+        def wheel(e):
+            canvas.yview_scroll(int(-1 * (e.delta / 120)) if e.delta else 0, "units")
+        win.bind("<MouseWheel>", wheel)
+        def refresh_cnt():
+            cnt.config(text=f"已选 {len(selected)} / 15")
+        def render(*_a):
+            for w in inner.winfo_children(): w.destroy()
+            q = qvar.get().strip().lower()
+            rows = []
+            if not q:
+                rows = [(n, tz, f"UTC{h:+g}" if h else "UTC") for n, tz, h in self._CLOCK_CATALOG]
+            else:
+                seen = set()
+                for n, tz, h in self._CLOCK_CATALOG:
+                    if q in n.lower() or q in tz.lower():
+                        rows.append((n, tz, f"UTC{h:+g}" if h else "UTC")); seen.add(tz)
+                for tz in self._clock_all_zones():
+                    if tz in seen: continue
+                    nm = self._clock_zone_name(tz)
+                    if q in tz.lower() or q in nm.lower():
+                        rows.append((nm, tz, "")); seen.add(tz)
+                    if len(rows) >= 100: break
+            if not rows:
+                tk.Label(inner, text="没找到这个城市, 换个关键词试试", font=self._ui_font(9), bg=self.UI_SURFACE, foreground=self.UI_MUTED).pack(anchor="w", padx=6, pady=6)
+            for name, tz, off in rows:
+                v = tk.BooleanVar(value=tz in selected)
+                def on_toggle(t=tz, var=v):
+                    if var.get():
+                        if len(selected) >= 15:
+                            var.set(False)
+                            messagebox.showinfo("世界时间", "最多选 15 个城市（本地不算）", parent=win)
+                            return
+                        selected.add(t)
+                    else:
+                        selected.discard(t)
+                    refresh_cnt()
+                txt = f"{name}  ({off})" if off else f"{name}  ·  {tz}"
+                cb = tk.Checkbutton(inner, text=txt, variable=v, font=self._ui_font(10),
+                                    bg=self.UI_SURFACE, fg=self.UI_TEXT, activebackground=self.UI_SURFACE,
+                                    anchor="w", command=on_toggle)
+                cb.pack(fill="x", padx=6, pady=1)
+            canvas.yview_moveto(0)
+            refresh_cnt()
+        qvar.trace_add("write", render)
+        render()
+        bar = ttk.Frame(win); bar.pack(fill="x", padx=10, pady=(4, 10))
+        def do_ok():
+            if not selected:
+                messagebox.showinfo("世界时间", "至少选一个城市", parent=win); return
+            cat_order = [tz for _n, tz, _h in self._CLOCK_CATALOG if tz in selected]
+            others = sorted(tz for tz in selected if tz not in set(cat_order))
+            picked = (cat_order + others)[:15]
+            if not self.cfg.has_section("Config"): self.cfg.add_section("Config")
+            self.cfg.set("Config", "ClockCities", ",".join(picked)); self.save_config()
+            close()
+            self._rebuild_clock_panel()
+            self.status.set(f"世界时间已设置 {len(picked)} 个城市")
+        ttk.Button(bar, text="确定", style="Accent.TButton", command=do_ok).pack(side="right")
+        ttk.Button(bar, text="取消", command=close).pack(side="right", padx=6)
+
+    # ---------- 卡片天气 (wttr.in 首选, Open-Meteo 兜底; 坐标: 精选城市内置, 其余按地名查, 本地按 IP 定位) ----------
+    _CLOCK_GEO = {"Asia/Shanghai": (39.90, 116.40), "Asia/Hong_Kong": (22.32, 114.17), "Asia/Taipei": (25.03, 121.57),
+                  "Asia/Singapore": (1.35, 103.82), "Asia/Bangkok": (13.76, 100.50), "Asia/Jakarta": (-6.21, 106.85),
+                  "Asia/Manila": (14.60, 120.98), "Asia/Tokyo": (35.68, 139.69), "Asia/Seoul": (37.57, 126.98),
+                  "Asia/Kolkata": (19.08, 72.88), "Australia/Sydney": (-33.87, 151.21), "Australia/Melbourne": (-37.81, 144.96),
+                  "Pacific/Auckland": (-36.85, 174.76), "Asia/Dubai": (25.20, 55.27), "Europe/Istanbul": (41.01, 28.98),
+                  "Europe/Moscow": (55.76, 37.62), "Africa/Cairo": (30.04, 31.24), "Africa/Johannesburg": (-26.20, 28.05),
+                  "Europe/London": (51.51, -0.13), "Europe/Paris": (48.85, 2.35), "Europe/Berlin": (52.52, 13.41),
+                  "Europe/Rome": (41.90, 12.50), "America/New_York": (40.71, -74.01), "America/Toronto": (43.65, -79.38),
+                  "America/Chicago": (41.88, -87.63), "America/Denver": (39.74, -104.99), "America/Los_Angeles": (34.05, -118.24),
+                  "America/Vancouver": (49.28, -123.12), "America/Sao_Paulo": (-23.55, -46.63)}
+
+    @staticmethod
+    def _wwo_zh(code, desc_en=""):
+        m = {"113": "晴", "116": "晴间多云", "119": "多云", "122": "阴", "143": "雾", "248": "雾", "260": "冻雾",
+             "176": "局部阵雨", "263": "毛毛雨", "266": "毛毛雨", "281": "冻毛毛雨", "284": "冻毛毛雨",
+             "293": "小雨", "296": "小雨", "299": "中雨", "302": "中雨", "305": "大雨", "308": "大雨",
+             "311": "冻雨", "314": "冻雨", "317": "雨夹雪", "320": "小雪", "323": "小雪", "326": "小雪",
+             "329": "中雪", "332": "中雪", "335": "大雪", "338": "大雪", "350": "冰粒", "353": "阵雨",
+             "356": "暴雨", "359": "暴雨", "362": "雨夹雪", "365": "雨夹雪", "368": "阵雪", "371": "阵雪",
+             "374": "冰粒", "377": "冰粒", "386": "雷阵雨", "389": "雷雨", "392": "雷阵雪", "395": "暴雪"}
+        hit = m.get(str(code))
+        if hit: return hit
+        d = (desc_en or "").lower()  # 代码表没覆盖的 (如各种霾) 按英文描述关键词兜底翻译
+        for kw, zh in (("thunder", "雷雨"), ("snow", "雪"), ("sleet", "雨夹雪"), ("rain", "雨"), ("drizzle", "毛毛雨"),
+                       ("fog", "雾"), ("haze", "霾"), ("smoke", "烟霾"), ("mist", "雾"), ("overcast", "阴"),
+                       ("cloud", "多云"), ("clear", "晴"), ("sunny", "晴")):
+            if kw in d: return zh
+        return desc_en or ""
+
+    @staticmethod
+    def _wmo_zh(code):
+        m = {0: "晴", 1: "晴间多云", 2: "多云", 3: "阴", 45: "雾", 48: "雾", 51: "毛毛雨", 53: "毛毛雨", 55: "毛毛雨",
+             56: "冻雨", 57: "冻雨", 61: "小雨", 63: "中雨", 65: "大雨", 66: "冻雨", 67: "冻雨", 71: "小雪",
+             73: "中雪", 75: "大雪", 77: "雪粒", 80: "阵雨", 81: "阵雨", 82: "暴雨", 85: "阵雪", 86: "阵雪",
+             95: "雷阵雨", 96: "冰雹", 99: "冰雹"}
+        return m.get(code, "")
+
+    def _wx_local_coords(self):
+        c = getattr(self, "_local_coords", "unset")
+        if c != "unset": return c
+        coords = None
+        try:
+            import urllib.request
+            req = urllib.request.Request("https://ipapi.co/json/", headers={"User-Agent": "SPST"})
+            with urllib.request.urlopen(req, timeout=10) as r:
+                d = json.loads(r.read().decode("utf-8"))
+            if d.get("latitude") is not None: coords = (float(d["latitude"]), float(d["longitude"]))
+        except Exception: coords = None
+        self._local_coords = coords
+        return coords
+
+    def _wx_coords(self, tzname, name):
+        if tzname is None: return self._wx_local_coords()
+        if tzname in self._CLOCK_GEO: return self._CLOCK_GEO[tzname]
+        cache = getattr(self, "_geo_cache", None)
+        if cache is None: cache = self._geo_cache = {}
+        if tzname in cache: return cache[tzname]
+        coords = None
+        try:
+            import urllib.request, urllib.parse
+            q = urllib.parse.quote(self._clock_zone_name(tzname))
+            req = urllib.request.Request(f"https://geocoding-api.open-meteo.com/v1/search?name={q}&count=1&language=en",
+                                         headers={"User-Agent": "SPST"})
+            with urllib.request.urlopen(req, timeout=12) as r:
+                d = json.loads(r.read().decode("utf-8"))
+            res = d.get("results") or []
+            if res: coords = (float(res[0]["latitude"]), float(res[0]["longitude"]))
+        except Exception: coords = None
+        cache[tzname] = coords
+        return coords
+
+    def _wx_query(self, coords):
+        lat, lon = coords
+        import urllib.request
+        try:
+            req = urllib.request.Request(f"https://wttr.in/{lat},{lon}?format=j1", headers={"User-Agent": "curl/8.0"})
+            with urllib.request.urlopen(req, timeout=12) as r:
+                d = json.loads(r.read().decode("utf-8"))
+            cc = (d.get("current_condition") or [{}])[0]
+            if cc.get("temp_C") is not None:
+                desc = (cc.get("weatherDesc") or [{}])[0].get("value", "")
+                return (int(round(float(cc["temp_C"]))), self._wwo_zh(cc.get("weatherCode"), desc))
+        except Exception: pass
+        try:
+            url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m,weather_code"
+            req = urllib.request.Request(url, headers={"User-Agent": "SPST"})
+            with urllib.request.urlopen(req, timeout=12) as r:
+                d = json.loads(r.read().decode("utf-8"))
+            cur = d.get("current") or {}
+            if cur.get("temperature_2m") is not None:
+                return (int(round(float(cur["temperature_2m"]))), self._wmo_zh(cur.get("weather_code")))
+        except Exception: pass
+        return None
+
+    def _maybe_fetch_weather(self):
+        """打开世界时间时拉一次各城市天气, 15 分钟内不重复拉; 后台线程并发查, 回主线程逐个填卡片"""
+        if getattr(self, "_wx_busy", False): return
+        if time.time() - getattr(self, "_wx_fetched_at", 0) < 900: return
+        cw = getattr(self, "_clock_weather", None)
+        if not cw: return
+        self._wx_busy = True
+        for key, _tz, _n, label in cw:
+            try:
+                if not label.cget("text"): label.config(text="天气加载中…")
+            except Exception: pass
+        targets = [(key, tzname, name) for key, tzname, name, _l in cw]
+        import threading
+        threading.Thread(target=self._wx_worker, args=(targets,), daemon=True).start()
+
+    def _wx_worker(self, targets):
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        def one(t):
+            key, tzname, name = t
+            try:
+                coords = self._wx_coords(tzname, name)
+                if coords is None: return key, None
+                return key, self._wx_query(coords)
+            except Exception:
+                return key, None
+        ok = 0
+        try:
+            with ThreadPoolExecutor(max_workers=5) as ex:
+                for f in as_completed([ex.submit(one, t) for t in targets]):
+                    key, res = f.result()
+                    if res: ok += 1
+                    self._ui_queue.put(lambda k=key, r=res: self._wx_apply(k, r))
+        except Exception: pass
+        self._ui_queue.put(lambda: self._wx_done(ok))
+
+    def _wx_done(self, ok=1):
+        self._wx_busy = False
+        # 全部失败 (多半是断网) 时别锁死 15 分钟: 把时间倒回, 1 分钟后就能重试
+        self._wx_fetched_at = time.time() if ok else time.time() - 840
+
+    def _wx_apply(self, key, res):
+        text = f"{res[0]}°C · {res[1]}" if res and res[1] else (f"{res[0]}°C" if res else "天气暂不可用")
+        data = getattr(self, "_wx_data", None)
+        if data is None: data = self._wx_data = {}
+        data[key] = text
+        for k, _tz, _n, label in getattr(self, "_clock_weather", []):
+            if k == key:
+                try: label.config(text=text)
+                except Exception: pass
+
+    def _clock_tick(self, gen=None):
+        """每秒刷新各城市时间; 面板被切走后自动停 (不再排下一次)"""
+        if gen is not None and gen != getattr(self, "_clock_gen", gen): return  # 旧链: 直接死掉, 别碰新链的 _clock_after
+        self._clock_after = None
+        panel = getattr(self, "_clock_panel", None)
+        if panel is None: return
+        try:
+            if not panel.winfo_ismapped(): return
+        except Exception: return
+        from datetime import datetime
+        now_local = datetime.now().astimezone()
+        loff = now_local.utcoffset()
+        for tz, tl, dl, fl in getattr(self, "_clock_items", []):
+            try:
+                dt = now_local if tz is None else now_local.astimezone(tz)
+                tl.config(text=dt.strftime("%H:%M:%S"))
+                dl.config(text=f"{dt.year}年{dt.month}月{dt.day}日 {self._CLOCK_WD[dt.weekday()]}")
+                off = dt.utcoffset()
+                if off is not None and loff is not None:
+                    diff = (off - loff).total_seconds() / 3600.0
+                    if diff == 0: fl.config(text="与本地同时区")
+                    else:
+                        ds = f"{abs(diff):.1f}".rstrip("0").rstrip(".")
+                        fl.config(text=f"比本地{'快' if diff > 0 else '慢'} {ds} 小时")
+            except Exception: pass
+        self._maybe_fetch_weather()
+        self._clock_after = self.after(1000, lambda: self._clock_tick(gen))
+
+    # ---------- 无水印下载 (yt-dlp 引擎: IG/FB/小红书/抖音/TikTok/B站/微博/YouTube/X 等, 存平台原文件) ----------
+    def open_media_dl(self):
+        """无水印下载 (工具栏按钮): 盖住主窗口下半区"""
+        self._show_dl_panel()
+
+    def _show_dl_panel(self):
+        if getattr(self, "_dl_panel", None) is None:
+            self._build_dl_panel()
+        try: self._body.pack_forget()
+        except Exception: pass
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_clock_panel"):
+            p = getattr(self, attr, None)
+            if p is not None:
+                try: p.pack_forget()
+                except Exception: pass
+        self._ai_view_on = False
+        self._wheel_bind(False)
+        self._calc_bind(False)
+        self._dl_panel.pack(fill="both", expand=True, before=self._status_sep)
+
+    @staticmethod
+    def _dl_clean_url(text):
+        """分享文案里混着说明文字时, 只把第一个 http(s) 链接抠出来 (小红书/抖音的系统分享都是这种格式)"""
+        import re as _re
+        m = _re.search(r"https?://[^\s，。；]+", text or "")
+        return m.group(0) if m else (text or "").strip()
+
+    def _dl_dir(self):
+        d = ""
+        try: d = self.cfg.get("Config", "DownloadDir", fallback="") or ""
+        except Exception: pass
+        if not d:
+            d = os.path.join(os.path.expanduser("~"), "Downloads")
+        return d
+
+    def _build_dl_panel(self):
+        panel = tk.Frame(self, background=self.UI_BG); self._dl_panel = panel
+        W = "#FFFFFF"
+        head = tk.Frame(panel, background=self.UI_BG); head.pack(fill="x", padx=14, pady=(10, 4))
+        tk.Label(head, text=self.t("media_dl", "无水印下载"), font=self._ui_font(12, True), background=self.UI_BG, foreground=self.UI_TEXT).pack(side="left")
+        back = tk.Label(head, text="返回", font=self._ui_font(9), background=self.UI_BG, foreground="#5B6B7C", cursor="hand2")
+        back.pack(side="right")
+        back.bind("<Button-1>", lambda e: self._show_main_view())
+        back.bind("<Enter>", lambda e: back.configure(foreground=self.UI_ACCENT))
+        back.bind("<Leave>", lambda e: back.configure(foreground="#5B6B7C"))
+        card = tk.Frame(panel, background=W, highlightthickness=1, highlightbackground=self.UI_BORDER, highlightcolor=self.UI_BORDER)
+        card.pack(fill="both", expand=True, padx=12, pady=(6, 10))
+        tk.Label(card, text="支持 Instagram / Facebook / 小红书 / 抖音 / TikTok / B站 / 微博 / 快手 / YouTube / X 等平台, 保存的是平台原文件 (不带平台水印)。",
+                 font=self._ui_font(9), background=W, foreground=self.UI_MUTED, wraplength=720, justify="left").pack(anchor="w", padx=12, pady=(10, 2))
+        row = ttk.Frame(card, style="Card.TFrame"); row.pack(fill="x", padx=12, pady=(2, 4))
+        url_var = tk.StringVar()
+        ent = ttk.Entry(row, textvariable=url_var); ent.pack(side="left", fill="x", expand=True)
+        def do_paste_link():
+            t = (self.clip_get() or "").strip()
+            if t: url_var.set(t); ent.focus_set()
+        ttk.Button(row, text="粘贴链接", command=do_paste_link).pack(side="left", padx=(8, 0))
+        row2 = ttk.Frame(card, style="Card.TFrame"); row2.pack(fill="x", padx=12, pady=2)
+        ttk.Label(row2, text="保存到:", style="Card.TLabel").pack(side="left")
+        dir_var = tk.StringVar(value=self._dl_dir())
+        ttk.Entry(row2, textvariable=dir_var).pack(side="left", fill="x", expand=True, padx=(4, 4))
+        def do_pick_dir():
+            d = filedialog.askdirectory(initialdir=dir_var.get() or self._dl_dir(), parent=self)
+            if d:
+                dir_var.set(d)
+                if not self.cfg.has_section("Config"): self.cfg.add_section("Config")
+                self.cfg.set("Config", "DownloadDir", d); self.save_config()
+        ttk.Button(row2, text="选择文件夹", command=do_pick_dir).pack(side="left")
+        ck_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(row2, text="使用 Chrome 登录状态 (IG/FB 受限内容, 需先关 Chrome)", variable=ck_var, style="Card.TCheckbutton").pack(side="left", padx=(12, 0))
+        row2b = ttk.Frame(card, style="Card.TFrame"); row2b.pack(fill="x", padx=12, pady=(2, 0))
+        ask_var = tk.BooleanVar(value=self.cfg.get("Config", "DownloadAsk", fallback="1").strip() != "0")
+        self._dl_ask_var = ask_var
+        def on_ask_toggle():
+            if not self.cfg.has_section("Config"): self.cfg.add_section("Config")
+            self.cfg.set("Config", "DownloadAsk", "1" if ask_var.get() else "0"); self.save_config()
+        ttk.Checkbutton(row2b, text="每次下载前弹出选择保存位置 (可存到桌面或任意文件夹); 不勾选 = 一直保存到上面这个文件夹", variable=ask_var, command=on_ask_toggle, style="Card.TCheckbutton").pack(side="left")
+        row3 = ttk.Frame(card, style="Card.TFrame"); row3.pack(fill="x", padx=12, pady=(6, 2))
+        info_btn = ttk.Button(row3, text="解析", style="Outline.TButton")
+        info_btn.pack(side="left")
+        dl_btn = ttk.Button(row3, text="开始下载", style="Accent.TButton")
+        dl_btn.pack(side="left", padx=(8, 0))
+        open_btn = ttk.Button(row3, text="打开文件夹")
+        open_btn.pack(side="left", padx=(8, 0))
+        bar = ttk.Progressbar(card, mode="determinate", maximum=100)
+        bar.pack(fill="x", padx=12, pady=(6, 0))
+        st_var = tk.StringVar(value="把在 App 里复制的分享链接粘贴进来 (整段分享文案也行, 会自动提取链接), 点「开始下载」。")
+        tk.Label(card, textvariable=st_var, font=self._ui_font(9), background=W, foreground=self.UI_MUTED, wraplength=720, justify="left").pack(anchor="w", padx=12, pady=(2, 2))
+        tree = ttk.Treeview(card, columns=("title", "site", "file"), show="headings", selectmode="browse", height=6)
+        tree.heading("title", text="标题"); tree.heading("site", text="平台"); tree.heading("file", text="文件")
+        tree.column("title", width=340); tree.column("site", width=90); tree.column("file", width=260)
+        tree.pack(fill="both", expand=True, padx=12, pady=(4, 4))
+        tk.Label(card, text="请只下载自己有权使用的内容; 未经授权搬运他人作品发布, 可能涉及版权与平台规则。",
+                 font=self._ui_font(8), background=W, foreground=self.UI_MUTED).pack(anchor="w", padx=12, pady=(0, 8))
+        state = {"busy": False}
+        def set_busy(b):
+            state["busy"] = b
+            for b_ in (info_btn, dl_btn):
+                try: b_.state(["disabled"] if b else ["!disabled"])
+                except Exception: pass
+        def open_dir():
+            d = dir_var.get() or self._dl_dir()
+            try:
+                os.makedirs(d, exist_ok=True)
+                if sys.platform.startswith("win"): os.startfile(d)
+                else:
+                    import subprocess
+                    subprocess.Popen(["xdg-open", d])
+            except Exception as e:
+                messagebox.showinfo("无水印下载", f"打不开文件夹: {e}", parent=self)
+        open_btn.configure(command=open_dir)
+        got_file = {}
+        def hook(d):
+            if d.get("status") == "finished" and d.get("filename"):
+                got_file["name"] = os.path.basename(d["filename"])  # 以实际落盘名为准 (标题含非法字符时 yt-dlp 会改名, prepare_filename 猜的会对不上)
+            if d.get("status") == "downloading":
+                total = d.get("total_bytes") or d.get("total_bytes_estimate") or 0
+                got = d.get("downloaded_bytes") or 0
+                pct = (got * 100.0 / total) if total else 0
+                self._ui_queue.put(lambda p=pct, g=got, t=total: (bar.configure(value=p),
+                    st_var.set(f"下载中 {p:.0f}%  ({g/1048576:.1f} / {t/1048576:.1f} MB)" if t else f"下载中… 已下 {g/1048576:.1f} MB")))
+            elif d.get("status") == "finished":
+                self._ui_queue.put(lambda: st_var.set("下载完成, 正在保存文件…"))
+        def work(url, download, outdir, use_cookies):
+            # 注意: Tk 变量 (dir_var/ck_var) 只能在主线程读, 值在 start() 里先取好传进来, 否则后台线程报 main thread is not in main loop
+            try:
+                import yt_dlp
+            except Exception:
+                self._ui_queue.put(lambda: (set_busy(False), st_var.set("缺少 yt-dlp 组件 (打包版已内置; 源码运行请先 pip install yt-dlp)")))
+                return
+            try: os.makedirs(outdir, exist_ok=True)
+            except Exception: pass
+            opts = {"quiet": True, "no_warnings": True, "noplaylist": True, "socket_timeout": 20, "retries": 3,
+                    "outtmpl": os.path.join(outdir, "%(title).80s [%(id)s].%(ext)s"),
+                    "format": "best/bv*+ba/bestvideo+bestaudio",
+                    "progress_hooks": [hook]}
+            if use_cookies: opts["cookiesfrombrowser"] = ("chrome",)
+            def done_info(info):
+                set_busy(False)
+                if info is None: return
+                title = info.get("title") or "(无标题)"
+                site = info.get("extractor_key") or info.get("extractor") or ""
+                if download:
+                    fn = got_file.get("name", "")
+                    if not fn:
+                        try:
+                            with yt_dlp.YoutubeDL(opts) as y2:
+                                fn = os.path.basename(y2.prepare_filename(info))
+                        except Exception: pass
+                    tree.insert("", 0, values=(title, site, fn))
+                    bar.configure(value=100)
+                    st_var.set(f"已保存: {title[:50]}")
+                else:
+                    dur = info.get("duration")
+                    extra = f", 时长 {int(dur)//60}:{int(dur)%60:02d}" if dur else ""
+                    st_var.set(f"解析成功: {title[:60]} (平台: {site}{extra}) —— 点「开始下载」保存")
+            def done_err(msg):
+                set_busy(False)
+                hint = ""
+                low = msg.lower()
+                if "login" in low or "cookies" in low or "sign in" in low:
+                    hint = " 这个内容可能需要登录: 勾选「使用 Chrome 登录状态」并关闭 Chrome 后重试。"
+                elif "unsupported url" in low:
+                    hint = " 这个链接暂时不支持, 换一条帖子/视频的分享链接试试。"
+                st_var.set("失败: " + msg[:150] + hint)
+            try:
+                with yt_dlp.YoutubeDL(opts) as ydl:
+                    info = ydl.extract_info(url, download=download)
+                self._ui_queue.put(lambda i=info: done_info(i))
+            except Exception as e:
+                msg = str(e).replace("ERROR: ", "")[:300]
+                self._ui_queue.put(lambda m=msg: done_err(m))
+        def start(download):
+            if state["busy"]: return
+            url = self._dl_clean_url(url_var.get())
+            if not url.startswith("http"):
+                st_var.set("先粘贴一条链接再开始"); return
+            url_var.set(url)
+            save_dir = dir_var.get() or self._dl_dir()
+            if download and ask_var.get():
+                picked = filedialog.askdirectory(title="选择保存位置 (桌面或任意文件夹)",
+                                                 initialdir=save_dir if os.path.isdir(save_dir) else os.path.expanduser("~"), parent=self)
+                if not picked:
+                    st_var.set("已取消下载"); return
+                save_dir = picked
+                dir_var.set(picked)  # 记住这次选的位置: 面板同步显示, 下次弹窗从这里打开; 以后取消勾选询问时它就是固定保存文件夹
+                if not self.cfg.has_section("Config"): self.cfg.add_section("Config")
+                self.cfg.set("Config", "DownloadDir", picked); self.save_config()
+            set_busy(True)
+            bar.configure(value=0)
+            st_var.set("正在解析链接…" if not download else "正在下载…")
+            import threading
+            threading.Thread(target=work, args=(url, download, save_dir, bool(ck_var.get())), daemon=True).start()
+        info_btn.configure(command=lambda: start(False))
+        dl_btn.configure(command=lambda: start(True))
+        ent.bind("<Return>", lambda _e: start(True))
+        self._dl_state = state
+
+    def open_ai_chat(self):
+        """AI 功能 (工具栏按钮): 不弹新窗口 —— 点一下把主窗口下半区切换成聊天面板, 盖住记录和各设置区 (Jane 要求);
+        再点一次, 或点面板顶栏的「返回」, 切回主界面。没填 key 时先弹提示带去系统设置, 不切换"""
+        if getattr(self, "_ai_view_on", False):
+            self._show_main_view(); return
+        if not self._ai_ready(): return
+        self._show_ai_panel()
+
+    def _wheel_bind(self, on):
+        cv = getattr(self, "_ai_cv", None)
+        if cv is None: return
+        try:
+            if on: cv.bind_all("<MouseWheel>", lambda e: cv.yview_scroll(int(-e.delta / 120), "units"))
+            else: cv.unbind_all("<MouseWheel>")
+        except Exception: pass
+
+    def _show_ai_panel(self):
+        if getattr(self, "_ai_panel", None) is None:
+            self._build_ai_panel()
+        if getattr(self, "_fx_panel", None) is not None:
+            try: self._fx_panel.pack_forget()
+            except Exception: pass
+        if getattr(self, "_calc_panel", None) is not None:
+            try: self._calc_panel.pack_forget()
+            except Exception: pass
+        if getattr(self, "_phrases_panel", None) is not None:
+            try: self._phrases_panel.pack_forget()
+            except Exception: pass
+        if getattr(self, "_clock_panel", None) is not None:
+            try: self._clock_panel.pack_forget()
+            except Exception: pass
+        if getattr(self, "_dl_panel", None) is not None:
+            try: self._dl_panel.pack_forget()
+            except Exception: pass
+        self._calc_bind(False)
+        try: self._body.pack_forget()
+        except Exception: pass
+        self._ai_panel.pack(fill="both", expand=True, before=self._status_sep)
+        self._ai_view_on = True
+        self._wheel_bind(True)
+        try: self._ai_input.focus_set()
+        except Exception: pass
+
+    def _show_main_view(self):
+        if getattr(self, "_dl_panel", None) is not None:
+            try: self._dl_panel.pack_forget()
+            except Exception: pass
+        if getattr(self, "_clock_panel", None) is not None:
+            try: self._clock_panel.pack_forget()
+            except Exception: pass
+        if getattr(self, "_phrases_panel", None) is not None:
+            try: self._phrases_panel.pack_forget()
+            except Exception: pass
+        if getattr(self, "_calc_panel", None) is not None:
+            try: self._calc_panel.pack_forget()
+            except Exception: pass
+        self._calc_bind(False)
+        if getattr(self, "_fx_panel", None) is not None:
+            try: self._fx_panel.pack_forget()
+            except Exception: pass
+        if getattr(self, "_ai_panel", None) is not None:
+            try: self._ai_panel.pack_forget()
+            except Exception: pass
+        try: self._body.pack(fill="both", expand=True, before=self._status_sep)
+        except Exception: pass
+        self._ai_view_on = False
+        self._wheel_bind(False)
+
+    def _build_ai_panel(self):
+        """聊天面板 (嵌在主窗口下半区): 豆包式气泡 —— 圆角气泡 (画布绘制), 我的消息蓝气泡靠右, AI 的浅灰气泡靠左,
+        气泡下是文字小链接「复制 / 重新生成」; 底部圆角输入框 + 圆角药丸发送键。用系统设置里选好的那家 AI 服务,
+        带最近 20 条上下文; 对话只存内存, 面板建一次反复用, 回车发送 / Shift+回车换行"""
+        if not hasattr(self, "_ai_chat_history"): self._ai_chat_history = []  # [{role, content}...], 切走切回不丢
+        from tkinter import font as tkfont
+        panel = tk.Frame(self, background="#FFFFFF"); self._ai_panel = panel
+        CHAT_BG, BUB_AI, TXT_MUTED = "#FFFFFF", "#F2F3F5", "#8A94A6"
+        chat_font = tkfont.Font(font=self._ui_font(11))
+        self._ai_chats = self._load_ai_chats()
+        self._ai_chat_id = None
+        # ---- 左侧边栏 (仿豆包左上角): 新对话 + AI 功能入口 + 最近对话 ----
+        SIDE_BG = "#F7F8FA"
+        side = tk.Frame(panel, background=SIDE_BG, width=208); side.pack(side="left", fill="y"); side.pack_propagate(False)
+        tk.Frame(panel, background=self.UI_BORDER, width=1).pack(side="left", fill="y")
+        chatcol = tk.Frame(panel, background=CHAT_BG); chatcol.pack(side="left", fill="both", expand=True)
+        ttk.Button(side, text="+ 新对话", style="Accent.TButton", command=lambda: new_chat()).pack(fill="x", padx=12, pady=(12, 6))
+        def side_head(text):
+            tk.Label(side, text=text, font=self._ui_font(9, True), background=SIDE_BG, foreground=TXT_MUTED).pack(anchor="w", padx=14, pady=(10, 2))
+        def side_row(text, cmd):
+            lb = tk.Label(side, text=text, font=self._ui_font(10), background=SIDE_BG, foreground=self.UI_TEXT, anchor="w", padx=10, pady=5, cursor="hand2")
+            lb.pack(fill="x", padx=6, pady=1)
+            lb.bind("<Button-1>", lambda e: cmd())
+            lb.bind("<Enter>", lambda e: lb.configure(background="#E9EEF4"))
+            lb.bind("<Leave>", lambda e: lb.configure(background=SIDE_BG))
+            return lb
+        side_head("AI 功能")
+        side_row("AI 设置", self.open_system_settings)
+        side_row("看图翻译", self.snip_ai_translate)
+        side_row("智能回复", self.snip_reply)
+        side_head("最近对话")
+        recent = tk.Listbox(side, font=self._ui_font(10), bg=SIDE_BG, fg=self.UI_TEXT, relief="flat", borderwidth=0,
+                            highlightthickness=0, selectbackground=self.UI_SEL_BG, selectforeground=self.UI_TEXT, activestyle="none")
+        recent.pack(fill="both", expand=True, padx=6, pady=(2, 8))
+        def refresh_recent():
+            recent.delete(0, "end")
+            for c in self._ai_chats:
+                recent.insert("end", c.get("title") or "新对话")
+            for i, c in enumerate(self._ai_chats):
+                if c.get("id") == getattr(self, "_ai_chat_id", None):
+                    recent.selection_clear(0, "end"); recent.selection_set(i)
+        self._refresh_recent = refresh_recent
+        def new_chat():
+            if busy["on"]: return
+            self._ai_chat_id = None
+            self._ai_chat_history = []
+            render_all(); refresh_recent()
+            inp.focus_set()
+        def on_recent(_e=None):
+            sel = recent.curselection()
+            if not sel: return
+            i = sel[0]
+            if i >= len(self._ai_chats): return
+            c = self._ai_chats[i]
+            if c.get("id") == getattr(self, "_ai_chat_id", None): return
+            self._ai_chat_id = c.get("id")
+            self._ai_chat_history = [dict(m) for m in c.get("messages", [])]
+            render_all()
+        recent.bind("<<ListboxSelect>>", on_recent)
+        def on_recent_del(e):
+            i = recent.nearest(e.y)
+            if i < 0 or i >= len(self._ai_chats): return
+            c = self._ai_chats[i]
+            if not messagebox.askyesno("删除对话", f"删除对话「{c.get('title', '')}」?"): return
+            self._ai_chats.pop(i)
+            if c.get("id") == getattr(self, "_ai_chat_id", None):
+                self._ai_chat_id = None; self._ai_chat_history = []; render_all()
+            self._store_ai_chats(); refresh_recent()
+        recent.bind("<Button-3>", on_recent_del)
+        # ---- 顶栏: 标题 + 服务名, 右侧 返回 / 清空 (文字链) ----
+        head = tk.Frame(chatcol, background=CHAT_BG); head.pack(fill="x", padx=14, pady=(10, 6))
+        svc_name = self._AI_PRESETS.get(self._ai_cfg()["service"], ("",))[0] or self._ai_cfg()["service"]
+        tk.Label(head, text="AI 功能", font=self._ui_font(12, True), background=CHAT_BG, foreground=self.UI_TEXT).pack(side="left")
+        tk.Label(head, text=f"  {svc_name}", font=self._ui_font(9), background=CHAT_BG, foreground=TXT_MUTED).pack(side="left")
+        busy = {"on": False}
+        def link(parent, text, cmd):
+            lb = tk.Label(parent, text=text, font=self._ui_font(9), background=CHAT_BG, foreground="#5B6B7C", cursor="hand2")
+            lb.bind("<Button-1>", lambda e: cmd())
+            lb.bind("<Enter>", lambda e: lb.configure(foreground=self.UI_ACCENT))
+            lb.bind("<Leave>", lambda e: lb.configure(foreground="#5B6B7C"))
+            return lb
+        # ---- 气泡区: 可滚动白底画布 ----
+        wrap = tk.Frame(chatcol, background=CHAT_BG); wrap.pack(fill="both", expand=True)
+        cv = tk.Canvas(wrap, highlightthickness=0, background=CHAT_BG)
+        self._ai_cv = cv
+        sb = ttk.Scrollbar(wrap, orient="vertical", command=cv.yview)
+        inner = tk.Frame(cv, background=CHAT_BG)
+        inner.bind("<Configure>", lambda e: cv.configure(scrollregion=cv.bbox("all")))
+        win_id = cv.create_window((0, 0), window=inner, anchor="nw")
+        cv.bind("<Configure>", lambda e: cv.itemconfigure(win_id, width=e.width))
+        cv.configure(yscrollcommand=sb.set)
+        cv.pack(side="left", fill="both", expand=True); sb.pack(side="right", fill="y")
+        tk.Frame(chatcol, background="#E7EBF0", height=1).pack(fill="x")  # 输入区上方细分隔线
+        rows = []
+        typing = {"row": None}
+        last_regen = {"lbl": None}  # 最后一颗 AI 气泡的「重新生成」链: 新回复到达时只摘它 + 追加新气泡, 不整表重画 (长对话整表重画要几百毫秒, 是回复后卡顿的主因)
+        def wrap_px(text, maxw):
+            """按像素宽折行: 英文按词断, 过长的词/中文按字断"""
+            out = []
+            for para in str(text).split("\n"):
+                cur = ""
+                for tok in para.split(" "):
+                    piece = tok
+                    while piece:
+                        trial = (cur + " " + piece) if cur else piece
+                        if chat_font.measure(trial) <= maxw:
+                            cur = trial; piece = ""
+                        elif chat_font.measure(piece) > maxw:
+                            # 单个词就超宽: 按字切
+                            if cur: out.append(cur); cur = ""
+                            k = 1
+                            while k < len(piece) and chat_font.measure(piece[:k + 1]) <= maxw: k += 1
+                            out.append(piece[:k]); piece = piece[k:]
+                        else:
+                            out.append(cur); cur = piece; piece = ""
+                out.append(cur)
+            return out
+        def bubble(parent, text, fill, fg):
+            """圆角气泡: 画布上画圆角多边形 + 文字, 尺寸按折行后的文本实测 (圆角点列用模块级 _rrect_pts)"""
+            lines = wrap_px(text, 348)
+            tw = max((chat_font.measure(l) for l in lines), default=0)
+            lh = chat_font.metrics("linespace")
+            padx, pady = 13, 9
+            w, h = tw + padx * 2, lh * len(lines) + pady * 2
+            c = tk.Canvas(parent, width=w, height=h, highlightthickness=0, background=CHAT_BG)
+            c.create_polygon(_rrect_pts(w, h, 16), smooth=True, fill=fill, outline=fill)
+            c.create_text(padx, pady, anchor="nw", text="\n".join(lines), font=chat_font, fill=fg)
+            return c
+        def scroll_bottom():
+            panel.update_idletasks(); cv.yview_moveto(1.0)
+        def add_bubble(role, text, with_regen=False):
+            row = tk.Frame(inner, background=CHAT_BG); row.pack(fill="x", pady=(10, 0), padx=14)
+            if role == "user":
+                bubble(row, text, self.UI_ACCENT, "#FFFFFF").pack(anchor="e")
+            else:
+                bubble(row, text, BUB_AI, self.UI_TEXT).pack(anchor="w")
+                acts = tk.Frame(row, background=CHAT_BG); acts.pack(fill="x", pady=(3, 0), padx=(4, 0))
+                cp = link(acts, "复制", lambda: None); cp.pack(side="left")
+                def do_copy(t=text, lb=cp):
+                    self.clip_set(t); lb.configure(text="已复制 ✓")
+                    panel.after(1200, lambda: lb.winfo_exists() and lb.configure(text="复制"))
+                cp.bind("<Button-1>", lambda e: do_copy())
+                if with_regen:
+                    rg = link(acts, "重新生成", lambda: regenerate()); rg.pack(side="left", padx=12)
+                    last_regen["lbl"] = rg
+            rows.append(row)
+            scroll_bottom()
+            return row
+        def strip_last_regen():
+            lb = last_regen.get("lbl")
+            if lb is not None:
+                try: lb.destroy()
+                except Exception: pass
+                last_regen["lbl"] = None
+        def render_all():
+            last_regen["lbl"] = None
+            for r in rows: r.destroy()
+            rows.clear()
+            if typing["row"] is not None:
+                typing["row"].destroy(); typing["row"] = None
+            hist = self._ai_chat_history
+            for i, m in enumerate(hist):
+                add_bubble(m["role"], m["content"], with_regen=(m["role"] == "assistant" and i == len(hist) - 1))
+            if not hist:
+                hint = tk.Label(inner, text="有什么想问的, 在下面打字, 按回车发送。", background=CHAT_BG,
+                                foreground=TXT_MUTED, font=self._ui_font(10))
+                hint.pack(pady=16); rows.append(hint)
+        def show_typing():
+            row = tk.Frame(inner, background=CHAT_BG); row.pack(fill="x", pady=(10, 0), padx=14)
+            bubble(row, "AI 正在思考…", BUB_AI, TXT_MUTED).pack(anchor="w")
+            typing["row"] = row; scroll_bottom()
+        def hide_typing():
+            if typing["row"] is not None:
+                typing["row"].destroy(); typing["row"] = None
+        send_ui = {"cv": None, "enabled": True}
+        def set_send_enabled(on):
+            send_ui["enabled"] = on
+            if send_ui["cv"] is not None:
+                fill = self.UI_ACCENT if on else "#B9C2CE"
+                send_ui["cv"].itemconfigure("pill", fill=fill, outline=fill)
+        def request_reply():
+            busy["on"] = True; set_send_enabled(False)
+            show_typing()
+            import threading
+            msgs = list(self._ai_chat_history[-20:])
+            hist_ref = self._ai_chat_history  # 记住这条回复属于哪个对话: 等回复期间切到别的对话, 回复不能串过去
+            cid_ref = getattr(self, "_ai_chat_id", None)
+            def work():
+                try:
+                    r = self._ai_chat_messages(msgs, max_tokens=2048)
+                    def done():
+                        busy["on"] = False
+                        if self._ai_chat_history is hist_ref:
+                            self._ai_chat_history.append({"role": "assistant", "content": r})
+                            if not panel.winfo_exists(): return
+                            self._save_current_chat()
+                            set_send_enabled(True); hide_typing(); strip_last_regen()
+                            add_bubble("assistant", r, with_regen=True)  # 增量追加: 不整表重画, 回复出现得更快
+                        else:  # 已切到别的对话: 存回它自己的存档, 当前界面不动
+                            hist_ref.append({"role": "assistant", "content": r})
+                            self._persist_chat(hist_ref, cid_ref)
+                            if hasattr(self, "_refresh_recent"): self._refresh_recent()
+                            if panel.winfo_exists(): set_send_enabled(True)
+                    self._ui_queue.put(done)
+                except Exception as e:
+                    msg = str(e)
+                    def fail():
+                        busy["on"] = False
+                        if not panel.winfo_exists(): return
+                        set_send_enabled(True)
+                        if self._ai_chat_history is hist_ref:
+                            hide_typing()
+                            add_bubble("assistant", f"(出错了: {msg})")
+                        else:
+                            self.status.set(f"AI 回复失败: {msg[:80]}")
+                    self._ui_queue.put(fail)
+            threading.Thread(target=work, daemon=True).start()
+        def regenerate():
+            if busy["on"]: return
+            if not self._ai_chat_history or self._ai_chat_history[-1]["role"] != "assistant": return
+            self._ai_chat_history.pop()
+            if rows:  # 只删最后一颗气泡, 不整表重画
+                r0 = rows.pop()
+                try: r0.destroy()
+                except Exception: pass
+            last_regen["lbl"] = None
+            request_reply()
+        def clear():
+            if busy["on"]: return
+            cid = getattr(self, "_ai_chat_id", None)
+            if cid is not None:
+                self._ai_chats = [c for c in self._ai_chats if c.get("id") != cid]
+                self._ai_chat_id = None
+                self._store_ai_chats()
+            self._ai_chat_history = []
+            render_all(); refresh_recent()
+        link(head, "清空对话", clear).pack(side="right")
+        link(head, "返回", lambda: self._show_main_view()).pack(side="right", padx=(0, 14))
+        # ---- 底部输入区: 圆角输入框 (画布圆角底 + 内嵌文本) + 圆角药丸发送键 ----
+        brow = tk.Frame(chatcol, background=CHAT_BG); brow.pack(fill="x", padx=14, pady=(10, 12))
+        inbox = tk.Canvas(brow, height=62, highlightthickness=0, background=CHAT_BG)
+        inbox.pack(side="left", fill="x", expand=True)
+        inp = tk.Text(inbox, height=3, width=12, wrap="word", font=self._ui_font(11), background=BUB_AI, foreground=self.UI_TEXT,
+                      relief="flat", borderwidth=0, highlightthickness=0, padx=4, pady=2, insertbackground=self.UI_ACCENT)
+        self._ai_input = inp
+        inp_win = inbox.create_window(13, 9, anchor="nw", window=inp, width=380, height=44)
+        def draw_inbox(_e=None):
+            wdt = inbox.winfo_width()
+            if wdt < 60: return
+            inbox.delete("bg")
+            inbox.create_polygon(_rrect_pts(wdt, 62, 16), smooth=True, fill=BUB_AI, outline=BUB_AI, tags="bg")
+            inbox.tag_lower("bg")
+            inbox.itemconfigure(inp_win, width=wdt - 26, height=44)
+        inbox.bind("<Configure>", draw_inbox)
+        send_cv = tk.Canvas(brow, width=80, height=42, highlightthickness=0, background=CHAT_BG, cursor="hand2")
+        send_cv.pack(side="right", padx=(10, 0))
+        send_cv.create_polygon(_rrect_pts(80, 42, 21), smooth=True, fill=self.UI_ACCENT, outline=self.UI_ACCENT, tags="pill")
+        send_cv.create_text(40, 21, text="发送", font=self._ui_font(11, True), fill="#FFFFFF")
+        send_ui["cv"] = send_cv
+        send_cv.bind("<Enter>", lambda e: send_ui["enabled"] and send_cv.itemconfigure("pill", fill="#2B83E6", outline="#2B83E6"))
+        send_cv.bind("<Leave>", lambda e: send_ui["enabled"] and send_cv.itemconfigure("pill", fill=self.UI_ACCENT, outline=self.UI_ACCENT))
+        def send():
+            text = inp.get("1.0", "end").strip()
+            if not text or busy["on"]: return
+            inp.delete("1.0", "end")
+            if rows and not self._ai_chat_history:
+                for r in rows: r.destroy()
+                rows.clear()
+            self._ai_chat_history.append({"role": "user", "content": text})
+            add_bubble("user", text)
+            self._save_current_chat()
+            request_reply()
+        send_cv.bind("<Button-1>", lambda e: send_ui["enabled"] and send())
+        def on_enter(e):
+            if e.state & 0x1: return None  # Shift+回车: 换行
+            send(); return "break"
+        inp.bind("<Return>", on_enter)
+        render_all(); refresh_recent()
+
     def trans_target(self):
         """截图翻译的目标语言: [Snip] TransTarget, zh-CN (默认) 或 en, 主窗口可改"""
         v = (self.cfg.get("Snip", "TransTarget", fallback="zh-CN") or "zh-CN").strip()
@@ -3549,39 +4974,24 @@ try {
         if len(cls._FONT_CACHE) < 96: cls._FONT_CACHE[key] = font
         return font
     @staticmethod
-    def _render_translated(img, lines, translations):
-        """有道式嵌图翻译: 每行采样原文底色盖住原文, 再按框高自适应字号把译文写回原位置。"""
-        from PIL import ImageDraw
-        src = img.convert("RGB"); out = src.copy()
-        dr = ImageDraw.Draw(out); px = src.load()
-        W, H = out.size
-        for ln, tr in zip(lines, translations):
-            if not tr: continue
-            x, y, w, h = ln["x"], ln["y"], ln["w"], ln["h"]
-            if w <= 0 or h <= 0: continue
-            pad = max(1, h // 6)
-            bx1, by1 = max(0, x - pad), max(0, y - pad // 2)
-            bx2, by2 = min(W - 1, x + w + pad), min(H - 1, y + h + pad // 2)
-            border = []
-            for xx in range(bx1, bx2 + 1, max(1, (bx2 - bx1) // 24)):
-                border.append(px[xx, by1]); border.append(px[xx, by2])
-            for yy in range(by1, by2 + 1, max(1, (by2 - by1) // 8)):
-                border.append(px[bx1, yy]); border.append(px[bx2, yy])
-            border.sort()
-            bg = border[len(border) // 2] if border else (255, 255, 255)
-            dr.rectangle([bx1, by1, bx2, by2], fill=bg)
-            lum = (0.299 * bg[0] + 0.587 * bg[1] + 0.114 * bg[2]) / 255.0
-            fg = (0, 0, 0) if lum >= 0.5 else (255, 255, 255)
-            size = max(8, int(h * 0.95)); font = App._load_font(size)
-            while size > 8 and dr.textlength(tr, font=font) > w:
-                size = max(8, size - 2); font = App._load_font(size)
-            dr.text((x, y + max(0, (h - size) // 2)), tr, fill=fg, font=font)
-        return out
     def _translate_lines(self, lines, target):
-        """逐行翻译 (嵌图翻译用): 纯数字/符号行原样保留; 返回 (译文列表, 是否有任一行译成功)。"""
-        translations, any_ok = [], False
-        for ln in lines:
-            t = ln["t"]
+        """嵌图翻译的译文生成: 先把全部行拼成整段一次翻译 (有上下文, 不会逐行词不达意),
+        译文按行拆回且行数对得上才采用; 对不上/整段失败再退回逐行翻译。
+        纯数字/符号行不送翻译, 原样保留。返回 (译文列表, 是否有任一行译成功)。"""
+        texts = [ln["t"] for ln in lines]
+        need = [i for i, t in enumerate(texts) if re.search(r"[A-Za-z\u4e00-\u9fff]", t)]
+        if not need: return list(texts), False
+        joined = "\n".join(texts[i] for i in need)
+        whole = self.translate_text_to(joined, target)
+        if whole:
+            parts = [p.strip() for p in whole.replace("\r\n", "\n").split("\n")]
+            parts = [p for p in parts if p != ""]
+            if len(parts) == len(need):
+                out = list(texts)
+                for i, p in zip(need, parts): out[i] = p
+                return out, True
+        translations, any_ok = [], False  # 整段路不通: 逐行兜底 (行已合并成整行, 质量仍远好于碎片时代)
+        for t in texts:
             if not re.search(r"[A-Za-z\u4e00-\u9fff]", t):
                 translations.append(t); continue
             r = self.translate_text_to(t, target)
@@ -3608,13 +5018,13 @@ try {
             self._ui_queue.put(lambda: self.show_translate_compare(img, lines, tgt, translations))
         threading.Thread(target=work, daemon=True).start()
     def show_translate_compare(self, orig, lines, target, translations):
-        """截图翻译结果窗 (仿有道): 顶部 检测到源语言 ⇄ 目标语言 (中文/English 可切换, 切换即重新翻译);
-        「对照翻译」开 = 原图+译图双语对照, 关 = 只显示译图; 译图可复制/保存/钉图, 译文可复制。"""
+        """截图翻译结果窗: 顶部 检测到源语言 ⇄ 目标语言 (中文/English 可切换, 切换即重新翻译);
+        「对照翻译」开 = 左边原文文本、右边译文文本; 关 = 只显示译文。
+        (用户要求: 原图和译图都不用给图, 直接显示识别出的原文本和译文 —— 清楚、能选中、好复制。)"""
         import threading
         joined = "".join(l["t"] for l in lines)
         src_name = "中文" if any("\u4e00" <= ch <= "\u9fff" for ch in joined) else "英语"
-        st = {"target": target, "translations": list(translations),
-              "img": self._render_translated(orig, lines, translations)}
+        st = {"target": target, "translations": list(translations)}
         win = tk.Toplevel(self); win.title("截图翻译结果"); win.attributes("-topmost", True)
         win.bind("<Escape>", lambda e: win.destroy())  # Esc 关闭结果窗
         try: win.focus_force()
@@ -3629,34 +5039,27 @@ try {
         ttk.Checkbutton(head, text="对照翻译", variable=compare_var).pack(side="left", padx=10)
         busy_var = tk.StringVar(); ttk.Label(head, textvariable=busy_var, foreground="#0070FF").pack(side="left", padx=4)
         bar = ttk.Frame(win); bar.pack(side="bottom", fill="x", padx=8, pady=6)
+        reply_box = ttk.Frame(win); reply_box.pack(side="bottom", fill="x")  # AI 智能回复的结果显示在按钮行下方 (先占位, 空着不占高度)
+        btn_row = ttk.Frame(win); btn_row.pack(side="bottom", fill="x", pady=(4, 0))
+        mid = ttk.Frame(btn_row); mid.pack()  # 三颗主按钮放在原文/译文框正下方居中 (用户要求); pack 默认横向居中
         body = ttk.Frame(win); body.pack(fill="both", expand=True)
-        ow, oh = orig.size
+        def text_pane(title, content, nlines, width_chars):
+            f = ttk.Frame(body); f.pack(side="left", padx=6, pady=6, fill="both", expand=True)
+            ttk.Label(f, text=title).pack()
+            t = tk.Text(f, width=width_chars, height=max(4, min(20, nlines + 1)),
+                        wrap="word", font=self._ui_font(11), background=self.UI_SURFACE,
+                        foreground=self.UI_TEXT, relief="solid", borderwidth=1, padx=8, pady=6)
+            t.insert("1.0", content)
+            t.pack(fill="both", expand=True)
+            return t
         def layout():
             for c in body.winfo_children(): c.destroy()
-            side = ow >= oh
-            if compare_var.get():
-                scale = min(1.0, 740 / ow, 840 / oh) if side else min(1.0, 760 / ow, 700 / oh)
+            if compare_var.get():  # 左原文文本、右译文文本 (都不再显示图片)
+                win._orig_text = text_pane("原文", "\n".join(l["t"] for l in lines), len(lines), 52)
             else:
-                scale = min(1.0, 1480 / ow, 860 / oh)
-            def photo(im):
-                if scale < 1.0: im = im.resize((max(1, int(ow * scale)), max(1, int(oh * scale))), Image.LANCZOS)
-                return ImageTk.PhotoImage(im)
-            win._photos = []
-            def pane(title, im):
-                ph = photo(im); win._photos.append(ph)
-                f = ttk.Frame(body)
-                ttk.Label(f, text=title).pack()
-                tk.Label(f, image=ph).pack()
-                return f
-            if compare_var.get():
-                if side:
-                    pane("原图", orig).pack(side="left", padx=6, pady=6)
-                    pane("译图", st["img"]).pack(side="left", padx=6, pady=6)
-                else:
-                    pane("原图", orig).pack(padx=6, pady=6)
-                    pane("译图", st["img"]).pack(padx=6, pady=6)
-            else:
-                pane("译图", st["img"]).pack(padx=6, pady=6)
+                win._orig_text = None
+            win._trans_text = text_pane("译文", "\n".join(st["translations"]), len(st["translations"]),
+                                        52 if compare_var.get() else 76)  # 复制/钉住读框里实际显示的文本 (可先改两个字再复制)
         def on_compare():
             if not self.cfg.has_section("Snip"): self.cfg.add_section("Snip")
             self.cfg.set("Snip", "TransCompare", "1" if compare_var.get() else "0"); self.save_config()
@@ -3675,20 +5078,64 @@ try {
                         busy_var.set("翻译失败, 已保留当前译文")
                         tgt_var.set("中文" if st["target"] == "zh-CN" else "English"); return
                     st["target"] = new_tgt; st["translations"] = trs
-                    st["img"] = self._render_translated(orig, lines, trs)
                     layout()
                 self._ui_queue.put(done)
             threading.Thread(target=work, daemon=True).start()
         tgt_var.trace_add("write", retranslate)
-        copy_btn = ttk.Button(bar, text="复制原文")
+        copy_btn = ttk.Button(mid, text="复制原文")
         def do_copy():
-            self.clip_set("\n".join(l["t"] for l in lines))  # 复制识别出的原文本 (用户要求: 不再复制译图, 译图已有保存/钉图)
+            w = getattr(win, "_orig_text", None)  # 对照开着时复制框里实际显示的原文, 关着时用识别结果
+            try: txt0 = w.get("1.0", "end").strip() if w is not None else "\n".join(l["t"] for l in lines)
+            except Exception: txt0 = "\n".join(l["t"] for l in lines)
+            self.clip_set(txt0)
             copy_btn.config(text="已复制 ✓")
             win.after(1200, lambda: copy_btn.config(text="复制原文"))
         copy_btn.config(command=do_copy); copy_btn.pack(side="left", padx=2)
-        ttk.Button(bar, text="保存译图", command=lambda: (self.save_shot(st["img"]), self.status.set("译图已存进历史截图"))).pack(side="left", padx=2)
-        ttk.Button(bar, text="钉住译图", command=lambda: self.pin_image(st["img"])).pack(side="left", padx=2)
-        ttk.Button(bar, text="复制译文", command=lambda: self.clip_set("\n".join(st["translations"]))).pack(side="left", padx=2)
+        def shown_trans():
+            w = getattr(win, "_trans_text", None)
+            try: return w.get("1.0", "end").strip() if w is not None else "\n".join(st["translations"])
+            except Exception: return "\n".join(st["translations"])
+        ttk.Button(mid, text="复制译文", command=lambda: self.clip_set(shown_trans())).pack(side="left", padx=2)
+        def do_reply():
+            """智能回复直接在本页出结果 (用户要求): 用这张截图让 AI 想 3 条候选, 显示在窗口下方, 不再另开候选窗"""
+            if not self._ai_ready(): return  # 没填 Key: 它会提示并带去系统设置
+            if getattr(self, "_ai_busy", False):
+                busy_var.set("AI 正在处理上一张图, 稍等它回复完"); return
+            self._ai_busy = True
+            for c in reply_box.winfo_children(): c.destroy()
+            ttk.Label(reply_box, text="AI 正在读这张截图、想回复…", style="Muted.TLabel").pack(anchor="w", padx=10, pady=(8, 4))
+            def show_cands(cands, err=None):
+                self._ai_busy = False
+                if not win.winfo_exists(): return
+                for c in reply_box.winfo_children(): c.destroy()
+                if err:
+                    ttk.Label(reply_box, text=f"智能回复失败: {err}", style="Muted.TLabel", wraplength=640).pack(anchor="w", padx=10, pady=(8, 4)); return
+                if not cands:
+                    ttk.Label(reply_box, text="模型没给出候选回复, 换个更完整的对话截图再试。", style="Muted.TLabel").pack(anchor="w", padx=10, pady=(8, 4)); return
+                ttk.Label(reply_box, text="AI 智能回复 (点「粘贴」直接发到刚才的聊天窗口):", style="Muted.TLabel").pack(anchor="w", padx=10, pady=(8, 2))
+                def paste_it(text):
+                    win.destroy()
+                    if self.winfo_viewable():
+                        if self._tray is not None: self._hide_to_tray()
+                        else: self.withdraw()
+                    self.after(180, lambda: self._paste_text(text))  # 与候选窗/常用语库同一套: 先让焦点回到刚才的软件再粘
+                for i, c in enumerate(cands, 1):
+                    row = ttk.Frame(reply_box); row.pack(fill="x", padx=10, pady=3)
+                    ttk.Label(row, text=f"{i}. {c}", wraplength=560).pack(side="left", fill="x", expand=True)
+                    ttk.Button(row, text="粘贴", style="Accent.TButton", command=lambda t=c: paste_it(t)).pack(side="right", padx=2)
+                    ttk.Button(row, text="复制", command=lambda t=c: self.clip_set(t)).pack(side="right", padx=2)
+                rb = ttk.Frame(reply_box); rb.pack(fill="x", padx=10, pady=(2, 8))
+                ttk.Button(rb, text="换一批", command=do_reply).pack(side="left", padx=2)
+            def work():
+                try:
+                    res = self._ai_chat_image(orig, self._AI_REPLY_PROMPT)
+                    cands = self._parse_replies(res) or ([res] if res else [])
+                    self._ui_queue.put(lambda: show_cands(cands))
+                except Exception as e:
+                    msg = str(e)
+                    self._ui_queue.put(lambda: show_cands(None, msg))
+            threading.Thread(target=work, daemon=True).start()
+        ttk.Button(mid, text="AI 智能回复", command=do_reply, style="Accent.TButton").pack(side="left", padx=2)
         ttk.Button(bar, text="关闭", command=win.destroy).pack(side="right", padx=2)
         layout()
     def translate_image(self, img, target=None, text=None):
@@ -3902,5 +5349,22 @@ try {
         else:
             self._quit_app()
 
+def _acquire_single_instance():
+    """单实例守卫: SPST 是常驻托盘工具, 重复打开会出现两个托盘图标、全局热键被两个进程同时响应
+    (按一次 F6 每条记录记两遍)、配置和记录文件互相覆盖。用 Windows 命名互斥体拦下第二个实例并弹窗提醒;
+    非 Windows (开发调试) 或任何异常都放行, 守卫本身绝不能把正版启动拦死。"""
+    if sys.platform != "win32": return True
+    try:
+        import ctypes
+        handle = ctypes.windll.kernel32.CreateMutexW(None, False, "SPST_SingleInstance_Mutex")
+        if not handle: return True
+        globals()["_SPST_MUTEX_HANDLE"] = handle  # 句柄必须留到进程结束: 关掉它就等于放行第二个实例
+        if ctypes.windll.kernel32.GetLastError() == 183:  # ERROR_ALREADY_EXISTS: 已经有一个在跑
+            ctypes.windll.user32.MessageBoxW(None, "SPST 已经在运行了 (看屏幕右下角的托盘图标), 不用重复打开。", "SPST", 0x40)  # MB_ICONINFORMATION
+            return False
+    except Exception: pass
+    return True
+
+
 if __name__ == "__main__":
-    App().mainloop()
+    if _acquire_single_instance(): App().mainloop()
