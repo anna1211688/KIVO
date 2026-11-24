@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-SnapPaste - 一键复制粘贴 + 截图贴图 (合并版)
+SPST - 一键复制粘贴 + 截图贴图 (原 SnapPaste, v1.4.15 起改名 SPST)
 ================================================
 由「一键复制粘贴工具」(2012, Delphi 加壳版) 重写、并合入 Snipaste 核心功能而来:
   文字: 多次复制队列 / 顺序·全部粘贴 / 分割·正则 / 大小写 / 搜索 / 去重 / 锁定
@@ -14,7 +14,7 @@ v1.3 二次审查修复 (详见 docs/二次审查报告.md):
 依赖: Pillow (截图必需); keyboard (全局热键, 可选); 其余见 requirements.txt
 运行: python main.py    打包: build_windows.bat (PyInstaller, 无加壳, 无联网)
 """
-import configparser, ctypes, datetime, json, os, queue, re, sys, time
+import base64, configparser, ctypes, datetime, json, os, queue, re, sys, time
 try:
     from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageGrab, ImageTk
     HAS_PIL = True
@@ -23,8 +23,307 @@ except Exception:
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
-APP_NAME = "SnapPaste 复制粘贴+截图贴图"
-VERSION = "1.4.14"  # v1.4.14: 语言文件改读 EXE 内置版 (AppData 旧语言文件不再盖住新文案, 「截图贴图」括号说明真机上真正去掉); 主窗口截图按钮的 (F1) 标注跟随热键设置同步刷新
+APP_NAME = "SPST 复制粘贴+截图贴图"
+# SPST 图标 (256×256 PNG 的 base64 内嵌: 窗口/托盘图标共用, 不依赖外部文件; 源图在 branding/spst_icon_1024.png)
+_ICON_PNG_B64 = (
+    "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"
+)
+VERSION = "1.4.15"  # v1.4.15: 正式改名 SPST (标题/托盘/自启项/EXE 名 SPST.exe, 数据目录 %APPDATA%\SPST 并自动搬移旧 SnapPaste 数据); 新图标+logo (SPST 字母融入剪贴板图标, 内嵌窗口/托盘, SPST.ico 作 EXE 图标); 性能优化 (热键队列轮询 60->15ms, 截图干等 300->120ms, 窗口隐藏时不重建列表); 新增「系统设置」窗口 (开机自启/语言/提示音/迷你窗口归拢)
 # v1.4.7: 新增一键截图翻译 (F4 预设, 自动检测源语言, 目标语言主窗口可设中文/English) + v1.4.6 的工具栏同窗/图片复制双通道/窗口自适应高度
 # v1.4.6: 标注工具栏改冻结屏同窗 Frame (独立小窗真机反复不显示) + 图片复制补全 Win32 签名并加 PowerShell 备用通道 + 主窗口按内容自适应高度 (底部不再被裁)
 # v1.4.5: 数据目录改到 %APPDATA%\SnapPaste, 桌面只剩单个 EXE (老数据首次运行自动从 EXE 旁搬移) + v1.4.4 的 Esc 焦点修复
@@ -39,13 +338,13 @@ DEFAULT_HOTKEYS = {"HotKey8": "F6", "HotKey9": "F7", "HotKey10": "F8",
 # Snipaste 习惯键: F1 截图 / F3 贴图, 放在 Config.ini [Snip] 段
 DEFAULT_SNIP_KEYS = {"SnipKey": "F1", "PinKey": "F3", "CopyKey": "F5", "TransKey": "F4", "DelayKey": "无",
                      "ClosePinsKey": "无", "TogglePinsKey": "无", "RestorePinKey": "无", "ClickThroughKey": "无"}
-# 数据目录: 源码运行时在 main.py 旁; 打成 EXE 后数据统一放 %APPDATA%\SnapPaste,
-# 桌面上只剩一个 SnapPaste.exe (v1.4.5, 用户反馈 Config/records/Language/shots/ding 散落一桌)。
+# 数据目录: 源码运行时在 main.py 旁; 打成 EXE 后数据统一放 %APPDATA%\SPST,
+# 桌面上只剩一个 SPST.exe (v1.4.5 起数据进 AppData; v1.4.15 改名前是 %APPDATA%\SnapPaste, 老数据自动搬移)。
 # 注意也不能用 _MEIPASS 临时目录: 那是单文件解压目录, 关程序就全丢 (v1.3.2 审查发现)。
 if getattr(sys, "frozen", False):
     EXE_DIR = os.path.dirname(os.path.abspath(sys.executable))
     BUNDLE = getattr(sys, "_MEIPASS", EXE_DIR)  # EXE 内置的默认文件 (打包时 --add-data 带入)
-    BASE = os.path.join(os.environ.get("APPDATA") or EXE_DIR, "SnapPaste")
+    BASE = os.path.join(os.environ.get("APPDATA") or EXE_DIR, "SPST")
     try: os.makedirs(BASE, exist_ok=True)
     except Exception: BASE = EXE_DIR  # AppData 建不了时退回 EXE 旁 (老行为, 至少能用)
 else:
@@ -63,26 +362,33 @@ def _atomic_write(path, text):
     os.replace(tmp, path)
 
 def _migrate_old_data():
-    """老版本 (<=v1.4.4) 数据在 EXE 旁: 首次用 AppData 数据目录时整套搬过来, 配置/记录/截图不丢"""
+    """老数据搬移 (新目录还没有 Config.ini 时才搬, 已存在的文件不覆盖):
+    ① 改名前的 %APPDATA%\\SnapPaste (v1.4.15 改名为 SPST) ② 更早的老版本 (<=v1.4.4) 放在 EXE 旁的数据"""
     if not getattr(sys, "frozen", False) or os.path.abspath(BASE) == os.path.abspath(EXE_DIR): return
     if os.path.exists(os.path.join(BASE, "Config.ini")): return  # 新目录已有数据, 不再搬
     import shutil
-    for rel in ("Config.ini", "records.json", "ding.wav",
-                os.path.join("Language", "Chinese.ini"), os.path.join("Language", "English.ini")):
-        src, dst = os.path.join(EXE_DIR, rel), os.path.join(BASE, rel)
-        if os.path.exists(src) and not os.path.exists(dst):
-            try: os.makedirs(os.path.dirname(dst), exist_ok=True); shutil.copy(src, dst)
+    def _copy_from(src_dir):
+        for rel in ("Config.ini", "records.json", "ding.wav",
+                    os.path.join("Language", "Chinese.ini"), os.path.join("Language", "English.ini")):
+            src, dst = os.path.join(src_dir, rel), os.path.join(BASE, rel)
+            if os.path.exists(src) and not os.path.exists(dst):
+                try: os.makedirs(os.path.dirname(dst), exist_ok=True); shutil.copy(src, dst)
+                except Exception: pass
+        old_shots, new_shots = os.path.join(src_dir, "shots"), os.path.join(BASE, "shots")
+        if os.path.isdir(old_shots):
+            try:
+                os.makedirs(new_shots, exist_ok=True)
+                for name in os.listdir(old_shots):
+                    s, d = os.path.join(old_shots, name), os.path.join(new_shots, name)
+                    if os.path.isfile(s) and not os.path.exists(d):
+                        try: shutil.copy(s, d)
+                        except Exception: pass
             except Exception: pass
-    old_shots, new_shots = os.path.join(EXE_DIR, "shots"), os.path.join(BASE, "shots")
-    if os.path.isdir(old_shots):
-        try:
-            os.makedirs(new_shots, exist_ok=True)
-            for name in os.listdir(old_shots):
-                s, d = os.path.join(old_shots, name), os.path.join(new_shots, name)
-                if os.path.isfile(s) and not os.path.exists(d):
-                    try: shutil.copy(s, d)
-                    except Exception: pass
-        except Exception: pass
+    appdata = os.environ.get("APPDATA")
+    if appdata:
+        old_base = os.path.join(appdata, "SnapPaste")
+        if os.path.abspath(old_base) != os.path.abspath(BASE): _copy_from(old_base)
+    _copy_from(EXE_DIR)
 
 def ensure_runtime_files():
     """EXE 首次运行: 先搬老数据 (EXE 旁 -> AppData), 再把内置默认文件释放到数据目录; 已存在的不覆盖"""
@@ -123,6 +429,9 @@ class App(tk.Tk):
         ensure_runtime_files()
         enable_hidpi()
         self.title(f"{APP_NAME} v{VERSION}")
+        try:  # 窗口图标 (标题栏/任务栏) 用内嵌的 SPST 图标
+            self._icon_photo = tk.PhotoImage(data=_ICON_PNG_B64); self.iconphoto(True, self._icon_photo)
+        except Exception: pass
         self.geometry("680x580"); self.minsize(600, 500)  # v1.3: 内容区变高, 旧 460 高会裁掉底部状态栏
         self.records = []          # [{"text": str, "locked": bool}]
         self._visible = []         # 列表框行号 -> records 下标 (搜索过滤时两者不一致, 必须映射)
@@ -150,8 +459,9 @@ class App(tk.Tk):
         self.apply_autorun()
         self._setup_tray()
         if self.cfg.get("Config", "MiniFormSet", fallback="0") == "1": self.after(300, self.show_mini)  # 常显模式: 启动即显示迷你窗口
-        self.after(60, self._poll_ui_queue)
+        self.after(15, self._poll_ui_queue)  # 15ms 轮询: 热键动作最多等 15ms 就执行 (旧 60ms 每次按键先白等)
         self.protocol("WM_DELETE_WINDOW", self.on_close)
+        self.bind("<Map>", self._on_main_map)  # 主窗口从托盘恢复显示时, 补刷隐藏期间标脏的列表
         self.bind("<Escape>", lambda e: self.on_close())  # Esc 关闭主窗口 (同点 X: 隐藏到托盘)
     def _fit_window_to_content(self):
         # 按内容实际需要的尺寸定窗口大小: 写死的 680x580 在高缩放 (125%/150%) 屏幕上装不下全部功能,
@@ -172,9 +482,12 @@ class App(tk.Tk):
                 try: fn()
                 except Exception: pass
         except queue.Empty: pass
-        try: self.after(60, self._poll_ui_queue)
+        try: self.after(15, self._poll_ui_queue)
         except tk.TclError: pass
 
+    def _on_main_map(self, e=None):
+        if e is not None and e.widget is not self: return
+        if getattr(self, "_list_dirty", False): self.refresh_list()
     # ---------- config (兼容原版字段) ----------
     def load_config(self):
         c = configparser.ConfigParser()
@@ -256,15 +569,13 @@ class App(tk.Tk):
     def build_ui(self):
         bar = ttk.Frame(self); bar.pack(fill="x", padx=8, pady=6)
         for txt, cmd in [(self.t("hotkey_settings", "热键设置"), self.open_hotkey_dialog),
+                         (self.t("system_settings", "系统设置"), self.open_system_settings),
                          (self.t("import_text", "导入文本"), self.import_txt), (self.t("export_text", "导出文本"), self.export_txt)]:
             ttk.Button(bar, text=txt, command=cmd).pack(side="left", padx=2)
         self.search_var = tk.StringVar(); self.search_var.trace_add("write", lambda *a: self._schedule_search_refresh())
         ttk.Entry(bar, textvariable=self.search_var, width=14).pack(side="right")
         ttk.Label(bar, text=self.t("search", "搜索:")).pack(side="right")
-        self.lang_var = tk.StringVar(value=self.lang)
-        lang_box = ttk.Combobox(bar, textvariable=self.lang_var, width=9, state="readonly", values=["Chinese", "English"])
-        lang_box.pack(side="right", padx=(0, 6)); lang_box.bind("<<ComboboxSelected>>", self._switch_language)
-        ttk.Label(bar, text=self.t("lang_label", "语言:")).pack(side="right")
+        self.lang_var = tk.StringVar(value=self.lang)  # 语言切换的界面已搬进「系统设置」窗口, 这里只留变量
 
         mid = ttk.Frame(self); mid.pack(fill="both", expand=True, padx=8)
         # 记录列表按原版分两列: 序号 | 文本内容 (Treeview; 内部沿用 listbox 这个名字, 行 id 存 _row_iids 与 _visible 对齐)
@@ -295,21 +606,16 @@ class App(tk.Tk):
         self.sleep_var = tk.StringVar(value=str(self.sleep_ms))
         _sle = ttk.Entry(opt1, textvariable=self.sleep_var, width=6); _sle.pack(side="left")
         _sle.bind("<FocusOut>", lambda _e: self._save_entry_settings()); _sle.bind("<Return>", lambda _e: self._save_entry_settings())
-        self.autorun_var = tk.BooleanVar(value=self.cfg.get("Config", "AutoRun", fallback="0") == "1")
-        ttk.Checkbutton(opt1, text=self.t("autorun", "开机自动运行"), variable=self.autorun_var, command=self._toggle_autorun).pack(side="left", padx=(10, 0))
+        self.autorun_var = tk.BooleanVar(value=self.cfg.get("Config", "AutoRun", fallback="0") == "1")  # 开机自启的勾选框已搬进「系统设置」
+        self.wave_var = tk.BooleanVar(value=self.cfg.get("Wave", "WaveSet", fallback=self.cfg.get("Config", "WaveSet", fallback="0")) == "1")  # 提示音开关 (在系统设置里)
         self.paste_enter_var = tk.BooleanVar(value=self.cfg.get("Config", "PasteEnter", fallback="0") == "1")
         ttk.Checkbutton(opt2, text=self.t("paste_enter", "顺序粘贴后自动回车"), variable=self.paste_enter_var, command=self._toggle_paste_enter).pack(side="left", padx=4)
         self.paste_remove_var = tk.BooleanVar(value=self.cfg.get("Config", "PasteRemove", fallback="1") == "1")
         ttk.Checkbutton(opt2, text=self.t("paste_remove", "顺序粘贴后自动删除该条"), variable=self.paste_remove_var, command=self._toggle_paste_remove).pack(side="left", padx=(10, 0))
 
-        mini = ttk.LabelFrame(self, text=self.t("mini_frame", "迷你窗口 (复制/粘贴时自动悬浮)")); mini.pack(fill="x", padx=8, pady=6)
-        ttk.Label(mini, text=self.t("mini_time", "悬浮显示时间(秒, 0=不显示):")).pack(side="left")
+        # 迷你窗口的设置界面已搬进「系统设置」窗口, 这里只建变量供各处读写 (改设置走 _save_mini_settings)
         self.mini_time_var = tk.StringVar(value=self.cfg.get("Config", "MiniFormTime", fallback="5"))
-        _me = ttk.Entry(mini, textvariable=self.mini_time_var, width=5); _me.pack(side="left")
-        _me.bind("<FocusOut>", lambda _e: self._save_mini_settings()); _me.bind("<Return>", lambda _e: self._save_mini_settings())
         self.mini_always_var = tk.BooleanVar(value=self.cfg.get("Config", "MiniFormSet", fallback="0") == "1")
-        ttk.Checkbutton(mini, text=self.t("mini_always", "常显 (不自动隐藏)"), variable=self.mini_always_var, command=self._save_mini_settings).pack(side="left", padx=6)
-        ttk.Button(mini, text=self.t("mini_show_btn", "立即显示"), command=lambda: self.show_mini()).pack(side="left", padx=4)
 
         act = ttk.Frame(self); act.pack(fill="x", padx=8, pady=4)
         for txt, cmd in [(self.t("multi_copy_btn", "多次复制 (加入队列)"), self.multi_copy), (self.t("paste_next_btn", "顺序粘贴下一条"), self.paste_next),
@@ -417,16 +723,20 @@ class App(tk.Tk):
             if self.cfg.get("Config", "AutoRun", fallback="0") == "1":
                 exe = sys.executable
                 cmd = f'"{exe}"' if getattr(sys, "frozen", False) else f'"{exe}" "{os.path.abspath(__file__)}"'
-                winreg.SetValueEx(key, "SnapPaste", 0, winreg.REG_SZ, cmd)
-            else:
-                try: winreg.DeleteValue(key, "SnapPaste")
+                winreg.SetValueEx(key, "SPST", 0, winreg.REG_SZ, cmd)
+                try: winreg.DeleteValue(key, "SnapPaste")  # 清理改名前的自启项, 免得它还指向旧 exe
                 except FileNotFoundError: pass
+            else:
+                for legacy in ("SPST", "SnapPaste"):
+                    try: winreg.DeleteValue(key, legacy)
+                    except FileNotFoundError: pass
             winreg.CloseKey(key)
         except Exception: pass
     def _refresh_mini(self):
         """迷你窗口的列表与主列表保持同步 (迷你窗不带搜索过滤, 行号即记录号; 同样分 序号|文本内容 两列)"""
         try:
             if self._mini_win is None or not self._mini_win.winfo_exists() or not hasattr(self, "_mini_list"): return
+            if not self._mini_win.winfo_viewable(): return  # 迷你窗藏着时不重建 (show_mini 显示后会专门刷一次)
             sel_row = self._mini_row()
             self._mini_list.delete(*self._mini_list.get_children()); self._mini_iids = []
             for i, r in enumerate(self.records):
@@ -488,8 +798,7 @@ class App(tk.Tk):
                 ttk.Button(bar, text="↓", width=3, command=lambda: mini_move(1)).pack(side="left", padx=1)
                 self._mini_list.bind("<Double-Button-1>", mini_goto)
                 self._mini_win = w
-            self._refresh_mini()
-            w = self._mini_win; w.deiconify(); w.lift()
+            w = self._mini_win; w.deiconify(); w.lift(); self._refresh_mini()  # 先显示再刷: _refresh_mini 对不可见窗口会跳过
             if self._mini_after: self.after_cancel(self._mini_after); self._mini_after = None
             if not always: self._mini_after = self.after(secs * 1000, self._hide_mini)
         except Exception: pass
@@ -498,6 +807,36 @@ class App(tk.Tk):
         try:
             if self._mini_win is not None: self._mini_win.withdraw()
         except Exception: pass
+    def _toggle_wave(self):
+        if not self.cfg.has_section("Wave"): self.cfg.add_section("Wave")
+        self.cfg.set("Wave", "WaveSet", "1" if self.wave_var.get() else "0")
+        self.save_config()
+    def open_system_settings(self):
+        """系统设置窗口: 开机自启/语言/提示音/迷你窗口从主窗口各处归拢到一起 (用户要求归类), 改完即存, Esc 关闭"""
+        if getattr(self, "_sys_win", None) is not None:
+            try: self._sys_win.lift(); self._sys_win.focus_set(); return
+            except Exception: self._sys_win = None
+        win = tk.Toplevel(self); self._sys_win = win
+        win.title(self.t("system_settings", "系统设置")); win.resizable(False, False); win.attributes("-topmost", True)
+        def close():
+            self._sys_win = None; win.destroy()
+        win.protocol("WM_DELETE_WINDOW", close); win.bind("<Escape>", lambda e: close())
+        frm = ttk.Frame(win); frm.pack(padx=12, pady=10)
+        ttk.Checkbutton(frm, text=self.t("autorun", "开机自动运行"), variable=self.autorun_var, command=self._toggle_autorun).pack(anchor="w", pady=3)
+        lrow = ttk.Frame(frm); lrow.pack(fill="x", pady=3)
+        ttk.Label(lrow, text=self.t("lang_label", "语言:")).pack(side="left")
+        lang_box = ttk.Combobox(lrow, textvariable=self.lang_var, width=9, state="readonly", values=["Chinese", "English"])
+        lang_box.pack(side="left", padx=4); lang_box.bind("<<ComboboxSelected>>", self._switch_language)
+        ttk.Label(lrow, text=self.t("lang_restart_hint", "(重启后生效)"), foreground="#888888").pack(side="left")
+        ttk.Checkbutton(frm, text=self.t("wave_sound", "提示音 (复制/粘贴成功时响一声)"), variable=self.wave_var, command=self._toggle_wave).pack(anchor="w", pady=3)
+        mfrm = ttk.LabelFrame(frm, text=self.t("mini_frame", "迷你窗口 (复制/粘贴时自动悬浮)")); mfrm.pack(fill="x", pady=(8, 2))
+        mrow = ttk.Frame(mfrm); mrow.pack(fill="x", pady=4, padx=4)
+        ttk.Label(mrow, text=self.t("mini_time", "悬浮显示时间(秒, 0=不显示):")).pack(side="left")
+        me = ttk.Entry(mrow, textvariable=self.mini_time_var, width=5); me.pack(side="left")
+        me.bind("<FocusOut>", lambda _e: self._save_mini_settings()); me.bind("<Return>", lambda _e: self._save_mini_settings())
+        ttk.Checkbutton(mrow, text=self.t("mini_always", "常显 (不自动隐藏)"), variable=self.mini_always_var, command=self._save_mini_settings).pack(side="left", padx=6)
+        ttk.Button(mfrm, text=self.t("mini_show_btn", "立即显示"), command=lambda: self.show_mini()).pack(anchor="w", padx=4, pady=(0, 4))
+        ttk.Button(frm, text=self.t("close", "关闭"), command=close).pack(pady=(10, 0))
     def _switch_language(self, _e=None):
         new = self.lang_var.get().strip()
         if new == self.lang: return
@@ -514,13 +853,18 @@ class App(tk.Tk):
         self._search_after = self.after(120, self.refresh_list)
     def refresh_list(self):
         q = self.search_var.get().strip()
-        self.listbox.delete(*self.listbox.get_children()); self._visible = []; self._row_iids = []
-        for i, r in enumerate(self.records):
-            if q and q not in r["text"]: continue
-            self._visible.append(i)
+        self._visible = [i for i, r in enumerate(self.records) if not q or q in r["text"]]  # 可见行映射是纯数据, 先算好 (别的逻辑要用)
+        self.status.set(f"{self.t('status_total', '当前记录总数')}: {len(self.records)}  |  {self.t('status_progress', '粘贴进度')}: {self.paste_index}/{len(self.records)}")
+        if not self.winfo_viewable():
+            # 主窗口没显示 (在托盘里) 时重建上百行列表看不见也用不上, 每次 F6/F7 都白花几十毫秒:
+            # 只标脏, 窗口重新显示时由 <Map> 钩子补刷一次
+            self._list_dirty = True; self._row_iids = []; self._refresh_mini(); return
+        self._list_dirty = False
+        self.listbox.delete(*self.listbox.get_children()); self._row_iids = []
+        for i in self._visible:
+            r = self.records[i]
             prefix = "🔒 " if r["locked"] else ""
             self._row_iids.append(self.listbox.insert("", "end", values=(i + 1, f"{prefix}{r['text'][:120]}")))
-        self.status.set(f"{self.t('status_total', '当前记录总数')}: {len(self.records)}  |  {self.t('status_progress', '粘贴进度')}: {self.paste_index}/{len(self.records)}")
         self._refresh_mini()
     def load_records(self):
         # 主文件损坏 (异常退出等) 时回退到上次的备份, 别让整个队列静默清零
@@ -688,7 +1032,7 @@ class App(tk.Tk):
                 if seq is not None and before_seq is not None:
                     if seq != before_seq: break
                 elif self.clip_get() != before_text: break
-                time.sleep(0.03)
+                time.sleep(0.015)
         n = len(self.records)
         text = self.clip_get()
         lines = [ln for ln in text.splitlines() if ln.strip()]
@@ -1214,11 +1558,11 @@ class App(tk.Tk):
             messagebox.showerror("缺少 Pillow", "截图功能需要 Pillow: pip install Pillow"); return
         self._snip_was_visible = self.winfo_viewable() == 1  # 截图前主窗口的状态, 结束时按原样恢复 (见 _restore_main_after_snip)
         self._snip_was_foreground = self._foreground_is_self()
-        self.withdraw(); self.update(); time.sleep(0.3)
+        self.withdraw(); self.update(); time.sleep(0.12)  # 等自家窗口从屏幕上消失再抓屏; 旧值 300ms 纯是干等 (真机反馈迟钝)
         try:
             try: full = ImageGrab.grab(all_screens=True)  # 多显示器抓虚拟桌面 (旧 Pillow 无此参数时回退)
             except TypeError: full = ImageGrab.grab()
-            full = full.convert("RGB")  # 统一 RGB: 调色板/灰度图取色和标注才不失真
+            if full.mode != "RGB": full = full.convert("RGB")  # 统一 RGB (抓屏通常已是 RGB, 省掉整图拷贝): 调色板/灰度图取色和标注才不失真
         except Exception as e:
             self._restore_main_after_snip(); messagebox.showerror("截图失败", str(e)); return
         try: ui_mode = int(self.cfg.get("Snip", "UIDetect", fallback="2"))  # UI 检测: 0 不检测 / 1 仅窗口 / 2 检测元素
@@ -2315,7 +2659,7 @@ try {
         url = "https://fanyi-api.baidu.com/api/trans/vip/translate?" + urllib.parse.urlencode(
             {"q": q, "from": "auto", "to": "zh" if target == "zh-CN" else "en",
              "appid": appid, "salt": salt, "sign": sign})
-        req = urllib.request.Request(url, headers={"User-Agent": "SnapPaste"})
+        req = urllib.request.Request(url, headers={"User-Agent": "SPST"})
         with urllib.request.urlopen(req, timeout=12) as r:
             d = _json.loads(r.read().decode("utf-8"))
         if d.get("error_code"): raise RuntimeError(f"百度翻译错误 {d.get('error_code')}: {d.get('error_msg', '')}")
@@ -2331,7 +2675,7 @@ try {
                                        "appKey": appkey, "salt": salt, "sign": sign,
                                        "signType": "v3", "curtime": curtime}).encode("utf-8")
         req = urllib.request.Request("https://openapi.youdao.com/api", data=data,
-                                     headers={"Content-Type": "application/x-www-form-urlencoded", "User-Agent": "SnapPaste"})
+                                     headers={"Content-Type": "application/x-www-form-urlencoded", "User-Agent": "SPST"})
         with urllib.request.urlopen(req, timeout=12) as r:
             d = _json.loads(r.read().decode("utf-8"))
         if str(d.get("errorCode", "0")) != "0": raise RuntimeError(f"有道翻译错误码 {d.get('errorCode')}")
@@ -2343,7 +2687,7 @@ try {
         url = "https://translation.googleapis.com/language/translate/v2?key=" + urllib.parse.quote(apikey)
         data = urllib.parse.urlencode({"q": q, "target": target, "format": "text"}).encode("utf-8")
         req = urllib.request.Request(url, data=data,
-                                     headers={"Content-Type": "application/x-www-form-urlencoded", "User-Agent": "SnapPaste"})
+                                     headers={"Content-Type": "application/x-www-form-urlencoded", "User-Agent": "SPST"})
         with urllib.request.urlopen(req, timeout=12) as r:
             d = _json.loads(r.read().decode("utf-8"))
         if d.get("error"): raise RuntimeError(f"谷歌翻译错误 {d['error'].get('code')}: {d['error'].get('message', '')}")
@@ -2448,7 +2792,7 @@ try {
         def via_mymemory(q):
             src = "zh-CN" if has_cjk else "en"
             url = "https://api.mymemory.translated.net/get?" + urllib.parse.urlencode({"q": q, "langpair": f"{src}|{target}"})
-            req = urllib.request.Request(url, headers={"User-Agent": "SnapPaste"})
+            req = urllib.request.Request(url, headers={"User-Agent": "SPST"})
             with urllib.request.urlopen(req, timeout=12) as r:
                 d = _json.loads(r.read().decode("utf-8"))
             return (d.get("responseData") or {}).get("translatedText") or ""
@@ -2768,6 +3112,10 @@ try {
     # ---------- 系统托盘 (像 Snipaste/PixPin 一样藏在右下角) ----------
     @staticmethod
     def _make_tray_icon():
+        try:  # 优先用内嵌的新图标 (与 EXE 图标同一张图)
+            import io
+            return Image.open(io.BytesIO(base64.b64decode(_ICON_PNG_B64))).convert("RGBA")
+        except Exception: pass
         img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
         d = ImageDraw.Draw(img)
         d.rounded_rectangle([6, 10, 58, 60], radius=8, fill=(30, 144, 255, 255))    # 蓝色底板
@@ -2792,9 +3140,9 @@ try {
                 pystray.MenuItem("截图翻译", lambda icon, item: self._ui_queue.put(self.snip_translate)),
                 pystray.MenuItem("贴剪贴板内容", lambda icon, item: self._ui_queue.put(self.pin_clipboard)),
                 pystray.Menu.SEPARATOR,
-                pystray.MenuItem("退出 SnapPaste", lambda icon, item: self._ui_queue.put(self._quit_app)),
+                pystray.MenuItem("退出 SPST", lambda icon, item: self._ui_queue.put(self._quit_app)),
             )
-            self._tray = pystray.Icon("SnapPaste", self._make_tray_icon(), "SnapPaste 剪贴板工作台", menu)
+            self._tray = pystray.Icon("SPST", self._make_tray_icon(), "SPST 剪贴板工作台", menu)
             threading.Thread(target=self._tray.run, daemon=True).start()
         except Exception:
             self._tray = None
@@ -2811,7 +3159,7 @@ try {
         self.withdraw()
         if not self._tray_notified:
             self._tray_notified = True
-            try: self._tray.notify("SnapPaste 还在后台运行: 点托盘图标打开主窗口, 右键托盘图标可以退出", "已隐藏到托盘")
+            try: self._tray.notify("SPST 还在后台运行: 点托盘图标打开主窗口, 右键托盘图标可以退出", "已隐藏到托盘")
             except Exception: pass
 
     def _quit_app(self):
