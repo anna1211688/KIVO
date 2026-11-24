@@ -24,7 +24,8 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
 APP_NAME = "SnapPaste 复制粘贴+截图贴图"
-VERSION = "1.4.7"  # v1.4.7: 新增一键截图翻译 (F4 预设, 自动检测源语言, 目标语言主窗口可设中文/English) + v1.4.6 的工具栏同窗/图片复制双通道/窗口自适应高度
+VERSION = "1.4.8"  # v1.4.8: 去掉「加载配置/保存配置」按钮 (用户反馈没意义), 所有设置改完自动保存且重开恢复 (分隔方式/自定义分隔符/间隔/分割字符/分割位置)
+# v1.4.7: 新增一键截图翻译 (F4 预设, 自动检测源语言, 目标语言主窗口可设中文/English) + v1.4.6 的工具栏同窗/图片复制双通道/窗口自适应高度
 # v1.4.6: 标注工具栏改冻结屏同窗 Frame (独立小窗真机反复不显示) + 图片复制补全 Win32 签名并加 PowerShell 备用通道 + 主窗口按内容自适应高度 (底部不再被裁)
 # v1.4.5: 数据目录改到 %APPDATA%\SnapPaste, 桌面只剩单个 EXE (老数据首次运行自动从 EXE 旁搬移) + v1.4.4 的 Esc 焦点修复
 # v1.4.4: 修复框选/检测元素阶段 Esc 退不出 (覆盖层被热键从别的程序唤起时抢不到键盘焦点, Esc 落到原程序): 打开覆盖层时用 AttachThreadInput 强抢前台焦点, 并挂临时全局 Esc (覆盖层关闭即注销)
@@ -215,7 +216,8 @@ class App(tk.Tk):
         by_sec = {}
         known_case = {k.lower(): k for k in list(DEFAULT_HOTKEYS) + list(DEFAULT_SNIP_KEYS) +
                       ["SleepTime", "WaveSet", "WaveFile", "AutoRun", "AutoSet", "MiniFormTime", "MiniFormSet", "Language", "PasteEnter", "PasteRemove",
-                       "SplitPos", "AddChar", "LetterSet", "HotKey", "OCAutoSet", "Form1XY", "Form2XY", "UIDetect", "HistoryMax", "DelaySeconds"]}
+                       "SplitPos", "AddChar", "LetterSet", "HotKey", "OCAutoSet", "Form1XY", "Form2XY", "UIDetect", "HistoryMax", "DelaySeconds",
+                       "Separator", "CustomSep", "SplitChar", "RegexSel", "CaseSel", "TransTarget"]}
         for (sec, k), v in pending.items(): by_sec.setdefault(sec, []).append((known_case.get(k, k), v))
         for sec, items in by_sec.items():
             headers = [i for i, ln in enumerate(out) if ln.strip().lower() == f"[{sec.lower()}]"]
@@ -231,8 +233,7 @@ class App(tk.Tk):
     # ---------- UI ----------
     def build_ui(self):
         bar = ttk.Frame(self); bar.pack(fill="x", padx=8, pady=6)
-        for txt, cmd in [(self.t("load_config", "加载配置"), self.reload), (self.t("save_config", "保存配置"), self.save_config),
-                         (self.t("hotkey_settings", "热键设置"), self.open_hotkey_dialog),
+        for txt, cmd in [(self.t("hotkey_settings", "热键设置"), self.open_hotkey_dialog),
                          (self.t("import_text", "导入文本"), self.import_txt), (self.t("export_text", "导出文本"), self.export_txt)]:
             ttk.Button(bar, text=txt, command=cmd).pack(side="left", padx=2)
         self.search_var = tk.StringVar(); self.search_var.trace_add("write", lambda *a: self.refresh_list())
@@ -261,13 +262,17 @@ class App(tk.Tk):
         opt = ttk.LabelFrame(self, text=self.t("paste_options", "粘贴选项")); opt.pack(fill="x", padx=8, pady=6)
         opt1 = ttk.Frame(opt); opt1.pack(fill="x")
         opt2 = ttk.Frame(opt); opt2.pack(fill="x", pady=(4, 0))
-        self.sep_var = tk.StringVar(value="enter")
+        self.sep_var = tk.StringVar(value=self.cfg.get("Config", "Separator", fallback="enter"))
         for txt, val in [(self.t("sep_enter", "记录间回车"), "enter"), (self.t("sep_tab", "记录间 TAB"), "tab"), (self.t("sep_none", "无分隔"), "none")]:
-            ttk.Radiobutton(opt1, text=txt, variable=self.sep_var, value=val).pack(side="left", padx=4)
-        ttk.Label(opt1, text=self.t("custom", "自定义:")).pack(side="left"); self.custom_sep = ttk.Entry(opt1, width=6); self.custom_sep.pack(side="left")
+            ttk.Radiobutton(opt1, text=txt, variable=self.sep_var, value=val, command=self._save_entry_settings).pack(side="left", padx=4)
+        ttk.Label(opt1, text=self.t("custom", "自定义:")).pack(side="left")
+        self.custom_sep_var = tk.StringVar(value=self.cfg.get("Config", "CustomSep", fallback=""))
+        self.custom_sep = ttk.Entry(opt1, width=6, textvariable=self.custom_sep_var); self.custom_sep.pack(side="left")
+        self.custom_sep.bind("<FocusOut>", lambda _e: self._save_entry_settings()); self.custom_sep.bind("<Return>", lambda _e: self._save_entry_settings())
         ttk.Label(opt1, text=self.t("interval", "间隔(ms):")).pack(side="left", padx=(10,0))
         self.sleep_var = tk.StringVar(value=str(self.sleep_ms))
-        ttk.Entry(opt1, textvariable=self.sleep_var, width=6).pack(side="left")
+        _sle = ttk.Entry(opt1, textvariable=self.sleep_var, width=6); _sle.pack(side="left")
+        _sle.bind("<FocusOut>", lambda _e: self._save_entry_settings()); _sle.bind("<Return>", lambda _e: self._save_entry_settings())
         self.autorun_var = tk.BooleanVar(value=self.cfg.get("Config", "AutoRun", fallback="0") == "1")
         ttk.Checkbutton(opt1, text=self.t("autorun", "开机自动运行"), variable=self.autorun_var, command=self._toggle_autorun).pack(side="left", padx=(10, 0))
         self.paste_enter_var = tk.BooleanVar(value=self.cfg.get("Config", "PasteEnter", fallback="0") == "1")
@@ -290,13 +295,19 @@ class App(tk.Tk):
             ttk.Button(act, text=txt, command=cmd).pack(side="left", padx=2)
 
         split = ttk.LabelFrame(self, text=self.t("split_frame", "剪切/复制时分割 (可选)")); split.pack(fill="x", padx=8, pady=6)
-        ttk.Label(split, text=self.t("split_char", "分割字符:")).pack(side="left"); self.split_entry = ttk.Entry(split, width=8); self.split_entry.pack(side="left")
-        self.regex_var = tk.StringVar(value="")
+        ttk.Label(split, text=self.t("split_char", "分割字符:")).pack(side="left")
+        self.split_var = tk.StringVar(value=self.cfg.get("Config", "SplitChar", fallback=""))
+        self.split_entry = ttk.Entry(split, width=8, textvariable=self.split_var); self.split_entry.pack(side="left")
+        self.split_entry.bind("<FocusOut>", lambda _e: self._save_entry_settings()); self.split_entry.bind("<Return>", lambda _e: self._save_entry_settings())
+        self.regex_var = tk.StringVar(value=self.cfg.get("Config", "RegexSel", fallback=""))
         ttk.Combobox(split, textvariable=self.regex_var, width=14, values=["", self.t("regex_numbers", "所有数字"), self.t("regex_lower", "所有小写字母"), self.t("regex_upper", "所有大写字母"), self.t("regex_enter", "回车符"), self.t("regex_tab", "制表符")]).pack(side="left", padx=4)
-        self.case_var = tk.StringVar(value="")
+        self.case_var = tk.StringVar(value=self.cfg.get("Config", "CaseSel", fallback=""))
         ttk.Combobox(split, textvariable=self.case_var, width=10, values=["", self.t("case_upper", "转大写"), self.t("case_lower", "转小写")]).pack(side="left", padx=4)
-        self.splitpos_var = tk.StringVar(value=self.t("splitpos_none", "不保留分隔符"))
-        ttk.Combobox(split, textvariable=self.splitpos_var, width=12, values=[self.t("splitpos_none", "不保留分隔符"), self.t("splitpos_after", "分隔符留在前段"), self.t("splitpos_before", "分隔符留在后段")]).pack(side="left", padx=4)
+        self._splitpos_values = [self.t("splitpos_none", "不保留分隔符"), self.t("splitpos_after", "分隔符留在前段"), self.t("splitpos_before", "分隔符留在后段")]
+        try: _sp_idx = int(self.cfg.get("Config", "SplitPos", fallback="0"))
+        except Exception: _sp_idx = 0
+        self.splitpos_var = tk.StringVar(value=self._splitpos_values[_sp_idx if 0 <= _sp_idx < 3 else 0])
+        ttk.Combobox(split, textvariable=self.splitpos_var, width=12, values=self._splitpos_values).pack(side="left", padx=4)
         ttk.Button(split, text=self.t("split_import_btn", "按分割导入剪贴板"), command=self.import_clipboard_split).pack(side="left", padx=4)
 
         snip = ttk.LabelFrame(self, text=self.t("snip_frame", "截图贴图 (合并自 Snipaste 核心功能, 需 Pillow)"))
@@ -322,6 +333,8 @@ class App(tk.Tk):
         self.status = tk.StringVar(value=self.t("ready", "就绪"))
         ttk.Label(self, textvariable=self.status, anchor="w").pack(fill="x", padx=8, pady=4)
         self.bind("<Delete>", lambda e: self.delete_sel())
+        for _v in (self.regex_var, self.case_var, self.splitpos_var):  # 分割区的下拉改完即存
+            _v.trace_add("write", lambda *_: self._save_entry_settings())
 
     def _toggle_autorun(self):
         if not self.cfg.has_section("Config"): self.cfg.add_section("Config")
@@ -330,6 +343,20 @@ class App(tk.Tk):
     def _toggle_paste_enter(self):
         if not self.cfg.has_section("Config"): self.cfg.add_section("Config")
         self.cfg.set("Config", "PasteEnter", "1" if self.paste_enter_var.get() else "0")
+        self.save_config()
+    def _save_entry_settings(self):
+        # 分隔方式/自定义分隔符/间隔/分割字符/分割区下拉: 改完即存 (v1.4.8 起去掉「保存配置」按钮, 全部设置自动保存)
+        if not self.cfg.has_section("Config"): self.cfg.add_section("Config")
+        self.cfg.set("Config", "Separator", self.sep_var.get())
+        self.cfg.set("Config", "CustomSep", self.custom_sep_var.get())
+        v = (self.sleep_var.get() or "80").strip()
+        self.cfg.set("Config", "SleepTime", v if v.isdigit() else "80")
+        self.cfg.set("Config", "SplitChar", self.split_var.get())
+        self.cfg.set("Config", "RegexSel", self.regex_var.get())
+        self.cfg.set("Config", "CaseSel", self.case_var.get())
+        try: idx = self._splitpos_values.index(self.splitpos_var.get())
+        except Exception: idx = 0
+        self.cfg.set("Config", "SplitPos", str(idx))
         self.save_config()
     def _save_ui_detect(self):
         if not self.cfg.has_section("Snip"): self.cfg.add_section("Snip")
@@ -754,8 +781,6 @@ class App(tk.Tk):
     def export_txt(self):
         p = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("文本", "*.txt")])
         if p: open(p, "w", encoding="utf-8").write(self.separator().join(r["text"] for r in self.records))
-    def reload(self):
-        self.cfg = self.load_config(); self.sleep_var.set(str(self.sleep_ms)); self.apply_hotkeys(); self.refresh_list()
     def delete_last(self):
         for i in range(len(self.records) - 1, -1, -1):
             if not self.records[i]["locked"]:
@@ -765,7 +790,7 @@ class App(tk.Tk):
         self.save_records(); self.refresh_list()
 
     # ---------- 自定义热键 ----------
-    # Config.ini [HotKey] 字段 -> (显示名, 动作). 用户在「热键设置」里改, 也可直接改 ini 后点「加载配置」。
+    # Config.ini [HotKey] 字段 -> (显示名, 动作). 用户在「热键设置」里改; 也可直接改 ini, 重启后生效。
     def hotkey_actions(self):
         # (section, key, 显示名, 动作)
         return [("HotKey", "HotKey1", self.t("hk_select_all", "全选"), self.act_select_all),
