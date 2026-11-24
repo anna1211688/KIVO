@@ -24,7 +24,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
 APP_NAME = "SnapPaste 复制粘贴+截图贴图"
-VERSION = "1.4.9"  # v1.4.9: 截图贴图标题去括号说明; 截图完主窗口不再自动弹出; 历史画廊改名历史截图+删除全部 (含 GIF); 标注加自定义取色; 翻译服务接口 (免费/百度/有道+密钥); F4 改有道式嵌图翻译+对照窗
+VERSION = "1.4.10"  # v1.4.10: 翻译服务新增谷歌翻译 (Google Cloud, 只需 API 密钥)
 # v1.4.7: 新增一键截图翻译 (F4 预设, 自动检测源语言, 目标语言主窗口可设中文/English) + v1.4.6 的工具栏同窗/图片复制双通道/窗口自适应高度
 # v1.4.6: 标注工具栏改冻结屏同窗 Frame (独立小窗真机反复不显示) + 图片复制补全 Win32 签名并加 PowerShell 备用通道 + 主窗口按内容自适应高度 (底部不再被裁)
 # v1.4.5: 数据目录改到 %APPDATA%\SnapPaste, 桌面只剩单个 EXE (老数据首次运行自动从 EXE 旁搬移) + v1.4.4 的 Esc 焦点修复
@@ -218,7 +218,7 @@ class App(tk.Tk):
                       ["SleepTime", "WaveSet", "WaveFile", "AutoRun", "AutoSet", "MiniFormTime", "MiniFormSet", "Language", "PasteEnter", "PasteRemove",
                        "SplitPos", "AddChar", "LetterSet", "HotKey", "OCAutoSet", "Form1XY", "Form2XY", "UIDetect", "HistoryMax", "DelaySeconds",
                        "Separator", "CustomSep", "SplitChar", "RegexSel", "CaseSel", "TransTarget",
-                       "Service", "BaiduAppId", "BaiduKey", "YoudaoAppId", "YoudaoSecret"]}
+                       "Service", "BaiduAppId", "BaiduKey", "YoudaoAppId", "YoudaoSecret", "GoogleKey"]}
         for (sec, k), v in pending.items(): by_sec.setdefault(sec, []).append((known_case.get(k, k), v))
         for sec, items in by_sec.items():
             headers = [i for i, ln in enumerate(out) if ln.strip().lower() == f"[{sec.lower()}]"]
@@ -2093,9 +2093,10 @@ try {
     def _trans_cfg(self):
         g = lambda k, d="": (self.cfg.get("Translate", k, fallback=d) or d).strip()
         svc = g("Service", "free") or "free"
-        return {"service": svc if svc in ("free", "baidu", "youdao") else "free",
+        return {"service": svc if svc in ("free", "baidu", "youdao", "google") else "free",
                 "baidu_id": g("BaiduAppId"), "baidu_key": g("BaiduKey"),
-                "youdao_id": g("YoudaoAppId"), "youdao_secret": g("YoudaoSecret")}
+                "youdao_id": g("YoudaoAppId"), "youdao_secret": g("YoudaoSecret"),
+                "google_key": g("GoogleKey")}
     @staticmethod
     def _baidu_translate(q, target, appid, key):
         """百度翻译开放平台: sign = md5(appid+q+salt+密钥), 成功返回译文, 出错抛异常 (带错误码)。"""
@@ -2126,11 +2127,25 @@ try {
             d = _json.loads(r.read().decode("utf-8"))
         if str(d.get("errorCode", "0")) != "0": raise RuntimeError(f"有道翻译错误码 {d.get('errorCode')}")
         return "\n".join(d.get("translation") or [])
+    @staticmethod
+    def _google_translate(q, target, apikey):
+        """谷歌云翻译 API v2 (只需 API 密钥): 成功返回译文 (HTML 实体已还原), 出错抛异常。"""
+        import urllib.request, urllib.parse, json as _json, html as _html
+        url = "https://translation.googleapis.com/language/translate/v2?key=" + urllib.parse.quote(apikey)
+        data = urllib.parse.urlencode({"q": q, "target": target, "format": "text"}).encode("utf-8")
+        req = urllib.request.Request(url, data=data,
+                                     headers={"Content-Type": "application/x-www-form-urlencoded", "User-Agent": "SnapPaste"})
+        with urllib.request.urlopen(req, timeout=12) as r:
+            d = _json.loads(r.read().decode("utf-8"))
+        if d.get("error"): raise RuntimeError(f"谷歌翻译错误 {d['error'].get('code')}: {d['error'].get('message', '')}")
+        trs = (d.get("data") or {}).get("translations") or []
+        return _html.unescape(trs[0].get("translatedText", "")) if trs else ""
     def open_translate_settings(self):
         """翻译服务设置窗 (仿 PixPin): 选服务 + 填 APP ID/密钥 + 测试; 密钥只存本机 Config.ini 的 [Translate] 段。"""
         tc = self._trans_cfg()
-        names = {"free": "免费接口 (无需密钥)", "baidu": "百度翻译开放平台", "youdao": "有道翻译"}
-        creds = {"baidu": [tc["baidu_id"], tc["baidu_key"]], "youdao": [tc["youdao_id"], tc["youdao_secret"]]}
+        names = {"free": "免费接口 (无需密钥)", "baidu": "百度翻译开放平台", "youdao": "有道翻译", "google": "谷歌翻译 (Google Cloud)"}
+        creds = {"baidu": [tc["baidu_id"], tc["baidu_key"]], "youdao": [tc["youdao_id"], tc["youdao_secret"]],
+                 "google": ["", tc["google_key"]]}
         cur = {"service": tc["service"]}
         win = tk.Toplevel(self); win.title("翻译服务设置"); win.geometry("470x300"); win.attributes("-topmost", True)
         ttk.Label(win, text="翻译服务:").grid(row=0, column=0, sticky="e", padx=8, pady=8)
@@ -2145,14 +2160,15 @@ try {
         def load_fields():
             pair = creds.get(cur["service"], ["", ""])
             id_var.set(pair[0]); key_var.set(pair[1])
-            st = "normal" if cur["service"] != "free" else "disabled"
-            id_entry.configure(state=st); key_entry.configure(state=st)
+            # 谷歌只需要 API 密钥 (没有 APP ID); 免费接口两个都不用填
+            id_entry.configure(state="normal" if cur["service"] in ("baidu", "youdao") else "disabled")
+            key_entry.configure(state="disabled" if cur["service"] == "free" else "normal")
         def on_svc(*_):
             creds[cur["service"]] = [id_var.get().strip(), key_var.get().strip()]  # 先收走当前服务的输入再切换
             cur["service"] = {v: k for k, v in names.items()}[svc_var.get()]
             load_fields()
         svc_var.trace_add("write", on_svc)
-        ttk.Label(win, text="百度/有道要到各自开放平台免费申请 APP ID 和密钥; 只保存在本机, 不上传别处。\n没填密钥或接口出错时, 自动用免费接口翻译。", foreground="#888888").grid(row=3, column=0, columnspan=2, padx=8, pady=4, sticky="w")
+        ttk.Label(win, text="百度/有道到各自开放平台免费申请 APP ID 和密钥; 谷歌在 Google Cloud 开通翻译 API 后创建 API 密钥 (只需填密钥栏)。\n密钥只保存在本机, 不上传别处; 没填或接口出错时自动用免费接口翻译。", foreground="#888888").grid(row=3, column=0, columnspan=2, padx=8, pady=4, sticky="w")
         test_var = tk.StringVar()
         ttk.Label(win, textvariable=test_var, foreground="#0070FF", wraplength=440).grid(row=4, column=0, columnspan=2, padx=8, sticky="w")
         btns = ttk.Frame(win); btns.grid(row=5, column=0, columnspan=2, pady=10)
@@ -2169,6 +2185,9 @@ try {
                     elif svc_key == "youdao":
                         if not all(pair): raise RuntimeError("先填 APP ID 和密钥")
                         r = self._youdao_translate("Hello, nice to meet you.", "zh-CN", pair[0], pair[1])
+                    elif svc_key == "google":
+                        if not pair[1]: raise RuntimeError("先填 API 密钥")
+                        r = self._google_translate("Hello, nice to meet you.", "zh-CN", pair[1])
                     else:
                         r = self.translate_text_to("Hello, nice to meet you.", "zh-CN")
                     msg = f"测试成功: Hello, nice to meet you. → {r}" if r else "测试失败: 没拿到译文"
@@ -2183,6 +2202,7 @@ try {
             self.cfg.set("Translate", "Service", cur["service"])
             self.cfg.set("Translate", "BaiduAppId", creds["baidu"][0]); self.cfg.set("Translate", "BaiduKey", creds["baidu"][1])
             self.cfg.set("Translate", "YoudaoAppId", creds["youdao"][0]); self.cfg.set("Translate", "YoudaoSecret", creds["youdao"][1])
+            self.cfg.set("Translate", "GoogleKey", creds["google"][1])
             self.save_config()
             self.status.set(f"翻译服务已保存: {names[cur['service']]}")
             win.destroy()
@@ -2228,6 +2248,8 @@ try {
                 return self._baidu_translate(q, target, tc["baidu_id"], tc["baidu_key"])
             if tc["service"] == "youdao" and tc["youdao_id"] and tc["youdao_secret"]:
                 return self._youdao_translate(q, target, tc["youdao_id"], tc["youdao_secret"])
+            if tc["service"] == "google" and tc["google_key"]:
+                return self._google_translate(q, target, tc["google_key"])
             return ""
         out = []
         for g in groups:
