@@ -24,7 +24,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
 APP_NAME = "SnapPaste 复制粘贴+截图贴图"
-VERSION = "1.4.10"  # v1.4.10: 翻译服务新增谷歌翻译 (Google Cloud, 只需 API 密钥)
+VERSION = "1.4.11"  # v1.4.11: 翻译结果窗改有道式: 检测语言⇄目标语言 (中/英可切换重译) + 对照翻译开关 (关只显译图, 偏好记忆)
 # v1.4.7: 新增一键截图翻译 (F4 预设, 自动检测源语言, 目标语言主窗口可设中文/English) + v1.4.6 的工具栏同窗/图片复制双通道/窗口自适应高度
 # v1.4.6: 标注工具栏改冻结屏同窗 Frame (独立小窗真机反复不显示) + 图片复制补全 Win32 签名并加 PowerShell 备用通道 + 主窗口按内容自适应高度 (底部不再被裁)
 # v1.4.5: 数据目录改到 %APPDATA%\SnapPaste, 桌面只剩单个 EXE (老数据首次运行自动从 EXE 旁搬移) + v1.4.4 的 Esc 焦点修复
@@ -218,7 +218,7 @@ class App(tk.Tk):
                       ["SleepTime", "WaveSet", "WaveFile", "AutoRun", "AutoSet", "MiniFormTime", "MiniFormSet", "Language", "PasteEnter", "PasteRemove",
                        "SplitPos", "AddChar", "LetterSet", "HotKey", "OCAutoSet", "Form1XY", "Form2XY", "UIDetect", "HistoryMax", "DelaySeconds",
                        "Separator", "CustomSep", "SplitChar", "RegexSel", "CaseSel", "TransTarget",
-                       "Service", "BaiduAppId", "BaiduKey", "YoudaoAppId", "YoudaoSecret", "GoogleKey"]}
+                       "Service", "BaiduAppId", "BaiduKey", "YoudaoAppId", "YoudaoSecret", "GoogleKey", "TransCompare"]}
         for (sec, k), v in pending.items(): by_sec.setdefault(sec, []).append((known_case.get(k, k), v))
         for sec, items in by_sec.items():
             headers = [i for i, ln in enumerate(out) if ln.strip().lower() == f"[{sec.lower()}]"]
@@ -2318,8 +2318,19 @@ try {
                 size = max(8, size - 2); font = App._load_font(size)
             dr.text((x, y + max(0, (h - size) // 2)), tr, fill=fg, font=font)
         return out
+    def _translate_lines(self, lines, target):
+        """逐行翻译 (嵌图翻译用): 纯数字/符号行原样保留; 返回 (译文列表, 是否有任一行译成功)。"""
+        translations, any_ok = [], False
+        for ln in lines:
+            t = ln["t"]
+            if not re.search(r"[A-Za-z\u4e00-\u9fff]", t):
+                translations.append(t); continue
+            r = self.translate_text_to(t, target)
+            if r: any_ok = True; translations.append(r)
+            else: translations.append(t)
+        return translations, any_ok
     def translate_image_inplace(self, img, target=None):
-        """有道式截图翻译: OCR 每行文字+位置 -> 逐行翻译 -> 译文绘回原图 -> 弹原图/译图对照窗。
+        """有道式截图翻译: OCR 每行文字+位置 -> 逐行翻译 -> 译文绘回原图 -> 弹翻译结果窗 (可切换目标语言/对照开关)。
         拿不到行坐标时回退到原来的纯文字翻译流程。"""
         import threading
         def work():
@@ -2330,53 +2341,92 @@ try {
             if tgt is None:
                 joined = "".join(l["t"] for l in lines)
                 tgt = "en" if any("\u4e00" <= ch <= "\u9fff" for ch in joined) else "zh-CN"
-            translations, any_ok = [], False
-            for ln in lines:
-                t = ln["t"]
-                if not re.search(r"[A-Za-z\u4e00-\u9fff]", t):
-                    translations.append(t); continue  # 纯数字/符号行原样保留
-                r = self.translate_text_to(t, tgt)
-                if r: any_ok = True; translations.append(r)
-                else: translations.append(t)
+            translations, any_ok = self._translate_lines(lines, tgt)
             if not any_ok:
                 self._ui_queue.put(lambda: messagebox.showinfo("截图翻译", "翻译失败: 在线翻译接口没连上, 检查网络后重试。")); return
-            translated = self._render_translated(img, lines, translations)
-            pairs = [(l["t"], t) for l, t in zip(lines, translations)]
-            self._ui_queue.put(lambda: self.show_translate_compare(img, translated, pairs))
+            self._ui_queue.put(lambda: self.show_translate_compare(img, lines, tgt, translations))
         threading.Thread(target=work, daemon=True).start()
-    def show_translate_compare(self, orig, translated, pairs):
-        """原图/译图对照窗 (仿有道截图翻译结果): 宽图左右对照, 高图上下对照; 译图可复制/保存/钉图。"""
-        win = tk.Toplevel(self); win.title("截图翻译 - 原图/译图对照"); win.attributes("-topmost", True)
+    def show_translate_compare(self, orig, lines, target, translations):
+        """截图翻译结果窗 (仿有道): 顶部 检测到源语言 ⇄ 目标语言 (中文/English 可切换, 切换即重新翻译);
+        「对照翻译」开 = 原图+译图双语对照, 关 = 只显示译图; 译图可复制/保存/钉图, 译文可复制。"""
+        import threading
+        joined = "".join(l["t"] for l in lines)
+        src_name = "中文" if any("\u4e00" <= ch <= "\u9fff" for ch in joined) else "英语"
+        st = {"target": target, "translations": list(translations),
+              "img": self._render_translated(orig, lines, translations)}
+        win = tk.Toplevel(self); win.title("截图翻译结果"); win.attributes("-topmost", True)
+        head = ttk.Frame(win); head.pack(side="top", fill="x", padx=8, pady=6)
+        ttk.Label(head, text=f"检测到{src_name}").pack(side="left")
+        ttk.Label(head, text=" ⇄ ").pack(side="left")
+        tgt_var = tk.StringVar(value="中文" if target == "zh-CN" else "English")
+        tgt_combo = ttk.Combobox(head, textvariable=tgt_var, values=["中文", "English"], width=8, state="readonly")
+        tgt_combo.pack(side="left")
+        compare_var = tk.BooleanVar(value=(self.cfg.get("Snip", "TransCompare", fallback="1") or "1") != "0")
+        ttk.Checkbutton(head, text="对照翻译", variable=compare_var).pack(side="left", padx=10)
+        busy_var = tk.StringVar(); ttk.Label(head, textvariable=busy_var, foreground="#0070FF").pack(side="left", padx=4)
         bar = ttk.Frame(win); bar.pack(side="bottom", fill="x", padx=8, pady=6)
         body = ttk.Frame(win); body.pack(fill="both", expand=True)
         ow, oh = orig.size
-        side = ow >= oh
-        scale = min(1.0, 740 / ow, 840 / oh) if side else min(1.0, 760 / ow, 700 / oh)
-        def photo(im):
-            if scale < 1.0: im = im.resize((max(1, int(ow * scale)), max(1, int(oh * scale))), Image.LANCZOS)
-            return ImageTk.PhotoImage(im)
-        win._photos = [photo(orig), photo(translated)]
-        def pane(title, ph):
-            f = ttk.Frame(body)
-            ttk.Label(f, text=title).pack()
-            tk.Label(f, image=ph).pack()
-            return f
-        if side:
-            pane("原图", win._photos[0]).pack(side="left", padx=6, pady=6)
-            pane("译图", win._photos[1]).pack(side="left", padx=6, pady=6)
-        else:
-            pane("原图", win._photos[0]).pack(padx=6, pady=6)
-            pane("译图", win._photos[1]).pack(padx=6, pady=6)
+        def layout():
+            for c in body.winfo_children(): c.destroy()
+            side = ow >= oh
+            if compare_var.get():
+                scale = min(1.0, 740 / ow, 840 / oh) if side else min(1.0, 760 / ow, 700 / oh)
+            else:
+                scale = min(1.0, 1480 / ow, 860 / oh)
+            def photo(im):
+                if scale < 1.0: im = im.resize((max(1, int(ow * scale)), max(1, int(oh * scale))), Image.LANCZOS)
+                return ImageTk.PhotoImage(im)
+            win._photos = []
+            def pane(title, im):
+                ph = photo(im); win._photos.append(ph)
+                f = ttk.Frame(body)
+                ttk.Label(f, text=title).pack()
+                tk.Label(f, image=ph).pack()
+                return f
+            if compare_var.get():
+                if side:
+                    pane("原图", orig).pack(side="left", padx=6, pady=6)
+                    pane("译图", st["img"]).pack(side="left", padx=6, pady=6)
+                else:
+                    pane("原图", orig).pack(padx=6, pady=6)
+                    pane("译图", st["img"]).pack(padx=6, pady=6)
+            else:
+                pane("译图", st["img"]).pack(padx=6, pady=6)
+        def on_compare():
+            if not self.cfg.has_section("Snip"): self.cfg.add_section("Snip")
+            self.cfg.set("Snip", "TransCompare", "1" if compare_var.get() else "0"); self.save_config()
+            layout()
+        for wdg in head.winfo_children():
+            if isinstance(wdg, ttk.Checkbutton): wdg.configure(command=on_compare)
+        def retranslate(*_):
+            new_tgt = "zh-CN" if tgt_var.get() == "中文" else "en"
+            if new_tgt == st["target"]: return
+            tgt_combo.configure(state="disabled"); busy_var.set("翻译中…")
+            def work():
+                trs, ok = self._translate_lines(lines, new_tgt)
+                def done():
+                    tgt_combo.configure(state="readonly"); busy_var.set("")
+                    if not ok:
+                        busy_var.set("翻译失败, 已保留当前译文")
+                        tgt_var.set("中文" if st["target"] == "zh-CN" else "English"); return
+                    st["target"] = new_tgt; st["translations"] = trs
+                    st["img"] = self._render_translated(orig, lines, trs)
+                    layout()
+                self._ui_queue.put(done)
+            threading.Thread(target=work, daemon=True).start()
+        tgt_var.trace_add("write", retranslate)
         copy_btn = ttk.Button(bar, text="复制译图")
         def do_copy():
-            ok = self._copy_image_to_clipboard(translated)
+            ok = self._copy_image_to_clipboard(st["img"])
             copy_btn.config(text="已复制 ✓" if ok else "复制失败")
             win.after(1200, lambda: copy_btn.config(text="复制译图"))
         copy_btn.config(command=do_copy); copy_btn.pack(side="left", padx=2)
-        ttk.Button(bar, text="保存译图", command=lambda: (self.save_shot(translated), self.status.set("译图已存进历史截图"))).pack(side="left", padx=2)
-        ttk.Button(bar, text="钉住译图", command=lambda: self.pin_image(translated)).pack(side="left", padx=2)
-        ttk.Button(bar, text="复制译文", command=lambda: self.clip_set("\n".join(t for _o, t in pairs))).pack(side="left", padx=2)
+        ttk.Button(bar, text="保存译图", command=lambda: (self.save_shot(st["img"]), self.status.set("译图已存进历史截图"))).pack(side="left", padx=2)
+        ttk.Button(bar, text="钉住译图", command=lambda: self.pin_image(st["img"])).pack(side="left", padx=2)
+        ttk.Button(bar, text="复制译文", command=lambda: self.clip_set("\n".join(st["translations"]))).pack(side="left", padx=2)
         ttk.Button(bar, text="关闭", command=win.destroy).pack(side="right", padx=2)
+        layout()
     def translate_image(self, img, target=None):
         """对一张图先 OCR 再翻译 (都在后台线程跑, 不冻结界面)。target 给定则译到该语言 (源语言自动检测), 否则英<->中互译"""
         import threading
