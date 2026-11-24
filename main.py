@@ -323,7 +323,7 @@ _ICON_PNG_B64 = (
     "fhKa7I1ceuRULY1torkdtZwuvMul1WcAGrWturLY7VdKa1XpyG33Z+bD4SMJwscZY05QwglgjgAOAVmDMAoqDZJJSv7YLHWNn5T8"
     "UdJSAsqgZgWZUvCYoB5SWt8l6Luc0NlecdWD9U04qrrgCofdGxTnnmtWS2kfp/8PwxajA1prQxYAAAAASUVORK5CYII="
 )
-VERSION = "1.4.15"  # v1.4.15: 正式改名 SPST (标题/托盘/自启项/EXE 名 SPST.exe, 数据目录 %APPDATA%\SPST 并自动搬移旧 SnapPaste 数据); 新图标+logo (SPST 字母融入剪贴板图标, 内嵌窗口/托盘, SPST.ico 作 EXE 图标); 性能优化 (热键队列轮询 60->15ms, 截图干等 300->120ms, 窗口隐藏时不重建列表); 新增「系统设置」窗口 (开机自启/语言/提示音/迷你窗口归拢)
+VERSION = "1.4.16"  # v1.4.16: 深度审查修复 7 项 (间隔写非法值导致下次启动崩溃的连锁 bug; 去重/满 2000 条丢弃时粘贴进度同步, 不再跳条; GIF 录制帧数封顶 200+宽度 960 防内存爆; 热键录入按 Esc 取消并还原, 不再把 escape 录成热键; 延时截图防重复排队; 历史清理把 GIF 一并计入上限)
 # v1.4.7: 新增一键截图翻译 (F4 预设, 自动检测源语言, 目标语言主窗口可设中文/English) + v1.4.6 的工具栏同窗/图片复制双通道/窗口自适应高度
 # v1.4.6: 标注工具栏改冻结屏同窗 Frame (独立小窗真机反复不显示) + 图片复制补全 Win32 签名并加 PowerShell 备用通道 + 主窗口按内容自适应高度 (底部不再被裁)
 # v1.4.5: 数据目录改到 %APPDATA%\SnapPaste, 桌面只剩单个 EXE (老数据首次运行自动从 EXE 旁搬移) + v1.4.4 的 Esc 焦点修复
@@ -563,7 +563,9 @@ class App(tk.Tk):
                 out += [f"[{sec}]"] + [f"{k}={v}" for k, v in items]
         _atomic_write(CONFIG_PATH, "\n".join(out) + "\n")
     @property
-    def sleep_ms(self): return max(10, self.cfg.getint("Config", "SleepTime", fallback=80))
+    def sleep_ms(self):
+        try: return max(10, self.cfg.getint("Config", "SleepTime", fallback=80))
+        except Exception: return 80  # 间隔被写成非数字 (旧版托盘保存没校验) 时别让软件启动就崩
 
     # ---------- UI ----------
     def build_ui(self):
@@ -891,6 +893,7 @@ class App(tk.Tk):
             idx = next((i for i, r in enumerate(self.records[:-1]) if not r["locked"]), None)
             if idx is None: break
             del self.records[idx]
+            if idx < self.paste_index: self.paste_index -= 1  # 丢的是已粘过的旧条, 进度跟着退一格, 不跳条
         if save: self.save_records()  # 批量场景由调用方最后统一 save 一次, 免得几百行粘贴写几百遍文件卡顿
     def selected_idx(self):
         """列表选中的是第几条 records (经搜索过滤映射); 没选返回 -1"""
@@ -918,10 +921,14 @@ class App(tk.Tk):
             self.records[i], self.records[j] = self.records[j], self.records[i]; self.save_records(); self.refresh_list()
             if j in self._visible: self.listbox.selection_set(self._row_iids[self._visible.index(j)])
     def dedupe(self):
+        old_index = self.paste_index
         seen, out = set(), []
-        for r in self.records:
-            if r["text"] not in seen: seen.add(r["text"]); out.append(r)
-        self.records = out; self.save_records(); self.refresh_list()
+        kept_before = 0  # 进度之前被保留下来的条数 = 去重后的新进度 (被删的正好是进度那条时, 指向它后面的第一条保留记录)
+        for i, r in enumerate(self.records):
+            if r["text"] not in seen:
+                seen.add(r["text"]); out.append(r)
+                if i < old_index: kept_before += 1
+        self.records = out; self.paste_index = kept_before; self.save_records(); self.refresh_list()
 
     # ---------- clipboard ----------
     def clip_get(self):
@@ -1166,8 +1173,10 @@ class App(tk.Tk):
             for enc in ("utf-8-sig", "gbk"):
                 try: lines = raw.decode(enc).splitlines(); break
                 except Exception: lines = []
+            n0 = len(self.records)
             for ln in lines: self.add_record(ln, save=False)
             self.save_records(); self.refresh_list()
+            if len(self.records) == n0: self.status.set("导入文本: 没读到可导入的内容 (文件编码无法识别或内容为空/全是重复)")
     def export_txt(self):
         p = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("文本", "*.txt")])
         if p:
@@ -1308,8 +1317,10 @@ class App(tk.Tk):
             var = tk.StringVar(value=self.cfg.get(section, cfg_key, fallback="无")); vars_[(section, cfg_key)] = var
             entry = ttk.Entry(row, textvariable=var, width=20); entry.pack(side="left")
             def capture(var=var, entry=entry):
-                entry.focus_set(); var.set("请按键…")
+                entry.focus_set(); old_val = var.get(); var.set("请按键…")
                 def on_key(e):
+                    if e.keysym.lower() == "escape":  # 录入中按 Esc = 取消这次录入, 还原旧值 (旧版会把 escape 录成热键)
+                        var.set(old_val); entry.unbind("<KeyPress>"); return "break"
                     mods = []
                     if e.state & 0x4: mods.append("ctrl")
                     if e.state & 0x20000 or e.state & 0x8: mods.append("alt")
@@ -1363,7 +1374,7 @@ class App(tk.Tk):
         try:  # 历史截图只保留最近 HistoryMax 张 (默认 100, 对齐 Snipaste 设置), 防文件夹无限膨胀
             keep = int(self.cfg.get("Snip", "HistoryMax", fallback="100"))
             files = sorted((os.path.join(self.shots_dir, f) for f in os.listdir(self.shots_dir)
-                            if f.startswith("shot_") and f.endswith(".png")), key=os.path.getmtime)
+                            if (f.startswith("shot_") and f.endswith(".png")) or (f.startswith("gif_") and f.endswith(".gif"))), key=os.path.getmtime)
             for p in files[:max(0, len(files) - keep)]:
                 try: os.remove(p)
                 except OSError: pass
@@ -1455,10 +1466,10 @@ class App(tk.Tk):
                 messagebox.showinfo("GIF 录制完成", f"已保存到:\n{path}\n共 {len(frames)} 帧", parent=self)
             except Exception as e: messagebox.showerror("GIF 保存失败", str(e), parent=self)
         def tick():
-            if rec["stop"] or time.time() - rec["t0"] > max_seconds: finish(); return
+            if rec["stop"] or time.time() - rec["t0"] > max_seconds or len(rec["frames"]) >= 200: finish(); return  # 帧数封顶 200: 全攒内存里, 大选区长录会吃掉近 1GB
             try:
                 fr = ImageGrab.grab(bbox=box)
-                if fr.width > 1280: fr = fr.resize((1280, max(1, int(fr.height * 1280 / fr.width))))
+                if fr.width > 960: fr = fr.resize((960, max(1, int(fr.height * 960 / fr.width))))
                 rec["frames"].append(fr.convert("RGB"))
                 lab.config(text=f"● GIF 录制中 {time.time() - rec['t0']:.0f}s · {len(rec['frames'])} 帧")
             except Exception: pass
@@ -2053,10 +2064,14 @@ class App(tk.Tk):
         self._snip_finish_mode = "translate"; self.snip_region()
     def snip_delayed(self):
         """延时截图: 倒计时后才开始, 方便截菜单/提示框这类一动鼠标就消失的画面"""
+        if getattr(self, "_snip_active", False) or getattr(self, "_delay_pending", False): return  # 已在截图或已排队: 忽略重复触发
         try: secs = float(self.cfg.get("Snip", "DelaySeconds", fallback="3"))
         except Exception: secs = 3.0
         self.status.set(f"{secs:g} 秒后开始截图, 先把要截的画面准备好…")
-        self.after(int(secs * 1000), self.snip_region)
+        self._delay_pending = True
+        def _fire():
+            self._delay_pending = False; self.snip_region()
+        self.after(int(secs * 1000), _fire)
     def close_all_pins(self):
         for w in list(self._pins):
             try: w.destroy()
@@ -2476,7 +2491,7 @@ try {
         """Windows 自带 OCR: 有结果返回文字, 没文字返回 '', 引擎/语言包不可用返回 None"""
         if sys.platform != "win32": return None
         import subprocess, tempfile
-        tmp = tempfile.mkdtemp(prefix="snappaste_ocr_")
+        tmp = tempfile.mkdtemp(prefix="spst_ocr_")
         img_path, out_path, ps_path = (os.path.join(tmp, n) for n in ("in.png", "out.txt", "ocr.ps1"))
         try:
             img.save(img_path)
@@ -2534,7 +2549,7 @@ try {
         """Windows 内置 OCR 带行坐标版: 返回 [{'t','x','y','w','h'}...]; 引擎不可用返回 None, 没文字返回 []"""
         if sys.platform != "win32": return None
         import subprocess, tempfile, json as _json
-        tmp = tempfile.mkdtemp(prefix="snappaste_ocrl_")
+        tmp = tempfile.mkdtemp(prefix="spst_ocrl_")
         img_path, out_path, ps_path = (os.path.join(tmp, n) for n in ("in.png", "out.json", "ocrl.ps1"))
         try:
             img.save(img_path)
@@ -3153,7 +3168,9 @@ try {
         except Exception: pass
 
     def _hide_to_tray(self):
-        try: self.cfg.set("Config", "SleepTime", self.sleep_var.get() or "80")
+        try:  # 间隔只存数字: 存进非数字的话下次启动 sleep_ms 读不出来 (旧版真出过这种配置)
+            _sv = (self.sleep_var.get() or "").strip()
+            if _sv.isdigit(): self.cfg.set("Config", "SleepTime", _sv)
         except Exception: pass
         self.save_config(); self.save_records()
         self.withdraw()
@@ -3163,7 +3180,9 @@ try {
             except Exception: pass
 
     def _quit_app(self):
-        try: self.cfg.set("Config", "SleepTime", self.sleep_var.get() or "80")
+        try:  # 间隔只存数字: 存进非数字的话下次启动 sleep_ms 读不出来 (旧版真出过这种配置)
+            _sv = (self.sleep_var.get() or "").strip()
+            if _sv.isdigit(): self.cfg.set("Config", "SleepTime", _sv)
         except Exception: pass
         self.save_config(); self.save_records()
         if self._tray is not None:
