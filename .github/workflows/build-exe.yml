@@ -17,10 +17,10 @@ jobs:
         with:
           name: SnapPaste-Windows
           path: dist/SnapPaste.exe
-      - name: Publish release v1.4.12
+      - name: Publish release v1.4.13
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          printf '%s\n' 'SnapPaste v1.4.12 首个云端打包版本（GitHub Actions 构建）。' '下载 SnapPaste.exe 双击即可运行，无需安装 Python。' '首次打开若弹出 SmartScreen，点「更多信息 → 仍要运行」。' '功能：F1 截图（标注/OCR/扫码）、F3 贴图、F6/F7/F8 文字复制队列，热键全部预设。' > notes.txt
-          gh release create v1.4.12 dist/SnapPaste.exe --title "SnapPaste v1.4.12" --notes-file notes.txt || gh release upload v1.4.12 dist/SnapPaste.exe --clobber
+          printf '%s\n' 'SnapPaste v1.4.13 首个云端打包版本（GitHub Actions 构建）。' '下载 SnapPaste.exe 双击即可运行，无需安装 Python。' '首次打开若弹出 SmartScreen，点「更多信息 → 仍要运行」。' '功能：F1 截图（标注/OCR/扫码）、F3 贴图、F6/F7/F8 文字复制队列，热键全部预设。' > notes.txt
+          gh release create v1.4.13 dist/SnapPaste.exe --title "SnapPaste v1.4.13" --notes-file notes.txt || gh release upload v1.4.13 dist/SnapPaste.exe --clobber
