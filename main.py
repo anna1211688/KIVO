@@ -24,7 +24,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
 APP_NAME = "SnapPaste 复制粘贴+截图贴图"
-VERSION = "1.4.12"  # v1.4.12: 全量审查优化: 配置/记录原子写+记录备份恢复; OCR/长截图改后台线程不冻界面; 放大镜节流/贴图缩放合并/搜索防抖/批量存盘; 热键垃圾值校验; 截图防重入; 字体缓存
+VERSION = "1.4.13"  # v1.4.13: 翻译结果窗「复制译图」改「复制原文」; 截图标注新增水印工具 (文字/平铺或四角居中/不透明度/大小/间距/字体, 截图工具栏与编辑器都有); 去掉标注工具栏的「移动」工具, 默认画笔  # v1.4.12: 全量审查优化: 配置/记录原子写+记录备份恢复; OCR/长截图改后台线程不冻界面; 放大镜节流/贴图缩放合并/搜索防抖/批量存盘; 热键垃圾值校验; 截图防重入; 字体缓存
 # v1.4.7: 新增一键截图翻译 (F4 预设, 自动检测源语言, 目标语言主窗口可设中文/English) + v1.4.6 的工具栏同窗/图片复制双通道/窗口自适应高度
 # v1.4.6: 标注工具栏改冻结屏同窗 Frame (独立小窗真机反复不显示) + 图片复制补全 Win32 签名并加 PowerShell 备用通道 + 主窗口按内容自适应高度 (底部不再被裁)
 # v1.4.5: 数据目录改到 %APPDATA%\SnapPaste, 桌面只剩单个 EXE (老数据首次运行自动从 EXE 旁搬移) + v1.4.4 的 Esc 焦点修复
@@ -1122,6 +1122,55 @@ class App(tk.Tk):
                 u32.SetForegroundWindow(hwnd)
         except Exception: pass
 
+    _WM_POS = {"平铺": "tile", "右下角": "br", "左下角": "bl", "右上角": "tr", "左上角": "tl",
+               "顶部居中": "tc", "底部居中": "bc", "居中": "center"}
+    def _ask_watermark(self, parent, default_color="#FF0000"):
+        """水印参数对话框 (仿 PixPin 水印): 文字/位置/不透明度/大小/间距/字体; 点确定返回参数 dict, 取消返回 None"""
+        res = {}
+        win = tk.Toplevel(parent); win.title("添加水印"); win.attributes("-topmost", True); win.resizable(False, False)
+        frm = ttk.Frame(win); frm.pack(padx=12, pady=10)
+        ttk.Label(frm, text="水印文字:").grid(row=0, column=0, sticky="e", pady=3)
+        txt_var = tk.StringVar()
+        ent = ttk.Entry(frm, textvariable=txt_var, width=26); ent.grid(row=0, column=1, pady=3); ent.focus_set()
+        ttk.Label(frm, text="位置:").grid(row=1, column=0, sticky="e", pady=3)
+        pos_var = tk.StringVar(value="平铺")
+        ttk.Combobox(frm, textvariable=pos_var, values=list(self._WM_POS), width=10, state="readonly").grid(row=1, column=1, sticky="w", pady=3)
+        ttk.Label(frm, text="不透明度:").grid(row=2, column=0, sticky="e", pady=3)
+        opa_var = tk.DoubleVar(value=30); opa_txt = tk.StringVar(value="30%")
+        opa_var.trace_add("write", lambda *_: opa_txt.set(f"{int(opa_var.get())}%"))
+        srow = ttk.Frame(frm); srow.grid(row=2, column=1, sticky="w", pady=3)
+        ttk.Scale(srow, from_=5, to=100, variable=opa_var, length=130).pack(side="left")
+        ttk.Label(srow, textvariable=opa_txt, width=4).pack(side="left")
+        ttk.Label(frm, text="大小:").grid(row=3, column=0, sticky="e", pady=3)
+        size_var = tk.IntVar(value=18)
+        ttk.Spinbox(frm, from_=8, to=120, textvariable=size_var, width=6).grid(row=3, column=1, sticky="w", pady=3)
+        ttk.Label(frm, text="间距 (平铺):").grid(row=4, column=0, sticky="e", pady=3)
+        gap_var = tk.IntVar(value=20)
+        ttk.Spinbox(frm, from_=0, to=200, textvariable=gap_var, width=6).grid(row=4, column=1, sticky="w", pady=3)
+        ttk.Label(frm, text="字体:").grid(row=5, column=0, sticky="e", pady=3)
+        font_var = tk.StringVar(value="微软雅黑")
+        ttk.Combobox(frm, textvariable=font_var, values=list(self._FONT_FILES), width=14, state="readonly").grid(row=5, column=1, sticky="w", pady=3)
+        ttk.Label(frm, text="颜色用当前标注颜色; 平铺会把水印重复盖满整张图。", foreground="#888888").grid(row=6, column=0, columnspan=2, pady=(4, 0), sticky="w")
+        btns = ttk.Frame(win); btns.pack(pady=(2, 10))
+        def ok():
+            text = txt_var.get().strip()
+            if not text: ent.focus_set(); return
+            try: size = max(8, min(120, int(size_var.get())))
+            except Exception: size = 18
+            try: gap = max(0, min(200, int(gap_var.get())))
+            except Exception: gap = 20
+            res.update(text=text, pos=self._WM_POS.get(pos_var.get(), "tile"),
+                       alpha=int(max(5, min(100, opa_var.get())) * 2.55), size=size, gap=gap,
+                       font=font_var.get(), color=default_color)
+            win.destroy()
+        ttk.Button(btns, text="确定", command=ok).pack(side="left", padx=4)
+        ttk.Button(btns, text="取消", command=win.destroy).pack(side="left", padx=4)
+        win.bind("<Escape>", lambda e: win.destroy())
+        win.bind("<Return>", lambda e: ok())
+        try: win.grab_set()
+        except Exception: pass
+        parent.wait_window(win)
+        return res or None
     def _choose_color(self, current, parent=None):
         """弹出系统取色器让用户自定义颜色, 返回大写 #RRGGBB; 取消或出错返回 None。"""
         try:
@@ -1341,6 +1390,29 @@ class App(tk.Tk):
             elif t == "text":
                 ids.append(canvas.create_text(op["at"][0] + ox, op["at"][1] + oy, anchor="nw", text=op["text"],
                                               fill=c, font=("Microsoft YaHei", 14 + w * 3), tags="op"))
+            elif t == "watermark":
+                # 冻结屏预览: 画布文字没有透明度, 用实色把位置/平铺密度先画出来, 成品再按不透明度渲染
+                bw, bh = state["box"][2] - ox, state["box"][3] - oy
+                size = int(op.get("size", 18)); gap = int(op.get("gap", 20)); text = op.get("text", "")
+                tw = max(10, int(size * 0.92 * len(text))); th = max(8, size); m = max(6, size // 2); spots = []
+                pos = op.get("pos", "tile")
+                if pos == "tile":
+                    yy = 0
+                    while yy < bh:
+                        xx = 0
+                        while xx < bw:
+                            spots.append((xx, yy)); xx += tw + max(8, gap * 3)
+                        yy += th + max(8, gap * 2)
+                elif pos == "br": spots = [(bw - tw - m, bh - th - m)]
+                elif pos == "bl": spots = [(m, bh - th - m)]
+                elif pos == "tr": spots = [(bw - tw - m, m)]
+                elif pos == "tl": spots = [(m, m)]
+                elif pos == "tc": spots = [((bw - tw) // 2, m)]
+                elif pos == "bc": spots = [((bw - tw) // 2, bh - th - m)]
+                else: spots = [((bw - tw) // 2, (bh - th) // 2)]
+                for sx, sy in spots[:150]:
+                    ids.append(canvas.create_text(sx + ox, sy + oy, anchor="nw", text=text,
+                                                  fill=op.get("color", c), font=("Microsoft YaHei", max(8, int(size * 0.75))), tags="op"))
             return ids
         def finish(kind):
             box = state["box"]; final = self.render_ops(full.crop(box), state["ops"])
@@ -1362,11 +1434,11 @@ class App(tk.Tk):
             def set_tool(name):
                 state["tool"] = name
                 for k2, b in tool_btns.items(): b.configure(bg="#BDD7EE" if k2 == name else "#F2F2F2")
-            for txt, name in [("移动", None), ("矩形", "rect"), ("椭圆", "ellipse"), ("箭头", "arrow"), ("直线", "line"),
+            for txt, name in [("矩形", "rect"), ("椭圆", "ellipse"), ("箭头", "arrow"), ("直线", "line"),
                               ("画笔", "pen"), ("文字", "text"), ("序号", "seq"), ("马赛克", "mosaic"), ("模糊", "blur")]:
                 b = tk.Button(r1, text=txt, font=("Microsoft YaHei", 9), relief="flat", bg="#F2F2F2",
                               command=lambda n=name: set_tool(n)); b.pack(side="left", padx=1, pady=2); tool_btns[name] = b
-            set_tool(None)
+            set_tool("pen")  # 默认画笔 (原「移动」工具已按用户要求去掉, 选区内拖动不再平移选区)
             for cname in ("#FF0000", "#FFD800", "#00B050", "#0070FF", "#000000", "#FFFFFF"):
                 tk.Button(r1, bg=cname, width=2, relief="ridge",
                           command=lambda cc=cname: state.update(color=cc)).pack(side="left", padx=1)
@@ -1403,6 +1475,23 @@ class App(tk.Tk):
                       command=lambda: self.recognize(self.render_ops(full.crop(state["box"]), state["ops"]), "ocr")).pack(side="left", padx=1)
             tk.Button(r2, text="翻译", font=("Microsoft YaHei", 9), relief="flat", bg="#F2F2F2",
                       command=lambda: self.translate_image_inplace(self.render_ops(full.crop(state["box"]), state["ops"]))).pack(side="left", padx=1)
+            def do_watermark():
+                hk = state.get("esc_hk")
+                if hk is not None:  # 对话框打开期间先摘全局 Esc (同取色器),免得在对话框里按 Esc 把整个截图退掉
+                    try:
+                        import keyboard as _kb; _kb.remove_hotkey(hk)
+                    except Exception: pass
+                    state["esc_hk"] = None
+                params = self._ask_watermark(sel_win, state["color"])
+                if sel_win.winfo_exists() and state.get("esc_hk") is None:
+                    try:
+                        import keyboard as _kb
+                        state["esc_hk"] = _kb.add_hotkey("esc", lambda: self._ui_queue.put(close_overlay), suppress=True)
+                    except Exception: pass
+                if params:
+                    op = {"type": "watermark", "width": state["width"], **params}
+                    state["ops"].append(op); state["undone"].clear(); state["op_items"].append(draw_op(op))
+            tk.Button(r2, text="水印", font=("Microsoft YaHei", 9), relief="flat", bg="#F2F2F2", command=do_watermark).pack(side="left", padx=1)
             def do_long():
                 box = state["box"]
                 try: tb.destroy()
@@ -1779,6 +1868,37 @@ class App(tk.Tk):
                     bb = d.textbbox((0, 0), n, font=f)
                     d.text((x - (bb[2] - bb[0]) / 2 - bb[0], y - (bb[3] - bb[1]) / 2 - bb[1]), n, fill="white", font=f)
                 except Exception: d.text((x - 4, y - 6), n, fill="white", font=f)
+            elif t == "watermark":
+                text = op.get("text", "")
+                if text:
+                    size = int(op.get("size", 18)); gap = int(op.get("gap", 20))
+                    alpha = max(0, min(255, int(op.get("alpha", 76))))
+                    col = op.get("color", "#FF0000")
+                    try: rgb = tuple(int(col[i:i + 2], 16) for i in (1, 3, 5))
+                    except Exception: rgb = (255, 0, 0)
+                    fnt = cls._load_font(size, op.get("font"))
+                    overlay = Image.new("RGBA", img.size, (0, 0, 0, 0))
+                    od = ImageDraw.Draw(overlay)
+                    Wd, Hd = img.size
+                    bb = od.textbbox((0, 0), text, font=fnt); tw, th = max(1, bb[2] - bb[0]), max(1, bb[3] - bb[1])
+                    pos = op.get("pos", "tile"); m = max(6, size // 2); spots = []
+                    if pos == "tile":  # 平铺: 按字宽+间距横竖重复盖满整图
+                        yy = 0
+                        while yy < Hd:
+                            xx = 0
+                            while xx < Wd:
+                                spots.append((xx, yy)); xx += tw + max(8, gap * 3)
+                            yy += th + max(8, gap * 2)
+                    elif pos == "br": spots = [(Wd - tw - m, Hd - th - m)]
+                    elif pos == "bl": spots = [(m, Hd - th - m)]
+                    elif pos == "tr": spots = [(Wd - tw - m, m)]
+                    elif pos == "tl": spots = [(m, m)]
+                    elif pos == "tc": spots = [((Wd - tw) // 2, m)]
+                    elif pos == "bc": spots = [((Wd - tw) // 2, Hd - th - m)]
+                    else: spots = [((Wd - tw) // 2, (Hd - th) // 2)]  # 居中
+                    for sx, sy in spots: od.text((sx - bb[0], sy - bb[1]), text, font=fnt, fill=rgb + (alpha,))
+                    img = Image.alpha_composite(img.convert("RGBA"), overlay).convert("RGB")
+                    d = ImageDraw.Draw(img)
             elif t == "blur":
                 x1, y1, x2, y2 = [int(v) for v in op["box"]]
                 if x2 - x1 > 4 and y2 - y1 > 4:
@@ -1863,6 +1983,11 @@ class App(tk.Tk):
         ttk.Button(btns, text="OCR 识别文字", command=lambda: self.recognize(self.render_ops(base, ops), "ocr")).pack(side="left", padx=2)
         ttk.Button(btns, text="扫二维码/条码", command=lambda: self.recognize(self.render_ops(base, ops), "code")).pack(side="left", padx=2)
         ttk.Button(btns, text="清空标注", command=lambda: (ops.clear(), undone.clear(), redraw())).pack(side="left", padx=2)
+        def add_watermark():
+            params = self._ask_watermark(win, color.get())
+            if params:
+                ops.append({"type": "watermark", "width": width.get(), **params}); undone.clear(); redraw()
+        ttk.Button(btns, text="水印", command=add_watermark).pack(side="left", padx=2)
         def finish(pin=True):
             final = self.render_ops(base, ops); self.save_shot(final); win.destroy()
             if pin: self.pin_image(final)
@@ -2346,19 +2471,25 @@ try {
             self._ui_queue.put(show)
         threading.Thread(target=work, daemon=True).start()
     _FONT_CACHE = {}
+    _FONT_FILES = {"微软雅黑": "msyh.ttc", "微软雅黑 Light": "msyhl.ttc", "宋体": "simsun.ttc", "新宋体": "simsun.ttc",
+                   "黑体": "simhei.ttf", "楷体": "simkai.ttf", "仿宋": "simfang.ttf", "等线": "Deng.ttf", "等线 Light": "Dengl.ttf"}
     @classmethod
-    def _load_font(cls, size):
-        if size in cls._FONT_CACHE: return cls._FONT_CACHE[size]
+    def _load_font(cls, size, font_name=None):
+        key = (size, font_name)
+        if key in cls._FONT_CACHE: return cls._FONT_CACHE[key]
         from PIL import ImageFont
         font = None
-        for path in (r"C:\Windows\Fonts\msyh.ttc", r"C:\Windows\Fonts\simhei.ttf",
-                     "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
-                     "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"):
+        paths = []
+        if font_name and font_name in cls._FONT_FILES: paths.append("C:\\Windows\\Fonts\\" + cls._FONT_FILES[font_name])
+        paths += [r"C:\Windows\Fonts\msyh.ttc", r"C:\Windows\Fonts\simhei.ttf",
+                  "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+                  "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"]
+        for path in paths:
             try:
                 if os.path.exists(path): font = ImageFont.truetype(path, size); break
             except Exception: pass
         if font is None: font = ImageFont.load_default()
-        if len(cls._FONT_CACHE) < 64: cls._FONT_CACHE[size] = font
+        if len(cls._FONT_CACHE) < 96: cls._FONT_CACHE[key] = font
         return font
     @staticmethod
     def _render_translated(img, lines, translations):
@@ -2490,11 +2621,11 @@ try {
                 self._ui_queue.put(done)
             threading.Thread(target=work, daemon=True).start()
         tgt_var.trace_add("write", retranslate)
-        copy_btn = ttk.Button(bar, text="复制译图")
+        copy_btn = ttk.Button(bar, text="复制原文")
         def do_copy():
-            ok = self._copy_image_to_clipboard(st["img"])
-            copy_btn.config(text="已复制 ✓" if ok else "复制失败")
-            win.after(1200, lambda: copy_btn.config(text="复制译图"))
+            self.clip_set("\n".join(l["t"] for l in lines))  # 复制识别出的原文本 (用户要求: 不再复制译图, 译图已有保存/钉图)
+            copy_btn.config(text="已复制 ✓")
+            win.after(1200, lambda: copy_btn.config(text="复制原文"))
         copy_btn.config(command=do_copy); copy_btn.pack(side="left", padx=2)
         ttk.Button(bar, text="保存译图", command=lambda: (self.save_shot(st["img"]), self.status.set("译图已存进历史截图"))).pack(side="left", padx=2)
         ttk.Button(bar, text="钉住译图", command=lambda: self.pin_image(st["img"])).pack(side="left", padx=2)
