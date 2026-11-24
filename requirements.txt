@@ -4,6 +4,8 @@ Pillow>=10.0
 pystray>=0.19
 # 可选: 全局热键 (Windows)
 keyboard>=0.13.5 ; sys_platform == "win32"
-# 可选: OCR 文字识别 + 扫码 (装一次, 离线可用; 不装时对应按钮会给出提示, 其他功能不受影响)
-#   pip install rapidocr-onnxruntime opencv-python-headless
+# OCR 文字识别引擎 (v1.4.17 起内置打包进 EXE, 离线可用; 源码运行也要装)
+rapidocr-onnxruntime>=1.2
+# 可选: 扫码 (不装时扫码按钮会给出提示, 其他功能不受影响)
+#   pip install opencv-python-headless
 # 打包时才需要: pip install pyinstaller
