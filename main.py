@@ -24,7 +24,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
 APP_NAME = "SnapPaste 复制粘贴+截图贴图"
-VERSION = "1.4.11"  # v1.4.11: 翻译结果窗改有道式: 检测语言⇄目标语言 (中/英可切换重译) + 对照翻译开关 (关只显译图, 偏好记忆); 结果窗支持 Esc 关闭
+VERSION = "1.4.11"  # v1.4.11: 翻译结果窗改有道式: 检测语言⇄目标语言 (中/英可切换重译) + 对照翻译开关 (关只显译图, 偏好记忆); 全软件窗口支持 Esc 关闭
 # v1.4.7: 新增一键截图翻译 (F4 预设, 自动检测源语言, 目标语言主窗口可设中文/English) + v1.4.6 的工具栏同窗/图片复制双通道/窗口自适应高度
 # v1.4.6: 标注工具栏改冻结屏同窗 Frame (独立小窗真机反复不显示) + 图片复制补全 Win32 签名并加 PowerShell 备用通道 + 主窗口按内容自适应高度 (底部不再被裁)
 # v1.4.5: 数据目录改到 %APPDATA%\SnapPaste, 桌面只剩单个 EXE (老数据首次运行自动从 EXE 旁搬移) + v1.4.4 的 Esc 焦点修复
@@ -145,6 +145,7 @@ class App(tk.Tk):
         if self.cfg.get("Config", "MiniFormSet", fallback="0") == "1": self.after(300, self.show_mini)  # 常显模式: 启动即显示迷你窗口
         self.after(60, self._poll_ui_queue)
         self.protocol("WM_DELETE_WINDOW", self.on_close)
+        self.bind("<Escape>", lambda e: self.on_close())  # Esc 关闭主窗口 (同点 X: 隐藏到托盘)
     def _fit_window_to_content(self):
         # 按内容实际需要的尺寸定窗口大小: 写死的 680x580 在高缩放 (125%/150%) 屏幕上装不下全部功能,
         # 底部截图按钮和状态栏会被裁掉, 要手动往下拉高才看得全 (真机反馈)。打开即按内容定高, 最小高度也锁到内容高度。
@@ -423,6 +424,7 @@ class App(tk.Tk):
                 w = tk.Toplevel(self); w.title("迷你窗口"); w.attributes("-topmost", True)
                 w.geometry(f"300x360+{max(0, w.winfo_screenwidth() - 330)}+80")
                 w.protocol("WM_DELETE_WINDOW", self._hide_mini)
+                w.bind("<Escape>", lambda e: self._hide_mini())  # Esc 隐藏迷你窗口
                 frame = ttk.Frame(w); frame.pack(fill="both", expand=True, padx=4, pady=4)
                 self._mini_list = ttk.Treeview(frame, columns=("no", "text"), show="headings", selectmode="browse", height=12)
                 self._mini_list.heading("no", text=self.t("col_no", "序号")); self._mini_list.heading("text", text=self.t("col_text", "文本内容"))
@@ -888,6 +890,7 @@ class App(tk.Tk):
             self.status.set(self.t("hk_on", "全局热键已开启"))
     def open_hotkey_dialog(self):
         win = tk.Toplevel(self); win.title(self.t("hotkey_settings", "热键设置")); win.geometry("460x640"); win.transient(self); win.grab_set()
+        win.bind("<Escape>", lambda e: win.destroy())  # Esc 关闭
         ttk.Label(win, text="点「录入」后直接按下组合键, 或手动输入。任何按键都可以设, 包括 F1、F2、Ctrl+C 这类常用键, 按你的习惯来。\n留空或填「无」= 不启用该热键。同一个键设给两个功能时, 会提示你确认, 后设的生效、先设的自动清空。").pack(padx=10, pady=8, anchor="w")
         # 动作已有 20 行: 列表区做成可滚动, 保证底部的「应用」按钮在任何屏幕上都够得到 (旧版固定高度会把最后几行挤出窗口)
         wrap = ttk.Frame(win); wrap.pack(fill="both", expand=True, padx=4)
@@ -1034,6 +1037,7 @@ class App(tk.Tk):
         lab = tk.Label(ctrl, text="● GIF 录制中 0s", bg="#222222", fg="#FF6666", font=("Microsoft YaHei", 10))
         lab.pack(side="left", padx=6, pady=4)
         tk.Button(ctrl, text="停止", command=lambda: rec.update(stop=True)).pack(side="left", padx=4, pady=4)
+        ctrl.bind("<Escape>", lambda e: rec.update(stop=True))  # Esc 停止录制
         ctrl.update_idletasks()
         ctrl.geometry(f"+{max(0, ctrl.winfo_screenwidth() - ctrl.winfo_reqwidth() - 16)}+{max(0, ctrl.winfo_screenheight() - ctrl.winfo_reqheight() - 60)}")
         def finish():
@@ -1585,6 +1589,7 @@ class App(tk.Tk):
     def pin_image(self, img):
         win = tk.Toplevel(self); win.overrideredirect(True); win.attributes("-topmost", True)
         win.geometry("+120+120"); state = {"img": img.copy(), "scale": 1.0, "photo": None}
+        win.bind("<Escape>", lambda e: win.destroy())  # Esc 关闭贴图 (贴图有焦点时)
         self._pins.append(win)
         def _on_destroy(e):
             if e.widget is not win: return
@@ -2148,6 +2153,7 @@ try {
                  "google": ["", tc["google_key"]]}
         cur = {"service": tc["service"]}
         win = tk.Toplevel(self); win.title("翻译服务设置"); win.geometry("470x300"); win.attributes("-topmost", True)
+        win.bind("<Escape>", lambda e: win.destroy())  # Esc 关闭 (不保存)
         ttk.Label(win, text="翻译服务:").grid(row=0, column=0, sticky="e", padx=8, pady=8)
         svc_var = tk.StringVar(value=names[cur["service"]])
         id_var, key_var = tk.StringVar(), tk.StringVar()
@@ -2476,6 +2482,7 @@ try {
     def open_gallery(self):
         if not HAS_PIL: return
         win = tk.Toplevel(self); win.title("历史截图"); win.geometry("760x500")
+        win.bind("<Escape>", lambda e: win.destroy())  # Esc 关闭
         def shot_files():
             try: return [f for f in sorted(os.listdir(self.shots_dir), reverse=True)
                          if f.lower().endswith((".png", ".gif"))]
@@ -2528,6 +2535,7 @@ try {
 
     def pin_text(self, text):
         win = tk.Toplevel(self); win.overrideredirect(True); win.attributes("-topmost", True); win.geometry("+140+140")
+        win.bind("<Escape>", lambda e: win.destroy())  # Esc 关闭贴图 (贴图有焦点时)
         tk.Label(win, text=text[:2000], bg="#fffbe6", bd=2, relief="solid", justify="left", wraplength=420, padx=8, pady=6).pack()
         ttk.Label(win, text="文字贴图 · 拖动移动 · 双击关闭 · 右键有菜单", background="#fffbe6", foreground="#888888").pack()
         tmenu = tk.Menu(win, tearoff=0)
