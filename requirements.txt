@@ -6,6 +6,10 @@ pystray>=0.19
 keyboard>=0.13.5 ; sys_platform == "win32"
 # OCR 文字识别引擎 (v1.4.17 起内置打包进 EXE, 离线可用; 源码运行也要装)
 rapidocr-onnxruntime>=1.2
+# 时区数据库 (世界时间用 zoneinfo; Windows 自带 Python 没有系统时区库, 打包必须带上)
+tzdata>=2024.1
+# 无水印下载引擎 (IG/FB/小红书/抖音/TikTok/B站/微博/YouTube/X 等站点解析)
+yt-dlp>=2024.10
 # 可选: 扫码 (不装时扫码按钮会给出提示, 其他功能不受影响)
 #   pip install opencv-python-headless
 # 打包时才需要: pip install pyinstaller
