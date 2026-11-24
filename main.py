@@ -24,7 +24,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
 APP_NAME = "SnapPaste 复制粘贴+截图贴图"
-VERSION = "1.4.11"  # v1.4.11: 翻译结果窗改有道式: 检测语言⇄目标语言 (中/英可切换重译) + 对照翻译开关 (关只显译图, 偏好记忆); 全软件窗口支持 Esc 关闭
+VERSION = "1.4.12"  # v1.4.12: 全量审查优化: 配置/记录原子写+记录备份恢复; OCR/长截图改后台线程不冻界面; 放大镜节流/贴图缩放合并/搜索防抖/批量存盘; 热键垃圾值校验; 截图防重入; 字体缓存
 # v1.4.7: 新增一键截图翻译 (F4 预设, 自动检测源语言, 目标语言主窗口可设中文/English) + v1.4.6 的工具栏同窗/图片复制双通道/窗口自适应高度
 # v1.4.6: 标注工具栏改冻结屏同窗 Frame (独立小窗真机反复不显示) + 图片复制补全 Win32 签名并加 PowerShell 备用通道 + 主窗口按内容自适应高度 (底部不再被裁)
 # v1.4.5: 数据目录改到 %APPDATA%\SnapPaste, 桌面只剩单个 EXE (老数据首次运行自动从 EXE 旁搬移) + v1.4.4 的 Esc 焦点修复
@@ -54,6 +54,13 @@ else:
     EXE_DIR = BASE
 CONFIG_PATH = os.path.join(BASE, "Config.ini")
 RECORDS_PATH = os.path.join(BASE, "records.json")
+
+def _atomic_write(path, text):
+    """原子写: 先写临时文件再 os.replace 换名。直接覆盖写时若断电/崩溃, 文件会写一半损坏,
+    记录和配置 (含翻译密钥) 就全丢了; 原子写保证磁盘上永远是完整的新版或旧版。"""
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f: f.write(text)
+    os.replace(tmp, path)
 
 def _migrate_old_data():
     """老版本 (<=v1.4.4) 数据在 EXE 旁: 首次用 AppData 数据目录时整套搬过来, 配置/记录/截图不丢"""
@@ -196,11 +203,20 @@ class App(tk.Tk):
     def t(self, key, zh):
         return self._strings.get(key, zh)
     def save_config(self):
+        # 保存配置绝不能把程序搞崩: 整个过程兜底, 失败就静默放弃这次保存 (下次改设置还会再存)
+        try: self._save_config_inner()
+        except Exception: pass
+    def _save_config_inner(self):
         # v1.1 修复: 原地更新已有 key, 保住 Config.ini 里的注释和排版 (旧版 configparser.write 会全抹掉)
         if not os.path.exists(CONFIG_PATH):
-            with open(CONFIG_PATH, "w", encoding="utf-8") as f: self.cfg.write(f)
+            import io
+            buf = io.StringIO(); self.cfg.write(buf); _atomic_write(CONFIG_PATH, buf.getvalue())
             return
-        lines = open(CONFIG_PATH, encoding="utf-8").read().splitlines()
+        raw = open(CONFIG_PATH, "rb").read()
+        for enc in ("utf-8-sig", "gbk"):  # 用户手动改过 ini 时可能是 GBK, 读不出就别硬读 (旧版直接抛异常, 设置一保存就报错)
+            try: lines = raw.decode(enc).splitlines(); break
+            except Exception: lines = []
+        else: lines = []
         pending = {(sec, k.lower()): v for sec in self.cfg.sections() for k, v in self.cfg.items(sec)}
         out, cur = [], None
         for line in lines:
@@ -228,7 +244,7 @@ class App(tk.Tk):
                 out[nxt:nxt] = [f"{k}={v}" for k, v in items]
             else:
                 out += [f"[{sec}]"] + [f"{k}={v}" for k, v in items]
-        with open(CONFIG_PATH, "w", encoding="utf-8") as f: f.write("\n".join(out) + "\n")
+        _atomic_write(CONFIG_PATH, "\n".join(out) + "\n")
     @property
     def sleep_ms(self): return max(10, self.cfg.getint("Config", "SleepTime", fallback=80))
 
@@ -238,7 +254,7 @@ class App(tk.Tk):
         for txt, cmd in [(self.t("hotkey_settings", "热键设置"), self.open_hotkey_dialog),
                          (self.t("import_text", "导入文本"), self.import_txt), (self.t("export_text", "导出文本"), self.export_txt)]:
             ttk.Button(bar, text=txt, command=cmd).pack(side="left", padx=2)
-        self.search_var = tk.StringVar(); self.search_var.trace_add("write", lambda *a: self.refresh_list())
+        self.search_var = tk.StringVar(); self.search_var.trace_add("write", lambda *a: self._schedule_search_refresh())
         ttk.Entry(bar, textvariable=self.search_var, width=14).pack(side="right")
         ttk.Label(bar, text=self.t("search", "搜索:")).pack(side="right")
         self.lang_var = tk.StringVar(value=self.lang)
@@ -479,6 +495,12 @@ class App(tk.Tk):
         messagebox.showinfo(self.t("lang_label", "语言:"), self.t("lang_applied", "语言设置已保存, 重启软件后生效"))
 
     # ---------- records ----------
+    def _schedule_search_refresh(self):
+        """搜索框逐字输入防抖 120ms: 记录多时每敲一个字都全量重建列表会明显卡顿"""
+        if getattr(self, "_search_after", None):
+            try: self.after_cancel(self._search_after)
+            except Exception: pass
+        self._search_after = self.after(120, self.refresh_list)
     def refresh_list(self):
         q = self.search_var.get().strip()
         self.listbox.delete(*self.listbox.get_children()); self._visible = []; self._row_iids = []
@@ -490,12 +512,20 @@ class App(tk.Tk):
         self.status.set(f"{self.t('status_total', '当前记录总数')}: {len(self.records)}  |  {self.t('status_progress', '粘贴进度')}: {self.paste_index}/{len(self.records)}")
         self._refresh_mini()
     def load_records(self):
-        if os.path.exists(RECORDS_PATH):
-            try: self.records = json.loads(open(RECORDS_PATH, encoding="utf-8").read())
-            except Exception: self.records = []
+        # 主文件损坏 (异常退出等) 时回退到上次的备份, 别让整个队列静默清零
+        for p in (RECORDS_PATH, RECORDS_PATH + ".bak"):
+            if os.path.exists(p):
+                try:
+                    data = json.loads(open(p, encoding="utf-8").read())
+                    if isinstance(data, list): self.records = data; return
+                except Exception: continue
+        self.records = []
     def save_records(self):
-        with open(RECORDS_PATH, "w", encoding="utf-8") as f: json.dump(self.records, f, ensure_ascii=False, indent=1)
-    def add_record(self, text, dedupe=True):
+        text = json.dumps(self.records, ensure_ascii=False, indent=1)
+        _atomic_write(RECORDS_PATH, text)
+        try: _atomic_write(RECORDS_PATH + ".bak", text)  # 同步留一份备份, 供下次启动损坏时回退
+        except Exception: pass
+    def add_record(self, text, dedupe=True, save=True):
         text = text.strip("\r\n")
         if not text: return
         if self.case_var.get() in ("转大写", "UPPERCASE"): text = text.upper()
@@ -506,7 +536,7 @@ class App(tk.Tk):
             idx = next((i for i, r in enumerate(self.records[:-1]) if not r["locked"]), None)
             if idx is None: break
             del self.records[idx]
-        self.save_records()
+        if save: self.save_records()  # 批量场景由调用方最后统一 save 一次, 免得几百行粘贴写几百遍文件卡顿
     def selected_idx(self):
         """列表选中的是第几条 records (经搜索过滤映射); 没选返回 -1"""
         s = self.listbox.selection()
@@ -652,7 +682,8 @@ class App(tk.Tk):
         text = self.clip_get()
         lines = [ln for ln in text.splitlines() if ln.strip()]
         if len(lines) > 1:
-            for ln in lines: self.add_record(ln)  # v1.3.4: WPS 表格/列表整块复制时按行自动拆成多条, F7 才能一条条粘
+            for ln in lines: self.add_record(ln, save=False)  # v1.3.4: WPS 表格/列表整块复制时按行自动拆成多条; 批量加只在最后存一次盘
+            self.save_records()
         else:
             self.add_record(text)
         if len(self.records) > n:
@@ -762,8 +793,8 @@ class App(tk.Tk):
             pos = self.splitpos_var.get()
             if pos in ("分隔符留在前段", "Separator stays with previous"): parts = [p + sep_used for p in parts[:-1]] + parts[-1:]
             elif pos in ("分隔符留在后段", "Separator stays with next"): parts = parts[:1] + [sep_used + p for p in parts[1:]]
-        for p in parts: self.add_record(p)
-        self.refresh_list()
+        for p in parts: self.add_record(p, save=False)
+        self.save_records(); self.refresh_list()
     def beep(self):
         # WaveSet 在 Config.ini 里是 [Wave] 段的键 (旧版误读 [Config] 段, 改了也不生效)
         wave_on = self.cfg.get("Wave", "WaveSet", fallback=self.cfg.get("Config", "WaveSet", fallback="0"))
@@ -780,11 +811,12 @@ class App(tk.Tk):
             for enc in ("utf-8-sig", "gbk"):
                 try: lines = raw.decode(enc).splitlines(); break
                 except Exception: lines = []
-            for ln in lines: self.add_record(ln)
-            self.refresh_list()
+            for ln in lines: self.add_record(ln, save=False)
+            self.save_records(); self.refresh_list()
     def export_txt(self):
         p = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("文本", "*.txt")])
-        if p: open(p, "w", encoding="utf-8").write(self.separator().join(r["text"] for r in self.records))
+        if p:
+            with open(p, "w", encoding="utf-8") as f: f.write(self.separator().join(r["text"] for r in self.records))
     def delete_last(self):
         for i in range(len(self.records) - 1, -1, -1):
             if not self.records[i]["locked"]:
@@ -818,6 +850,7 @@ class App(tk.Tk):
         s = raw.strip().lower().replace(" ", "").replace("＋", "+")
         if s in ("无", "none", "no", "-"): return None
         s = s.replace("control", "ctrl").replace("windows", "win").replace("window", "win")
+        if not re.fullmatch(r"[a-z0-9_+-]+", s): return None  # 只接受合法键名: 录入中途的「请按键…」等值直接作废, 免得绑定时报错
         return s or None
     @staticmethod
     def tk_sequence(hk):
@@ -854,7 +887,8 @@ class App(tk.Tk):
             labels.append(f"{hk.upper()} {label}")
             seq = self.tk_sequence(hk)
             if seq:
-                self.bind(seq, lambda e, f=fn: f()); self._tk_sequences.append(seq)
+                try: self.bind(seq, lambda e, f=fn: f()); self._tk_sequences.append(seq)
+                except Exception: pass  # 个别键名 Tk 绑不了也不许拖垮整轮热键注册 (全局热键那条路还在)
             if keyboard is not None:
                 # keyboard 在它自己的线程里回调, 直接操作 Tk 会随机崩溃: 只入队, 主线程轮询执行
                 # suppress=True: 按键被我们"吃掉", 不再传给前台软件 —— 否则像 F7 在 WPS 表格里会同时触发
@@ -1004,31 +1038,36 @@ class App(tk.Tk):
             prev = fr; prev_sigs = sigs
         return acc
     def _run_long_capture(self, box):
-        """长截图执行 (覆盖层已关闭): 鼠标停在选区中心自动向下滚动, 逐帧抓取拼接; Esc 中止, 画面不再变化自动结束, 完成后打开标注编辑器。"""
+        """长截图执行 (覆盖层已关闭): 鼠标停在选区中心自动向下滚动, 逐帧抓取拼接; Esc 中止, 画面不再变化自动结束, 完成后打开标注编辑器。
+        抓取+拼接放后台线程: 旧版在主线程跑十几秒, 期间界面冻结、热键排队全堵住 (像死机)。"""
         if sys.platform != "win32":
             self._restore_main_after_snip(); self.status.set("长截图目前仅支持 Windows"); return
-        u = ctypes.windll.user32
-        u.mouse_event.argtypes = [ctypes.c_uint, ctypes.c_uint, ctypes.c_uint, ctypes.c_uint, ctypes.c_void_p]
-        x1, y1, x2, y2 = box
-        u.SetCursorPos((x1 + x2) // 2, (y1 + y2) // 2); time.sleep(0.2)
-        frames, last_sig, still = [], None, 0
-        for _ in range(30):
-            if u.GetAsyncKeyState(0x1B) & 0x8000: break  # Esc 中止
-            fr = ImageGrab.grab(bbox=(x1, y1, x2, y2)); frames.append(fr)
-            sig = fr.resize((8, 8)).tobytes()
-            if sig == last_sig:
-                still += 1
-                if still >= 2: break  # 连续两帧没变化 = 滚到底了
-            else: still = 0
-            last_sig = sig
-            u.mouse_event(0x0800, 0, 0, (-600) & 0xFFFFFFFF, None)  # MOUSEEVENTF_WHEEL 向下滚一格
-            time.sleep(0.35)
-        self._restore_main_after_snip()
-        if not frames: return
-        img = self._stitch_frames(frames)
-        if img is None: return
-        self.save_shot(img); self.status.set(f"长截图完成: {img.width}×{img.height}, 已打开编辑器 (可标注/复制/钉图)")
-        self.open_editor(img)
+        import threading
+        def work():
+            u = ctypes.windll.user32
+            u.mouse_event.argtypes = [ctypes.c_uint, ctypes.c_uint, ctypes.c_uint, ctypes.c_uint, ctypes.c_void_p]
+            x1, y1, x2, y2 = box
+            u.SetCursorPos((x1 + x2) // 2, (y1 + y2) // 2); time.sleep(0.2)
+            frames, last_sig, still = [], None, 0
+            for _ in range(30):
+                if u.GetAsyncKeyState(0x1B) & 0x8000: break  # Esc 中止
+                fr = ImageGrab.grab(bbox=(x1, y1, x2, y2)); frames.append(fr)
+                sig = fr.resize((8, 8)).tobytes()
+                if sig == last_sig:
+                    still += 1
+                    if still >= 2: break  # 连续两帧没变化 = 滚到底了
+                else: still = 0
+                last_sig = sig
+                u.mouse_event(0x0800, 0, 0, (-600) & 0xFFFFFFFF, None)  # MOUSEEVENTF_WHEEL 向下滚一格
+                time.sleep(0.35)
+            img = self._stitch_frames(frames) if frames else None
+            def done():
+                self._restore_main_after_snip()
+                if img is None: return
+                self.save_shot(img); self.status.set(f"长截图完成: {img.width}×{img.height}, 已打开编辑器 (可标注/复制/钉图)")
+                self.open_editor(img)
+            self._ui_queue.put(done)
+        threading.Thread(target=work, daemon=True).start()
     def _run_gif_record(self, box, max_seconds=30, fps=8):
         """录制选区为 GIF 动图: 非阻塞逐帧抓取, 屏幕角落有小控制窗 (计时+停止), 结束自动存进截图文件夹。"""
         if not HAS_PIL: return
@@ -1102,6 +1141,7 @@ class App(tk.Tk):
             try: self.lower()
             except Exception: pass
     def snip_region(self):
+        if getattr(self, "_snip_active", False): return  # 已有一张截图进行中: 忽略重复触发, 防两层覆盖层/两个全局 Esc 互相打架
         if not HAS_PIL:
             messagebox.showerror("缺少 Pillow", "截图功能需要 Pillow: pip install Pillow"); return
         self._snip_was_visible = self.winfo_viewable() == 1  # 截图前主窗口的状态, 结束时按原样恢复 (见 _restore_main_after_snip)
@@ -1119,6 +1159,7 @@ class App(tk.Tk):
         snap_rects = [r for _, r in top_windows]  # Windows 下枚举真实窗口; 其他系统为空, 自动退回自由框选
         hwnd_of = {r: h for h, r in top_windows}
         finish_mode = self._snip_finish_mode; self._snip_finish_mode = None  # 消费本次截图的特殊完成方式
+        self._snip_active = True
         sel_win = tk.Toplevel(self); sel_win.attributes("-fullscreen", True); sel_win.attributes("-topmost", True)
         canvas = tk.Canvas(sel_win, cursor="crosshair", highlightthickness=0); canvas.pack(fill="both", expand=True)
         photo = ImageTk.PhotoImage(full); canvas.create_image(0, 0, anchor="nw", image=photo); canvas.image = photo
@@ -1126,6 +1167,9 @@ class App(tk.Tk):
                  "box": None, "ops": [], "op_items": [], "undone": [], "tool": None,
                  "color": "#FF0000", "width": 3, "drag": None, "tb": None}
         def show_info(e, extra=""):
+            _now = time.time()
+            if _now - state.get("_info_t", 0) < 0.033: return  # 节流到约 30 帧/秒: 放大镜每帧要裁图+缩放+画网格, 不节流截图时明显发卡
+            state["_info_t"] = _now
             canvas.delete("info")
             if snap_rects and not (e.state & 0x0100):  # 没按住鼠标时: 吸附高亮鼠标所在窗口 (单击即截整窗)
                 snap = self.pick_window(e.x, e.y, snap_rects)
@@ -1228,6 +1272,7 @@ class App(tk.Tk):
         except Exception: pass
         def _drop_esc_hk(e):
             if e.widget is not sel_win: return
+            self._snip_active = False  # 覆盖层销毁 = 本次截图结束, 放行下一次截图 (与摘全局 Esc 同一个销毁钩子, 免得两个 <Destroy> 绑定互相覆盖)
             if state.get("esc_hk") is not None:
                 try:
                     import keyboard as _kb2; _kb2.remove_hotkey(state["esc_hk"])
@@ -1524,7 +1569,8 @@ class App(tk.Tk):
             if data is not None and hasattr(data, "save"):
                 self.pin_image(data.convert("RGB") if data.mode not in ("RGB", "RGBA") else data); return
             if isinstance(data, list) and data and os.path.isfile(str(data[0])):
-                try: self.pin_image(Image.open(str(data[0]))); return
+                try:
+                    with Image.open(str(data[0])) as _im: self.pin_image(_im.copy()); return
                 except Exception: pass
         text = self.clip_get()
         if text: self.pin_text(text)
@@ -1539,7 +1585,7 @@ class App(tk.Tk):
     def pin_selected_shot(self):
         sel = self.shots_list.curselection() if hasattr(self, "shots_list") else ()
         if not sel or not HAS_PIL: return
-        self.pin_image(Image.open(os.path.join(self.shots_dir, self.shots_list.get(sel[0]))))
+        with Image.open(os.path.join(self.shots_dir, self.shots_list.get(sel[0]))) as _im: self.pin_image(_im.copy())
     def _draggable(self, win):
         pos = {}
         def down(e): pos.update(x=e.x_root - win.winfo_x(), y=e.y_root - win.winfo_y())
@@ -1617,7 +1663,15 @@ class App(tk.Tk):
         menu.add_command(label="关闭贴图 (双击也可)", command=win.destroy)
         # 事件只绑在 label 上并 return "break": 旧版 win 和 label 各绑一份, 事件沿 bindtags 传播会缩放两次
         def on_wheel(e):
-            state.update(scale=min(4, max(0.1, state["scale"] * (1.1 if e.delta > 0 else 0.9)))); render(); return "break"
+            state["scale"] = min(4, max(0.1, state["scale"] * (1.1 if e.delta > 0 else 0.9)))
+            if not state.get("render_pending"):  # 滚轮连发时合并: 每格都整图缩放重绘一次会卡, 攒 40ms 只画最新尺寸
+                state["render_pending"] = True
+                def _do_render():
+                    state["render_pending"] = False
+                    try: render()
+                    except Exception: pass
+                win.after(40, _do_render)
+            return "break"
         def on_menu(e): menu.tk_popup(e.x_root, e.y_root); return "break"
         win.bind("<Button-3>", on_menu)
         label.bind("<Button-3>", on_menu)
@@ -2072,8 +2126,15 @@ try {
         except ImportError: return None
         except Exception: return []
     def recognize(self, img, kind):
+        """识别放后台线程跑: Windows 内置 OCR 要走 PowerShell (一两秒起), 在主线程跑会把整个界面冻住像死机;
+        结果排队回主线程再弹窗。"""
+        import threading
+        def work():
+            res = self.ocr_image(img) if kind == "ocr" else self.decode_codes(img)
+            self._ui_queue.put(lambda: self._show_recognize_result(kind, res))
+        threading.Thread(target=work, daemon=True).start()
+    def _show_recognize_result(self, kind, res):
         if kind == "ocr":
-            res = self.ocr_image(img)
             if res is None:
                 hint = ("OCR 用的是 Windows 自带识别引擎, 现在不可用, 多半是系统没装中文语言包:\n"
                         "到 Windows「设置 → 时间和语言 → 语言和区域」添加「中文(简体)」, 装好后重启本软件再试。") \
@@ -2082,7 +2143,6 @@ try {
                 messagebox.showinfo("OCR 未启用", hint); return
             self.show_text_result("OCR 识别结果", res or "(没识别到文字, 换个更清晰的截图试试)", translate=True)
         else:
-            res = self.decode_codes(img)
             if res is None:
                 messagebox.showinfo("扫码未启用", "还没装扫码引擎, 装一次即可:\n\npip install opencv-python-headless"); return
             self.show_text_result("扫码结果", "\n".join(res) if res else "(没扫到二维码/条码)")
@@ -2285,16 +2345,21 @@ try {
                     self.show_text_result("翻译结果", res)
             self._ui_queue.put(show)
         threading.Thread(target=work, daemon=True).start()
-    @staticmethod
-    def _load_font(size):
+    _FONT_CACHE = {}
+    @classmethod
+    def _load_font(cls, size):
+        if size in cls._FONT_CACHE: return cls._FONT_CACHE[size]
         from PIL import ImageFont
+        font = None
         for path in (r"C:\Windows\Fonts\msyh.ttc", r"C:\Windows\Fonts\simhei.ttf",
                      "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
                      "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"):
             try:
-                if os.path.exists(path): return ImageFont.truetype(path, size)
+                if os.path.exists(path): font = ImageFont.truetype(path, size); break
             except Exception: pass
-        return ImageFont.load_default()
+        if font is None: font = ImageFont.load_default()
+        if len(cls._FONT_CACHE) < 64: cls._FONT_CACHE[size] = font
+        return font
     @staticmethod
     def _render_translated(img, lines, translations):
         """有道式嵌图翻译: 每行采样原文底色盖住原文, 再按框高自适应字号把译文写回原位置。"""
@@ -2467,7 +2532,8 @@ try {
         def to_queue():
             added = 0
             for line in box.get("1.0", "end").splitlines():
-                if line.strip(): self.add_record(line); added += 1
+                if line.strip(): self.add_record(line, save=False); added += 1
+            if added: self.save_records()
             self.refresh_list(); messagebox.showinfo("文字队列", f"已加入 {added} 条到文字队列, 之后按 F7 就能逐条粘贴", parent=win)
         ttk.Button(bar, text="加入文字队列 (配合 F7 粘贴)", command=to_queue).pack(side="left", padx=2)
         if translate:
@@ -2476,8 +2542,11 @@ try {
     def ocr_selected_shot(self):
         sel = self.shots_list.curselection() if hasattr(self, "shots_list") else ()
         if not sel or not HAS_PIL: messagebox.showinfo("OCR", "先在截图列表里选一张"); return
-        self.recognize(Image.open(os.path.join(self.shots_dir, self.shots_list.get(sel[0]))), "ocr")
+        with Image.open(os.path.join(self.shots_dir, self.shots_list.get(sel[0]))) as _im: self.recognize(_im.copy(), "ocr")
 
+    def _pin_file(self, name):
+        """从历史文件钉图: 打开后立刻复制一份并关文件, 不让文件句柄一直挂在贴图上"""
+        with Image.open(os.path.join(self.shots_dir, name)) as _im: self.pin_image(_im.copy())
     # ---------- 截图历史画廊 (v1.2) ----------
     def open_gallery(self):
         if not HAS_PIL: return
@@ -2513,7 +2582,7 @@ try {
                 label = ("GIF " if name.lower().endswith(".gif") else "") + (name[5:20] if name.startswith("shot_") else name[4:19])
                 ttk.Label(cell, text=label, font=("", 8)).pack()
                 btns = ttk.Frame(cell); btns.pack()
-                ttk.Button(btns, text="钉图", width=6, command=lambda n=name: self.pin_image(Image.open(os.path.join(self.shots_dir, n)))).pack(side="left", padx=1)
+                ttk.Button(btns, text="钉图", width=6, command=lambda n=name: self._pin_file(n)).pack(side="left", padx=1)
                 def delete(n=name, cell=cell):
                     try: os.remove(os.path.join(self.shots_dir, n))
                     except Exception: pass
