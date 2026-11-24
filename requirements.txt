@@ -13,3 +13,5 @@ yt-dlp>=2024.10
 # 可选: 扫码 (不装时扫码按钮会给出提示, 其他功能不受影响)
 #   pip install opencv-python-headless
 # 打包时才需要: pip install pyinstaller
+# 微型浏览器 (pywebview 驱动系统 WebView2 内核; 子进程模式运行)
+pywebview>=4.0 ; sys_platform == "win32"
