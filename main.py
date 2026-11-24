@@ -5,7 +5,7 @@ SnapPaste - 一键复制粘贴 + 截图贴图 (合并版)
 ================================================
 由「一键复制粘贴工具」(2012, Delphi 加壳版) 重写、并合入 Snipaste 核心功能而来:
   文字: 多次复制队列 / 顺序·全部粘贴 / 分割·正则 / 大小写 / 搜索 / 去重 / 锁定
-  图片: F1 区域截图 (窗口吸附·取色) / 标注编辑器 / F3 贴图钉屏 / 历史画廊
+  图片: F1 区域截图 (窗口吸附·取色) / 标注编辑器 / F3 贴图钉屏 / 历史截图
   识别: OCR / 二维码·条码 (可选引擎 rapidocr-onnxruntime / opencv)
   热键: 7 个动作全部预设可自定义, 保存于 Config.ini, 改键立即生效
 v1.3 二次审查修复 (详见 docs/二次审查报告.md):
@@ -24,7 +24,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
 APP_NAME = "SnapPaste 复制粘贴+截图贴图"
-VERSION = "1.4.8"  # v1.4.8: 去掉「加载配置/保存配置」按钮 (用户反馈没意义), 所有设置改完自动保存且重开恢复 (分隔方式/自定义分隔符/间隔/分割字符/分割位置)
+VERSION = "1.4.9"  # v1.4.9: 截图贴图标题去括号说明; 截图完主窗口不再自动弹出; 历史画廊改名历史截图+删除全部 (含 GIF); 标注加自定义取色; 翻译服务接口 (免费/百度/有道+密钥); F4 改有道式嵌图翻译+对照窗
 # v1.4.7: 新增一键截图翻译 (F4 预设, 自动检测源语言, 目标语言主窗口可设中文/English) + v1.4.6 的工具栏同窗/图片复制双通道/窗口自适应高度
 # v1.4.6: 标注工具栏改冻结屏同窗 Frame (独立小窗真机反复不显示) + 图片复制补全 Win32 签名并加 PowerShell 备用通道 + 主窗口按内容自适应高度 (底部不再被裁)
 # v1.4.5: 数据目录改到 %APPDATA%\SnapPaste, 桌面只剩单个 EXE (老数据首次运行自动从 EXE 旁搬移) + v1.4.4 的 Esc 焦点修复
@@ -217,7 +217,8 @@ class App(tk.Tk):
         known_case = {k.lower(): k for k in list(DEFAULT_HOTKEYS) + list(DEFAULT_SNIP_KEYS) +
                       ["SleepTime", "WaveSet", "WaveFile", "AutoRun", "AutoSet", "MiniFormTime", "MiniFormSet", "Language", "PasteEnter", "PasteRemove",
                        "SplitPos", "AddChar", "LetterSet", "HotKey", "OCAutoSet", "Form1XY", "Form2XY", "UIDetect", "HistoryMax", "DelaySeconds",
-                       "Separator", "CustomSep", "SplitChar", "RegexSel", "CaseSel", "TransTarget"]}
+                       "Separator", "CustomSep", "SplitChar", "RegexSel", "CaseSel", "TransTarget",
+                       "Service", "BaiduAppId", "BaiduKey", "YoudaoAppId", "YoudaoSecret"]}
         for (sec, k), v in pending.items(): by_sec.setdefault(sec, []).append((known_case.get(k, k), v))
         for sec, items in by_sec.items():
             headers = [i for i, ln in enumerate(out) if ln.strip().lower() == f"[{sec.lower()}]"]
@@ -310,7 +311,7 @@ class App(tk.Tk):
         ttk.Combobox(split, textvariable=self.splitpos_var, width=12, values=self._splitpos_values).pack(side="left", padx=4)
         ttk.Button(split, text=self.t("split_import_btn", "按分割导入剪贴板"), command=self.import_clipboard_split).pack(side="left", padx=4)
 
-        snip = ttk.LabelFrame(self, text=self.t("snip_frame", "截图贴图 (合并自 Snipaste 核心功能, 需 Pillow)"))
+        snip = ttk.LabelFrame(self, text=self.t("snip_frame", "截图贴图"))
         snip.pack(fill="x", padx=8, pady=6)
         snip2 = ttk.Frame(snip); snip2.pack(fill="x")
         ttk.Label(snip2, text=self.t("ui_detect", "UI 检测:")).pack(side="left", padx=(2, 0), pady=2)
@@ -322,8 +323,9 @@ class App(tk.Tk):
         self.trans_target_var = tk.StringVar(value="中文" if self.trans_target() == "zh-CN" else "English")
         ttk.Combobox(snip3, textvariable=self.trans_target_var, values=["中文", "English"], width=8, state="readonly").pack(side="left", padx=2)
         self.trans_target_var.trace_add("write", lambda *_: self._save_trans_target())
+        ttk.Button(snip3, text="翻译服务", command=self.open_translate_settings).pack(side="left", padx=4)
         for txt, cmd in [(self.t("snip_region", "区域截图 (F1)"), self.snip_region), (self.t("snip_copy_btn", "截图并复制 (F5)"), self.snip_copy), (self.t("snip_trans_btn", "截图翻译 (F4)"), self.snip_translate), (self.t("pin_clip", "贴剪贴板 (F3)"), self.pin_clipboard),
-                         (self.t("pin_selected", "钉住选中截图"), self.pin_selected_shot), (self.t("gallery", "历史画廊"), self.open_gallery),
+                         (self.t("pin_selected", "钉住选中截图"), self.pin_selected_shot), (self.t("gallery", "历史截图"), self.open_gallery),
                          (self.t("ocr_selected", "OCR 选中截图"), self.ocr_selected_shot), (self.t("open_shots_dir", "打开截图文件夹"), self.open_shots_dir)]:
             ttk.Button(snip, text=txt, command=cmd).pack(side="left", padx=2, pady=4)
         self.shots_list = tk.Listbox(snip, height=3); self.shots_list.pack(side="left", fill="x", expand=True, padx=6, pady=4)
@@ -953,7 +955,7 @@ class App(tk.Tk):
         if not hasattr(self, "shots_list"): return
         self.shots_list.delete(0, "end")
         for f in sorted(os.listdir(self.shots_dir), reverse=True):
-            if f.lower().endswith(".png"): self.shots_list.insert("end", f)
+            if f.lower().endswith((".png", ".gif")): self.shots_list.insert("end", f)
     def save_shot(self, img):
         now = datetime.datetime.now()  # 带毫秒: 旧版只到秒, 1 秒内连截两张会同名互相覆盖
         name = now.strftime("shot_%Y%m%d_%H%M%S_") + f"{now.microsecond // 1000:03d}.png"
@@ -1001,7 +1003,7 @@ class App(tk.Tk):
     def _run_long_capture(self, box):
         """长截图执行 (覆盖层已关闭): 鼠标停在选区中心自动向下滚动, 逐帧抓取拼接; Esc 中止, 画面不再变化自动结束, 完成后打开标注编辑器。"""
         if sys.platform != "win32":
-            self.deiconify(); self.status.set("长截图目前仅支持 Windows"); return
+            self._restore_main_after_snip(); self.status.set("长截图目前仅支持 Windows"); return
         u = ctypes.windll.user32
         u.mouse_event.argtypes = [ctypes.c_uint, ctypes.c_uint, ctypes.c_uint, ctypes.c_uint, ctypes.c_void_p]
         x1, y1, x2, y2 = box
@@ -1018,7 +1020,7 @@ class App(tk.Tk):
             last_sig = sig
             u.mouse_event(0x0800, 0, 0, (-600) & 0xFFFFFFFF, None)  # MOUSEEVENTF_WHEEL 向下滚一格
             time.sleep(0.35)
-        self.deiconify()
+        self._restore_main_after_snip()
         if not frames: return
         img = self._stitch_frames(frames)
         if img is None: return
@@ -1037,7 +1039,7 @@ class App(tk.Tk):
         def finish():
             try: ctrl.destroy()
             except Exception: pass
-            self.deiconify()
+            self._restore_main_after_snip()
             frames = rec["frames"]
             if len(frames) < 2: self.status.set("GIF 太短, 已取消"); return
             path = os.path.join(self.shots_dir, time.strftime("gif_%Y%m%d_%H%M%S.gif"))
@@ -1077,16 +1079,36 @@ class App(tk.Tk):
                 u32.SetForegroundWindow(hwnd)
         except Exception: pass
 
+    def _choose_color(self, current, parent=None):
+        """弹出系统取色器让用户自定义颜色, 返回大写 #RRGGBB; 取消或出错返回 None。"""
+        try:
+            from tkinter import colorchooser
+            _rgb, hexv = colorchooser.askcolor(color=current, title="自定义颜色", parent=parent)
+            return hexv.upper() if hexv else None
+        except Exception:
+            return None
+    def _restore_main_after_snip(self):
+        """截图结束时把主窗口恢复成截图前的样子, 不许自己弹到最前面。
+        旧实现无条件 deiconify: 在别的软件里按热键截图复制完, 主窗口会弹出来挡住正在用的软件 (真机反馈)。
+        现在: 截图前藏在托盘里就继续藏着; 截图前露着但不在最前 (人在别的软件里) 就静默放回并沉到后面;
+        只有截图前主窗口就在最前 (在主窗口里点的截图按钮) 才照常恢复到前面。"""
+        if not getattr(self, "_snip_was_visible", True): return
+        self.deiconify()
+        if not getattr(self, "_snip_was_foreground", True):
+            try: self.lower()
+            except Exception: pass
     def snip_region(self):
         if not HAS_PIL:
             messagebox.showerror("缺少 Pillow", "截图功能需要 Pillow: pip install Pillow"); return
+        self._snip_was_visible = self.winfo_viewable() == 1  # 截图前主窗口的状态, 结束时按原样恢复 (见 _restore_main_after_snip)
+        self._snip_was_foreground = self._foreground_is_self()
         self.withdraw(); self.update(); time.sleep(0.3)
         try:
             try: full = ImageGrab.grab(all_screens=True)  # 多显示器抓虚拟桌面 (旧 Pillow 无此参数时回退)
             except TypeError: full = ImageGrab.grab()
             full = full.convert("RGB")  # 统一 RGB: 调色板/灰度图取色和标注才不失真
         except Exception as e:
-            self.deiconify(); messagebox.showerror("截图失败", str(e)); return
+            self._restore_main_after_snip(); messagebox.showerror("截图失败", str(e)); return
         try: ui_mode = int(self.cfg.get("Snip", "UIDetect", fallback="2"))  # UI 检测: 0 不检测 / 1 仅窗口 / 2 检测元素
         except Exception: ui_mode = 2
         top_windows = self._enum_top_windows() if ui_mode else []
@@ -1181,7 +1203,7 @@ class App(tk.Tk):
                 if finish_mode == "copy":  # 截图并复制: 框选完直接出图进剪贴板, 不停留标注
                     final = full.crop(box); self.save_shot(final); close_overlay(); self._copy_image_to_clipboard(final)
                 elif finish_mode == "translate":  # 截图翻译: 框选完直接 OCR 并翻译到目标语言, 不停留标注
-                    final = full.crop(box); self.save_shot(final); close_overlay(); self.translate_image(final, self.trans_target())
+                    final = full.crop(box); self.save_shot(final); close_overlay(); self.translate_image_inplace(final, self.trans_target())
                 else: enter_adjust(box)
             else: close_overlay()
         canvas.bind("<ButtonPress-1>", down); canvas.bind("<B1-Motion>", drag); canvas.bind("<ButtonRelease-1>", up)
@@ -1192,7 +1214,7 @@ class App(tk.Tk):
             except Exception: pass
             try: sel_win.destroy()
             except Exception: pass
-            self.deiconify()
+            self._restore_main_after_snip()
         # 全局 Esc 兜底: 就算焦点一时没抢过来 (还停在原程序身上), 框选/调整阶段按 Esc 也能退出;
         # 覆盖层销毁时自动注销 (finish/取消/长截图/GIF 所有出口都销毁 sel_win), 不影响平时用 Esc
         state["esc_hk"] = None
@@ -1299,6 +1321,23 @@ class App(tk.Tk):
             for cname in ("#FF0000", "#FFD800", "#00B050", "#0070FF", "#000000", "#FFFFFF"):
                 tk.Button(r1, bg=cname, width=2, relief="ridge",
                           command=lambda cc=cname: state.update(color=cc)).pack(side="left", padx=1)
+            def pick_custom():
+                hk = state.get("esc_hk")
+                if hk is not None:  # 取色器打开期间先摘掉全局 Esc: 在取色器里按 Esc 取消不该把整个截图也退掉
+                    try:
+                        import keyboard as _kb; _kb.remove_hotkey(hk)
+                    except Exception: pass
+                    state["esc_hk"] = None
+                picked = self._choose_color(state["color"], sel_win)
+                if sel_win.winfo_exists() and state.get("esc_hk") is None:  # 取色器关掉后把全局 Esc 装回去
+                    try:
+                        import keyboard as _kb
+                        state["esc_hk"] = _kb.add_hotkey("esc", lambda: self._ui_queue.put(close_overlay), suppress=True)
+                    except Exception: pass
+                if picked:
+                    state.update(color=picked); custom_btn.configure(bg=picked)
+            custom_btn = tk.Button(r1, text="自定义", font=("Microsoft YaHei", 9), relief="ridge", bg="#F2F2F2", command=pick_custom)
+            custom_btn.pack(side="left", padx=1)
             width_var = tk.IntVar(value=3)
             ttk.Combobox(r1, textvariable=width_var, values=[1, 2, 3, 5, 8], width=3).pack(side="left", padx=2)
             width_var.trace_add("write", lambda *_: state.update(width=width_var.get()))
@@ -1314,7 +1353,7 @@ class App(tk.Tk):
             tk.Button(r2, text="OCR", font=("Microsoft YaHei", 9), relief="flat", bg="#F2F2F2",
                       command=lambda: self.recognize(self.render_ops(full.crop(state["box"]), state["ops"]), "ocr")).pack(side="left", padx=1)
             tk.Button(r2, text="翻译", font=("Microsoft YaHei", 9), relief="flat", bg="#F2F2F2",
-                      command=lambda: self.translate_image(self.render_ops(full.crop(state["box"]), state["ops"]))).pack(side="left", padx=1)
+                      command=lambda: self.translate_image_inplace(self.render_ops(full.crop(state["box"]), state["ops"]))).pack(side="left", padx=1)
             def do_long():
                 box = state["box"]
                 try: tb.destroy()
@@ -1463,7 +1502,7 @@ class App(tk.Tk):
             adj_menu.add_command(label="另存为 (Ctrl+S)", command=lambda: finish("save"))
             adj_menu.add_separator()
             adj_menu.add_command(label="OCR 识别", command=lambda: self.recognize(self.render_ops(full.crop(state["box"]), state["ops"]), "ocr"))
-            adj_menu.add_command(label="翻译图中文字", command=lambda: self.translate_image(self.render_ops(full.crop(state["box"]), state["ops"])))
+            adj_menu.add_command(label="翻译图中文字", command=lambda: self.translate_image_inplace(self.render_ops(full.crop(state["box"]), state["ops"])))
             adj_menu.add_separator()
             adj_menu.add_command(label="取消截图 (Esc)", command=close_overlay)
             canvas.bind("<Button-3>", lambda e: adj_menu.tk_popup(e.x_root, e.y_root))
@@ -1561,7 +1600,7 @@ class App(tk.Tk):
         menu = tk.Menu(win, tearoff=0)
         menu.add_command(label="标注这张图", command=lambda: (win.destroy(), self.open_editor(state["img"])))
         menu.add_command(label="OCR 识别这张图", command=lambda: self.recognize(state["img"], "ocr"))
-        menu.add_command(label="翻译图中文字", command=lambda: self.translate_image(state["img"]))
+        menu.add_command(label="翻译图中文字", command=lambda: self.translate_image_inplace(state["img"]))
         menu.add_command(label="扫这张图的码", command=lambda: self.recognize(state["img"], "code"))
         menu.add_command(label="旋转 90°", command=lambda: (state.update(img=state["img"].rotate(-90, expand=True)), render()))
         alpha = tk.Menu(menu, tearoff=0)
@@ -1705,6 +1744,12 @@ class App(tk.Tk):
             ttk.Radiobutton(bar, text=txt, variable=tool, value=val).pack(side="left", padx=1)
         for cname in ("#FF0000", "#FFD800", "#00B050", "#0070FF", "#000000", "#FFFFFF"):
             tk.Button(bar, bg=cname, width=2, command=lambda cc=cname: color.set(cc)).pack(side="left", padx=1)
+        def pick_custom_ed():
+            picked = self._choose_color(color.get(), win)
+            if picked:
+                color.set(picked); custom_btn_ed.configure(bg=picked)
+        custom_btn_ed = tk.Button(bar, text="自定义", command=pick_custom_ed)
+        custom_btn_ed.pack(side="left", padx=1)
         ttk.Combobox(bar, textvariable=width, values=[1, 2, 3, 5, 8], width=3).pack(side="left", padx=3)
         # 大图按比例缩小显示 (旧版按原图尺寸开窗, 截大区域/4K 时窗口超出屏幕点不到按钮)
         scale = min(1.0, 1500 / base.width, 880 / base.height)
@@ -1902,6 +1947,87 @@ try {
             return None
         finally:
             import shutil; shutil.rmtree(tmp, ignore_errors=True)
+    # 带行坐标的 OCR 脚本 (嵌图翻译用): 每行输出 文字 + 包围盒 (词矩形并集), JSON 一行一个对象
+    _WIN_OCR_LINES_PS1 = r"""
+param([string]$ImgPath, [string]$OutPath)
+$ErrorActionPreference = 'Stop'
+try {
+  Add-Type -AssemblyName System.Runtime.WindowsRuntime
+  $null = [Windows.Storage.StorageFile, Windows.Storage, ContentType = WindowsRuntime]
+  $null = [Windows.Graphics.Imaging.BitmapDecoder, Windows.Foundation, ContentType = WindowsRuntime]
+  $null = [Windows.Media.Ocr.OcrEngine, Windows.Foundation, ContentType = WindowsRuntime]
+  $null = [Windows.Globalization.Language, Windows.Globalization, ContentType = WindowsRuntime]
+  $asTask = ([System.WindowsRuntimeSystemExtensions].GetMethods() | Where-Object { $_.Name -eq 'AsTask' -and $_.GetParameters().Count -eq 1 -and $_.GetParameters()[0].ParameterType.Name -eq 'IAsyncOperation`1' })[0]
+  function Await($op, $type) { $m = $asTask.MakeGenericMethod($type); $t = $m.Invoke($null, @($op)); $t.Wait(-1) | Out-Null; $t.Result }
+  $file = Await ([Windows.Storage.StorageFile]::GetFileFromPathAsync($ImgPath)) ([Windows.Storage.StorageFile])
+  $stream = Await ($file.OpenAsync([Windows.Storage.FileAccessMode]::Read)) ([Windows.Storage.Streams.IRandomAccessStream])
+  $decoder = Await ([Windows.Graphics.Imaging.BitmapDecoder]::CreateAsync($stream)) ([Windows.Graphics.Imaging.BitmapDecoder])
+  $bitmap = Await ($decoder.GetSoftwareBitmapAsync()) ([Windows.Graphics.Imaging.SoftwareBitmap])
+  $engine = [Windows.Media.Ocr.OcrEngine]::TryCreateFromUserProfileLanguages()
+  if ($null -eq $engine) { $engine = [Windows.Media.Ocr.OcrEngine]::TryCreateFromLanguage((New-Object Windows.Globalization.Language 'zh-Hans-CN')) }
+  if ($null -eq $engine) { throw 'NO_OCR_LANGUAGE' }
+  $result = Await ($engine.RecognizeAsync($bitmap)) ([Windows.Media.Ocr.OcrResult])
+  $lines = @()
+  foreach ($line in $result.Lines) {
+    $x1 = 1e9; $y1 = 1e9; $x2 = -1; $y2 = -1
+    foreach ($word in $line.Words) {
+      $r = $word.BoundingRect
+      if ($r.X -lt $x1) { $x1 = $r.X }; if ($r.Y -lt $y1) { $y1 = $r.Y }
+      if ($r.X + $r.Width -gt $x2) { $x2 = $r.X + $r.Width }; if ($r.Y + $r.Height -gt $y2) { $y2 = $r.Y + $r.Height }
+    }
+    if ($x2 -gt $x1) { $lines += [PSCustomObject]@{ t = $line.Text; x = [int]$x1; y = [int]$y1; w = [int]($x2 - $x1); h = [int]($y2 - $y1) } }
+  }
+  [System.IO.File]::WriteAllText($OutPath, ($lines | ConvertTo-Json -Compress), (New-Object System.Text.UTF8Encoding $false))
+} catch {
+  [System.IO.File]::WriteAllText($OutPath, ('ERROR: ' + $_.Exception.Message), (New-Object System.Text.UTF8Encoding $false))
+}
+"""
+    @classmethod
+    def _ocr_windows_lines(cls, img):
+        """Windows 内置 OCR 带行坐标版: 返回 [{'t','x','y','w','h'}...]; 引擎不可用返回 None, 没文字返回 []"""
+        if sys.platform != "win32": return None
+        import subprocess, tempfile, json as _json
+        tmp = tempfile.mkdtemp(prefix="snappaste_ocrl_")
+        img_path, out_path, ps_path = (os.path.join(tmp, n) for n in ("in.png", "out.json", "ocrl.ps1"))
+        try:
+            img.save(img_path)
+            with open(ps_path, "w", encoding="utf-8") as f: f.write(cls._WIN_OCR_LINES_PS1)
+            subprocess.run(["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ps_path,
+                            "-ImgPath", img_path, "-OutPath", out_path],
+                           capture_output=True, timeout=30, creationflags=0x08000000)
+            if not os.path.exists(out_path): return None
+            txt = open(out_path, encoding="utf-8-sig").read().strip()
+            if txt.startswith("ERROR:"): return None
+            if not txt: return []
+            data = _json.loads(txt)
+            if isinstance(data, dict): data = [data]  # 只有一行时 ConvertTo-Json 给的是对象不是数组
+            out = []
+            for d in data:
+                t = re.sub(r"(?<=[\u4e00-\u9fff])\s+(?=[\u4e00-\u9fff])", "", str(d.get("t", ""))).strip()
+                if t: out.append({"t": t, "x": int(d["x"]), "y": int(d["y"]), "w": int(d["w"]), "h": int(d["h"])})
+            return out
+        except Exception:
+            return None
+        finally:
+            import shutil; shutil.rmtree(tmp, ignore_errors=True)
+    @classmethod
+    def ocr_lines(cls, img):
+        """带行坐标的 OCR (嵌图翻译用): Windows 内置 -> RapidOCR (自带框); 都不可用返回 None"""
+        lines = cls._ocr_windows_lines(img)
+        if lines is not None: return lines
+        try:
+            from rapidocr_onnxruntime import RapidOCR
+            import numpy as np
+            if cls._ocr_engine is None: cls._ocr_engine = RapidOCR()
+            result, _ = cls._ocr_engine(np.array(img.convert("RGB")))
+            out = []
+            for box, text, _score in (result or []):
+                xs = [p[0] for p in box]; ys = [p[1] for p in box]
+                out.append({"t": text.strip(), "x": int(min(xs)), "y": int(min(ys)),
+                            "w": int(max(xs) - min(xs)), "h": int(max(ys) - min(ys))})
+            return [o for o in out if o["t"]]
+        except ImportError: return None
+        except Exception: return []
     @classmethod
     def ocr_image(cls, img):
         """有引擎返回识别文字 (可能为空串); 没引擎返回 None。优先级: Windows 内置 OCR -> RapidOCR -> pytesseract"""
@@ -1956,52 +2082,121 @@ try {
                 messagebox.showinfo("扫码未启用", "还没装扫码引擎, 装一次即可:\n\npip install opencv-python-headless"); return
             self.show_text_result("扫码结果", "\n".join(res) if res else "(没扫到二维码/条码)")
     # ---------- 截图翻译: OCR 出的文字自动英<->中互译 ----------
-    @staticmethod
-    def translate_text(text):
+    def translate_text(self, text):
         """把文字在 英文<->简体中文 间翻译 (含汉字则译成英文, 否则译成中文)。
-        用免费在线接口 (MyMemory 主, Google 备用), 无需密钥; 全部失败返回 None。"""
-        import urllib.request, urllib.parse, json as _json
+        优先用设置里配置的翻译服务 (百度/有道, 自备密钥), 否则用免费在线接口; 全部失败返回 None。"""
         text = (text or "").strip()
         if not text: return ""
         has_cjk = any("\u4e00" <= ch <= "\u9fff" for ch in text)
-        src, dst = ("zh-CN", "en") if has_cjk else ("en", "zh-CN")
-        groups, cur = [], ""  # 接口单次长度有限: 按行攒成 <=450 字符的段, 分段译后拼回
-        for line in text.splitlines():
-            if cur and len(cur) + len(line) + 1 > 450: groups.append(cur); cur = line
-            else: cur = (cur + "\n" + line) if cur else line
-        if cur: groups.append(cur)
-        def via_mymemory(q):
-            url = "https://api.mymemory.translated.net/get?" + urllib.parse.urlencode({"q": q, "langpair": f"{src}|{dst}"})
-            req = urllib.request.Request(url, headers={"User-Agent": "SnapPaste"})
-            with urllib.request.urlopen(req, timeout=12) as r:
-                d = _json.loads(r.read().decode("utf-8"))
-            return (d.get("responseData") or {}).get("translatedText") or ""
-        def via_google(q):
-            url = "https://translate.googleapis.com/translate_a/single?" + urllib.parse.urlencode(
-                {"client": "gtx", "sl": src, "tl": dst, "dt": "t", "q": q})
-            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-            with urllib.request.urlopen(req, timeout=12) as r:
-                d = _json.loads(r.read().decode("utf-8"))
-            return "".join(seg[0] for seg in (d[0] or []) if seg and seg[0])
-        out = []
-        for g in groups:
-            t = ""
-            try: t = via_mymemory(g)
-            except Exception: t = ""
-            if not t:
-                try: t = via_google(g)
-                except Exception: return None
-            if not t: return None
-            out.append(t)
-        return "\n".join(out)
+        return self.translate_text_to(text, "en" if has_cjk else "zh-CN")
+    # ---------- 翻译服务接口 (像 PixPin 一样可填自己的 APP ID/密钥) ----------
+    def _trans_cfg(self):
+        g = lambda k, d="": (self.cfg.get("Translate", k, fallback=d) or d).strip()
+        svc = g("Service", "free") or "free"
+        return {"service": svc if svc in ("free", "baidu", "youdao") else "free",
+                "baidu_id": g("BaiduAppId"), "baidu_key": g("BaiduKey"),
+                "youdao_id": g("YoudaoAppId"), "youdao_secret": g("YoudaoSecret")}
+    @staticmethod
+    def _baidu_translate(q, target, appid, key):
+        """百度翻译开放平台: sign = md5(appid+q+salt+密钥), 成功返回译文, 出错抛异常 (带错误码)。"""
+        import urllib.request, urllib.parse, json as _json, hashlib, random
+        salt = str(random.randint(10000, 99999))
+        sign = hashlib.md5((appid + q + salt + key).encode("utf-8")).hexdigest()
+        url = "https://fanyi-api.baidu.com/api/trans/vip/translate?" + urllib.parse.urlencode(
+            {"q": q, "from": "auto", "to": "zh" if target == "zh-CN" else "en",
+             "appid": appid, "salt": salt, "sign": sign})
+        req = urllib.request.Request(url, headers={"User-Agent": "SnapPaste"})
+        with urllib.request.urlopen(req, timeout=12) as r:
+            d = _json.loads(r.read().decode("utf-8"))
+        if d.get("error_code"): raise RuntimeError(f"百度翻译错误 {d.get('error_code')}: {d.get('error_msg', '')}")
+        return "\n".join(seg.get("dst", "") for seg in d.get("trans_result") or [])
+    @staticmethod
+    def _youdao_translate(q, target, appkey, secret):
+        """有道翻译 (网易智云) v3 签名: sha256(appKey+input+salt+curtime+密钥), 成功返回译文, 出错抛异常。"""
+        import urllib.request, urllib.parse, json as _json, hashlib, time as _time, uuid
+        salt = str(uuid.uuid4()); curtime = str(int(_time.time()))
+        inp = q if len(q) <= 20 else q[:10] + str(len(q)) + q[-10:]  # v3 规则: 长句取首尾各 10 字 + 总长
+        sign = hashlib.sha256((appkey + inp + salt + curtime + secret).encode("utf-8")).hexdigest()
+        data = urllib.parse.urlencode({"q": q, "from": "auto", "to": "zh-CHS" if target == "zh-CN" else "en",
+                                       "appKey": appkey, "salt": salt, "sign": sign,
+                                       "signType": "v3", "curtime": curtime}).encode("utf-8")
+        req = urllib.request.Request("https://openapi.youdao.com/api", data=data,
+                                     headers={"Content-Type": "application/x-www-form-urlencoded", "User-Agent": "SnapPaste"})
+        with urllib.request.urlopen(req, timeout=12) as r:
+            d = _json.loads(r.read().decode("utf-8"))
+        if str(d.get("errorCode", "0")) != "0": raise RuntimeError(f"有道翻译错误码 {d.get('errorCode')}")
+        return "\n".join(d.get("translation") or [])
+    def open_translate_settings(self):
+        """翻译服务设置窗 (仿 PixPin): 选服务 + 填 APP ID/密钥 + 测试; 密钥只存本机 Config.ini 的 [Translate] 段。"""
+        tc = self._trans_cfg()
+        names = {"free": "免费接口 (无需密钥)", "baidu": "百度翻译开放平台", "youdao": "有道翻译"}
+        creds = {"baidu": [tc["baidu_id"], tc["baidu_key"]], "youdao": [tc["youdao_id"], tc["youdao_secret"]]}
+        cur = {"service": tc["service"]}
+        win = tk.Toplevel(self); win.title("翻译服务设置"); win.geometry("470x300"); win.attributes("-topmost", True)
+        ttk.Label(win, text="翻译服务:").grid(row=0, column=0, sticky="e", padx=8, pady=8)
+        svc_var = tk.StringVar(value=names[cur["service"]])
+        id_var, key_var = tk.StringVar(), tk.StringVar()
+        svc = ttk.Combobox(win, textvariable=svc_var, values=list(names.values()), width=26, state="readonly")
+        svc.grid(row=0, column=1, sticky="w", pady=8)
+        ttk.Label(win, text="APP ID:").grid(row=1, column=0, sticky="e", padx=8, pady=6)
+        id_entry = ttk.Entry(win, textvariable=id_var, width=38); id_entry.grid(row=1, column=1, sticky="w", pady=6)
+        ttk.Label(win, text="密钥:").grid(row=2, column=0, sticky="e", padx=8, pady=6)
+        key_entry = ttk.Entry(win, textvariable=key_var, width=38, show="*"); key_entry.grid(row=2, column=1, sticky="w", pady=6)
+        def load_fields():
+            pair = creds.get(cur["service"], ["", ""])
+            id_var.set(pair[0]); key_var.set(pair[1])
+            st = "normal" if cur["service"] != "free" else "disabled"
+            id_entry.configure(state=st); key_entry.configure(state=st)
+        def on_svc(*_):
+            creds[cur["service"]] = [id_var.get().strip(), key_var.get().strip()]  # 先收走当前服务的输入再切换
+            cur["service"] = {v: k for k, v in names.items()}[svc_var.get()]
+            load_fields()
+        svc_var.trace_add("write", on_svc)
+        ttk.Label(win, text="百度/有道要到各自开放平台免费申请 APP ID 和密钥; 只保存在本机, 不上传别处。\n没填密钥或接口出错时, 自动用免费接口翻译。", foreground="#888888").grid(row=3, column=0, columnspan=2, padx=8, pady=4, sticky="w")
+        test_var = tk.StringVar()
+        ttk.Label(win, textvariable=test_var, foreground="#0070FF", wraplength=440).grid(row=4, column=0, columnspan=2, padx=8, sticky="w")
+        btns = ttk.Frame(win); btns.grid(row=5, column=0, columnspan=2, pady=10)
+        def do_test():
+            creds[cur["service"]] = [id_var.get().strip(), key_var.get().strip()]
+            svc_key, pair = cur["service"], creds.get(cur["service"], ["", ""])
+            test_var.set("测试中...")
+            import threading
+            def work():
+                try:
+                    if svc_key == "baidu":
+                        if not all(pair): raise RuntimeError("先填 APP ID 和密钥")
+                        r = self._baidu_translate("Hello, nice to meet you.", "zh-CN", pair[0], pair[1])
+                    elif svc_key == "youdao":
+                        if not all(pair): raise RuntimeError("先填 APP ID 和密钥")
+                        r = self._youdao_translate("Hello, nice to meet you.", "zh-CN", pair[0], pair[1])
+                    else:
+                        r = self.translate_text_to("Hello, nice to meet you.", "zh-CN")
+                    msg = f"测试成功: Hello, nice to meet you. → {r}" if r else "测试失败: 没拿到译文"
+                except Exception as e:
+                    msg = f"测试失败: {e}"
+                self._ui_queue.put(lambda: test_var.set(msg))
+            threading.Thread(target=work, daemon=True).start()
+        ttk.Button(btns, text="测试", command=do_test).pack(side="left", padx=4)
+        def do_save():
+            creds[cur["service"]] = [id_var.get().strip(), key_var.get().strip()]
+            if not self.cfg.has_section("Translate"): self.cfg.add_section("Translate")
+            self.cfg.set("Translate", "Service", cur["service"])
+            self.cfg.set("Translate", "BaiduAppId", creds["baidu"][0]); self.cfg.set("Translate", "BaiduKey", creds["baidu"][1])
+            self.cfg.set("Translate", "YoudaoAppId", creds["youdao"][0]); self.cfg.set("Translate", "YoudaoSecret", creds["youdao"][1])
+            self.save_config()
+            self.status.set(f"翻译服务已保存: {names[cur['service']]}")
+            win.destroy()
+        ttk.Button(btns, text="保存", command=do_save).pack(side="left", padx=4)
+        ttk.Button(btns, text="取消", command=win.destroy).pack(side="left", padx=4)
+        load_fields()
     def trans_target(self):
         """截图翻译的目标语言: [Snip] TransTarget, zh-CN (默认) 或 en, 主窗口可改"""
         v = (self.cfg.get("Snip", "TransTarget", fallback="zh-CN") or "zh-CN").strip()
         return v if v in ("zh-CN", "en") else "zh-CN"
-    @staticmethod
-    def translate_text_to(text, target):
+    def translate_text_to(self, text, target):
         """把文字翻译到指定目标语言, 源语言自动检测 (一键截图翻译 F4 用)。
-        Google 接口 (sl=auto) 为主, MyMemory 备用; 原文已是中文且目标也是中文时原样返回; 全部失败返回 None。"""
+        设置了百度/有道接口时优先用它, 失败自动回退免费接口 (Google 主, MyMemory 备);
+        原文已是中文且目标也是中文时原样返回; 全部失败返回 None。"""
         import urllib.request, urllib.parse, json as _json
         text = (text or "").strip()
         if not text: return ""
@@ -2027,11 +2222,21 @@ try {
             with urllib.request.urlopen(req, timeout=12) as r:
                 d = _json.loads(r.read().decode("utf-8"))
             return (d.get("responseData") or {}).get("translatedText") or ""
+        def via_api(q):
+            tc = self._trans_cfg()
+            if tc["service"] == "baidu" and tc["baidu_id"] and tc["baidu_key"]:
+                return self._baidu_translate(q, target, tc["baidu_id"], tc["baidu_key"])
+            if tc["service"] == "youdao" and tc["youdao_id"] and tc["youdao_secret"]:
+                return self._youdao_translate(q, target, tc["youdao_id"], tc["youdao_secret"])
+            return ""
         out = []
         for g in groups:
             t = ""
-            try: t = via_google(g)
+            try: t = via_api(g)
             except Exception: t = ""
+            if not t:
+                try: t = via_google(g)
+                except Exception: t = ""
             if not t:
                 try: t = via_mymemory(g)
                 except Exception: return None
@@ -2052,6 +2257,104 @@ try {
                     self.show_text_result("翻译结果", res)
             self._ui_queue.put(show)
         threading.Thread(target=work, daemon=True).start()
+    @staticmethod
+    def _load_font(size):
+        from PIL import ImageFont
+        for path in (r"C:\Windows\Fonts\msyh.ttc", r"C:\Windows\Fonts\simhei.ttf",
+                     "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+                     "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"):
+            try:
+                if os.path.exists(path): return ImageFont.truetype(path, size)
+            except Exception: pass
+        return ImageFont.load_default()
+    @staticmethod
+    def _render_translated(img, lines, translations):
+        """有道式嵌图翻译: 每行采样原文底色盖住原文, 再按框高自适应字号把译文写回原位置。"""
+        from PIL import ImageDraw
+        src = img.convert("RGB"); out = src.copy()
+        dr = ImageDraw.Draw(out); px = src.load()
+        W, H = out.size
+        for ln, tr in zip(lines, translations):
+            if not tr: continue
+            x, y, w, h = ln["x"], ln["y"], ln["w"], ln["h"]
+            if w <= 0 or h <= 0: continue
+            pad = max(1, h // 6)
+            bx1, by1 = max(0, x - pad), max(0, y - pad // 2)
+            bx2, by2 = min(W - 1, x + w + pad), min(H - 1, y + h + pad // 2)
+            border = []
+            for xx in range(bx1, bx2 + 1, max(1, (bx2 - bx1) // 24)):
+                border.append(px[xx, by1]); border.append(px[xx, by2])
+            for yy in range(by1, by2 + 1, max(1, (by2 - by1) // 8)):
+                border.append(px[bx1, yy]); border.append(px[bx2, yy])
+            border.sort()
+            bg = border[len(border) // 2] if border else (255, 255, 255)
+            dr.rectangle([bx1, by1, bx2, by2], fill=bg)
+            lum = (0.299 * bg[0] + 0.587 * bg[1] + 0.114 * bg[2]) / 255.0
+            fg = (0, 0, 0) if lum >= 0.5 else (255, 255, 255)
+            size = max(8, int(h * 0.95)); font = App._load_font(size)
+            while size > 8 and dr.textlength(tr, font=font) > w:
+                size = max(8, size - 2); font = App._load_font(size)
+            dr.text((x, y + max(0, (h - size) // 2)), tr, fill=fg, font=font)
+        return out
+    def translate_image_inplace(self, img, target=None):
+        """有道式截图翻译: OCR 每行文字+位置 -> 逐行翻译 -> 译文绘回原图 -> 弹原图/译图对照窗。
+        拿不到行坐标时回退到原来的纯文字翻译流程。"""
+        import threading
+        def work():
+            lines = self.ocr_lines(img)
+            if not lines:
+                self.translate_image(img, target); return
+            tgt = target
+            if tgt is None:
+                joined = "".join(l["t"] for l in lines)
+                tgt = "en" if any("\u4e00" <= ch <= "\u9fff" for ch in joined) else "zh-CN"
+            translations, any_ok = [], False
+            for ln in lines:
+                t = ln["t"]
+                if not re.search(r"[A-Za-z\u4e00-\u9fff]", t):
+                    translations.append(t); continue  # 纯数字/符号行原样保留
+                r = self.translate_text_to(t, tgt)
+                if r: any_ok = True; translations.append(r)
+                else: translations.append(t)
+            if not any_ok:
+                self._ui_queue.put(lambda: messagebox.showinfo("截图翻译", "翻译失败: 在线翻译接口没连上, 检查网络后重试。")); return
+            translated = self._render_translated(img, lines, translations)
+            pairs = [(l["t"], t) for l, t in zip(lines, translations)]
+            self._ui_queue.put(lambda: self.show_translate_compare(img, translated, pairs))
+        threading.Thread(target=work, daemon=True).start()
+    def show_translate_compare(self, orig, translated, pairs):
+        """原图/译图对照窗 (仿有道截图翻译结果): 宽图左右对照, 高图上下对照; 译图可复制/保存/钉图。"""
+        win = tk.Toplevel(self); win.title("截图翻译 - 原图/译图对照"); win.attributes("-topmost", True)
+        bar = ttk.Frame(win); bar.pack(side="bottom", fill="x", padx=8, pady=6)
+        body = ttk.Frame(win); body.pack(fill="both", expand=True)
+        ow, oh = orig.size
+        side = ow >= oh
+        scale = min(1.0, 740 / ow, 840 / oh) if side else min(1.0, 760 / ow, 700 / oh)
+        def photo(im):
+            if scale < 1.0: im = im.resize((max(1, int(ow * scale)), max(1, int(oh * scale))), Image.LANCZOS)
+            return ImageTk.PhotoImage(im)
+        win._photos = [photo(orig), photo(translated)]
+        def pane(title, ph):
+            f = ttk.Frame(body)
+            ttk.Label(f, text=title).pack()
+            tk.Label(f, image=ph).pack()
+            return f
+        if side:
+            pane("原图", win._photos[0]).pack(side="left", padx=6, pady=6)
+            pane("译图", win._photos[1]).pack(side="left", padx=6, pady=6)
+        else:
+            pane("原图", win._photos[0]).pack(padx=6, pady=6)
+            pane("译图", win._photos[1]).pack(padx=6, pady=6)
+        copy_btn = ttk.Button(bar, text="复制译图")
+        def do_copy():
+            ok = self._copy_image_to_clipboard(translated)
+            copy_btn.config(text="已复制 ✓" if ok else "复制失败")
+            win.after(1200, lambda: copy_btn.config(text="复制译图"))
+        copy_btn.config(command=do_copy); copy_btn.pack(side="left", padx=2)
+        ttk.Button(bar, text="保存译图", command=lambda: (self.save_shot(translated), self.status.set("译图已存进历史截图"))).pack(side="left", padx=2)
+        ttk.Button(bar, text="钉住译图", command=lambda: self.pin_image(translated)).pack(side="left", padx=2)
+        ttk.Button(bar, text="复制译文", command=lambda: self.clip_set("\n".join(t for _o, t in pairs))).pack(side="left", padx=2)
+        ttk.Button(bar, text="关闭", command=win.destroy).pack(side="right", padx=2)
     def translate_image(self, img, target=None):
         """对一张图先 OCR 再翻译 (都在后台线程跑, 不冻结界面)。target 给定则译到该语言 (源语言自动检测), 否则英<->中互译"""
         import threading
@@ -2096,30 +2399,56 @@ try {
     # ---------- 截图历史画廊 (v1.2) ----------
     def open_gallery(self):
         if not HAS_PIL: return
-        win = tk.Toplevel(self); win.title("截图历史画廊"); win.geometry("760x500")
+        win = tk.Toplevel(self); win.title("历史截图"); win.geometry("760x500")
+        def shot_files():
+            try: return [f for f in sorted(os.listdir(self.shots_dir), reverse=True)
+                         if f.lower().endswith((".png", ".gif"))]
+            except Exception: return []
+        bar = ttk.Frame(win); bar.pack(fill="x", padx=8, pady=6)
+        count_var = tk.StringVar(); ttk.Label(bar, textvariable=count_var).pack(side="left")
         outer = ttk.Frame(win); outer.pack(fill="both", expand=True)
         canvas = tk.Canvas(outer); sb = ttk.Scrollbar(outer, orient="vertical", command=canvas.yview)
         grid = ttk.Frame(canvas); grid.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
         canvas.create_window((0, 0), window=grid, anchor="nw"); canvas.configure(yscrollcommand=sb.set)
         canvas.pack(side="left", fill="both", expand=True); sb.pack(side="right", fill="y")
         win._photos = []
-        files = [f for f in sorted(os.listdir(self.shots_dir), reverse=True) if f.lower().endswith(".png")][:60]  # 只展示最近 60 张, 防几百张时全量解码卡顿
-        if not files: ttk.Label(grid, text="还没有截图, 先按 F1 截一张").pack(padx=20, pady=20)
-        for i, name in enumerate(files):
-            cell = ttk.Frame(grid); cell.grid(row=i // 4, column=i % 4, padx=8, pady=8)
-            try:
-                im = Image.open(os.path.join(self.shots_dir, name)); thumb = im.copy(); thumb.thumbnail((160, 110))
-                photo = ImageTk.PhotoImage(thumb); win._photos.append(photo)
-                tk.Label(cell, image=photo).pack()
-            except Exception: pass
-            ttk.Label(cell, text=name[5:20], font=("", 8)).pack()
-            btns = ttk.Frame(cell); btns.pack()
-            ttk.Button(btns, text="钉图", width=6, command=lambda n=name: self.pin_image(Image.open(os.path.join(self.shots_dir, n)))).pack(side="left", padx=1)
-            def delete(n=name, cell=cell):
-                try: os.remove(os.path.join(self.shots_dir, n))
+        def render():
+            for c in grid.winfo_children(): c.destroy()
+            win._photos = []
+            all_files = shot_files()
+            files = all_files[:60]  # 只展示最近 60 个, 防几百个时全量解码卡顿
+            count_var.set(f"共 {len(all_files)} 个" + (" (只显示最近 60 个)" if len(all_files) > 60 else ""))
+            if not files:
+                ttk.Label(grid, text="还没有截图, 先按 F1 截一张").pack(padx=20, pady=20); return
+            for i, name in enumerate(files):
+                cell = ttk.Frame(grid); cell.grid(row=i // 4, column=i % 4, padx=8, pady=8)
+                try:
+                    im = Image.open(os.path.join(self.shots_dir, name)); thumb = im.copy(); thumb.thumbnail((160, 110))
+                    photo = ImageTk.PhotoImage(thumb); win._photos.append(photo)
+                    tk.Label(cell, image=photo).pack()
                 except Exception: pass
-                cell.destroy(); self.refresh_shots()
-            ttk.Button(btns, text="删除", width=6, command=delete).pack(side="left", padx=1)
+                label = ("GIF " if name.lower().endswith(".gif") else "") + (name[5:20] if name.startswith("shot_") else name[4:19])
+                ttk.Label(cell, text=label, font=("", 8)).pack()
+                btns = ttk.Frame(cell); btns.pack()
+                ttk.Button(btns, text="钉图", width=6, command=lambda n=name: self.pin_image(Image.open(os.path.join(self.shots_dir, n)))).pack(side="left", padx=1)
+                def delete(n=name, cell=cell):
+                    try: os.remove(os.path.join(self.shots_dir, n))
+                    except Exception: pass
+                    cell.destroy(); self.refresh_shots(); render()
+                ttk.Button(btns, text="删除", width=6, command=delete).pack(side="left", padx=1)
+        def delete_all():
+            files = shot_files()
+            if not files:
+                messagebox.showinfo("历史截图", "没有可删除的历史截图。", parent=win); return
+            if not messagebox.askyesno("删除全部", f"确定要删除全部 {len(files)} 个历史截图/录制文件吗? 删除后不能恢复。", parent=win): return
+            n = 0
+            for f in files:
+                try: os.remove(os.path.join(self.shots_dir, f)); n += 1
+                except Exception: pass
+            self.refresh_shots(); render()
+            self.status.set(f"已删除全部历史截图 ({n} 个)")
+        ttk.Button(bar, text="删除全部", command=delete_all).pack(side="right")
+        render()
 
     def pin_text(self, text):
         win = tk.Toplevel(self); win.overrideredirect(True); win.attributes("-topmost", True); win.geometry("+140+140")
