@@ -1768,9 +1768,14 @@ class App(tk.Tk):
         # 语言文件是程序自带资源而不是用户数据: 优先读 EXE 内置的那份 (BUNDLE), 升级后新文案立刻生效;
         # 早期版本把语言文件释放到数据目录 (AppData) 且从不更新, 旧文件会一直盖住新文案 —— 真机上已经去掉的
         # 「(合并自 Snipaste 核心功能, 需 Pillow)」还一直显示就是这个原因; 数据目录里的只作兜底。
-        p = os.path.join(BUNDLE, "Language", f"{self.lang}.ini")
-        if not os.path.exists(p): p = os.path.join(BASE, "Language", f"{self.lang}.ini")
-        if os.path.exists(p):
+        candidates = (
+            os.path.join(BUNDLE, "Language", f"{self.lang}.ini"),
+            os.path.join(BASE, "Language", f"{self.lang}.ini"),
+            os.path.join(BUNDLE, f"{self.lang}.ini"),
+            os.path.join(BASE, f"{self.lang}.ini"),
+        )
+        p = next((candidate for candidate in candidates if os.path.isfile(candidate)), None)
+        if p:
             lp = configparser.ConfigParser(strict=False)
             for enc in ("utf-8-sig", "gbk"):
                 try: lp.read(p, encoding=enc); break
@@ -2816,30 +2821,45 @@ class App(tk.Tk):
         return None
     def multi_cut(self): self.multi_copy(cut=True)  # 多次剪切: 与多次复制成对 (原版 HotKey7)
     def multi_copy(self, cut=False):
-        before_seq, before_text = self._clip_sequence(), None
-        if not self._foreground_is_self():
-            before_text = self.clip_get()
-            self._send_combo(0x58 if cut else 0x43)  # 替用户在当前软件里按 Ctrl+X / Ctrl+C
-            deadline = time.time() + max(0.3, self.sleep_ms / 1000 * 6)  # 等剪贴板真的变了再读, 最多约 0.5 秒
+        # 只有确认目标程序真的更新了剪贴板，才允许把内容加入队列；否则绝不复用旧剪贴板。
+        external = not self._foreground_is_self()
+        if external:
+            before_seq, before_text = self._clip_sequence(), self.clip_get()
+            if not self._send_combo(0x58 if cut else 0x43):
+                self.refresh_list()
+                return False
+            changed = False
+            deadline = time.time() + max(0.3, self.sleep_ms / 1000 * 6)
             while time.time() < deadline:
                 seq = self._clip_sequence()
-                if seq is not None and before_seq is not None:
-                    if seq != before_seq: break
-                elif self.clip_get() != before_text: break
+                current = self.clip_get()
+                if before_seq is not None and seq is not None:
+                    changed = seq != before_seq
+                else:
+                    changed = current != before_text
+                if changed: break
                 time.sleep(0.015)
+            if not changed:
+                self.refresh_list()
+                return False
         n = len(self.records)
         text = self.clip_get()
+        if not text.strip():
+            self.refresh_list()
+            return False
         lines = [ln for ln in text.splitlines() if ln.strip()]
         if len(lines) > 1:
-            for ln in lines: self.add_record(ln, save=False)  # v1.3.4: WPS 表格/列表整块复制时按行自动拆成多条; 批量加只在最后存一次盘
+            for ln in lines: self.add_record(ln, save=False)
             self.save_records()
         else:
             self.add_record(text)
-        if len(self.records) > n:
-            self.beep()  # 真入队了才响, 没选中文字时不假响
-            _next = self.records[min(self.paste_index, len(self.records) - 1)]["text"][:26]  # 进度理论上不会越界, 钳一下防个别删除路径漏调进度时这里 IndexError
+        added = len(self.records) > n
+        if added:
+            self.beep()
+            _next = self.records[min(self.paste_index, len(self.records) - 1)]["text"][:26]
             self.show_mini(f"{self.t('mini_total', '共')} {len(self.records)} {self.t('mini_records', '条')} · {self.t('mini_next', '下一条')}: {_next}")
         self.refresh_list()
+        return added
     def _send_enter(self):
         """向当前前台窗口发送一次回车 (确认/提交); SendInput -> keybd_event -> keyboard 三层兜底"""
         if sys.platform == "win32":
@@ -2861,23 +2881,30 @@ class App(tk.Tk):
     # 对这类目标改走逐字打字 (与强力粘贴同路, 不依赖剪贴板和粘贴命令, 单元格里打字即输入)
     _WPS_PROCS = ("et.exe", "wps.exe", "wpp.exe")
     def _paste_text(self, text, enter=False):
+        # 窗口焦点仍在 SnapPaste 时并没有发生粘贴；不能把队列项误当作已消费。
+        if self._foreground_is_self():
+            return False
         self.clip_set(text)
-        if not self._foreground_is_self():
-            time.sleep(0.03)
-            if self._foreground_process_name() in self._WPS_PROCS:
-                self._type_text(text)  # WPS: 逐字打进目标窗口
-            else:
-                self._send_combo(0x56)  # Ctrl+V: 真的粘进目标窗口, 不只是放剪贴板
-            if enter:  # 粘完稍等目标程序处理完再回车确认 (太快回车会赶在粘贴落地之前)
-                time.sleep(0.15); self._send_enter()
+        time.sleep(0.03)
+        if self._foreground_process_name() in self._WPS_PROCS:
+            pasted = bool(self._type_text(text))
+        else:
+            pasted = bool(self._send_combo(0x56))
+        if not pasted:
+            return False
+        if enter:
+            time.sleep(0.15)
+            self._send_enter()
         self.beep()
+        return True
     def paste_next(self):
         if not self.records: return
         if self.paste_index >= len(self.records): self.paste_index = 0
         rec = self.records[self.paste_index]
-        self._paste_text(rec["text"], enter=self.paste_enter_var.get())
+        if not self._paste_text(rec["text"], enter=self.paste_enter_var.get()):
+            return
         if self.paste_remove_var.get() and not rec["locked"]:
-            # 粘完即删 (消费模式): 删掉刚粘的这条, 下一条自动顶到当前位置, 序号不用前进
+            # 仅在目标窗口确认执行粘贴后消费记录。
             del self.records[self.paste_index]
             if self.paste_index >= len(self.records): self.paste_index = 0
             self.save_records()
@@ -2930,8 +2957,11 @@ class App(tk.Tk):
                     i.u.ki.dwFlags = (0x0004 if unicode_ else 0) | (0x0002 if up else 0); return i
                 batch = [ev(*p) for p in self._type_units(text)]
                 for j in range(0, len(batch), 200):  # 分批发送, 防超长文本一次塞爆
-                    chunk = (_INPUT * len(batch[j:j+200]))(*batch[j:j+200])
-                    u.SendInput(len(batch[j:j+200]), chunk, ctypes.sizeof(_INPUT))
+                    part = batch[j:j+200]
+                    chunk = (_INPUT * len(part))(*part)
+                    sent = u.SendInput(len(part), chunk, ctypes.sizeof(_INPUT))
+                    if sent != len(part):
+                        return False  # 部分发送不能报告成功，也不能再用 fallback 重复输入
                 return True
             except Exception: pass
         try:
