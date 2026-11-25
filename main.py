@@ -1436,7 +1436,7 @@ _BTN_ICONS_B64 = {
     "gear": "iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAD5klEQVR4nLWUT4jVVRTHv+fce3/vvRnGHExpoj+LIOGBM8ErsSJ+o0VjOeXqB4ENisZr0yaGVlnDMIhItiiIYFCzhbaYwcVo5bgoZxGE+iCHHF1WJkOaZaH2fr977zkt5k9jTY4EneXhns+559+XcGdGaTpgAGBiYjDcYcz/Y7SYM8syM1KtanoSPDExGNZu3LIs59ZXEeLPZ0/s/wgApWlquru7ZWpqikZGRuIdgRfa6he3t5UKOp6UWp5QACG/+d7Dbb/3Lwa7HZgAoKtn+5vWlTfkzZt7nePL7Cqnfd5sMrMTifnk+P1tXRsvbWbrXhOff3l2/MCu2XidA/HC8gFoZ8+Ona7SOqSQ9TZJPpVIa3zR/I6ZS8RsQDjf+eyl5421Rwi6wVVahzp7duwEoLOMW8Ej1epcthckhBiKIocKQPohVFepikoIEUAXsYzF4DX4IpfgBUS9f2Ms+PHUFCHLDBHtBtSQ4ZKKKJhLRNTCbJitMwSyABEAEJFTVYLqHgCUnvyL94/hrVuXVW4ua0nZJKOq2gIVZZdw9MV5IrrGbB4XEUA1srVGYtF37Q8Z/X7i4+YiwxtgDACdX1/aayxvkxi+VaXHiJAY4zhqeMv+xHsajWHf+dwrvUw0qiIJQFDIaSZ+CKAzxlx/uXHsk6sAwGmaWmBQuk79uDUpl18XkXY2yVNEKDMbDuKnzn62b1ejMexrtbqb/HzfMRE9bGxCqiLGuLWqWGGTck/wlb0AFGlq+Pr11TP9EtwDACqSqwSoqhAzoPgNgNbqdedcq51ZKr1MRABBRSJUJVeJUOJ7F7aCAMWaTVuWm9hy1LjkSV/kV0DaTiBmNhQlbp48vv8oANR66w+EqGcIuFtVAOAXY90KEZkWCZsmjx/4ZgADRAsSaK1Wd9KBR6MPXcT8LlTLABEReVE5zMAVJdpGRCslSjTWmhh8vzP2qxvxxg8Xxg9Nz7Hm1kPTdMA2GsM+FvEuY5P3oagAIFUVVUmsS7axK71BmIESgSUGMdbt9iG2Xxg/NF2r1d3c9c3v3UQ3BAARY4gIRlUKADDWGYAQfB6CbwZVUWOtmU3qicgRYwhQavR2zOvHrQcCqCrG2Do2LimxsSTR9ynklDHOErFVxdUYfD8Rw7pSia0jVYwBpLOMRQ9kXoTYldZHX3wwOb7/SOfGHb8yuE00BuOSkhb5I0p0n3Xl/uCbXywmQkvK5oPp1vLyij3qyi3PSIyIobgSYqidO3Hw4u3i7GLOLMtMtVrVkzNC31z1dN9LnvkdEK9UlbfPnTh4sVaru0ZvR8z+Rej/qy1Z6ZIP5t5lWcbArDQODspSAX8Cm0TtanseiCAAAAAASUVORK5CYII=",
     "star": "iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAACeUlEQVR4nNWUQUhUURSG/3PfffNmTGdMxRQ3ErhoxsVkkW0EayEEtRxo0SIiWhRCRfvnrFyVqNUqaNUiWhpEKyMS2pQtzAgXtQkRLH0zOE/fu++cFk8Tx4EZI5DO6t7Lf7/733PPucDhhxBE6LBdNBKxy/Zr71ra7nztiZfqO1d1uYVYY5pbb5jIuACAMVj1ttXPmSsKANJrXz6CcDylg+6V+/mN+CYkjYPdWQ0Mx+NfSxbafkTp1a48OfZ7UtoiU7m4lll5je+9Gr29Jha+AYrnzMEcA2i9/fkp7OarEAaHlZelydylenu2wfG1Wm4ttquEvgMQi9kypEgBcCB0F4oSAEE48okwCWBLWJi0owFRHJiJ8qPszx3WrmNXFJY/WOlU6rrSqceUzEDCDYA0ZNMDsJ1OIpCTAcSA7COQTQ9s/Jsl33+C7lMRisQ1UhGflhn9dBKJ9CsCjklYCUHK3ivjkOwmW4AVBKUL3nR+vvoxq8qNBK5obzo/z+H6kEg0RzqpIcK7UGHSSS0SzXG4PuRN5+fhiq6ukP11XCSDwkKiPDWwpAJ/HNohEARABEgEQKAdUoE/Xp4aWEJhIYEimWpM7QbJ5hiuq1jrkdiJGLJTFjlpKz6AhLUegesqZHNcC1EbPIYIizkCR2chTJQ86nDgv5Wt8jNymhMgIjAPYjFHGEPUIFgUiKSjp7+T7KYzwpHHQWW0tHzivDeZvcJRcFnM5jLs1GBHT38niASQfZz94EJcKYHwsJCaEd44XZroe4gXYBTEKj3oex76qwMQmglku0ULjTUaAKDp3reuPxN3Vtca79EcLIR2PqG9y0I73+nfQf+J5n+J39QzDLg7vrq5AAAAAElFTkSuQmCC",
 }  # 按钮小图标 (22px, PIL 手绘线条风: 图标+文字并排, 与常见软件一致)
-VERSION = "1.4.21"  # v1.4.21: 稳定性加固六项 (功能不变): ①崩溃日志 (主线程/后台线程/Tk 回调三路异常 + faulthandler, 写 crash.log) ②系统设置新增「软件自检」(七项逐项查) ③数据备份/恢复 (一键导出 zip, 导入后无保存退出防回写) ④记录列表增量刷新 (追加/单改/交换只动变动行) ⑤记录保存合并落盘 (600ms 防抖, 退出/隐藏立即刷盘) ⑥配置保存核查为原子写 (原已实现, 未动)
+VERSION = "1.4.22"  # v1.4.22: ①去掉内置浏览器整套 (Jane 真机定版不好用: 面板/书签/历史/菜单/pywebview 子进程全删, 工具栏回 8 按钮, 自检减为六项, 打包去 pywebview) ②世界时间加「刷新」(绕过天气 15 分钟节流立即重拉) ③文本翻译框自适应高度 (默认 8 行, 随内容长高至 24 行封顶, 按钮行跟随) ④系统设置/软件自检/历史截图/城市选择全部改为主窗口内面板 (Jane 定版「能收的都收」, 不再弹独立窗口, 重复开窗问题从结构上消除) ⑤启动时清理浏览器残留文件 (bookmarks/browser_history/browser_profile) ⑥工具栏改一行 8 按钮 ⑦截图翻译学有道: F4 出无边框浮动条 (原文区透明盖选区透出真实截图对照/译文框在选区下方、不够翻上方/大小随内容/源语言可选/条内复制原文·译文·AI 智能回复), 完整结果窗保留给无选区入口
 # v1.4.20: 瘦身版, 功能零变化 — 打包侧剔除未用组件 (cv2 视频插件/级联数据、numpy 测试集、onnxruntime 的 transformers/tools/quantization/datasets/backend), 已模拟验证删除后 OCR 中英文识别正常
 # v1.4.19: ①AI 面板侧边栏去掉「AI 功能」快捷入口组 (功能本体全保留) ②修复 v1.4.18 的 F4 截图翻译主流程 (_translate_lines 误标 @staticmethod 致后台线程静默失败) ③记录上限改硬线 (全锁定时不再突破 2000) ④截图翻译目标语言扩到 13 种 ⑤内嵌微型浏览器 (WebView2 子进程收编: 谷歌翻译主页/书签栏前 8+书签管理/浏览历史/清除数据/页面缩放/下载说明) ⑥文本翻译面板 (打字停笔 350ms 自动翻译, 无缓存每次实时译) + 工具栏按序重排为两行并配线条图标 ⑦品牌头重排 (系统设置移左上挨着 SPST, 副标题「多功能工作台」居中, 右上留空) + 软件图标换 Jane 的樱花小女孩原图 ⑧窗口最小高度解锁 (最大化/缩放恢复正常) ⑨全界面双语化补齐 (约 330 条文案入语言文件, 英文模式复检残留中文 0 条) + 第八轮深查 (线程/网络/浏览器生命周期/热键英文保存往返全过)
 # v1.4.18: ①截图翻译修复 (OCR 碎片合并+整段翻译, 结果窗改纯文本) ②翻译结果窗内嵌 AI 智能回复 ③AI/热键/翻译设置全并入系统设置 ④AI 功能改内嵌面板+豆包式侧边栏+最近对话存档 (圆角气泡) ⑤主窗口简约重设计 (方角) ⑥货币汇率 ⑦计算器 ⑧常用语库面板化+序号 ⑨世界时间 (全球城市自选+当地天气) ⑩无水印下载 (FB/IG/小红书等, 保存位置可每次询问或固定) ⑪历史截图保存设置 (张数/不保存, 含 GIF) ⑫移除网络搜索 ⑬三轮深查整改: AI 回复防串话/时钟计时链/天气失败重试/设置窗滚轮隔离/下载实际文件名/汇率过期刷新/AI 回复增量渲染 (320ms→24ms)/单实例保护/单对话存档封顶 200 条
@@ -1470,8 +1470,7 @@ else:
 CONFIG_PATH = os.path.join(BASE, "Config.ini")
 RECORDS_PATH = os.path.join(BASE, "records.json")
 PHRASES_PATH = os.path.join(BASE, "phrases.json")
-BOOKMARKS_PATH = os.path.join(BASE, "bookmarks.json")
-BROWSER_HISTORY_PATH = os.path.join(BASE, "browser_history.json")  # 浏览器访问历史 (菜单里查看/清空)  # 浏览器书签 (与常用语库同款存法: 原子写 + .bak)  # 常用语库: 与临时队列分开存, 不被删全部/去重/上限清理影响
+# 常用语库: 与临时队列分开存, 不被删全部/去重/上限清理影响
 AI_CHATS_PATH = os.path.join(BASE, "ai_chats.json")  # AI 最近对话: 多个对话存档, 与常用语库同款存法
 
 CRASH_LOG_PATH = os.path.join(BASE, "crash.log")
@@ -1549,10 +1548,21 @@ def _migrate_old_data():
         if os.path.abspath(old_base) != os.path.abspath(BASE): _copy_from(old_base)
     _copy_from(EXE_DIR)
 
+def _cleanup_legacy_browser_files():
+    """v1.4.22 起内置浏览器已删除 (Jane 定版不好用): 把它留在数据目录的书签/历史/缓存删干净 (Jane 09:10 要求)。
+    每次启动都扫一遍 (删不存在的文件零成本), 迁移搬进来的老文件也一并清掉 (本函数在迁移之后跑)。"""
+    import shutil
+    for name in ("bookmarks.json", "bookmarks.json.bak", "browser_history.json", "browser_history.json.bak",
+                 "browser_host.json", "browser_cmd.json", "browser_state.json"):
+        try: os.remove(os.path.join(BASE, name))
+        except Exception: pass
+    shutil.rmtree(os.path.join(BASE, "browser_profile"), ignore_errors=True)
+
 def ensure_runtime_files():
     """EXE 首次运行: 先搬老数据 (EXE 旁 -> AppData), 再把内置默认文件释放到数据目录; 已存在的不覆盖"""
     import shutil
     _migrate_old_data()
+    _cleanup_legacy_browser_files()
     for rel in ("Config.ini", "ding.wav", os.path.join("Language", "Chinese.ini"), os.path.join("Language", "English.ini")):
         src, dst = os.path.join(BUNDLE, rel), os.path.join(BASE, rel)
         if not os.path.exists(dst) and os.path.exists(src):
@@ -1928,21 +1938,18 @@ class App(tk.Tk):
         tk.Frame(self, background=self.UI_BORDER, height=1).pack(fill="x")
         self.lang_var = tk.StringVar(value=self.lang)  # 语言切换的界面已搬进「系统设置」窗口, 这里只留变量
         # ---------- 工具栏: 方角按钮 (主窗口不用圆角, Jane 要求; AI 功能用描边款突出一点) ----------
-        bar = tk.Frame(self, background=self.UI_BG); bar.pack(fill="x", padx=12, pady=(10, 0))
-        bar2 = tk.Frame(bar.master, background=self.UI_BG); bar2.pack(fill="x", padx=10, pady=(0, 2), after=bar)
+        bar = tk.Frame(self, background=self.UI_BG); bar.pack(fill="x", padx=12, pady=(10, 2))
         for _idx, (txt, cmd, var_, icn) in enumerate([(self.t("copy_paste", "复制粘贴"), self._show_main_view, "soft", "copy"),
                                (self.t("phrase_library", "常用语库"), self.open_phrases, "soft", "phrases"),
                                (self.t("text_translate", "文本翻译"), self._show_texttrans_panel, "soft", "translate"),
                                (self.t("ai_chat", "AI 功能"), self.open_ai_chat, "outline", "ai"),
-                               (self.t("web_browser", "浏览器"), self._show_browser_panel, "soft", "browser"),
                                (self.t("fx_rates", "货币汇率"), self.open_fx, "soft", "fx"),
                                (self.t("world_clock", "世界时间"), self.open_world_clock, "soft", "clock"),
                                (self.t("calculator", "计算器"), self.open_calc, "soft", "calc"),
                                (self.t("media_dl", "无水印下载"), self.open_media_dl, "soft", "download")]):
             _ic = self._btn_icon(icn)
-            _row = bar if _idx < 5 else bar2  # 工具栏两行 (Jane 定版): 前 5 个一行, 其余一行, 窗口不用撑太宽
-            ttk.Button(_row, text=txt, command=cmd, style="ToolOutline.TButton" if var_ == "outline" else "Tool.TButton",
-                       image=_ic, compound="left").pack(side="left", padx=2, pady=1)
+            ttk.Button(bar, text=txt, command=cmd, style="ToolOutline.TButton" if var_ == "outline" else "Tool.TButton",
+                       image=_ic, compound="left").pack(side="left", padx=2, pady=1)  # 工具栏一行 (Jane 2026-11-25 09:13 定版, 8 个按钮)
         # 下半区容器: 记录卡/操作行/各设置卡都装在这里; 点「AI 功能」时整块被聊天面板盖住 (Jane 要求不弹新窗)
         body = tk.Frame(self, background=self.UI_BG); body.pack(fill="both", expand=True)
         self._body = body
@@ -2206,21 +2213,56 @@ class App(tk.Tk):
         if not self.cfg.has_section("Wave"): self.cfg.add_section("Wave")
         self.cfg.set("Wave", "WaveSet", "1" if self.wave_var.get() else "0")
         self.save_config()
+    def _forget_aux_panels(self, keep=None):
+        """设置/自检/历史截图/城市选择四个辅助面板的统一隐藏: 每个视图切换都会调它, 防面板叠罗汉;
+        顺带解绑滚轮 (这几个面板里设置/城市/画廊靠 bind_all 抢滚轮, 切走必须放手, 不然会串到别的面板)"""
+        for attr in ("_settings_panel", "_selfcheck_panel", "_gallery_panel", "_clockset_panel"):
+            if attr == keep: continue
+            p = getattr(self, attr, None)
+            if p is not None:
+                try: p.pack_forget()
+                except Exception: pass
+        if keep not in ("_settings_panel", "_clockset_panel", "_gallery_panel"):
+            try: self.unbind_all("<MouseWheel>")
+            except Exception: pass
     def open_system_settings(self):
-        """系统设置窗口: 开机自启/语言/提示音/迷你窗口/AI 设置/翻译服务/热键设置全归拢到一起 (用户要求归类);
-        内容比屏幕高时整窗可滚动 (关闭按钮钉在底部永远够得到), 改完即存, Esc 关闭"""
-        if getattr(self, "_sys_win", None) is not None:
-            try: self._sys_win.lift(); self._sys_win.focus_set(); return
-            except Exception: self._sys_win = None
-        win = tk.Toplevel(self); self._sys_win = win
-        win.title(self.t("system_settings", "系统设置")); win.resizable(False, False); win.attributes("-topmost", True)
-        def close():
-            self._sys_win = None; win.destroy()
-        win.protocol("WM_DELETE_WINDOW", close); win.bind("<Escape>", lambda e: close())
-        bar = ttk.Frame(win); bar.pack(side="bottom", fill="x", pady=8)
-        ttk.Button(bar, text=self.t("close", "关闭"), command=close).pack()
-        outer = ttk.Frame(win); outer.pack(fill="both", expand=True)
-        cv = tk.Canvas(outer, highlightthickness=0)
+        """系统设置入口 (标题栏按钮 / AI 没填 key 时的引导): 现在切到主窗口内的设置面板 (Jane 2026-11-25 定版「能收的都收进主窗口」), 不再弹独立窗口"""
+        try:
+            if self.state() == "iconic" or not self.winfo_viewable():
+                self._show_main()  # 主窗口藏着时先唤出来, 不然面板切了也看不见
+        except Exception: pass
+        self._show_settings_panel()
+    def _show_settings_panel(self):
+        self._texttrans_on_hide()
+        if getattr(self, "_settings_panel", None) is None:
+            self._build_settings_panel()
+        try: self._body.pack_forget()
+        except Exception: pass
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel"):
+            p = getattr(self, attr, None)
+            if p is not None:
+                try: p.pack_forget()
+                except Exception: pass
+        self._forget_aux_panels(keep="_settings_panel")
+        self._ai_view_on = False
+        self._wheel_bind(False)
+        self._calc_bind(False)
+        self._settings_panel.pack(fill="both", expand=True, before=self._status_sep)
+        cv = self._settings_cv
+        self.bind_all("<MouseWheel>", lambda e: cv.yview_scroll(int(-e.delta / 120), "units"))  # 面板可见时滚轮归设置区; 切走由 _forget_aux_panels/_wheel_bind 解绑, 不串到别的面板
+    def _build_settings_panel(self):
+        """系统设置面板: 开机自启/语言/提示音/迷你窗口/历史截图/AI 设置/翻译服务/热键设置/自检/备份全归拢到一起;
+        内容比面板高时整区可滚动, 改完即存"""
+        panel = tk.Frame(self, background=self.UI_BG); self._settings_panel = panel
+        head = tk.Frame(panel, background=self.UI_BG); head.pack(fill="x", padx=14, pady=(10, 4))
+        tk.Label(head, text=self.t("system_settings", "系统设置"), font=self._ui_font(12, True), background=self.UI_BG, foreground=self.UI_TEXT).pack(side="left")
+        back = tk.Label(head, text=self.t("cmn_back", "返回"), font=self._ui_font(9), background=self.UI_BG, foreground="#5B6B7C", cursor="hand2")
+        back.pack(side="right")
+        back.bind("<Button-1>", lambda e: self._show_main_view())
+        back.bind("<Enter>", lambda e: back.configure(foreground=self.UI_ACCENT))
+        back.bind("<Leave>", lambda e: back.configure(foreground="#5B6B7C"))
+        outer = ttk.Frame(panel); outer.pack(fill="both", expand=True)
+        cv = tk.Canvas(outer, highlightthickness=0); self._settings_cv = cv
         sb = ttk.Scrollbar(outer, orient="vertical", command=cv.yview)
         frm = ttk.Frame(cv, padding=(12, 10, 12, 6))
         frm.bind("<Configure>", lambda e: cv.configure(scrollregion=cv.bbox("all")))
@@ -2228,7 +2270,6 @@ class App(tk.Tk):
         cv.bind("<Configure>", lambda e: cv.itemconfigure(win_id, width=e.width))
         cv.configure(yscrollcommand=sb.set)
         cv.pack(side="left", fill="both", expand=True); sb.pack(side="right", fill="y")
-        win.bind("<MouseWheel>", lambda e: cv.yview_scroll(int(-e.delta / 120), "units"))  # 绑在本窗口: 只管设置窗自己, 关窗自动失效 (旧写法 bind_all + 关窗 unbind_all 会把 AI 面板的滚轮绑定一起摘掉, 聊天区就滚不动了)
         ttk.Checkbutton(frm, text=self.t("autorun", "开机自动运行"), variable=self.autorun_var, command=self._toggle_autorun).pack(anchor="w", pady=3)
         lrow = ttk.Frame(frm); lrow.pack(fill="x", pady=3)
         ttk.Label(lrow, text=self.t("lang_label", "语言:")).pack(side="left")
@@ -2271,35 +2312,66 @@ class App(tk.Tk):
         tfrm = ttk.LabelFrame(frm, text=self.t("set_trans_frame", "翻译服务设置")); tfrm.pack(fill="x", pady=(8, 2))
         self._build_translate_form(tfrm)
         hkfrm = ttk.LabelFrame(frm, text=self.t("hotkey_settings", "热键设置")); hkfrm.pack(fill="x", pady=(8, 2))
-        self._build_hotkey_form(win, hkfrm)
+        self._build_hotkey_form(panel, hkfrm)
         cfrm = ttk.LabelFrame(frm, text=self.t("set_check_frame", "软件自检")); cfrm.pack(fill="x", pady=(8, 2))
         ttk.Button(cfrm, text=self.t("chk_run", "开始自检"), command=self._open_selfcheck).pack(anchor="w", padx=6, pady=6)
         bfrm = ttk.LabelFrame(frm, text=self.t("set_backup_frame", "数据备份")); bfrm.pack(fill="x", pady=(8, 2))
         brow2 = ttk.Frame(bfrm); brow2.pack(fill="x", padx=6, pady=(6, 2))
         ttk.Button(brow2, text=self.t("bak_export", "导出备份"), command=self._backup_export_dialog).pack(side="left")
         ttk.Button(brow2, text=self.t("bak_import", "导入备份"), command=self._backup_import_dialog).pack(side="left", padx=6)
-        ttk.Label(bfrm, text=self.t("bak_note", "备份包含设置、复制记录、常用语、书签、浏览历史、AI 对话等全部数据 (含你填过的密钥, 请妥善保管)。导入备份后软件会立即关闭且不保存当前状态, 重新打开即是备份里的数据。"), foreground="#888888", wraplength=560, justify="left").pack(anchor="w", padx=6, pady=(0, 6))
-        win.update_idletasks()
-        cap = max(420, win.winfo_screenheight() - 170)  # 内容再多, 窗口也不超过屏幕 (剩下的靠滚动)
-        cv.configure(width=frm.winfo_reqwidth(), height=min(frm.winfo_reqheight(), cap))
+        ttk.Label(bfrm, text=self.t("bak_note", "备份包含设置、复制记录、常用语、AI 对话等全部数据 (含你填过的密钥, 请妥善保管)。导入备份后软件会立即关闭且不保存当前状态, 重新打开即是备份里的数据。"), foreground="#888888", wraplength=560, justify="left").pack(anchor="w", padx=6, pady=(0, 6))
     # ---------- 软件自检 ----------
     def _open_selfcheck(self):
-        win = tk.Toplevel(self); win.title(self.t("chk_title", "软件自检")); win.resizable(False, False)
-        frm = tk.Frame(win, background="#FFFFFF"); frm.pack(fill="both", expand=True, padx=16, pady=14)
-        items = [("data", "chk_data_dir", "数据目录可写"), ("config", "chk_config", "配置文件完好"),
-                 ("records", "chk_records", "记录数据完好"), ("ocr", "chk_ocr", "OCR 识别引擎"),
-                 ("translate", "chk_translate", "翻译通道"), ("browser", "chk_browser", "浏览器组件"),
-                 ("hotkey", "chk_hotkey", "全局热键")]
-        vars_ = {}
-        for key, lk, zh in items:
+        """软件自检入口 (设置面板里的「开始自检」按钮): 切到自检面板 (Jane 定版面板化, 不再弹独立窗口)"""
+        self._show_selfcheck_panel()
+    def _show_selfcheck_panel(self):
+        self._texttrans_on_hide()
+        if getattr(self, "_selfcheck_panel", None) is None:
+            self._build_selfcheck_panel()
+        try: self._body.pack_forget()
+        except Exception: pass
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel"):
+            p = getattr(self, attr, None)
+            if p is not None:
+                try: p.pack_forget()
+                except Exception: pass
+        self._forget_aux_panels(keep="_selfcheck_panel")
+        self._ai_view_on = False
+        self._wheel_bind(False)
+        self._calc_bind(False)
+        self._selfcheck_panel.pack(fill="both", expand=True, before=self._status_sep)
+        self._run_selfcheck()
+    _CHK_ITEMS = [("data", "chk_data_dir", "数据目录可写"), ("config", "chk_config", "配置文件完好"),
+                  ("records", "chk_records", "记录数据完好"), ("ocr", "chk_ocr", "OCR 识别引擎"),
+                  ("translate", "chk_translate", "翻译通道"), ("hotkey", "chk_hotkey", "全局热键")]
+    def _build_selfcheck_panel(self):
+        panel = tk.Frame(self, background=self.UI_BG); self._selfcheck_panel = panel
+        head = tk.Frame(panel, background=self.UI_BG); head.pack(fill="x", padx=14, pady=(10, 4))
+        tk.Label(head, text=self.t("chk_title", "软件自检"), font=self._ui_font(12, True), background=self.UI_BG, foreground=self.UI_TEXT).pack(side="left")
+        back = tk.Label(head, text=self.t("cmn_back", "返回"), font=self._ui_font(9), background=self.UI_BG, foreground="#5B6B7C", cursor="hand2")
+        back.pack(side="right")
+        back.bind("<Button-1>", lambda e: self._show_settings_panel())
+        back.bind("<Enter>", lambda e: back.configure(foreground=self.UI_ACCENT))
+        back.bind("<Leave>", lambda e: back.configure(foreground="#5B6B7C"))
+        card = tk.Frame(panel, background="#FFFFFF", highlightthickness=1, highlightbackground=self.UI_BORDER, highlightcolor=self.UI_BORDER)
+        card.pack(fill="x", padx=12, pady=(6, 10))
+        frm = tk.Frame(card, background="#FFFFFF"); frm.pack(fill="both", expand=True, padx=16, pady=14)
+        self._chk_vars = {}
+        for key, lk, zh in self._CHK_ITEMS:
             row = ttk.Frame(frm); row.pack(fill="x", pady=3)
             ttk.Label(row, text=self.t(lk, zh), width=18).pack(side="left")
-            v = tk.StringVar(value=self.t("chk_wait", "检测中…")); vars_[key] = v
+            v = tk.StringVar(value=self.t("chk_wait", "检测中…")); self._chk_vars[key] = v
             ttk.Label(row, textvariable=v).pack(side="left")
-        ttk.Button(frm, text=self.t("cmn_close", "关闭"), command=win.destroy).pack(anchor="e", pady=(10, 0))
+        ttk.Button(frm, text=self.t("chk_run", "开始自检"), command=self._run_selfcheck).pack(anchor="e", pady=(10, 0))
+    def _run_selfcheck(self):
+        vars_ = getattr(self, "_chk_vars", None)
+        if vars_ is None: return
+        self._chk_gen = getattr(self, "_chk_gen", 0) + 1
+        gen = self._chk_gen
+        for v in vars_.values(): v.set(self.t("chk_wait", "检测中…"))
         def set_row(k, ok, extra=""):
             def apply():
-                if not win.winfo_exists(): return
+                if gen != getattr(self, "_chk_gen", 0): return  # 已经重跑过, 旧结果作废
                 vars_[k].set((self.t("chk_ok", "正常") if ok else self.t("chk_bad", "异常")) + (f" — {extra}" if extra else ""))
             self._ui_queue.put(apply)
         def work():
@@ -2322,17 +2394,6 @@ class App(tk.Tk):
             except Exception as e: set_row("ocr", False, str(e)[:50])
             try: set_row("translate", self.translate_text_to("hello", "zh-CN") is not None)
             except Exception as e: set_row("translate", False, str(e)[:50])
-            try:
-                import importlib.util
-                okb = importlib.util.find_spec("webview") is not None
-                if okb and sys.platform == "win32":
-                    try:
-                        import winreg
-                        k = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}")
-                        winreg.CloseKey(k)
-                    except Exception: okb = False
-                set_row("browser", okb)
-            except Exception as e: set_row("browser", False, str(e)[:50])
             n = len(getattr(self, "_hk_handles", []) or [])
             if n: set_row("hotkey", True, f"{n}{self.t('chk_count_suffix', ' 个已注册')}")
             else: set_row("hotkey", False, self.t("chk_hotkey_note", "仅窗口内热键 (全局热键未注册)"))
@@ -2340,7 +2401,7 @@ class App(tk.Tk):
         threading.Thread(target=work, daemon=True).start()
     # ---------- 数据备份/恢复 ----------
     _BACKUP_FILES = ["Config.ini", "records.json", "records.json.bak", "phrases.json", "phrases.json.bak",
-                     "bookmarks.json", "bookmarks.json.bak", "browser_history.json", "ai_chats.json"]
+                     "ai_chats.json"]
     def _export_backup(self, path):
         import zipfile
         with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as z:
@@ -2379,10 +2440,6 @@ class App(tk.Tk):
         self._quit_no_save()
     def _quit_no_save(self):
         """导入备份后专用退出: 绝不能走正常退出路径 (那会把内存里的旧数据再写回去覆盖刚导入的备份)。"""
-        _bp = getattr(self, "_browser_proc", None)
-        if _bp is not None:
-            try: _bp.terminate()
-            except Exception: pass
         if self._tray is not None:
             try: self._tray.stop()
             except Exception: pass
@@ -2410,7 +2467,6 @@ class App(tk.Tk):
             except Exception: pass
         except Exception: pass
     def open_phrases(self):
-        self._browser_on_hide()
         self._texttrans_on_hide()
         """常用语库 (工具栏按钮): 跟 AI/汇率/计算器一样盖住主窗口下半区, 不再弹独立窗口 (Jane 要求)"""
         self._show_phrases_panel()
@@ -2428,6 +2484,7 @@ class App(tk.Tk):
         self._ai_view_on = False
         self._wheel_bind(False)
         self._calc_bind(False)
+        self._forget_aux_panels()
         self._phrases_panel.pack(fill="both", expand=True, before=self._status_sep)
 
     def _build_phrases_panel(self):
@@ -3301,7 +3358,7 @@ class App(tk.Tk):
         """弹出系统取色器让用户自定义颜色, 返回大写 #RRGGBB; 取消或出错返回 None。"""
         try:
             from tkinter import colorchooser
-            _rgb, hexv = colorchooser.askcolor(color=current, title="自定义颜色", parent=parent)
+            _rgb, hexv = colorchooser.askcolor(color=current, title=self.t("ed_custom_color", "自定义颜色"), parent=parent)
             return hexv.upper() if hexv else None
         except Exception:
             return None
@@ -3426,7 +3483,7 @@ class App(tk.Tk):
                 if finish_mode == "copy":  # 截图并复制: 框选完直接出图进剪贴板, 不停留标注
                     final = full.crop(box); self.save_shot(final); close_overlay(); self._copy_image_to_clipboard(final)
                 elif finish_mode == "translate":  # 截图翻译: 框选完直接 OCR 并翻译到目标语言, 不停留标注
-                    final = full.crop(box); self.save_shot(final); close_overlay(); self.translate_image_inplace(final, self.trans_target())
+                    final = full.crop(box); self.save_shot(final); close_overlay(); self.translate_image_inplace(final, self.trans_target(), anchor=box)
                 elif finish_mode == "reply":  # 智能回复: 框选完直接让 AI 读对话给候选 (聊天截图不存历史, 免得堆一堆隐私图)
                     final = full.crop(box); close_overlay(); self.ai_smart_reply(final)
                 elif finish_mode == "ai":  # 看图翻译 (截图工具栏/贴图菜单入口): 框选完直接让 AI 读图翻译 (不存历史)
@@ -3611,7 +3668,7 @@ class App(tk.Tk):
             tk.Button(r2, text="OCR", font=("Microsoft YaHei", 9), relief="flat", bg="#F2F2F2",
                       command=lambda: self.recognize(self.render_ops(full.crop(state["box"]), state["ops"]), "ocr")).pack(side="left", padx=1)
             tk.Button(r2, text=self.t("snip_translate_btn2", "翻译"), font=("Microsoft YaHei", 9), relief="flat", bg="#F2F2F2",
-                      command=lambda: self.translate_image_inplace(self.render_ops(full.crop(state["box"]), state["ops"]))).pack(side="left", padx=1)
+                      command=lambda: self.translate_image_inplace(self.render_ops(full.crop(state["box"]), state["ops"]), anchor=state["box"])).pack(side="left", padx=1)
             tk.Button(r2, text=self.t("snip_ai_btn", "AI翻译"), font=("Microsoft YaHei", 9), relief="flat", bg="#F2F2F2",
                       command=lambda: self.ai_translate_image(self.render_ops(full.crop(state["box"]), state["ops"]))).pack(side="left", padx=1)
             def do_watermark():
@@ -3772,7 +3829,7 @@ class App(tk.Tk):
             adj_menu.add_command(label=self.t("menu_saveas", "另存为 (Ctrl+S)"), command=lambda: finish("save"))
             adj_menu.add_separator()
             adj_menu.add_command(label=self.t("menu_ocr", "OCR 识别"), command=lambda: self.recognize(self.render_ops(full.crop(state["box"]), state["ops"]), "ocr"))
-            adj_menu.add_command(label=self.t("menu_trans_img", "翻译图中文字"), command=lambda: self.translate_image_inplace(self.render_ops(full.crop(state["box"]), state["ops"])))
+            adj_menu.add_command(label=self.t("menu_trans_img", "翻译图中文字"), command=lambda: self.translate_image_inplace(self.render_ops(full.crop(state["box"]), state["ops"]), anchor=state["box"]))
             adj_menu.add_separator()
             adj_menu.add_command(label=self.t("menu_cancel_snip", "取消截图 (Esc)"), command=close_overlay)
             canvas.bind("<Button-3>", lambda e: adj_menu.tk_popup(e.x_root, e.y_root))
@@ -4572,13 +4629,13 @@ try {
                 "youdao_id": g("YoudaoAppId"), "youdao_secret": g("YoudaoSecret"),
                 "google_key": g("GoogleKey")}
     @staticmethod
-    def _baidu_translate(q, target, appid, key):
+    def _baidu_translate(q, target, appid, key, source=None):
         """百度翻译开放平台: sign = md5(appid+q+salt+密钥), 成功返回译文, 出错抛异常 (带错误码)。"""
         import urllib.request, urllib.parse, json as _json, hashlib, random
         salt = str(random.randint(10000, 99999))
         sign = hashlib.md5((appid + q + salt + key).encode("utf-8")).hexdigest()
         url = "https://fanyi-api.baidu.com/api/trans/vip/translate?" + urllib.parse.urlencode(
-            {"q": q, "from": "auto", "to": {"zh-CN": "zh", "zh-TW": "cht", "ja": "jp", "ko": "kor", "fr": "fra", "es": "spa", "vi": "vie"}.get(target, target),
+            {"q": q, "from": ({"zh-CN": "zh", "zh-TW": "cht", "ja": "jp", "ko": "kor", "fr": "fra", "es": "spa", "vi": "vie"}.get(source, source) if source else "auto"), "to": {"zh-CN": "zh", "zh-TW": "cht", "ja": "jp", "ko": "kor", "fr": "fra", "es": "spa", "vi": "vie"}.get(target, target),
              "appid": appid, "salt": salt, "sign": sign})
         req = urllib.request.Request(url, headers={"User-Agent": "SPST"})
         with urllib.request.urlopen(req, timeout=12) as r:
@@ -4586,13 +4643,13 @@ try {
         if d.get("error_code"): raise RuntimeError(f"百度翻译错误 {d.get('error_code')}: {d.get('error_msg', '')}")
         return "\n".join(seg.get("dst", "") for seg in d.get("trans_result") or [])
     @staticmethod
-    def _youdao_translate(q, target, appkey, secret):
+    def _youdao_translate(q, target, appkey, secret, source=None):
         """有道翻译 (网易智云) v3 签名: sha256(appKey+input+salt+curtime+密钥), 成功返回译文, 出错抛异常。"""
         import urllib.request, urllib.parse, json as _json, hashlib, time as _time, uuid
         salt = str(uuid.uuid4()); curtime = str(int(_time.time()))
         inp = q if len(q) <= 20 else q[:10] + str(len(q)) + q[-10:]  # v3 规则: 长句取首尾各 10 字 + 总长
         sign = hashlib.sha256((appkey + inp + salt + curtime + secret).encode("utf-8")).hexdigest()
-        data = urllib.parse.urlencode({"q": q, "from": "auto", "to": {"zh-CN": "zh-CHS", "zh-TW": "zh-CHT"}.get(target, target),
+        data = urllib.parse.urlencode({"q": q, "from": ({"zh-CN": "zh-CHS", "zh-TW": "zh-CHT"}.get(source, source) if source else "auto"), "to": {"zh-CN": "zh-CHS", "zh-TW": "zh-CHT"}.get(target, target),
                                        "appKey": appkey, "salt": salt, "sign": sign,
                                        "signType": "v3", "curtime": curtime}).encode("utf-8")
         req = urllib.request.Request("https://openapi.youdao.com/api", data=data,
@@ -4602,11 +4659,13 @@ try {
         if str(d.get("errorCode", "0")) != "0": raise RuntimeError(f"有道翻译错误码 {d.get('errorCode')}")
         return "\n".join(d.get("translation") or [])
     @staticmethod
-    def _google_translate(q, target, apikey):
+    def _google_translate(q, target, apikey, source=None):
         """谷歌云翻译 API v2 (只需 API 密钥): 成功返回译文 (HTML 实体已还原), 出错抛异常。"""
         import urllib.request, urllib.parse, json as _json, html as _html
         url = "https://translation.googleapis.com/language/translate/v2?key=" + urllib.parse.quote(apikey)
-        data = urllib.parse.urlencode({"q": q, "target": target, "format": "text"}).encode("utf-8")
+        _params = {"q": q, "target": target, "format": "text"}
+        if source: _params["source"] = source
+        data = urllib.parse.urlencode(_params).encode("utf-8")
         req = urllib.request.Request(url, data=data,
                                      headers={"Content-Type": "application/x-www-form-urlencoded", "User-Agent": "SPST"})
         with urllib.request.urlopen(req, timeout=12) as r:
@@ -5012,7 +5071,6 @@ try {
         self._show_fx_panel()
 
     def _show_fx_panel(self):
-        self._browser_on_hide()
         self._texttrans_on_hide()
         if getattr(self, "_fx_panel", None) is None:
             self._build_fx_panel()
@@ -5036,6 +5094,7 @@ try {
             try: self._dl_panel.pack_forget()
             except Exception: pass
         self._calc_bind(False)
+        self._forget_aux_panels()
         self._fx_panel.pack(fill="both", expand=True, before=self._status_sep)
         if getattr(self, "_fx_reload", None) is not None and (
                 not getattr(self, "_fx_rates", None) or time.time() - getattr(self, "_fx_fetched_at", 0) > 3600):
@@ -5056,7 +5115,7 @@ try {
         back.bind("<Leave>", lambda e: back.configure(foreground="#5B6B7C"))
         refresh_btn = ttk.Button(head, text=self.t("fx_refresh", "刷新"), command=lambda: reload())
         refresh_btn.pack(side="right", padx=(0, 10))
-        status_var = tk.StringVar(value="正在获取最新汇率…")
+        status_var = tk.StringVar(value=self.t("fx_fetching", "正在获取最新汇率…"))
         # ---- 换算卡 ----
         card = tk.Frame(panel, background=W, highlightthickness=1, highlightbackground=self.UI_BORDER, highlightcolor=self.UI_BORDER)
         card.pack(fill="x", padx=12, pady=(6, 0))
@@ -5066,7 +5125,7 @@ try {
         amt_var = tk.StringVar(value="100")
         ttk.Entry(row, textvariable=amt_var, width=12).pack(side="left")
         from_var = tk.StringVar(value=f"USD {self._fx_name('USD', '美元')}")
-        to_var = tk.StringVar(value="CNY 人民币")
+        to_var = tk.StringVar(value=f"CNY {self._fx_name('CNY', '人民币')}")
         ttk.Combobox(row, textvariable=from_var, values=names, width=13, state="readonly").pack(side="left", padx=(8, 0))
         swap_btn = ttk.Button(row, text="⇄", width=3)
         swap_btn.pack(side="left", padx=6)
@@ -5172,7 +5231,6 @@ try {
         except Exception: pass
 
     def _show_calc_panel(self):
-        self._browser_on_hide()
         self._texttrans_on_hide()
         if getattr(self, "_calc_panel", None) is None:
             self._build_calc_panel()
@@ -5185,6 +5243,7 @@ try {
                 except Exception: pass
         self._ai_view_on = False
         self._wheel_bind(False)
+        self._forget_aux_panels()
         self._calc_panel.pack(fill="both", expand=True, before=self._status_sep)
         self._calc_bind(True)
 
@@ -5337,7 +5396,6 @@ try {
         self._show_clock_panel()
 
     def _show_clock_panel(self):
-        self._browser_on_hide()
         self._texttrans_on_hide()
         if getattr(self, "_clock_panel", None) is None:
             self._build_clock_panel()
@@ -5351,6 +5409,7 @@ try {
         self._ai_view_on = False
         self._wheel_bind(False)
         self._calc_bind(False)
+        self._forget_aux_panels()
         self._clock_panel.pack(fill="both", expand=True, before=self._status_sep)
         aid = getattr(self, "_clock_after", None)
         if aid:
@@ -5371,6 +5430,11 @@ try {
         back.bind("<Button-1>", lambda e: self._show_main_view())
         back.bind("<Enter>", lambda e: back.configure(foreground=self.UI_ACCENT))
         back.bind("<Leave>", lambda e: back.configure(foreground="#5B6B7C"))
+        refr = tk.Label(head, text=self.t("fx_refresh", "刷新"), font=self._ui_font(9), background=self.UI_BG, foreground="#5B6B7C", cursor="hand2")
+        refr.pack(side="right", padx=(0, 12))
+        refr.bind("<Button-1>", lambda e: self._clock_refresh())
+        refr.bind("<Enter>", lambda e: refr.configure(foreground=self.UI_ACCENT))
+        refr.bind("<Leave>", lambda e: refr.configure(foreground="#5B6B7C"))
         edit = tk.Label(head, text=self.t("clk_edit", "编辑城市"), font=self._ui_font(9), background=self.UI_BG, foreground="#5B6B7C", cursor="hand2")
         edit.pack(side="right", padx=(0, 12))
         edit.bind("<Button-1>", lambda e: self.open_clock_settings())
@@ -5459,95 +5523,116 @@ try {
         return (self._clock_zone_name(tz), tz, std)
 
     def open_clock_settings(self):
-        """世界时间城市设置: 精选城市直接勾, 也可搜索全球所有时区城市 (英文名如 Tokyo);
-        最多 15 个 (本地不算), 确定后立即重排卡片并存进配置"""
-        if getattr(self, "_clockset_win", None) is not None:
-            try: self._clockset_win.lift(); self._clockset_win.focus_set(); return
-            except Exception: self._clockset_win = None
-        win = tk.Toplevel(self); self._clockset_win = win
-        win.title(self.t("clk_pick_title", "选择世界时间城市")); win.geometry("400x580"); win.attributes("-topmost", True)
-        def close():
-            self._clockset_win = None; win.destroy()
-        win.protocol("WM_DELETE_WINDOW", close); win.bind("<Escape>", lambda e: close())
-        win.bind("<Destroy>", lambda e: setattr(self, "_clockset_win", None) if e.widget is win else None)
-        selected = {tz for _n, tz, _h in self._clock_selected()}
-        tk.Label(win, text=self.t("clk_pick_hint", "勾选要显示的城市（本地永远在第一张）"), font=self._ui_font(9), foreground=self.UI_MUTED).pack(anchor="w", padx=12, pady=(10, 2))
-        cnt = tk.Label(win, text="", font=self._ui_font(9, True), foreground=self.UI_ACCENT)
-        cnt.pack(anchor="w", padx=12)
-        srow = ttk.Frame(win); srow.pack(fill="x", padx=12, pady=(2, 2))
+        """城市选择入口 (世界时间面板的「编辑城市」): 切到主窗口内的选择面板 (Jane 2026-11-25 定版面板化, 不再弹独立窗口)"""
+        self._show_clockset_panel()
+    def _show_clockset_panel(self):
+        self._texttrans_on_hide()
+        if getattr(self, "_clockset_panel", None) is None:
+            self._build_clockset_panel()
+        try: self._body.pack_forget()
+        except Exception: pass
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel"):
+            p = getattr(self, attr, None)
+            if p is not None:
+                try: p.pack_forget()
+                except Exception: pass
+        self._forget_aux_panels(keep="_clockset_panel")
+        self._ai_view_on = False
+        self._wheel_bind(False)
+        self._calc_bind(False)
+        self._clockset_panel.pack(fill="both", expand=True, before=self._status_sep)
+        cv = self._clockset_cv
+        self.bind_all("<MouseWheel>", lambda e: cv.yview_scroll(int(-e.delta / 120), "units"))
+        self._clockset_selected = {tz for _n, tz, _h in self._clock_selected()}  # 每次打开按当前配置重建选择集 (面板常驻, 不重建就还是上次的勾选)
+        self._clockset_qvar.set("")
+        self._clockset_render()
+        try: self._clockset_entry.focus_set()
+        except Exception: pass
+    def _build_clockset_panel(self):
+        """世界时间城市选择面板: 精选城市直接勾, 也可搜索全球所有时区城市 (英文名如 Tokyo); 最多 15 个 (本地不算)"""
+        panel = tk.Frame(self, background=self.UI_BG); self._clockset_panel = panel
+        head = tk.Frame(panel, background=self.UI_BG); head.pack(fill="x", padx=14, pady=(10, 4))
+        tk.Label(head, text=self.t("clk_pick_title", "选择世界时间城市"), font=self._ui_font(12, True), background=self.UI_BG, foreground=self.UI_TEXT).pack(side="left")
+        back = tk.Label(head, text=self.t("cmn_back", "返回"), font=self._ui_font(9), background=self.UI_BG, foreground="#5B6B7C", cursor="hand2")
+        back.pack(side="right")
+        back.bind("<Button-1>", lambda e: self._show_clock_panel())
+        back.bind("<Enter>", lambda e: back.configure(foreground=self.UI_ACCENT))
+        back.bind("<Leave>", lambda e: back.configure(foreground="#5B6B7C"))
+        tk.Label(panel, text=self.t("clk_pick_hint", "勾选要显示的城市（本地永远在第一张）"), font=self._ui_font(9), background=self.UI_BG, foreground=self.UI_MUTED).pack(anchor="w", padx=14, pady=(2, 0))
+        self._clockset_cnt = tk.Label(panel, text="", font=self._ui_font(9, True), background=self.UI_BG, foreground=self.UI_ACCENT)
+        self._clockset_cnt.pack(anchor="w", padx=14)
+        srow = ttk.Frame(panel); srow.pack(fill="x", padx=14, pady=(2, 2))
         ttk.Label(srow, text=self.t("clk_search", "搜索:")).pack(side="left")
-        qvar = tk.StringVar()
-        ent = ttk.Entry(srow, textvariable=qvar); ent.pack(side="left", fill="x", expand=True, padx=(4, 0))
-        ent.focus_set()
-        tk.Label(win, text=self.t("clk_search_hint", "不搜索时显示常用城市; 搜英文名可找全球城市, 如 Tokyo、Sydney、Reykjavik。已选的城市不在列表里也会保留。"), font=self._ui_font(8), foreground=self.UI_MUTED, wraplength=370, justify="left").pack(anchor="w", padx=12)
-        wrap = ttk.Frame(win); wrap.pack(fill="both", expand=True, padx=8, pady=4)
-        canvas = tk.Canvas(wrap, highlightthickness=0, bg=self.UI_SURFACE)
+        self._clockset_qvar = tk.StringVar()
+        ent = ttk.Entry(srow, textvariable=self._clockset_qvar); ent.pack(side="left", fill="x", expand=True, padx=(4, 0))
+        self._clockset_entry = ent
+        tk.Label(panel, text=self.t("clk_search_hint", "不搜索时显示常用城市; 搜英文名可找全球城市, 如 Tokyo、Sydney、Reykjavik。已选的城市不在列表里也会保留。"), font=self._ui_font(8), background=self.UI_BG, foreground=self.UI_MUTED, wraplength=720, justify="left").pack(anchor="w", padx=14)
+        wrap = ttk.Frame(panel); wrap.pack(fill="both", expand=True, padx=10, pady=4)
+        canvas = tk.Canvas(wrap, highlightthickness=0, bg=self.UI_SURFACE); self._clockset_cv = canvas
         sb = ttk.Scrollbar(wrap, orient="vertical", command=canvas.yview)
         canvas.configure(yscrollcommand=sb.set)
         sb.pack(side="right", fill="y"); canvas.pack(side="left", fill="both", expand=True)
-        inner = tk.Frame(canvas, bg=self.UI_SURFACE)
+        inner = tk.Frame(canvas, bg=self.UI_SURFACE); self._clockset_inner = inner
         wid = canvas.create_window((0, 0), window=inner, anchor="nw")
         inner.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
         canvas.bind("<Configure>", lambda e: canvas.itemconfigure(wid, width=e.width))
-        def wheel(e):
-            canvas.yview_scroll(int(-1 * (e.delta / 120)) if e.delta else 0, "units")
-        win.bind("<MouseWheel>", wheel)
-        def refresh_cnt():
-            cnt.config(text=f"{self.t('clk_selected', '已选')} {len(selected)} / 15")
-        def render(*_a):
-            for w in inner.winfo_children(): w.destroy()
-            q = qvar.get().strip().lower()
-            rows = []
-            if not q:
-                rows = [(self._clock_name(n, tz), tz, f"UTC{h:+g}" if h else "UTC") for n, tz, h in self._CLOCK_CATALOG]
-            else:
-                seen = set()
-                for n, tz, h in self._CLOCK_CATALOG:
-                    if q in n.lower() or q in tz.lower():
-                        rows.append((self._clock_name(n, tz), tz, f"UTC{h:+g}" if h else "UTC")); seen.add(tz)
-                for tz in self._clock_all_zones():
-                    if tz in seen: continue
-                    nm = self._clock_zone_name(tz)
-                    if q in tz.lower() or q in nm.lower():
-                        rows.append((nm, tz, "")); seen.add(tz)
-                    if len(rows) >= 100: break
-            if not rows:
-                tk.Label(inner, text=self.t("clk_notfound", "没找到这个城市, 换个关键词试试"), font=self._ui_font(9), bg=self.UI_SURFACE, foreground=self.UI_MUTED).pack(anchor="w", padx=6, pady=6)
-            for name, tz, off in rows:
-                v = tk.BooleanVar(value=tz in selected)
-                def on_toggle(t=tz, var=v):
-                    if var.get():
-                        if len(selected) >= 15:
-                            var.set(False)
-                            messagebox.showinfo(self.t("world_clock", "世界时间"), self.t("clk_max", "最多选 15 个城市（本地不算）"), parent=win)
-                            return
-                        selected.add(t)
-                    else:
-                        selected.discard(t)
-                    refresh_cnt()
-                txt = f"{name}  ({off})" if off else f"{name}  ·  {tz}"
-                cb = tk.Checkbutton(inner, text=txt, variable=v, font=self._ui_font(10),
-                                    bg=self.UI_SURFACE, fg=self.UI_TEXT, activebackground=self.UI_SURFACE,
-                                    anchor="w", command=on_toggle)
-                cb.pack(fill="x", padx=6, pady=1)
-            canvas.yview_moveto(0)
-            refresh_cnt()
-        qvar.trace_add("write", render)
-        render()
-        bar = ttk.Frame(win); bar.pack(fill="x", padx=10, pady=(4, 10))
-        def do_ok():
-            if not selected:
-                messagebox.showinfo(self.t("world_clock", "世界时间"), self.t("clk_min", "至少选一个城市"), parent=win); return
-            cat_order = [tz for _n, tz, _h in self._CLOCK_CATALOG if tz in selected]
-            others = sorted(tz for tz in selected if tz not in set(cat_order))
-            picked = (cat_order + others)[:15]
-            if not self.cfg.has_section("Config"): self.cfg.add_section("Config")
-            self.cfg.set("Config", "ClockCities", ",".join(picked)); self.save_config()
-            close()
-            self._rebuild_clock_panel()
-            self.status.set(f"{self.t('clk_set_done', '世界时间已设置')} {len(picked)} {self.t('clk_cities', '个城市')}")
-        ttk.Button(bar, text=self.t("cmn_ok", "确定"), style="Accent.TButton", command=do_ok).pack(side="right")
-        ttk.Button(bar, text=self.t("cmn_cancel", "取消"), command=close).pack(side="right", padx=6)
+        self._clockset_qvar.trace_add("write", lambda *_a: self._clockset_render())
+        bar = ttk.Frame(panel); bar.pack(fill="x", padx=10, pady=(4, 10))
+        ttk.Button(bar, text=self.t("cmn_ok", "确定"), style="Accent.TButton", command=self._clockset_ok).pack(side="right")
+        ttk.Button(bar, text=self.t("cmn_cancel", "取消"), command=self._show_clock_panel).pack(side="right", padx=6)
+    def _clockset_refresh_cnt(self):
+        self._clockset_cnt.config(text=f"{self.t('clk_selected', '已选')} {len(self._clockset_selected)} / 15")
+    def _clockset_render(self):
+        inner = self._clockset_inner; selected = self._clockset_selected
+        for w in inner.winfo_children(): w.destroy()
+        q = self._clockset_qvar.get().strip().lower()
+        rows = []
+        if not q:
+            rows = [(self._clock_name(n, tz), tz, f"UTC{h:+g}" if h else "UTC") for n, tz, h in self._CLOCK_CATALOG]
+        else:
+            seen = set()
+            for n, tz, h in self._CLOCK_CATALOG:
+                if q in n.lower() or q in tz.lower():
+                    rows.append((self._clock_name(n, tz), tz, f"UTC{h:+g}" if h else "UTC")); seen.add(tz)
+            for tz in self._clock_all_zones():
+                if tz in seen: continue
+                nm = self._clock_zone_name(tz)
+                if q in tz.lower() or q in nm.lower():
+                    rows.append((nm, tz, "")); seen.add(tz)
+                if len(rows) >= 100: break
+        if not rows:
+            tk.Label(inner, text=self.t("clk_notfound", "没找到这个城市, 换个关键词试试"), font=self._ui_font(9), bg=self.UI_SURFACE, foreground=self.UI_MUTED).pack(anchor="w", padx=6, pady=6)
+        for name, tz, off in rows:
+            v = tk.BooleanVar(value=tz in selected)
+            def on_toggle(t=tz, var=v):
+                if var.get():
+                    if len(selected) >= 15:
+                        var.set(False)
+                        messagebox.showinfo(self.t("world_clock", "世界时间"), self.t("clk_max", "最多选 15 个城市（本地不算）"), parent=self)
+                        return
+                    selected.add(t)
+                else:
+                    selected.discard(t)
+                self._clockset_refresh_cnt()
+            txt = f"{name}  ({off})" if off else f"{name}  ·  {tz}"
+            cb = tk.Checkbutton(inner, text=txt, variable=v, font=self._ui_font(10),
+                                bg=self.UI_SURFACE, fg=self.UI_TEXT, activebackground=self.UI_SURFACE,
+                                anchor="w", command=on_toggle)
+            cb.pack(fill="x", padx=6, pady=1)
+        self._clockset_cv.yview_moveto(0)
+        self._clockset_refresh_cnt()
+    def _clockset_ok(self):
+        selected = self._clockset_selected
+        if not selected:
+            messagebox.showinfo(self.t("world_clock", "世界时间"), self.t("clk_min", "至少选一个城市"), parent=self); return
+        cat_order = [tz for _n, tz, _h in self._CLOCK_CATALOG if tz in selected]
+        others = sorted(tz for tz in selected if tz not in set(cat_order))
+        picked = (cat_order + others)[:15]
+        if not self.cfg.has_section("Config"): self.cfg.add_section("Config")
+        self.cfg.set("Config", "ClockCities", ",".join(picked)); self.save_config()
+        self._rebuild_clock_panel()
+        self._show_clock_panel()
+        self.status.set(f"{self.t('clk_set_done', '世界时间已设置')} {len(picked)} {self.t('clk_cities', '个城市')}")
 
     # ---------- 卡片天气 (wttr.in 首选, Open-Meteo 兜底; 坐标: 精选城市内置, 其余按地名查, 本地按 IP 定位) ----------
     _CLOCK_GEO = {"Asia/Shanghai": (39.90, 116.40), "Asia/Hong_Kong": (22.32, 114.17), "Asia/Taipei": (25.03, 121.57),
@@ -5661,6 +5746,11 @@ try {
         except Exception: pass
         return None
 
+    def _clock_refresh(self):
+        """手动刷新 (Jane 要求, 和汇率面板的「刷新」一样): 绕过 15 分钟节流立即重拉各城市天气;
+        时间本身每秒自动走, 要刷的只有天气。正在拉的时候点了就等这一轮完 (不会重复开线程)。"""
+        self._wx_fetched_at = 0
+        self._maybe_fetch_weather()
     def _maybe_fetch_weather(self):
         """打开世界时间时拉一次各城市天气, 15 分钟内不重复拉; 后台线程并发查, 回主线程逐个填卡片"""
         if getattr(self, "_wx_busy", False): return
@@ -5765,20 +5855,21 @@ try {
         combo = ttk.Combobox(ctrl, textvariable=self._tt_target_var, values=[n for n, _ in self._TRANS_TARGETS], width=11, state="readonly")
         combo.pack(side="left", padx=4)
         combo.bind("<<ComboboxSelected>>", lambda e: self._tt_go())
-        body = tk.Frame(panel, background=self.UI_BG); body.pack(fill="both", expand=True, padx=14, pady=(0, 10))
+        body = tk.Frame(panel, background=self.UI_BG); body.pack(fill="x", padx=14, pady=(0, 10))
         def text_col(parent, title):
             col = tk.Frame(parent, background="#FFFFFF", relief="solid", borderwidth=1)
             tk.Label(col, text=title, font=self._ui_font(9, True), background="#FFFFFF", foreground=self.UI_MUTED).pack(anchor="w", padx=8, pady=(6, 0))
             t = tk.Text(col, wrap="word", font=self._ui_font(11), background="#FFFFFF", foreground=self.UI_TEXT,
                         relief="flat", borderwidth=0, padx=8, pady=6, height=10)
-            t.pack(fill="both", expand=True)
+            t.pack(fill="x")
             return col, t
         body.columnconfigure(0, weight=1, uniform="ttcols"); body.columnconfigure(1, weight=1, uniform="ttcols")
-        body.rowconfigure(0, weight=1)
         left, self._tt_in = text_col(body, self.t("tt_source", "原文"))
-        left.grid(row=0, column=0, sticky="nsew", padx=(0, 5))
+        left.grid(row=0, column=0, sticky="new", padx=(0, 5))
         right, self._tt_out = text_col(body, self.t("tt_target", "译文"))
-        right.grid(row=0, column=1, sticky="nsew", padx=(5, 0))
+        right.grid(row=0, column=1, sticky="new", padx=(5, 0))
+        self._tt_in.configure(height=self._TT_MIN_LINES); self._tt_out.configure(height=self._TT_MIN_LINES)
+        self._tt_in.bind("<Configure>", self._tt_on_resize)
         self._tt_in.bind("<KeyRelease>", lambda e: self._tt_schedule())
         btns = tk.Frame(panel, background=self.UI_BG); btns.pack(fill="x", padx=14, pady=(0, 10))
         ttk.Button(btns, text=self.t("tt_paste", "粘贴原文"), command=self._tt_paste).pack(side="left", padx=2)
@@ -5788,7 +5879,6 @@ try {
     def _show_texttrans_panel(self):
         if getattr(self, "_tt_panel", None) is None:
             self._build_texttrans_panel()
-        self._browser_on_hide()
         try: self._body.pack_forget()
         except Exception: pass
         for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_clock_panel", "_dl_panel"):
@@ -5799,6 +5889,7 @@ try {
         self._ai_view_on = False
         self._wheel_bind(False)
         self._calc_bind(False)
+        self._forget_aux_panels()
         self._tt_panel.pack(fill="both", expand=True, before=self._status_sep)
         try: self._tt_in.focus_set()
         except Exception: pass
@@ -5807,8 +5898,27 @@ try {
         if p is not None:
             try: p.pack_forget()
             except Exception: pass
+    _TT_MIN_LINES = 8   # 文本翻译框默认高度 (Jane: 原来满屏太大, 约四分之一即可)
+    _TT_MAX_LINES = 24  # 自动长高的上限, 再长框内滚动看
+    def _tt_display_lines(self, w):
+        try: return int(w.count("1.0", "end", "displaylines"))
+        except Exception: return int(w.index("end-1c").split(".")[0])
+    def _tt_fit(self):
+        """框高跟内容走: 原文/译文谁行多按谁算 (两框等高), 按钮行 pack 在框下方自然跟随"""
+        try:
+            need = max(self._tt_display_lines(self._tt_in), self._tt_display_lines(self._tt_out), self._TT_MIN_LINES)
+            h = min(need, self._TT_MAX_LINES)
+            for w in (self._tt_in, self._tt_out):
+                if int(w.cget("height")) != h: w.configure(height=h)
+        except Exception: pass
+    def _tt_on_resize(self, event):
+        """窗口宽度变了折行数会变, 跟着重算一次高度 (高度变化本身不触发重算, 防循环)"""
+        if event.width != getattr(self, "_tt_last_w", 0):
+            self._tt_last_w = event.width
+            self._tt_fit()
     def _tt_schedule(self):
         """停笔 350ms 后自动翻译 (连打时不停重置计时, 不会每键都发请求)"""
+        self._tt_fit()
         if getattr(self, "_tt_after", None) is not None:
             try: self.after_cancel(self._tt_after)
             except Exception: pass
@@ -5830,7 +5940,7 @@ try {
                     self._tt_status.set(self.t("tt_failed", "翻译失败: 检查网络后重试"))
                     return
                 self._tt_out.delete("1.0", "end"); self._tt_out.insert("1.0", res)
-                self._tt_status.set("")
+                self._tt_status.set(""); self._tt_fit()
             self._ui_queue.put(done)
         import threading
         threading.Thread(target=work, daemon=True).start()
@@ -5838,450 +5948,15 @@ try {
         t = self.clip_get()
         if t:
             self._tt_in.delete("1.0", "end"); self._tt_in.insert("1.0", t)
-            self._tt_go()
+            self._tt_fit(); self._tt_go()
     def _tt_clear(self):
-        self._tt_in.delete("1.0", "end"); self._tt_out.delete("1.0", "end"); self._tt_status.set("")
+        self._tt_in.delete("1.0", "end"); self._tt_out.delete("1.0", "end"); self._tt_status.set(""); self._tt_fit()
     def _tt_copy(self):
         t = self._tt_out.get("1.0", "end").strip()
         if t:
             self.clipboard_clear(); self.clipboard_append(t)
             self._tt_status.set(self.t("tt_copied", "译文已复制"))
-    # ---------- 微型浏览器 (Jane 要求内置): pywebview 子进程开 WebView2 窗口, 主进程用 Win32 把它收编进面板 ----------
-    _BROWSER_HOME = "https://translate.google.com/"  # 默认主页: 谷歌翻译 (Jane 提这个需求的出发点)
-    @staticmethod
-    def _browser_normalize_url(text):
-        """地址栏输入 -> URL: 完整链接原样; 裸域名/路径补 https://; 带空格或没点号的当搜索词走 Google 搜索。纯逻辑可单测。"""
-        import urllib.parse as _up
-        t = (text or "").strip()
-        if not t: return App._BROWSER_HOME
-        if t.startswith(("http://", "https://")): return t
-        if " " not in t and "." in t: return "https://" + t
-        return "https://www.google.com/search?q=" + _up.quote(t)
-    @staticmethod
-    def _browser_ipc_path(name):
-        return os.path.join(BASE, name)
-    def _build_browser_panel(self):
-        panel = tk.Frame(self, background=self.UI_BG); self._browser_panel = panel
-        head = tk.Frame(panel, background=self.UI_BG); head.pack(fill="x", padx=14, pady=(10, 4))
-        tk.Label(head, text=self.t("web_browser", "浏览器"), font=self._ui_font(12, True), background=self.UI_BG, foreground=self.UI_TEXT).pack(side="left")
-        tk.Label(head, text=self.t("brw_subtitle", "系统 WebView2 内核 (与 Edge 同源)"), font=self._ui_font(9), background=self.UI_BG, foreground=self.UI_MUTED).pack(side="left", padx=8)
-        back = tk.Label(head, text=self.t("cmn_back", "返回"), font=self._ui_font(9), background=self.UI_BG, foreground="#5B6B7C", cursor="hand2")
-        back.pack(side="right")
-        back.bind("<Button-1>", lambda e: self._show_main_view())
-        back.bind("<Enter>", lambda e: back.configure(foreground=self.UI_ACCENT))
-        back.bind("<Leave>", lambda e: back.configure(foreground="#5B6B7C"))
-        nav = tk.Frame(panel, background=self.UI_BG); nav.pack(fill="x", padx=14, pady=(0, 4))
-        for txt, cmd in [("←", "back"), ("→", "forward"), ("⟳", "reload")]:
-            ttk.Button(nav, text=txt, width=3, command=lambda c=cmd: self._browser_send({"cmd": c})).pack(side="left", padx=1)
-        self._browser_url_var = tk.StringVar(value=self._BROWSER_HOME)
-        entry = ttk.Entry(nav, textvariable=self._browser_url_var); entry.pack(side="left", fill="x", expand=True, padx=4)
-        self._browser_url_entry = entry
-        entry.bind("<Return>", lambda e: self._browser_navigate())
-        ttk.Button(nav, text=self.t("brw_open", "打开"), width=5, command=self._browser_navigate).pack(side="left", padx=1)
-        ttk.Button(nav, text=self.t("brw_fav", "+ 收藏"), width=6, command=lambda: self._browser_bookmark_dialog()).pack(side="left", padx=1)
-        ttk.Button(nav, text=self.t("brw_bookmarks", "书签"), width=5, command=self._browser_manager_dialog).pack(side="left", padx=1)
-        _menu_btn = ttk.Button(nav, text=self.t("brw_menu", "菜单 ▾"), width=6)
-        _menu_btn.configure(command=lambda: self._browser_menu_popup(_menu_btn))
-        _menu_btn.pack(side="left", padx=1)
-        bm_bar = tk.Frame(panel, background=self.UI_BG); bm_bar.pack(fill="x", padx=14, pady=(0, 2))
-        self._browser_bm_bar = bm_bar
-        self._bookmarks = self._load_bookmarks()
-        self._browser_render_bookmarks()
-        self._browser_status = tk.StringVar(value="")
-        tk.Label(panel, textvariable=self._browser_status, font=self._ui_font(9), background=self.UI_BG, foreground=self.UI_MUTED).pack(anchor="w", padx=14)
-        host = tk.Frame(panel, background="#FFFFFF", relief="solid", borderwidth=1); host.pack(fill="both", expand=True, padx=14, pady=(2, 10))
-        self._browser_host = host
-        host.bind("<Configure>", lambda e: self._browser_sync_geometry())
-        fb = tk.Frame(host, background="#FFFFFF"); self._browser_fb = fb
-        tk.Label(fb, text=self.t("brw_not_open", "浏览器还没打开。"), font=self._ui_font(10), background="#FFFFFF", foreground=self.UI_MUTED).pack(pady=(24, 4))
-        ttk.Button(fb, text=self.t("brw_use_sys", "改用系统浏览器打开谷歌翻译"), command=lambda: self._browser_open_external()).pack(pady=2)
-    def _show_browser_panel(self):
-        if getattr(self, "_browser_panel", None) is None:
-            self._build_browser_panel()
-        try: self._body.pack_forget()
-        except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_clock_panel", "_dl_panel", "_tt_panel"):
-            p = getattr(self, attr, None)
-            if p is not None:
-                try: p.pack_forget()
-                except Exception: pass
-        self._ai_view_on = False
-        self._wheel_bind(False)
-        self._calc_bind(False)
-        self._browser_panel.pack(fill="both", expand=True, before=self._status_sep)
-        self._browser_ensure()
-        self._browser_start_state_poll()
-    def _browser_on_hide(self):
-        """切去别的视图时调用: 收起浏览器面板并隐藏子窗口 (子进程不杀, 回来秒开、页面状态还在)"""
-        self._browser_poll_gen = getattr(self, "_browser_poll_gen", 0) + 1  # 停掉地址栏状态轮询
-        p = getattr(self, "_browser_panel", None)
-        if p is not None:
-            try: p.pack_forget()
-            except Exception: pass
-        hwnd = getattr(self, "_browser_hwnd", 0)
-        if hwnd and sys.platform == "win32":
-            try: ctypes.windll.user32.ShowWindow(hwnd, 0)  # SW_HIDE
-            except Exception: pass
-    # ---------- 浏览器书签 (存 bookmarks.json, 带 .bak; 首次使用给四个常用站种子, 可删) ----------
-    _BROWSER_SEED_BOOKMARKS = [{"name": "谷歌", "url": "https://www.google.com/"},
-                               {"name": "百度", "url": "https://www.baidu.com/"},
-                               {"name": "必应", "url": "https://www.bing.com/"}]  # Jane 定的默认三个 (她可自行增删改)
-    def _load_bookmarks(self):
-        for p in (BOOKMARKS_PATH, BOOKMARKS_PATH + ".bak"):
-            if os.path.exists(p):
-                try:
-                    data = json.loads(open(p, encoding="utf-8").read())
-                    if isinstance(data, list):
-                        return [{"name": str(d.get("name", "")).strip() or str(d.get("url", "")).strip(),
-                                 "url": str(d.get("url", "")).strip()}
-                                for d in data if isinstance(d, dict) and str(d.get("url", "")).strip()]
-                except Exception: continue
-        seed = [dict(b) for b in self._BROWSER_SEED_BOOKMARKS]
-        if self.lang == "English":  # 种子书签名跟随界面语言 (用户自己改过的书签不动)
-            for b in seed: b["name"] = {"谷歌": "Google", "百度": "Baidu", "必应": "Bing"}.get(b["name"], b["name"])
-        return seed
-    def _save_bookmarks(self):
-        try:
-            text = json.dumps(self._bookmarks, ensure_ascii=False, indent=1)
-            _atomic_write(BOOKMARKS_PATH, text)
-            try: _atomic_write(BOOKMARKS_PATH + ".bak", text)
-            except Exception: pass
-        except Exception: pass
-    def _browser_render_bookmarks(self):
-        bar = getattr(self, "_browser_bm_bar", None)
-        if bar is None: return
-        for ch in bar.winfo_children(): ch.destroy()
-        for i, bm in enumerate(getattr(self, "_bookmarks", [])[:8]):  # 书签栏一排只放前 8 个常用, 其余在「书签」管理窗里
-            b = ttk.Button(bar, text=bm["name"], command=lambda u=bm["url"]: self._browser_goto(u))
-            b.grid(row=0, column=i, padx=2, pady=1, sticky="w")
-            b.bind("<Button-3>", lambda e, idx=i: self._browser_bookmark_menu(e, idx))
-    def _browser_bookmark_menu(self, event, idx):
-        m = tk.Menu(self, tearoff=0)
-        m.add_command(label=self.t("brw_m_open", "打开"), command=lambda: self._browser_goto(self._bookmarks[idx]["url"]))
-        m.add_command(label=self.t("brw_m_edit", "编辑"), command=lambda: self._browser_bookmark_dialog(idx))
-        m.add_command(label=self.t("brw_m_delete", "删除"), command=lambda: self._browser_delete_bookmark(idx))
-        try: m.tk_popup(event.x_root, event.y_root)
-        except Exception: pass
-    def _browser_delete_bookmark(self, idx):
-        bm = self._bookmarks[idx]
-        if not messagebox.askyesno(self.t("brw_del_title", "删除书签"), f"{self.t('brw_del_title', '删除书签')}「{bm['name']}」？"): return
-        del self._bookmarks[idx]
-        self._save_bookmarks(); self._browser_render_bookmarks()
-        if getattr(self, "_browser_mgr_refresh", None) is not None:
-            try: self._browser_mgr_refresh()
-            except Exception: pass
-    def _browser_bookmark_dialog(self, idx=None):
-        """添加/编辑书签: 添加时名称预填当前页标题 (子进程回报的)、网址预填当前页地址, 都可改"""
-        import urllib.parse as _up
-        editing = idx is not None
-        if editing:
-            cur_name, cur_url = self._bookmarks[idx]["name"], self._bookmarks[idx]["url"]
-        else:
-            cur_url = self._browser_url_var.get()
-            cur_name = getattr(self, "_browser_page_title", "") or _up.urlparse(self._browser_normalize_url(cur_url)).netloc or cur_url
-        win = tk.Toplevel(self); win.title(self.t("brw_edit_title", "编辑书签") if editing else self.t("brw_add_title", "收藏当前页")); win.resizable(False, False)
-        frm = tk.Frame(win, background="#FFFFFF"); frm.pack(fill="both", expand=True, padx=14, pady=12)
-        tk.Label(frm, text=self.t("brw_name", "名称"), font=self._ui_font(10), background="#FFFFFF", foreground=self.UI_TEXT).grid(row=0, column=0, sticky="w", pady=3)
-        name_var = tk.StringVar(value=cur_name)
-        ttk.Entry(frm, textvariable=name_var, width=52).grid(row=0, column=1, padx=(8, 0), pady=3)
-        tk.Label(frm, text=self.t("brw_url", "网址"), font=self._ui_font(10), background="#FFFFFF", foreground=self.UI_TEXT).grid(row=1, column=0, sticky="w", pady=3)
-        url_var = tk.StringVar(value=cur_url)
-        ttk.Entry(frm, textvariable=url_var, width=52).grid(row=1, column=1, padx=(8, 0), pady=3)
-        def save():
-            url = self._browser_normalize_url(url_var.get())
-            if not url.startswith(("http://", "https://")):
-                messagebox.showwarning(self.t("brw_bookmarks", "书签"), self.t("brw_bad_url", "网址不对, 请输入完整网址。")); return
-            name = name_var.get().strip() or _up.urlparse(url).netloc or url
-            if editing: self._bookmarks[idx] = {"name": name, "url": url}
-            else:
-                for j, bm in enumerate(self._bookmarks):
-                    if bm["url"] == url:  # 已收藏过同一个网址: 更新名称, 不重复加
-                        self._bookmarks[j] = {"name": name, "url": url}; break
-                else: self._bookmarks.append({"name": name, "url": url})
-            self._save_bookmarks(); self._browser_render_bookmarks()
-            if getattr(self, "_browser_mgr_refresh", None) is not None:
-                try: self._browser_mgr_refresh()
-                except Exception: pass
-            win.destroy()
-        btns = tk.Frame(frm, background="#FFFFFF"); btns.grid(row=2, column=0, columnspan=2, sticky="e", pady=(8, 0))
-        ttk.Button(btns, text=self.t("cmn_save", "保存"), style="Accent.TButton", command=save).pack(side="left", padx=3)
-        ttk.Button(btns, text=self.t("cmn_cancel", "取消"), command=win.destroy).pack(side="left")
-        win.bind("<Return>", lambda e: save()); win.bind("<Escape>", lambda e: win.destroy())
-    # ---------- 浏览器菜单 (仿 Chrome/Edge 的 ☰ 菜单: 历史/下载设置/缩放/清数据) ----------
-    def _browser_menu_popup(self, widget):
-        m = tk.Menu(self, tearoff=0)
-        m.add_command(label=self.t("brw_menu_history", "浏览历史…"), command=self._browser_history_dialog)
-        m.add_command(label=self.t("brw_menu_dl", "下载设置…"), command=self._browser_download_settings)
-        zoom = tk.Menu(m, tearoff=0)
-        for label, lv in (("75%", 0.75), ("100%", 1.0), ("125%", 1.25), ("150%", 1.5)):
-            zoom.add_command(label=label, command=lambda v=lv: self._browser_send({"cmd": "zoom", "level": v}))
-        m.add_cascade(label=self.t("brw_menu_zoom", "页面缩放"), menu=zoom)
-        m.add_command(label=self.t("brw_menu_sys", "在系统浏览器中打开"), command=self._browser_open_external)
-        m.add_separator()
-        m.add_command(label=self.t("brw_menu_clear", "清除浏览数据 (缓存/Cookie)…"), command=self._browser_clear_data)
-        try: m.tk_popup(widget.winfo_rootx(), widget.winfo_rooty() + widget.winfo_height())
-        finally: m.grab_release()
-    def _browser_record_history(self, url, title):
-        """访问过的页面记进历史 (连续同址不重复记; 上限 300 条, 存 browser_history.json)"""
-        if not url or not url.startswith(("http://", "https://")): return
-        hist = getattr(self, "_browser_history", None)
-        if hist is None: hist = self._browser_history = self._load_browser_history()
-        if hist and hist[-1].get("url") == url: return
-        hist.append({"url": url, "title": title or url, "ts": time.strftime("%m-%d %H:%M")})
-        del hist[:-300]
-        try: _atomic_write(BROWSER_HISTORY_PATH, json.dumps(hist, ensure_ascii=False))
-        except Exception: pass
-    def _load_browser_history(self):
-        for p in (BROWSER_HISTORY_PATH, BROWSER_HISTORY_PATH + ".bak"):
-            try:
-                with open(p, encoding="utf-8") as f: data = json.load(f)
-                if isinstance(data, list):
-                    return [h for h in data if isinstance(h, dict) and h.get("url")][-300:]
-            except Exception: pass
-        return []
-    def _browser_history_dialog(self):
-        hist = getattr(self, "_browser_history", None)
-        if hist is None: hist = self._browser_history = self._load_browser_history()
-        win = tk.Toplevel(self); win.title(self.t("brw_hist_title", "浏览历史")); win.resizable(False, False)
-        frm = tk.Frame(win, background="#FFFFFF"); frm.pack(fill="both", expand=True, padx=14, pady=12)
-        lb = tk.Listbox(frm, font=self._ui_font(10), width=76, height=14, activestyle="none",
-                        selectbackground=self.UI_SEL_BG, selectforeground=self.UI_TEXT)
-        lb.pack(fill="both", expand=True)
-        def refresh():
-            lb.delete(0, "end")
-            for h in reversed(hist):
-                lb.insert("end", f"{h.get('ts', '')}  {h.get('title', '')}  ·  {h.get('url', '')}")
-            if not hist: lb.insert("end", self.t("brw_hist_empty", "(还没有浏览记录)"))
-        def open_sel():
-            s = lb.curselection()
-            if s and hist:
-                h = list(reversed(hist))[s[0]]
-                self._browser_goto(h["url"]); win.destroy()
-        lb.bind("<Double-Button-1>", lambda e: open_sel())
-        row = tk.Frame(frm, background="#FFFFFF"); row.pack(fill="x", pady=(8, 0))
-        ttk.Button(row, text=self.t("cmn_open", "打开"), style="Accent.TButton", command=open_sel).pack(side="left", padx=2)
-        def clear_all():
-            if hist and messagebox.askyesno(self.t("brw_hist_clear", "清空历史"), self.t("brw_hist_clear_q", "确定要清空全部浏览历史吗?")):
-                hist.clear()
-                try: _atomic_write(BROWSER_HISTORY_PATH, "[]")
-                except Exception: pass
-                refresh()
-        ttk.Button(row, text=self.t("brw_hist_clear", "清空历史"), command=clear_all).pack(side="left", padx=2)
-        ttk.Button(row, text=self.t("cmn_close", "关闭"), command=win.destroy).pack(side="right", padx=2)
-        refresh()
-    def _browser_clear_data(self):
-        """清除浏览数据: 停掉浏览器子进程 -> 删它的 WebView2 数据夹 (缓存/Cookie/登录全在里面) -> 重新打开一个干净的"""
-        if not messagebox.askyesno(self.t("brw_clear_title", "清除浏览数据"), self.t("brw_clear_q", "会清掉缓存、Cookie 和登录状态, 浏览器将重新打开。继续吗?")):
-            return
-        proc = getattr(self, "_browser_proc", None)
-        if proc is not None:
-            try: proc.terminate()
-            except Exception: pass
-            self._browser_proc = None
-        self._browser_hwnd = 0; self._browser_docked = False
-        import shutil
-        shutil.rmtree(os.path.join(BASE, "browser_profile"), ignore_errors=True)
-        self._browser_last_url = ""
-        self._browser_set_status(self.t("brw_cleared", "浏览数据已清除"))
-        p = getattr(self, "_browser_panel", None)
-        if p is not None and p.winfo_ismapped():
-            self._browser_ensure()
-    def _browser_download_settings(self):
-        dl = os.path.join(os.path.expanduser("~"), "Downloads")
-        win = tk.Toplevel(self); win.title(self.t("brw_dl_title", "下载设置")); win.resizable(False, False)
-        frm = tk.Frame(win, background="#FFFFFF"); frm.pack(fill="both", expand=True, padx=16, pady=14)
-        tk.Label(frm, text=self.t("brw_dl_note1", "网页里下载的文件由浏览器内核处理:"), font=self._ui_font(10),
-                 background="#FFFFFF", foreground=self.UI_TEXT).pack(anchor="w")
-        tk.Label(frm, text=self.t("brw_dl_note2", "默认保存到 Windows 的「下载」文件夹; 下载时弹出的保存框里也可以每次自己选位置。"),
-                 font=self._ui_font(9), background="#FFFFFF", foreground=self.UI_MUTED, wraplength=430, justify="left").pack(anchor="w", pady=(2, 8))
-        tk.Label(frm, text=f"{self.t('brw_dl_folder', '下载文件夹')}: {dl}", font=self._ui_font(10),
-                 background="#FFFFFF", foreground=self.UI_TEXT).pack(anchor="w")
-        row = tk.Frame(frm, background="#FFFFFF"); row.pack(fill="x", pady=(10, 0))
-        def open_dl():
-            try:
-                if sys.platform == "win32": os.startfile(dl)
-                else:
-                    import subprocess
-                    subprocess.Popen(["xdg-open", dl])
-            except Exception: pass
-        ttk.Button(row, text=self.t("brw_dl_open", "打开下载文件夹"), style="Accent.TButton", command=open_dl).pack(side="left", padx=2)
-        ttk.Button(row, text=self.t("cmn_close", "关闭"), command=win.destroy).pack(side="right", padx=2)
-    def _browser_manager_dialog(self):
-        """书签管理窗 (导航行「书签」按钮): 全部书签都在这里; 书签栏只显示前 8 个, 靠上移/下移决定谁上栏。
-        打开/编辑/删除/添加都复用同一套存取, 改完书签栏立刻跟着变。"""
-        win = tk.Toplevel(self); win.title(self.t("brw_mgr_title", "书签管理")); win.resizable(False, False)
-        frm = tk.Frame(win, background="#FFFFFF"); frm.pack(fill="both", expand=True, padx=14, pady=12)
-        tk.Label(frm, text=self.t("brw_mgr_hint", "书签栏显示前 8 个, 其余书签在这里打开 (双击也能打开)"), font=self._ui_font(9),
-                 background="#FFFFFF", foreground=self.UI_MUTED).pack(anchor="w", pady=(0, 6))
-        lb = tk.Listbox(frm, font=self._ui_font(10), width=64, height=12, activestyle="none",
-                        selectbackground=self.UI_SEL_BG, selectforeground=self.UI_TEXT)
-        lb.pack(fill="both", expand=True)
-        def refresh():
-            lb.delete(0, "end")
-            for i, bm in enumerate(self._bookmarks):
-                lb.insert("end", f"{i + 1}. {bm['name']}  ·  {bm['url']}")
-            self._browser_render_bookmarks()
-        self._browser_mgr_refresh = refresh
-        def sel():
-            s = lb.curselection()
-            return s[0] if s else -1
-        def open_sel():
-            i = sel()
-            if i >= 0:
-                self._browser_goto(self._bookmarks[i]["url"]); win.destroy()
-        def edit_sel():
-            i = sel()
-            if i >= 0: self._browser_bookmark_dialog(i)
-        def del_sel():
-            i = sel()
-            if i >= 0: self._browser_delete_bookmark(i)
-        def move_sel(d):
-            i = sel(); j = i + d
-            if i < 0 or not (0 <= j < len(self._bookmarks)): return
-            self._bookmarks[i], self._bookmarks[j] = self._bookmarks[j], self._bookmarks[i]
-            self._save_bookmarks(); refresh(); lb.selection_set(j)
-        lb.bind("<Double-Button-1>", lambda e: open_sel())
-        row1 = tk.Frame(frm, background="#FFFFFF"); row1.pack(fill="x", pady=(8, 3))
-        ttk.Button(row1, text=self.t("cmn_open", "打开"), style="Accent.TButton", command=open_sel).pack(side="left", padx=2)
-        ttk.Button(row1, text=self.t("brw_mgr_add", "添加"), command=lambda: self._browser_bookmark_dialog()).pack(side="left", padx=2)
-        ttk.Button(row1, text=self.t("cmn_edit", "编辑"), command=edit_sel).pack(side="left", padx=2)
-        ttk.Button(row1, text=self.t("cmn_delete", "删除"), command=del_sel).pack(side="left", padx=2)
-        row2 = tk.Frame(frm, background="#FFFFFF"); row2.pack(fill="x")
-        ttk.Button(row2, text=self.t("cmn_up", "上移"), command=lambda: move_sel(-1)).pack(side="left", padx=2)
-        ttk.Button(row2, text=self.t("cmn_down", "下移"), command=lambda: move_sel(1)).pack(side="left", padx=2)
-        ttk.Button(row2, text=self.t("cmn_close", "关闭"), command=win.destroy).pack(side="right", padx=2)
-        def on_close():
-            self._browser_mgr_refresh = None
-            win.destroy()
-        win.protocol("WM_DELETE_WINDOW", on_close)
-        refresh()
-    def _browser_start_state_poll(self):
-        """子进程会把当前页地址/标题写进 browser_state.json: 面板打开期间轮询它, 同步地址栏 (正在打字时不抢)"""
-        self._browser_poll_gen = getattr(self, "_browser_poll_gen", 0) + 1
-        gen = self._browser_poll_gen
-        def tick():
-            if gen != getattr(self, "_browser_poll_gen", 0): return
-            p = getattr(self, "_browser_panel", None)
-            if p is None or not p.winfo_ismapped(): return
-            try:
-                with open(self._browser_ipc_path("browser_state.json"), encoding="utf-8") as f:
-                    st = json.load(f)
-                url = st.get("url") or ""
-                self._browser_page_title = st.get("title") or ""
-                if url and url != getattr(self, "_browser_last_url", ""):
-                    self._browser_last_url = url
-                    self._browser_record_history(url, self._browser_page_title)
-                if url and url != self._browser_url_var.get() and self.focus_get() is not getattr(self, "_browser_url_entry", None):
-                    self._browser_url_var.set(url)
-            except Exception: pass
-            self.after(800, tick)
-        self.after(800, tick)
-    def _browser_set_status(self, s):
-        try: self._browser_status.set(s)
-        except Exception: pass
-    def _browser_show_fallback(self, msg):
-        self._browser_set_status(msg + self.t("brw_can_sys", " — 可以改用系统浏览器打开。"))
-        try: self._browser_fb.pack(fill="both", expand=True)
-        except Exception: pass
-    def _browser_open_external(self):
-        import webbrowser
-        try: webbrowser.open(self._browser_normalize_url(self._browser_url_var.get()))
-        except Exception: pass
-    def _browser_alive(self):
-        proc = getattr(self, "_browser_proc", None)
-        return proc is not None and proc.poll() is None
-    def _browser_ensure(self):
-        if sys.platform != "win32":
-            self._browser_show_fallback(self.t("brw_fallback_win", "微型浏览器只在 Windows 版可用"))
-            return
-        if getattr(self, "_browser_hwnd", 0) and self._browser_alive():
-            self._browser_dock()
-            return
-        import importlib.util
-        if importlib.util.find_spec("webview") is None:  # 主进程先探: 没装 pywebview 就别白等子进程握手, 直接给兜底
-            self._browser_show_fallback(self.t("brw_no_comp", "浏览器组件未就绪 (缺 pywebview)"))
-            return
-        self._browser_set_status(self.t("brw_starting", "正在打开浏览器…"))
-        try: os.remove(self._browser_ipc_path("browser_host.json"))
-        except Exception: pass
-        import subprocess
-        if getattr(sys, "frozen", False):
-            argv = [sys.executable, "--browser", self._BROWSER_HOME]
-        else:
-            argv = [sys.executable, os.path.abspath(__file__), "--browser", self._BROWSER_HOME]
-        try:
-            self._browser_proc = subprocess.Popen(argv)
-        except Exception:
-            self._browser_show_fallback(self.t("brw_spawn_fail", "浏览器子进程启动失败"))
-            return
-        self._browser_wait_tries = 0
-        self.after(250, self._browser_wait_host)
-    def _browser_wait_host(self):
-        """等子进程把窗口句柄写进握手文件 (最多约 10 秒), 拿到就收编; 超时多半是缺 WebView2 运行时"""
-        if getattr(self, "_browser_panel", None) is None or not self._browser_panel.winfo_ismapped():
-            return  # 用户已经切走了: 不再处理, 下次打开面板时 _browser_ensure 会接着收编
-        self._browser_wait_tries = getattr(self, "_browser_wait_tries", 0) + 1
-        info = None
-        try:
-            with open(self._browser_ipc_path("browser_host.json"), encoding="utf-8") as f:
-                info = json.load(f)
-        except Exception: pass
-        proc = getattr(self, "_browser_proc", None)
-        if info and info.get("hwnd") and proc is not None and info.get("pid") == proc.pid:
-            self._browser_hwnd = int(info["hwnd"])
-            self._browser_dock()
-            pending = getattr(self, "_browser_pending_url", "")
-            if pending and pending != self._BROWSER_HOME:
-                self._browser_send({"cmd": "navigate", "url": pending})
-            self._browser_pending_url = ""
-            return
-        if self._browser_wait_tries > 40 or (proc is not None and proc.poll() is not None):
-            self._browser_show_fallback(self.t("brw_start_fail", "浏览器没能启动 (可能缺 WebView2 运行时)"))
-            return
-        self.after(250, self._browser_wait_host)
-    def _browser_dock(self):
-        """把子进程的浏览器窗口收编进面板: SetParent + 改样式为子窗口 + 铺满宿主区"""
-        hwnd = getattr(self, "_browser_hwnd", 0)
-        if not hwnd or sys.platform != "win32": return
-        try:
-            u = ctypes.windll.user32
-            u.SetParent(hwnd, self._browser_host.winfo_id())
-            style = u.GetWindowLongW(hwnd, -16)  # GWL_STYLE
-            style = (style & ~0x80000000 & ~0x00C00000 & ~0x00040000 & ~0x00020000 & ~0x00010000 & ~0x00080000) | 0x40000000 | 0x10000000
-            u.SetWindowLongW(hwnd, -16, style)  # 去 POPUP/标题栏/边框/最小最大化/系统菜单, 加 WS_CHILD|WS_VISIBLE
-            self._browser_docked = True
-            try: self._browser_fb.pack_forget()
-            except Exception: pass
-            u.ShowWindow(hwnd, 5)  # SW_SHOW
-            self._browser_sync_geometry()
-            self._browser_set_status("")
-        except Exception: pass
-    def _browser_sync_geometry(self):
-        if not getattr(self, "_browser_docked", False): return
-        hwnd = getattr(self, "_browser_hwnd", 0)
-        if not hwnd or sys.platform != "win32": return
-        try:
-            w = self._browser_host.winfo_width(); h = self._browser_host.winfo_height()
-            if w > 10 and h > 10:
-                ctypes.windll.user32.MoveWindow(hwnd, 0, 0, w, h, True)
-        except Exception: pass
-    def _browser_send(self, cmd):
-        if not getattr(self, "_browser_hwnd", 0): return
-        try: _atomic_write(self._browser_ipc_path("browser_cmd.json"), json.dumps(cmd))
-        except Exception: pass
-    def _browser_navigate(self):
-        self._browser_goto(self._browser_url_var.get())
-    def _browser_goto(self, url):
-        url = self._browser_normalize_url(url)
-        try: self._browser_url_var.set(url)
-        except Exception: pass
-        if getattr(self, "_browser_hwnd", 0) and self._browser_alive():
-            self._browser_send({"cmd": "navigate", "url": url})
-        else:
-            self._browser_pending_url = url
-            self._browser_ensure()
     def _show_dl_panel(self):
-        self._browser_on_hide()
         self._texttrans_on_hide()
         if getattr(self, "_dl_panel", None) is None:
             self._build_dl_panel()
@@ -6295,6 +5970,7 @@ try {
         self._ai_view_on = False
         self._wheel_bind(False)
         self._calc_bind(False)
+        self._forget_aux_panels()
         self._dl_panel.pack(fill="both", expand=True, before=self._status_sep)
 
     @staticmethod
@@ -6491,7 +6167,6 @@ try {
         except Exception: pass
 
     def _show_ai_panel(self):
-        self._browser_on_hide()
         self._texttrans_on_hide()
         if getattr(self, "_ai_panel", None) is None:
             self._build_ai_panel()
@@ -6513,6 +6188,7 @@ try {
         self._calc_bind(False)
         try: self._body.pack_forget()
         except Exception: pass
+        self._forget_aux_panels()
         self._ai_panel.pack(fill="both", expand=True, before=self._status_sep)
         self._ai_view_on = True
         self._wheel_bind(True)
@@ -6520,7 +6196,6 @@ try {
         except Exception: pass
 
     def _show_main_view(self):
-        self._browser_on_hide()
         self._texttrans_on_hide()
         if getattr(self, "_dl_panel", None) is not None:
             try: self._dl_panel.pack_forget()
@@ -6541,6 +6216,7 @@ try {
         if getattr(self, "_ai_panel", None) is not None:
             try: self._ai_panel.pack_forget()
             except Exception: pass
+        self._forget_aux_panels()
         try: self._body.pack(fill="both", expand=True, before=self._status_sep)
         except Exception: pass
         self._ai_view_on = False
@@ -6833,7 +6509,7 @@ try {
         """截图翻译的目标语言: [Snip] TransTarget (代码表见 _TRANS_TARGETS, 默认 zh-CN), 主窗口可改"""
         v = (self.cfg.get("Snip", "TransTarget", fallback="zh-CN") or "zh-CN").strip()
         return v if v in {c for _, c in self._TRANS_TARGETS} else "zh-CN"
-    def translate_text_to(self, text, target):
+    def translate_text_to(self, text, target, source=None):
         """把文字翻译到指定目标语言, 源语言自动检测 (一键截图翻译 F4 用)。
         设置了百度/有道接口时优先用它, 失败自动回退免费接口 (Google 主, MyMemory 备);
         原文已是中文且目标也是中文时原样返回; 全部失败返回 None。"""
@@ -6841,7 +6517,7 @@ try {
         text = (text or "").strip()
         if not text: return ""
         cjk = sum(1 for ch in text if "\u4e00" <= ch <= "\u9fff")
-        if target == "zh-CN" and cjk >= 3 and cjk * 2 >= len(text.replace(" ", "")): return text  # 基本已是中文, 不必译
+        if target == "zh-CN" and source in (None, "zh-CN") and cjk >= 3 and cjk * 2 >= len(text.replace(" ", "")): return text  # 基本已是中文且源语言没被指定成别的, 不必译
         has_cjk = cjk > 0
         groups, cur = [], ""
         for line in text.splitlines():
@@ -6850,13 +6526,13 @@ try {
         if cur: groups.append(cur)
         def via_google(q):
             url = "https://translate.googleapis.com/translate_a/single?" + urllib.parse.urlencode(
-                {"client": "gtx", "sl": "auto", "tl": target, "dt": "t", "q": q})
+                {"client": "gtx", "sl": source or "auto", "tl": target, "dt": "t", "q": q})
             req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
             with urllib.request.urlopen(req, timeout=12) as r:
                 d = _json.loads(r.read().decode("utf-8"))
             return "".join(seg[0] for seg in (d[0] or []) if seg and seg[0])
         def via_mymemory(q):
-            src = "zh-CN" if has_cjk else "en"
+            src = source or ("zh-CN" if has_cjk else "en")
             url = "https://api.mymemory.translated.net/get?" + urllib.parse.urlencode({"q": q, "langpair": f"{src}|{target}"})
             req = urllib.request.Request(url, headers={"User-Agent": "SPST"})
             with urllib.request.urlopen(req, timeout=12) as r:
@@ -6865,11 +6541,11 @@ try {
         def via_api(q):
             tc = self._trans_cfg()
             if tc["service"] == "baidu" and tc["baidu_id"] and tc["baidu_key"]:
-                return self._baidu_translate(q, target, tc["baidu_id"], tc["baidu_key"])
+                return self._baidu_translate(q, target, tc["baidu_id"], tc["baidu_key"], source)
             if tc["service"] == "youdao" and tc["youdao_id"] and tc["youdao_secret"]:
-                return self._youdao_translate(q, target, tc["youdao_id"], tc["youdao_secret"])
+                return self._youdao_translate(q, target, tc["youdao_id"], tc["youdao_secret"], source)
             if tc["service"] == "google" and tc["google_key"]:
-                return self._google_translate(q, target, tc["google_key"])
+                return self._google_translate(q, target, tc["google_key"], source)
             return ""
         out = []
         for g in groups:
@@ -6920,7 +6596,7 @@ try {
         if font is None: font = ImageFont.load_default()
         if len(cls._FONT_CACHE) < 96: cls._FONT_CACHE[key] = font
         return font
-    def _translate_lines(self, lines, target):  # 实例方法 (要用 self.translate_text_to): 曾误标 @staticmethod, 两个生产调用点都少传一个参数必抛 TypeError, F4 主流程在线程里静默死掉 (v1.4.18 实测中招, QA 第七轮抓到)
+    def _translate_lines(self, lines, target, source=None):  # 实例方法 (要用 self.translate_text_to): 曾误标 @staticmethod, 两个生产调用点都少传一个参数必抛 TypeError, F4 主流程在线程里静默死掉 (v1.4.18 实测中招, QA 第七轮抓到)
         """嵌图翻译的译文生成: 先把全部行拼成整段一次翻译 (有上下文, 不会逐行词不达意),
         译文按行拆回且行数对得上才采用; 对不上/整段失败再退回逐行翻译。
         纯数字/符号行不送翻译, 原样保留。返回 (译文列表, 是否有任一行译成功)。"""
@@ -6928,7 +6604,7 @@ try {
         need = [i for i, t in enumerate(texts) if re.search(r"[A-Za-z\u4e00-\u9fff]", t)]
         if not need: return list(texts), False
         joined = "\n".join(texts[i] for i in need)
-        whole = self.translate_text_to(joined, target)
+        whole = self.translate_text_to(joined, target, source)
         if whole:
             parts = [p.strip() for p in whole.replace("\r\n", "\n").split("\n")]
             parts = [p for p in parts if p != ""]
@@ -6940,11 +6616,11 @@ try {
         for t in texts:
             if not re.search(r"[A-Za-z\u4e00-\u9fff]", t):
                 translations.append(t); continue
-            r = self.translate_text_to(t, target)
+            r = self.translate_text_to(t, target, source)
             if r: any_ok = True; translations.append(r)
             else: translations.append(t)
         return translations, any_ok
-    def translate_image_inplace(self, img, target=None):
+    def translate_image_inplace(self, img, target=None, anchor=None):
         """有道式截图翻译: OCR 每行文字+位置 -> 逐行翻译 -> 译文绘回原图 -> 弹翻译结果窗 (可切换目标语言/对照开关)。
         拿不到行坐标时回退到原来的纯文字翻译流程。"""
         import threading
@@ -6953,7 +6629,7 @@ try {
             if not lines:
                 # 拿不到行坐标: 在本线程把纯文字 OCR 也做了再交给文字翻译流程,
                 # 旧版直接调 translate_image 会把整套 OCR 再跑一遍 (RapidOCR 一遍好几秒)
-                self.translate_image(img, target, text=self.ocr_image(img)); return
+                self.translate_image(img, target, text=self.ocr_image(img), anchor=anchor); return
             tgt = target
             if tgt is None:
                 joined = "".join(l["t"] for l in lines)
@@ -6961,22 +6637,94 @@ try {
             translations, any_ok = self._translate_lines(lines, tgt)
             if not any_ok:
                 self._ui_queue.put(lambda: messagebox.showinfo(self.t("snip_trans_title", "截图翻译"), self.t("tr_fail_net2", "翻译失败: 在线翻译接口没连上, 检查网络后重试。"))); return
-            self._ui_queue.put(lambda: self.show_translate_compare(img, lines, tgt, translations))
+            def deliver():
+                if anchor: self._show_translate_bar(img, lines, tgt, translations, anchor)
+                else: self.show_translate_compare(img, lines, tgt, translations)
+            self._ui_queue.put(deliver)
         threading.Thread(target=work, daemon=True).start()
-    def show_translate_compare(self, orig, lines, target, translations):
+    def _result_retranslate(self, st, lines, tgt_var, src_var, auto_name, tgt_combo, src_combo, busy_var, on_ok, alive=None):
+        """截图翻译结果窗/浮动条共用: 源/目标语言变化时在后台重译; 成功更新 st 并回调 on_ok(trs) 刷新各自显示,
+        失败恢复原语言选择并保留当前译文。alive 给定时 done 先验承载窗还在不在 (浮动条/结果窗被关掉后不碰已销毁控件)。"""
+        import threading
+        new_tgt = self._tgt_code(tgt_var.get())
+        new_src = None if src_var.get() == auto_name else self._tgt_code(src_var.get())
+        if new_tgt == st["target"] and new_src == st["source"]: return
+        tgt_combo.configure(state="disabled"); src_combo.configure(state="disabled"); busy_var.set(self.t("tt_translating", "翻译中…"))
+        def work():
+            trs, ok = self._translate_lines(lines, new_tgt, new_src)
+            def done():
+                if alive is not None and not alive(): return
+                tgt_combo.configure(state="readonly"); src_combo.configure(state="readonly"); busy_var.set("")
+                if not ok:
+                    busy_var.set(self.t("tr_fail_keep", "翻译失败, 已保留当前译文"))
+                    tgt_var.set(self._tgt_name(st["target"]))
+                    src_var.set(auto_name if st["source"] is None else self._tgt_name(st["source"])); return
+                st["target"] = new_tgt; st["source"] = new_src; st["translations"] = trs
+                on_ok(trs)
+            self._ui_queue.put(done)
+        threading.Thread(target=work, daemon=True).start()
+
+    def _result_ai_reply(self, img, host, reply_box, busy_var, on_layout=None):
+        """截图翻译结果窗/浮动条共用: AI 智能回复全流程 —— 没填 Key 先引导去设置, 忙碌互斥,
+        后台用截图向 AI 要 3 条候选, 渲染进 reply_box (粘贴=关承载窗+隐藏主窗+粘回刚才的窗口, 复制, 换一批)。
+        on_layout 在每次渲染后调用 (浮动条靠它重新对齐选区; 结果窗不需要)。"""
+        import threading
+        if not self._ai_ready(): return  # 没填 Key: 它会提示并带去系统设置
+        if getattr(self, "_ai_busy", False):
+            busy_var.set(self.t("tr_busy_short", "AI 正在处理上一张图, 稍等它回复完")); return
+        self._ai_busy = True
+        for c in reply_box.winfo_children(): c.destroy()
+        ttk.Label(reply_box, text=self.t("tr_reply_working", "AI 正在读这张截图、想回复…"), style="Muted.TLabel").pack(anchor="w", padx=10, pady=(8, 4))
+        if on_layout: on_layout()
+        def show_cands(cands, err=None):
+            self._ai_busy = False
+            if not host.winfo_exists(): return
+            for c in reply_box.winfo_children(): c.destroy()
+            if err:
+                ttk.Label(reply_box, text=f"{self.t('ai_reply_failed', '智能回复失败')}: {err}", style="Muted.TLabel", wraplength=640).pack(anchor="w", padx=10, pady=(8, 4))
+            elif not cands:
+                ttk.Label(reply_box, text=self.t("ai_reply_none", "模型没给出候选回复, 换个更完整的对话截图再试。"), style="Muted.TLabel").pack(anchor="w", padx=10, pady=(8, 4))
+            else:
+                ttk.Label(reply_box, text=self.t("tr_reply_head", "AI 智能回复 (点「粘贴」直接发到刚才的聊天窗口):"), style="Muted.TLabel").pack(anchor="w", padx=10, pady=(8, 2))
+                def paste_it(text):
+                    host.destroy()
+                    if self.winfo_viewable():
+                        if self._tray is not None: self._hide_to_tray()
+                        else: self.withdraw()
+                    self.after(180, lambda: self._paste_text(text))  # 与候选窗/常用语库同一套: 先让焦点回到刚才的软件再粘
+                for i, c in enumerate(cands, 1):
+                    row = ttk.Frame(reply_box); row.pack(fill="x", padx=10, pady=3)
+                    ttk.Label(row, text=f"{i}. {c}", wraplength=560).pack(side="left", fill="x", expand=True)
+                    ttk.Button(row, text=self.t("cmn_paste", "粘贴"), style="Accent.TButton", command=lambda t=c: paste_it(t)).pack(side="right", padx=2)
+                    ttk.Button(row, text=self.t("cmn_copy", "复制"), command=lambda t=c: self.clip_set(t)).pack(side="right", padx=2)
+                rb = ttk.Frame(reply_box); rb.pack(fill="x", padx=10, pady=(2, 8))
+                ttk.Button(rb, text=self.t("ai_another", "换一批"), command=lambda: self._result_ai_reply(img, host, reply_box, busy_var, on_layout)).pack(side="left", padx=2)
+            if on_layout: on_layout()
+        def work():
+            try:
+                res = self._ai_chat_image(img, self._AI_REPLY_PROMPT)
+                cands = self._parse_replies(res) or ([res] if res else [])
+                self._ui_queue.put(lambda: show_cands(cands))
+            except Exception as e:
+                msg = str(e)
+                self._ui_queue.put(lambda: show_cands(None, msg))
+        threading.Thread(target=work, daemon=True).start()
+
+    def show_translate_compare(self, orig, lines, target, translations, anchor=None, source=None):
         """截图翻译结果窗: 顶部 检测到源语言 ⇄ 目标语言 (13 种常用语言可切换, 切换即重新翻译);
         「对照翻译」开 = 左边原文文本、右边译文文本; 关 = 只显示译文。
         (用户要求: 原图和译图都不用给图, 直接显示识别出的原文本和译文 —— 清楚、能选中、好复制。)"""
-        import threading
-        joined = "".join(l["t"] for l in lines)
-        src_name = self.t("tr_src_zh", "中文") if any("\u4e00" <= ch <= "\u9fff" for ch in joined) else self.t("tr_src_en", "英语")
-        st = {"target": target, "translations": list(translations)}
+        st = {"target": target, "source": source, "translations": list(translations)}
         win = tk.Toplevel(self); win.title(self.t("tr_title", "截图翻译结果")); win.attributes("-topmost", True)
         win.bind("<Escape>", lambda e: win.destroy())  # Esc 关闭结果窗
         try: win.focus_force()
         except Exception: pass
         head = ttk.Frame(win); head.pack(side="top", fill="x", padx=8, pady=6)
-        ttk.Label(head, text=f"{self.t('tr_detected', '检测到')} {src_name}" if self.lang == "English" else f"检测到{src_name}").pack(side="left")
+        ttk.Label(head, text=self.t("tr_detected", "检测到")).pack(side="left")
+        auto_name = self.t("tr_auto", "自动检测")
+        src_var = tk.StringVar(value=auto_name if source is None else self._tgt_name(source))
+        src_combo = ttk.Combobox(head, textvariable=src_var, values=[auto_name] + [n for n, _ in self._TRANS_TARGETS], width=11, state="readonly")
+        src_combo.pack(side="left", padx=(4, 0))
         ttk.Label(head, text=" ⇄ ").pack(side="left")
         tgt_var = tk.StringVar(value=self._tgt_name(target))
         tgt_combo = ttk.Combobox(head, textvariable=tgt_var, values=[n for n, _ in self._TRANS_TARGETS], width=11, state="readonly")
@@ -6989,23 +6737,50 @@ try {
         btn_row = ttk.Frame(win); btn_row.pack(side="bottom", fill="x", pady=(4, 0))
         mid = ttk.Frame(btn_row); mid.pack()  # 三颗主按钮放在原文/译文框正下方居中 (用户要求); pack 默认横向居中
         body = ttk.Frame(win); body.pack(fill="both", expand=True)
-        def text_pane(title, content, nlines, width_chars):
+        import math
+        def _disp_w(s):  # 显示宽估算: CJK/全角按 2 计 (与 Tk 按字体计宽近似), 折行行数靠它算
+            return sum(2 if ord(ch) > 0x2E7F else 1 for ch in s)
+        def _disp_lines(content, width_chars):
+            return sum(max(1, math.ceil(_disp_w(ln) / max(10, width_chars))) for ln in content.split("\n"))
+        def _pane_width(content, lo, hi):  # 框宽随内容: 最长一行决定, 夹在 [lo, hi] 字符之间
+            return max(lo, min(hi, max((_disp_w(ln) for ln in content.split("\n")), default=lo)))
+        def text_pane(title, content, height_lines, width_chars):
             f = ttk.Frame(body); f.pack(side="left", padx=6, pady=6, fill="both", expand=True)
             ttk.Label(f, text=title).pack()
-            t = tk.Text(f, width=width_chars, height=max(4, min(20, nlines + 1)),
+            t = tk.Text(f, width=width_chars, height=max(3, min(24, height_lines)),
                         wrap="word", font=self._ui_font(11), background=self.UI_SURFACE,
                         foreground=self.UI_TEXT, relief="solid", borderwidth=1, padx=8, pady=6)
             t.insert("1.0", content)
             t.pack(fill="both", expand=True)
             return t
+        def _place():  # 结果窗贴着截图选区 (anchor 在时): 首次打开与内容重排后都走同一套位置规则, 不溢出屏幕
+            if not anchor: return
+            try:
+                win.update_idletasks()
+                ww, wh = win.winfo_reqwidth(), win.winfo_reqheight()
+                sw, sh = win.winfo_screenwidth(), win.winfo_screenheight()
+                ax1, ay1, ax2, ay2 = anchor
+                px, py = ax1, ay2 + 8  # 首选: 选区正下方, 左边缘对齐
+                if py + wh > sh - 4: py = ay1 - wh - 8  # 下方放不下 -> 选区上方
+                if py < 4: py = max(4, min(ay2 + 8, sh - wh - 4))  # 上下都放不下 -> 贴下方且不溢出
+                if px + ww > sw - 4: px = sw - ww - 4  # 右边溢出 -> 左移贴边
+                if px < 4: px = 4
+                win.geometry(f"+{int(px)}+{int(py)}")
+            except Exception: pass
         def layout():
             for c in body.winfo_children(): c.destroy()
-            if compare_var.get():  # 左原文文本、右译文文本 (都不再显示图片)
-                win._orig_text = text_pane(self.t("tt_source", "原文"), "\n".join(l["t"] for l in lines), len(lines), 52)
+            orig_txt = "\n".join(l["t"] for l in lines)
+            tran_txt = "\n".join(st["translations"])
+            if compare_var.get():  # 左原文文本、右译文文本; 两框等高, 宽高都随内容多少自动调 (Jane 2026-11-25 要求: 内容少窗小, 内容多窗大)
+                w_o, w_t = _pane_width(orig_txt, 24, 52), _pane_width(tran_txt, 24, 52)
+                h = max(_disp_lines(orig_txt, w_o), _disp_lines(tran_txt, w_t))
+                win._orig_text = text_pane(self.t("tt_source", "原文"), orig_txt, h, w_o)
+                win._trans_text = text_pane(self.t("tt_target", "译文"), tran_txt, h, w_t)
             else:
                 win._orig_text = None
-            win._trans_text = text_pane(self.t("tt_target", "译文"), "\n".join(st["translations"]), len(st["translations"]),
-                                        52 if compare_var.get() else 76)  # 复制/钉住读框里实际显示的文本 (可先改两个字再复制)
+                w_t = _pane_width(tran_txt, 30, 76)
+                win._trans_text = text_pane(self.t("tt_target", "译文"), tran_txt, _disp_lines(tran_txt, w_t), w_t)  # 复制/钉住读框里实际显示的文本 (可先改两个字再复制)
+            _place()
         def on_compare():
             if not self.cfg.has_section("Snip"): self.cfg.add_section("Snip")
             self.cfg.set("Snip", "TransCompare", "1" if compare_var.get() else "0"); self.save_config()
@@ -7013,21 +6788,10 @@ try {
         for wdg in head.winfo_children():
             if isinstance(wdg, ttk.Checkbutton): wdg.configure(command=on_compare)
         def retranslate(*_):
-            new_tgt = self._tgt_code(tgt_var.get())
-            if new_tgt == st["target"]: return
-            tgt_combo.configure(state="disabled"); busy_var.set(self.t("tt_translating", "翻译中…"))
-            def work():
-                trs, ok = self._translate_lines(lines, new_tgt)
-                def done():
-                    tgt_combo.configure(state="readonly"); busy_var.set("")
-                    if not ok:
-                        busy_var.set(self.t("tr_fail_keep", "翻译失败, 已保留当前译文"))
-                        tgt_var.set(self._tgt_name(st["target"])); return
-                    st["target"] = new_tgt; st["translations"] = trs
-                    layout()
-                self._ui_queue.put(done)
-            threading.Thread(target=work, daemon=True).start()
+            self._result_retranslate(st, lines, tgt_var, src_var, auto_name, tgt_combo, src_combo, busy_var,
+                                     lambda trs: layout(), alive=lambda: win.winfo_exists())
         tgt_var.trace_add("write", retranslate)
+        src_var.trace_add("write", retranslate)
         copy_btn = ttk.Button(mid, text=self.t("tr_copy_orig", "复制原文"))
         def do_copy():
             w = getattr(win, "_orig_text", None)  # 对照开着时复制框里实际显示的原文, 关着时用识别结果
@@ -7042,49 +6806,138 @@ try {
             try: return w.get("1.0", "end").strip() if w is not None else "\n".join(st["translations"])
             except Exception: return "\n".join(st["translations"])
         ttk.Button(mid, text=self.t("tt_copy", "复制译文"), command=lambda: self.clip_set(shown_trans())).pack(side="left", padx=2)
-        def do_reply():
-            """智能回复直接在本页出结果 (用户要求): 用这张截图让 AI 想 3 条候选, 显示在窗口下方, 不再另开候选窗"""
-            if not self._ai_ready(): return  # 没填 Key: 它会提示并带去系统设置
-            if getattr(self, "_ai_busy", False):
-                busy_var.set(self.t("tr_busy_short", "AI 正在处理上一张图, 稍等它回复完")); return
-            self._ai_busy = True
-            for c in reply_box.winfo_children(): c.destroy()
-            ttk.Label(reply_box, text=self.t("tr_reply_working", "AI 正在读这张截图、想回复…"), style="Muted.TLabel").pack(anchor="w", padx=10, pady=(8, 4))
-            def show_cands(cands, err=None):
-                self._ai_busy = False
-                if not win.winfo_exists(): return
-                for c in reply_box.winfo_children(): c.destroy()
-                if err:
-                    ttk.Label(reply_box, text=f"{self.t('ai_reply_failed', '智能回复失败')}: {err}", style="Muted.TLabel", wraplength=640).pack(anchor="w", padx=10, pady=(8, 4)); return
-                if not cands:
-                    ttk.Label(reply_box, text=self.t("ai_reply_none", "模型没给出候选回复, 换个更完整的对话截图再试。"), style="Muted.TLabel").pack(anchor="w", padx=10, pady=(8, 4)); return
-                ttk.Label(reply_box, text=self.t("tr_reply_head", "AI 智能回复 (点「粘贴」直接发到刚才的聊天窗口):"), style="Muted.TLabel").pack(anchor="w", padx=10, pady=(8, 2))
-                def paste_it(text):
-                    win.destroy()
-                    if self.winfo_viewable():
-                        if self._tray is not None: self._hide_to_tray()
-                        else: self.withdraw()
-                    self.after(180, lambda: self._paste_text(text))  # 与候选窗/常用语库同一套: 先让焦点回到刚才的软件再粘
-                for i, c in enumerate(cands, 1):
-                    row = ttk.Frame(reply_box); row.pack(fill="x", padx=10, pady=3)
-                    ttk.Label(row, text=f"{i}. {c}", wraplength=560).pack(side="left", fill="x", expand=True)
-                    ttk.Button(row, text=self.t("cmn_paste", "粘贴"), style="Accent.TButton", command=lambda t=c: paste_it(t)).pack(side="right", padx=2)
-                    ttk.Button(row, text=self.t("cmn_copy", "复制"), command=lambda t=c: self.clip_set(t)).pack(side="right", padx=2)
-                rb = ttk.Frame(reply_box); rb.pack(fill="x", padx=10, pady=(2, 8))
-                ttk.Button(rb, text=self.t("ai_another", "换一批"), command=do_reply).pack(side="left", padx=2)
-            def work():
-                try:
-                    res = self._ai_chat_image(orig, self._AI_REPLY_PROMPT)
-                    cands = self._parse_replies(res) or ([res] if res else [])
-                    self._ui_queue.put(lambda: show_cands(cands))
-                except Exception as e:
-                    msg = str(e)
-                    self._ui_queue.put(lambda: show_cands(None, msg))
-            threading.Thread(target=work, daemon=True).start()
-        ttk.Button(mid, text=self.t("tr_ai_btn", "AI 智能回复"), command=do_reply, style="Accent.TButton").pack(side="left", padx=2)
+        ttk.Button(mid, text=self.t("tr_ai_btn", "AI 智能回复"), command=lambda: self._result_ai_reply(orig, win, reply_box, busy_var), style="Accent.TButton").pack(side="left", padx=2)
         ttk.Button(bar, text=self.t("cmn_close", "关闭"), command=win.destroy).pack(side="right", padx=2)
         layout()
-    def translate_image(self, img, target=None, text=None):
+    def _show_translate_bar(self, orig, lines, target, translations, anchor):
+        """截图翻译浮动条 (Jane 2026-11-25 定版布局): 原文框 (识别出的纯文本) 直接盖在截图选区上,
+        译文框放在选区下面 (下面空间不够就翻到选区上面), 原文框始终对准选区; 一条工具条带
+        源/目标语言下拉、复制原文、复制译文、AI 智能回复、关闭; 拖工具条空白处可移动, Esc 关闭。"""
+        import math
+        old = getattr(self, "_trans_bar", None)
+        if old is not None:
+            try: old.destroy()
+            except Exception: pass
+        st = {"target": target, "source": None, "translations": list(translations)}
+        bar = tk.Toplevel(self); self._trans_bar = bar
+        bar.overrideredirect(True); bar.attributes("-topmost", True)
+        MAGIC = "#FF00FE"  # 透明魔法色: 原文区涂这个色, Windows 把该色像素变全透明 (透出底下真实截图, 那才是最正确的原文)
+        try: bar.attributes("-transparentcolor", MAGIC)
+        except Exception: MAGIC = None  # 非 Windows 平台无此能力 -> 回退显示识别文本框
+        bar.bind("<Escape>", lambda e: bar.destroy())
+        bar.bind("<Destroy>", lambda e: setattr(self, "_trans_bar", None) if e.widget is bar and getattr(self, "_trans_bar", None) is bar else None)
+        try: bar.focus_force()
+        except Exception: pass
+        root = tk.Frame(bar, bg=self.UI_SURFACE, highlightthickness=1, highlightbackground="#B9C8D8")
+        root.pack(fill="both", expand=True)
+        ax1, ay1, ax2, ay2 = anchor
+        sel_w = max(120, ax2 - ax1)
+        wch = max(30, min(110, int(sel_w / 9)))  # 框宽跟着选区宽 (字符数近似)
+        def _disp_w(s):
+            return sum(2 if ord(ch) > 0x2E7F else 1 for ch in s)
+        def _dl(content, cap):
+            return max(1, min(cap, sum(max(1, math.ceil(_disp_w(ln) / max(10, wch))) for ln in content.split("\n"))))
+        orig_txt = "\n".join(l["t"] for l in lines)
+        tran_txt = "\n".join(st["translations"])
+        oh = _dl(orig_txt, 10)
+        th = max(1, min(12, sum(max(1, math.ceil(_disp_w(ln) / max(10, int(wch * 11 / 13)))) for ln in tran_txt.split("\n"))))
+        # 翻转判定: 译文+工具条放选区下方还够不够 (估算: 译文字号 13 行高约 24, 工具条约 36)
+        flip = (ay2 + th * 24 + 44 > bar.winfo_screenheight() - 4) and (ay1 - (th * 24 + 44) >= 4)
+        def _text_box(parent, content, height, font_size, fg, width_chars):
+            t = tk.Text(parent, width=width_chars, height=height, wrap="word", font=self._ui_font(font_size),
+                        bg=self.UI_SURFACE, fg=fg, relief="solid", bd=1, padx=8, pady=5,
+                        insertbackground=self.UI_ACCENT)
+            t.insert("1.0", content)
+            t.pack(side="left")
+            return t
+        reply_box = ttk.Frame(root); reply_box.pack(side="bottom", fill="x")  # AI 回复候选区 (先占位, 空着不占高)
+        strip = tk.Frame(root, bg=self.UI_BG)
+        orig_wrap = tk.Frame(root, bg=self.UI_SURFACE)
+        tran_wrap = tk.Frame(root, bg=self.UI_SURFACE)
+        if flip:  # 译文翻到选区上方: [译文][工具条][原文]
+            tran_wrap.pack(side="top", fill="x", pady=(6, 0)); strip.pack(side="top", fill="x", pady=(6, 0)); orig_wrap.pack(side="top", fill="x", pady=(6, 6))
+        else:     # 常规: [原文][译文][工具条]
+            orig_wrap.pack(side="top", fill="x", pady=(6, 0)); tran_wrap.pack(side="top", fill="x", pady=(6, 0)); strip.pack(side="top", fill="x", pady=(6, 0))
+        wch_tran = max(24, int(wch * 11 / 13))  # 译文字号更大, 字符数按比例减, 两框像素宽才对齐
+        orig_wrap.configure(highlightthickness=1, highlightbackground="#B9C8D8")
+        if MAGIC:
+            orig_text = None
+            zone = tk.Frame(orig_wrap, bg=MAGIC, width=sel_w, height=max(24, ay2 - ay1))  # 透明区就是选区本身大小: 透出的正好是你框住的那块真实内容
+            zone.pack(side="left"); zone.pack_propagate(False)
+            bar._bar_orig = zone
+        else:
+            orig_text = _text_box(orig_wrap, orig_txt, oh, 11, self.UI_TEXT, wch)
+            bar._bar_orig = orig_text
+        bar._bar_orig_txt = orig_txt
+        tran_text = _text_box(tran_wrap, tran_txt, th, 13, self.UI_TEXT, wch_tran)
+        bar._bar_tran = tran_text
+        state = {"moved": False}
+        def place():
+            try:
+                bar.update_idletasks()
+                ww, wh = bar.winfo_reqwidth(), bar.winfo_reqheight()
+                sw, sh = bar.winfo_screenwidth(), bar.winfo_screenheight()
+                if state["moved"]:
+                    px = min(max(0, bar.winfo_x()), max(0, sw - ww)); py = min(max(0, bar.winfo_y()), max(0, sh - wh))
+                else:
+                    px = ax1
+                    py = ay1 - (orig_wrap.winfo_y() + 1)  # 原文框对准选区 (+1 是 root 的高亮边)
+                    if py + wh > sh - 4: py = max(4, sh - wh - 4)
+                    if py < 4: py = 4
+                    if px + ww > sw - 4: px = sw - ww - 4
+                    if px < 4: px = 4
+                bar.geometry(f"+{int(px)}+{int(py)}")
+            except Exception: pass
+        lab1 = tk.Label(strip, text=self.t("tr_detected", "检测到"), font=self._ui_font(9), bg=self.UI_BG, fg=self.UI_MUTED)
+        lab1.pack(side="left", padx=(8, 2), pady=5)
+        auto_name = self.t("tr_auto", "自动检测")
+        src_var = tk.StringVar(value=auto_name)
+        src_combo = ttk.Combobox(strip, textvariable=src_var, values=[auto_name] + [n for n, _ in self._TRANS_TARGETS], width=10, state="readonly")
+        src_combo.pack(side="left")
+        lab2 = tk.Label(strip, text=" ⇄ ", font=self._ui_font(9), bg=self.UI_BG, fg=self.UI_MUTED); lab2.pack(side="left")
+        tgt_var = tk.StringVar(value=self._tgt_name(target))
+        tgt_combo = ttk.Combobox(strip, textvariable=tgt_var, values=[n for n, _ in self._TRANS_TARGETS], width=10, state="readonly")
+        tgt_combo.pack(side="left")
+        busy_var = tk.StringVar()
+        lab3 = tk.Label(strip, textvariable=busy_var, font=self._ui_font(9), bg=self.UI_BG, fg="#0070FF"); lab3.pack(side="left", padx=4)
+        def _link(text, cmd, accent=False, bold=False):
+            lb = tk.Label(strip, text=text, font=self._ui_font(9, bold), bg=self.UI_BG,
+                          fg="#FFFFFF" if accent else self.UI_ACCENT, cursor="hand2")
+            if accent: lb.configure(bg=self.UI_ACCENT, padx=8)
+            lb.pack(side="right", padx=5, pady=5)
+            lb.bind("<Button-1>", lambda e: cmd())
+            return lb
+        def do_close():
+            self._trans_bar = None; bar.destroy()
+        def _box_text(w, fallback):
+            try: return w.get("1.0", "end").strip()
+            except Exception: return fallback
+        _link("✕", do_close)
+        _link(self.t("tr_ai_btn", "AI 智能回复"), lambda: self._result_ai_reply(orig, bar, reply_box, busy_var, place), accent=True)
+        _link(self.t("tt_copy", "复制译文"), lambda: self.clip_set(_box_text(tran_text, "\n".join(st["translations"]))))
+        _link(self.t("tr_copy_orig", "复制原文"), lambda: self.clip_set(_box_text(orig_text, orig_txt) if orig_text is not None else orig_txt))
+        def retranslate(*_):
+            self._result_retranslate(st, lines, tgt_var, src_var, auto_name, tgt_combo, src_combo, busy_var,
+                                     lambda trs: _bar_apply(trs), alive=lambda: bar.winfo_exists())
+        def _bar_apply(trs):
+            new_txt = "\n".join(trs)
+            tran_text.delete("1.0", "end"); tran_text.insert("1.0", new_txt)
+            tran_text.configure(height=max(1, min(12, sum(max(1, math.ceil(_disp_w(ln) / max(10, wch_tran))) for ln in new_txt.split("\n")))))
+            place()
+        tgt_var.trace_add("write", retranslate)
+        src_var.trace_add("write", retranslate)
+        drag = {}
+        def drag_start(e):
+            drag["dx"] = e.x_root - bar.winfo_x(); drag["dy"] = e.y_root - bar.winfo_y()
+        def drag_move(e):
+            state["moved"] = True
+            bar.geometry(f"+{e.x_root - drag.get('dx', 0)}+{e.y_root - drag.get('dy', 0)}")
+        for wdg in (strip, lab1, lab2, lab3):
+            wdg.bind("<Button-1>", drag_start); wdg.bind("<B1-Motion>", drag_move)
+        place()
+        bar.after(80, place)   # 字体度量在窗口首次映射后才稳定下来, 补两次重对齐 (用户已拖动时 place 只做屏幕钳制, 不抢位置)
+        bar.after(250, place)
+    def translate_image(self, img, target=None, text=None, anchor=None):
         """对一张图先 OCR 再翻译 (都在后台线程跑, 不冻结界面)。target 给定则译到该语言 (源语言自动检测), 否则英<->中互译;
         text 已由调用方 OCR 好时直接用, 不再重复识别一遍"""
         import threading
@@ -7098,10 +6951,10 @@ try {
                 if res is None:
                     messagebox.showinfo(self.t("snip_trans_title", "截图翻译"), self.t("tr_fail_net", "翻译失败: 用的是免费在线翻译接口, 需要联网, 检查网络后重试。"))
                 else:
-                    self.show_text_result(self.t("res_trans_title", "翻译结果"), res)
+                    self.show_text_result(self.t("res_trans_title", "翻译结果"), res, anchor=anchor)
             self._ui_queue.put(show)
         threading.Thread(target=work, daemon=True).start()
-    def show_text_result(self, title, text, translate=False):
+    def show_text_result(self, title, text, translate=False, anchor=None):
         win = tk.Toplevel(self); win.title(title); win.geometry("520x340"); win.attributes("-topmost", True)
         win.bind("<Escape>", lambda e: win.destroy())  # Esc 关闭结果窗 (与截图翻译结果窗一致)
         # 按钮栏必须先 pack 到底部占位: 旧写法先 pack 文本框, 它默认请求 24 行高, 超过窗高后
@@ -7126,6 +6979,18 @@ try {
         if translate:
             ttk.Button(bar, text=self.t("ocr_trans_btn", "翻译 (英↔中)"), command=lambda: self.translate_and_show(box.get("1.0", "end").strip())).pack(side="left", padx=2)
         ttk.Button(bar, text=self.t("cmn_close", "关闭"), command=win.destroy).pack(side="right", padx=2)
+        if anchor:  # 截图翻译兜底路径 (没拿到行坐标): 结果窗也贴着选区出, 规则与截图翻译结果窗一致
+            try:
+                win.update_idletasks()
+                sw, sh = win.winfo_screenwidth(), win.winfo_screenheight()
+                ax1, ay1, ax2, ay2 = anchor
+                px, py = ax1, ay2 + 8
+                if py + 340 > sh - 4: py = ay1 - 340 - 8
+                if py < 4: py = max(4, min(ay2 + 8, sh - 340 - 4))
+                if px + 520 > sw - 4: px = sw - 520 - 4
+                if px < 4: px = 4
+                win.geometry(f"520x340+{int(px)}+{int(py)}")
+            except Exception: pass
     def ocr_selected_shot(self):
         sel = self.shots_list.curselection() if hasattr(self, "shots_list") else ()
         if not sel or not HAS_PIL: messagebox.showinfo("OCR", self.t("ocr_pick_first", "先在截图列表里选一张")); return
@@ -7136,58 +7001,88 @@ try {
         with Image.open(os.path.join(self.shots_dir, name)) as _im: self.pin_image(_im.copy())
     # ---------- 截图历史画廊 (v1.2) ----------
     def open_gallery(self):
+        """历史截图入口 (主窗口按钮): 切到主窗口内的画廊面板 (Jane 2026-11-25 定版面板化, 不再弹独立窗口)"""
+        self._show_gallery_panel()
+    def _show_gallery_panel(self):
         if not HAS_PIL: return
-        win = tk.Toplevel(self); win.title(self.t("gal_title", "历史截图")); win.geometry("760x500")
-        win.bind("<Escape>", lambda e: win.destroy())  # Esc 关闭
-        def shot_files():
-            try: return [f for f in sorted(os.listdir(self.shots_dir), reverse=True)
-                         if f.lower().endswith((".png", ".gif"))]
-            except Exception: return []
-        bar = ttk.Frame(win); bar.pack(fill="x", padx=8, pady=6)
-        count_var = tk.StringVar(); ttk.Label(bar, textvariable=count_var).pack(side="left")
-        outer = ttk.Frame(win); outer.pack(fill="both", expand=True)
-        canvas = tk.Canvas(outer); sb = ttk.Scrollbar(outer, orient="vertical", command=canvas.yview)
-        grid = ttk.Frame(canvas); grid.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+        self._texttrans_on_hide()
+        if getattr(self, "_gallery_panel", None) is None:
+            self._build_gallery_panel()
+        try: self._body.pack_forget()
+        except Exception: pass
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel"):
+            p = getattr(self, attr, None)
+            if p is not None:
+                try: p.pack_forget()
+                except Exception: pass
+        self._forget_aux_panels(keep="_gallery_panel")
+        self._ai_view_on = False
+        self._wheel_bind(False)
+        self._calc_bind(False)
+        self._gallery_panel.pack(fill="both", expand=True, before=self._status_sep)
+        cv = self._gallery_cv
+        self.bind_all("<MouseWheel>", lambda e: cv.yview_scroll(int(-e.delta / 120), "units"))
+        self._gallery_render()
+    def _gallery_files(self):
+        try: return [f for f in sorted(os.listdir(self.shots_dir), reverse=True)
+                     if f.lower().endswith((".png", ".gif"))]
+        except Exception: return []
+    def _build_gallery_panel(self):
+        panel = tk.Frame(self, background=self.UI_BG); self._gallery_panel = panel
+        head = tk.Frame(panel, background=self.UI_BG); head.pack(fill="x", padx=14, pady=(10, 4))
+        tk.Label(head, text=self.t("gal_title", "历史截图"), font=self._ui_font(12, True), background=self.UI_BG, foreground=self.UI_TEXT).pack(side="left")
+        self._gallery_count_var = tk.StringVar()
+        tk.Label(head, textvariable=self._gallery_count_var, font=self._ui_font(9), background=self.UI_BG, foreground=self.UI_MUTED).pack(side="left", padx=8)
+        back = tk.Label(head, text=self.t("cmn_back", "返回"), font=self._ui_font(9), background=self.UI_BG, foreground="#5B6B7C", cursor="hand2")
+        back.pack(side="right")
+        back.bind("<Button-1>", lambda e: self._show_main_view())
+        back.bind("<Enter>", lambda e: back.configure(foreground=self.UI_ACCENT))
+        back.bind("<Leave>", lambda e: back.configure(foreground="#5B6B7C"))
+        ttk.Button(head, text=self.t("gal_delall", "删除全部"), command=self._gallery_delete_all).pack(side="right", padx=(0, 10))
+        outer = ttk.Frame(panel); outer.pack(fill="both", expand=True, padx=10, pady=(2, 10))
+        canvas = tk.Canvas(outer, highlightthickness=0, background=self.UI_BG); self._gallery_cv = canvas
+        sb = ttk.Scrollbar(outer, orient="vertical", command=canvas.yview)
+        grid = ttk.Frame(canvas); self._gallery_grid = grid
+        grid.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
         canvas.create_window((0, 0), window=grid, anchor="nw"); canvas.configure(yscrollcommand=sb.set)
         canvas.pack(side="left", fill="both", expand=True); sb.pack(side="right", fill="y")
-        win._photos = []
-        def render():
-            for c in grid.winfo_children(): c.destroy()
-            win._photos = []
-            all_files = shot_files()
-            files = all_files[:60]  # 只展示最近 60 个, 防几百个时全量解码卡顿
-            count_var.set(f"{self.t('gal_total_pre', '共')} {len(all_files)} {self.t('gal_total_suf', '个')}" + (self.t("gal_recent60", " (只显示最近 60 个)") if len(all_files) > 60 else ""))
-            if not files:
-                ttk.Label(grid, text=self.t("gal_empty", "还没有截图, 先按 F1 截一张")).pack(padx=20, pady=20); return
-            for i, name in enumerate(files):
-                cell = ttk.Frame(grid); cell.grid(row=i // 4, column=i % 4, padx=8, pady=8)
-                try:
-                    im = Image.open(os.path.join(self.shots_dir, name)); thumb = im.copy(); thumb.thumbnail((160, 110))
-                    photo = ImageTk.PhotoImage(thumb); win._photos.append(photo)
-                    tk.Label(cell, image=photo).pack()
+        self._gallery_photos = []
+    def _gallery_render(self):
+        grid = self._gallery_grid
+        for c in grid.winfo_children(): c.destroy()
+        self._gallery_photos = []
+        all_files = self._gallery_files()
+        files = all_files[:60]  # 只展示最近 60 个, 防几百个时全量解码卡顿
+        self._gallery_count_var.set(f"{self.t('gal_total_pre', '共')} {len(all_files)} {self.t('gal_total_suf', '个')}" + (self.t("gal_recent60", " (只显示最近 60 个)") if len(all_files) > 60 else ""))
+        if not files:
+            ttk.Label(grid, text=self.t("gal_empty", "还没有截图, 先按 F1 截一张")).pack(padx=20, pady=20); return
+        for i, name in enumerate(files):
+            cell = ttk.Frame(grid); cell.grid(row=i // 4, column=i % 4, padx=8, pady=8)
+            try:
+                im = Image.open(os.path.join(self.shots_dir, name)); thumb = im.copy(); thumb.thumbnail((160, 110))
+                photo = ImageTk.PhotoImage(thumb); self._gallery_photos.append(photo)
+                tk.Label(cell, image=photo).pack()
+            except Exception: pass
+            label = ("GIF " if name.lower().endswith(".gif") else "") + (name[5:20] if name.startswith("shot_") else name[4:19])
+            ttk.Label(cell, text=label, font=("", 8)).pack()
+            btns = ttk.Frame(cell); btns.pack()
+            ttk.Button(btns, text=self.t("gal_pin", "钉图"), width=6, command=lambda n=name: self._pin_file(n)).pack(side="left", padx=1)
+            def delete(n=name, cell=cell):
+                try: os.remove(os.path.join(self.shots_dir, n))
                 except Exception: pass
-                label = ("GIF " if name.lower().endswith(".gif") else "") + (name[5:20] if name.startswith("shot_") else name[4:19])
-                ttk.Label(cell, text=label, font=("", 8)).pack()
-                btns = ttk.Frame(cell); btns.pack()
-                ttk.Button(btns, text=self.t("gal_pin", "钉图"), width=6, command=lambda n=name: self._pin_file(n)).pack(side="left", padx=1)
-                def delete(n=name, cell=cell):
-                    try: os.remove(os.path.join(self.shots_dir, n))
-                    except Exception: pass
-                    cell.destroy(); self.refresh_shots(); render()
-                ttk.Button(btns, text=self.t("cmn_delete", "删除"), width=6, command=delete).pack(side="left", padx=1)
-        def delete_all():
-            files = shot_files()
-            if not files:
-                messagebox.showinfo(self.t("gal_title", "历史截图"), self.t("gal_none_del", "没有可删除的历史截图。"), parent=win); return
-            if not messagebox.askyesno(self.t("gal_delall", "删除全部"), f"{self.t('gal_delall_pre', '确定要删除全部')} {len(files)} {self.t('gal_delall_suf', '个历史截图/录制文件吗? 删除后不能恢复。')}", parent=win): return
-            n = 0
-            for f in files:
-                try: os.remove(os.path.join(self.shots_dir, f)); n += 1
-                except Exception: pass
-            self.refresh_shots(); render()
-            self.status.set(f"{self.t('gal_deleted', '已删除全部历史截图')} ({n})")
-        ttk.Button(bar, text=self.t("gal_delall", "删除全部"), command=delete_all).pack(side="right")
-        render()
+                cell.destroy(); self.refresh_shots(); self._gallery_render()
+            ttk.Button(btns, text=self.t("cmn_delete", "删除"), width=6, command=delete).pack(side="left", padx=1)
+    def _gallery_delete_all(self):
+        files = self._gallery_files()
+        if not files:
+            messagebox.showinfo(self.t("gal_title", "历史截图"), self.t("gal_none_del", "没有可删除的历史截图。"), parent=self); return
+        if not messagebox.askyesno(self.t("gal_delall", "删除全部"), f"{self.t('gal_delall_pre', '确定要删除全部')} {len(files)} {self.t('gal_delall_suf', '个历史截图/录制文件吗? 删除后不能恢复。')}", parent=self): return
+        n = 0
+        for f in files:
+            try: os.remove(os.path.join(self.shots_dir, f)); n += 1
+            except Exception: pass
+        self.refresh_shots(); self._gallery_render()
+        self.status.set(f"{self.t('gal_deleted', '已删除全部历史截图')} ({n})")
 
     def pin_text(self, text):
         win = tk.Toplevel(self); win.overrideredirect(True); win.attributes("-topmost", True); win.geometry("+140+140")
@@ -7270,7 +7165,7 @@ try {
         self.withdraw()
         if not self._tray_notified:
             self._tray_notified = True
-            try: self._tray.notify("SPST 还在后台运行: 点托盘图标打开主窗口, 右键托盘图标可以退出", "已隐藏到托盘")
+            try: self._tray.notify(self.t("tray_still", "SPST 还在后台运行: 点托盘图标打开主窗口, 右键托盘图标可以退出"), self.t("tray_hidden", "已隐藏到托盘"))
             except Exception: pass
 
     def _quit_app(self):
@@ -7278,10 +7173,6 @@ try {
             _sv = (self.sleep_var.get() or "").strip()
             if _sv.isdigit(): self.cfg.set("Config", "SleepTime", _sv)
         except Exception: pass
-        _bp = getattr(self, "_browser_proc", None)
-        if _bp is not None:
-            try: _bp.terminate()
-            except Exception: pass
         self.save_config(); self.save_records(immediate=True)
         if self._tray is not None:
             try: self._tray.stop()
@@ -7318,63 +7209,6 @@ def _acquire_single_instance():
 
 
 
-def _run_browser_host(url):
-    """微型浏览器子进程入口 (SPST --browser <url>): 用 pywebview (系统 WebView2/Chromium) 开一个无边框窗口,
-    把窗口句柄写进 BASE/browser_host.json 握手文件, 主进程再用 SetParent 把它收编进浏览器面板;
-    主进程的命令写在 browser_cmd.json, 这里轮询执行 (导航/前进/后退/刷新)。缺 pywebview/WebView2 时静默退出,
-    主进程等不到握手会给用户兜底提示。"""
-    try:
-        import webview
-    except Exception:
-        return
-    import threading as _th
-    title = f"SPSTBrowserHost-{os.getpid()}"
-    host_path = os.path.join(BASE, "browser_host.json")
-    cmd_path = os.path.join(BASE, "browser_cmd.json")
-    try: win = webview.create_window(title, url=url, frameless=True, width=980, height=640)
-    except Exception: return
-    def handshake():
-        try:
-            u = ctypes.windll.user32
-            for _ in range(60):
-                hwnd = u.FindWindowW(None, title)
-                if hwnd:
-                    _atomic_write(host_path, json.dumps({"pid": os.getpid(), "hwnd": int(hwnd), "title": title}))
-                    return
-                time.sleep(0.1)
-        except Exception: pass
-    state_path = os.path.join(BASE, "browser_state.json")
-    def cmd_loop():
-        seen = 0.0; tick = 0; last_url = None
-        while True:
-            time.sleep(0.3); tick += 1
-            if tick % 3 == 0:  # 约每秒回报一次当前页地址/标题: 主进程据此同步地址栏、给收藏预填
-                try:
-                    u = win.evaluate_js("location.href")
-                    if u and u != last_url:
-                        last_url = u
-                        _atomic_write(state_path, json.dumps({"url": u, "title": win.evaluate_js("document.title") or ""}))
-                except Exception: pass
-            try:
-                st = os.stat(cmd_path)
-                if st.st_mtime <= seen: continue
-                seen = st.st_mtime
-                with open(cmd_path, encoding="utf-8") as f: cmd = json.load(f)
-            except Exception: continue
-            try:
-                c = cmd.get("cmd")
-                if c == "navigate": win.load_url(cmd.get("url") or "about:blank")
-                elif c == "back": win.evaluate_js("history.back()")
-                elif c == "forward": win.evaluate_js("history.forward()")
-                elif c == "reload": win.evaluate_js("location.reload()")
-                elif c == "zoom": win.evaluate_js(f"document.body.style.zoom = '{cmd.get('level') or 1.0}'")
-            except Exception: pass
-    _th.Thread(target=handshake, daemon=True).start()
-    try: webview.start(cmd_loop, storage_path=os.path.join(BASE, "browser_profile"))
-    except Exception: pass
-
 if __name__ == "__main__":
     _install_crash_logging()
-    if len(sys.argv) >= 3 and sys.argv[1] == "--browser":
-        _run_browser_host(sys.argv[2])  # 浏览器子进程: 不走单实例, 不启主程序
-    elif _acquire_single_instance(): App().mainloop()
+    if _acquire_single_instance(): App().mainloop()
