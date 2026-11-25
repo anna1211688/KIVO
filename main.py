@@ -2947,8 +2947,11 @@ class App(tk.Tk):
                     i.u.ki.dwFlags = (0x0004 if unicode_ else 0) | (0x0002 if up else 0); return i
                 batch = [ev(*p) for p in self._type_units(text)]
                 for j in range(0, len(batch), 200):  # 分批发送, 防超长文本一次塞爆
-                    chunk = (_INPUT * len(batch[j:j+200]))(*batch[j:j+200])
-                    u.SendInput(len(batch[j:j+200]), chunk, ctypes.sizeof(_INPUT))
+                    items = batch[j:j+200]
+                    chunk = (_INPUT * len(items))(*items)
+                    sent = u.SendInput(len(items), chunk, ctypes.sizeof(_INPUT))
+                    if sent != len(items):
+                        return False  # 部分发送不视为成功, 避免队列消费掉未完整输入的文本
                 return True
             except Exception: pass
         try:
