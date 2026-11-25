@@ -1436,7 +1436,7 @@ _BTN_ICONS_B64 = {
     "gear": "iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAD5klEQVR4nLWUT4jVVRTHv+fce3/vvRnGHExpoj+LIOGBM8ErsSJ+o0VjOeXqB4ENisZr0yaGVlnDMIhItiiIYFCzhbaYwcVo5bgoZxGE+iCHHF1WJkOaZaH2fr977zkt5k9jTY4EneXhns+559+XcGdGaTpgAGBiYjDcYcz/Y7SYM8syM1KtanoSPDExGNZu3LIs59ZXEeLPZ0/s/wgApWlquru7ZWpqikZGRuIdgRfa6he3t5UKOp6UWp5QACG/+d7Dbb/3Lwa7HZgAoKtn+5vWlTfkzZt7nePL7Cqnfd5sMrMTifnk+P1tXRsvbWbrXhOff3l2/MCu2XidA/HC8gFoZ8+Ona7SOqSQ9TZJPpVIa3zR/I6ZS8RsQDjf+eyl5421Rwi6wVVahzp7duwEoLOMW8Ej1epcthckhBiKIocKQPohVFepikoIEUAXsYzF4DX4IpfgBUS9f2Ms+PHUFCHLDBHtBtSQ4ZKKKJhLRNTCbJitMwSyABEAEJFTVYLqHgCUnvyL94/hrVuXVW4ua0nZJKOq2gIVZZdw9MV5IrrGbB4XEUA1srVGYtF37Q8Z/X7i4+YiwxtgDACdX1/aayxvkxi+VaXHiJAY4zhqeMv+xHsajWHf+dwrvUw0qiIJQFDIaSZ+CKAzxlx/uXHsk6sAwGmaWmBQuk79uDUpl18XkXY2yVNEKDMbDuKnzn62b1ejMexrtbqb/HzfMRE9bGxCqiLGuLWqWGGTck/wlb0AFGlq+Pr11TP9EtwDACqSqwSoqhAzoPgNgNbqdedcq51ZKr1MRABBRSJUJVeJUOJ7F7aCAMWaTVuWm9hy1LjkSV/kV0DaTiBmNhQlbp48vv8oANR66w+EqGcIuFtVAOAXY90KEZkWCZsmjx/4ZgADRAsSaK1Wd9KBR6MPXcT8LlTLABEReVE5zMAVJdpGRCslSjTWmhh8vzP2qxvxxg8Xxg9Nz7Hm1kPTdMA2GsM+FvEuY5P3oagAIFUVVUmsS7axK71BmIESgSUGMdbt9iG2Xxg/NF2r1d3c9c3v3UQ3BAARY4gIRlUKADDWGYAQfB6CbwZVUWOtmU3qicgRYwhQavR2zOvHrQcCqCrG2Do2LimxsSTR9ynklDHOErFVxdUYfD8Rw7pSia0jVYwBpLOMRQ9kXoTYldZHX3wwOb7/SOfGHb8yuE00BuOSkhb5I0p0n3Xl/uCbXywmQkvK5oPp1vLyij3qyi3PSIyIobgSYqidO3Hw4u3i7GLOLMtMtVrVkzNC31z1dN9LnvkdEK9UlbfPnTh4sVaru0ZvR8z+Rej/qy1Z6ZIP5t5lWcbArDQODspSAX8Cm0TtanseiCAAAAAASUVORK5CYII=",
     "star": "iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAACeUlEQVR4nNWUQUhUURSG/3PfffNmTGdMxRQ3ErhoxsVkkW0EayEEtRxo0SIiWhRCRfvnrFyVqNUqaNUiWhpEKyMS2pQtzAgXtQkRLH0zOE/fu++cFk8Tx4EZI5DO6t7Lf7/733PPucDhhxBE6LBdNBKxy/Zr71ra7nztiZfqO1d1uYVYY5pbb5jIuACAMVj1ttXPmSsKANJrXz6CcDylg+6V+/mN+CYkjYPdWQ0Mx+NfSxbafkTp1a48OfZ7UtoiU7m4lll5je+9Gr29Jha+AYrnzMEcA2i9/fkp7OarEAaHlZelydylenu2wfG1Wm4ttquEvgMQi9kypEgBcCB0F4oSAEE48okwCWBLWJi0owFRHJiJ8qPszx3WrmNXFJY/WOlU6rrSqceUzEDCDYA0ZNMDsJ1OIpCTAcSA7COQTQ9s/Jsl33+C7lMRisQ1UhGflhn9dBKJ9CsCjklYCUHK3ivjkOwmW4AVBKUL3nR+vvoxq8qNBK5obzo/z+H6kEg0RzqpIcK7UGHSSS0SzXG4PuRN5+fhiq6ukP11XCSDwkKiPDWwpAJ/HNohEARABEgEQKAdUoE/Xp4aWEJhIYEimWpM7QbJ5hiuq1jrkdiJGLJTFjlpKz6AhLUegesqZHNcC1EbPIYIizkCR2chTJQ86nDgv5Wt8jNymhMgIjAPYjFHGEPUIFgUiKSjp7+T7KYzwpHHQWW0tHzivDeZvcJRcFnM5jLs1GBHT38niASQfZz94EJcKYHwsJCaEd44XZroe4gXYBTEKj3oex76qwMQmglku0ULjTUaAKDp3reuPxN3Vtca79EcLIR2PqG9y0I73+nfQf+J5n+J39QzDLg7vrq5AAAAAElFTkSuQmCC",
 }  # 按钮小图标 (22px, PIL 手绘线条风: 图标+文字并排, 与常见软件一致)
-VERSION = "1.4.24"  # v1.4.22: ①去掉内置浏览器整套 (Jane 真机定版不好用: 面板/书签/历史/菜单/pywebview 子进程全删, 工具栏回 8 按钮, 自检减为六项, 打包去 pywebview) ②世界时间加「刷新」(绕过天气 15 分钟节流立即重拉) ③文本翻译框自适应高度 (默认 8 行, 随内容长高至 24 行封顶, 按钮行跟随) ④系统设置/软件自检/历史截图/城市选择全部改为主窗口内面板 (Jane 定版「能收的都收」, 不再弹独立窗口, 重复开窗问题从结构上消除) ⑤启动时清理浏览器残留文件 (bookmarks/browser_history/browser_profile) ⑥工具栏改一行 8 按钮 ⑦截图翻译学有道: F4 出无边框浮动条 (原文区透明盖选区透出真实截图对照/译文框在选区下方、不够翻上方/大小随内容/源语言可选/条内复制原文·译文·AI 智能回复), 完整结果窗保留给无选区入口; v1.4.23: ①修真 bug: 配置解析关 % 插值 (分隔符/路径/接口地址带 % 不再抛错) ②备份导入加固 (JSON 先验货后落盘, 坏备份整包拒绝) + 备份说明去掉书签残留文案 ③英文模式运行时漏网文案两批全清 (汇率/托盘/取色器/下载提示/识别结果窗/AI 气泡与接口报错/测试连接结果/计算器/截图浮层, 三个翻译助手改实例方法并本地化报错) ④F4 纯数字/符号截图提示「没有可翻译的文字」不再误报失败 ⑤删死代码, 新增边缘测试套件; v1.4.24: 修 AI 聊天真机 400 (Jane 实测): 智谱 glm-4v-flash 的 max_tokens 上限 1024, 聊天面板传 2048 被拒 (code 1210); 已在 _ai_chat_messages 对智谱统一钳制 [1,1024], 别家不受影响, test_edge 扩至 17 项含此用例
+VERSION = "1.4.25"  # v1.4.22: ①去掉内置浏览器整套 (Jane 真机定版不好用: 面板/书签/历史/菜单/pywebview 子进程全删, 工具栏回 8 按钮, 自检减为六项, 打包去 pywebview) ②世界时间加「刷新」(绕过天气 15 分钟节流立即重拉) ③文本翻译框自适应高度 (默认 8 行, 随内容长高至 24 行封顶, 按钮行跟随) ④系统设置/软件自检/历史截图/城市选择全部改为主窗口内面板 (Jane 定版「能收的都收」, 不再弹独立窗口, 重复开窗问题从结构上消除) ⑤启动时清理浏览器残留文件 (bookmarks/browser_history/browser_profile) ⑥工具栏改一行 8 按钮 ⑦截图翻译学有道: F4 出无边框浮动条 (原文区透明盖选区透出真实截图对照/译文框在选区下方、不够翻上方/大小随内容/源语言可选/条内复制原文·译文·AI 智能回复), 完整结果窗保留给无选区入口; v1.4.23: ①修真 bug: 配置解析关 % 插值 (分隔符/路径/接口地址带 % 不再抛错) ②备份导入加固 (JSON 先验货后落盘, 坏备份整包拒绝) + 备份说明去掉书签残留文案 ③英文模式运行时漏网文案两批全清 (汇率/托盘/取色器/下载提示/识别结果窗/AI 气泡与接口报错/测试连接结果/计算器/截图浮层, 三个翻译助手改实例方法并本地化报错) ④F4 纯数字/符号截图提示「没有可翻译的文字」不再误报失败 ⑤删死代码, 新增边缘测试套件; v1.4.24: 修 AI 聊天真机 400 (Jane 实测): 智谱 glm-4v-flash 的 max_tokens 上限 1024, 聊天面板传 2048 被拒 (code 1210); 已在 _ai_chat_messages 对智谱统一钳制 [1,1024], 别家不受影响, test_edge 扩至 17 项含此用例; v1.4.25: ①F4 截图翻译合并引擎 (Jane 定案): 配了 AI Key 先 AI 看图翻译 (一次读图+翻译, 尝试上限 20 秒), AI 失效/没配 Key 立刻回退 OCR 通道 ②F4 提速: 免费翻译通道黏性 (通的通道 120 秒内优先)、Google 超时 12→8 秒、MyMemory 12→10 秒、逐行兜底改并发 ③文本翻译源语言改下拉可选 (自动检测+13 种, 改选即重译并真传引擎) ④文本翻译接 AI 通道 + 「启用AI翻译」勾选 (默认开: 勾上才优先 AI、失效回退在线; 不勾绝不调 AI; 选择落盘 TTUseAI) ⑤_ai_chat_image/_ai_chat_messages 加 timeout 参数 (默认 90 不变)
 # v1.4.20: 瘦身版, 功能零变化 — 打包侧剔除未用组件 (cv2 视频插件/级联数据、numpy 测试集、onnxruntime 的 transformers/tools/quantization/datasets/backend), 已模拟验证删除后 OCR 中英文识别正常
 # v1.4.19: ①AI 面板侧边栏去掉「AI 功能」快捷入口组 (功能本体全保留) ②修复 v1.4.18 的 F4 截图翻译主流程 (_translate_lines 误标 @staticmethod 致后台线程静默失败) ③记录上限改硬线 (全锁定时不再突破 2000) ④截图翻译目标语言扩到 13 种 ⑤内嵌微型浏览器 (WebView2 子进程收编: 谷歌翻译主页/书签栏前 8+书签管理/浏览历史/清除数据/页面缩放/下载说明) ⑥文本翻译面板 (打字停笔 350ms 自动翻译, 无缓存每次实时译) + 工具栏按序重排为两行并配线条图标 ⑦品牌头重排 (系统设置移左上挨着 SPST, 副标题「多功能工作台」居中, 右上留空) + 软件图标换 Jane 的樱花小女孩原图 ⑧窗口最小高度解锁 (最大化/缩放恢复正常) ⑨全界面双语化补齐 (约 330 条文案入语言文件, 英文模式复检残留中文 0 条) + 第八轮深查 (线程/网络/浏览器生命周期/热键英文保存往返全过)
 # v1.4.18: ①截图翻译修复 (OCR 碎片合并+整段翻译, 结果窗改纯文本) ②翻译结果窗内嵌 AI 智能回复 ③AI/热键/翻译设置全并入系统设置 ④AI 功能改内嵌面板+豆包式侧边栏+最近对话存档 (圆角气泡) ⑤主窗口简约重设计 (方角) ⑥货币汇率 ⑦计算器 ⑧常用语库面板化+序号 ⑨世界时间 (全球城市自选+当地天气) ⑩无水印下载 (FB/IG/小红书等, 保存位置可每次询问或固定) ⑪历史截图保存设置 (张数/不保存, 含 GIF) ⑫移除网络搜索 ⑬三轮深查整改: AI 回复防串话/时钟计时链/天气失败重试/设置窗滚轮隔离/下载实际文件名/汇率过期刷新/AI 回复增量渲染 (320ms→24ms)/单实例保护/单对话存档封顶 200 条
@@ -1811,7 +1811,7 @@ class App(tk.Tk):
                       ["SleepTime", "WaveSet", "WaveFile", "AutoRun", "AutoSet", "MiniFormTime", "MiniFormSet", "Language", "PasteEnter", "PasteRemove",
                        "SplitPos", "AddChar", "LetterSet", "HotKey", "OCAutoSet", "Form1XY", "Form2XY", "UIDetect", "HistoryMax", "DelaySeconds",
                        "Separator", "CustomSep", "SplitChar", "RegexSel", "CaseSel", "TransTarget", "ShowHotKey", "HistorySave", "DownloadDir", "DownloadAsk", "ClockCities",
-                       "Service", "BaiduAppId", "BaiduKey", "YoudaoAppId", "YoudaoSecret", "GoogleKey", "TransCompare",
+                       "Service", "BaiduAppId", "BaiduKey", "YoudaoAppId", "YoudaoSecret", "GoogleKey", "TransCompare", "TTUseAI",
                        "ReplyKey", "ApiKey", "Model", "BaseUrl",
                        "ZhipuKey", "ZhipuModel", "ZhipuBase", "BailianKey", "BailianModel", "BailianBase",
                        "SiliconflowKey", "SiliconflowModel", "SiliconflowBase", "CustomKey", "CustomModel", "CustomBase"]}
@@ -4784,15 +4784,15 @@ try {
         if m > 1600: im = im.resize((max(1, round(w * 1600 / m)), max(1, round(h * 1600 / m))), Image.LANCZOS)
         buf = io.BytesIO(); im.save(buf, "JPEG", quality=82)
         return "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode("ascii")
-    def _ai_chat_image(self, img, prompt, cfg=None, temperature=0.7):
+    def _ai_chat_image(self, img, prompt, cfg=None, temperature=0.7, timeout=90):
         """把图+提示词发给视觉模型, 返回模型回复的纯文本; 配置缺失/接口出错抛 RuntimeError (带人话原因)。
         只用标准库 urllib, 不加新依赖; 调用方必须在后台线程里调 (网络往返几秒起)。
         cfg 可显式传入 (设置窗的「测试」用窗里还没保存的值): 旧版靠临时改 self.cfg 实现,
         测试期间用户若触发了任何一次保存, 没点保存的测试 key 就会被写进 Config.ini。"""
         return self._ai_chat_messages([{"role": "user", "content": [
             {"type": "text", "text": prompt},
-            {"type": "image_url", "image_url": {"url": self._ai_image_dataurl(img)}}]}], cfg=cfg, temperature=temperature)
-    def _ai_chat_messages(self, messages, cfg=None, temperature=0.7, max_tokens=1024):
+            {"type": "image_url", "image_url": {"url": self._ai_image_dataurl(img)}}]}], cfg=cfg, temperature=temperature, timeout=timeout)
+    def _ai_chat_messages(self, messages, cfg=None, temperature=0.7, max_tokens=1024, timeout=90):
         """把一组 OpenAI 格式消息发给当前 AI 服务, 返回回复纯文本 (看图/纯文本会话共用); 配置缺失/出错抛 RuntimeError。
         只用标准库 urllib; 调用方必须在后台线程里调。cfg 显式传入时用传入值 (设置窗测试用), 不碰 self.cfg。"""
         import urllib.request, urllib.error, json as _json
@@ -4806,7 +4806,7 @@ try {
                                      headers={"Content-Type": "application/json",
                                               "Authorization": "Bearer " + cfg["key"], "User-Agent": "SPST"})
         try:
-            with urllib.request.urlopen(req, timeout=90) as r:
+            with urllib.request.urlopen(req, timeout=timeout) as r:
                 d = _json.loads(r.read().decode("utf-8"))
         except urllib.error.HTTPError as e:
             try: detail = e.read().decode("utf-8", "ignore")[:200]
@@ -5837,13 +5837,19 @@ try {
         back.bind("<Enter>", lambda e: back.configure(foreground=self.UI_ACCENT))
         back.bind("<Leave>", lambda e: back.configure(foreground="#5B6B7C"))
         ctrl = tk.Frame(panel, background=self.UI_BG); ctrl.pack(fill="x", padx=14, pady=(0, 6))
-        tk.Label(ctrl, text=self.t("tt_src_auto", "源语言: 自动检测"), font=self._ui_font(10), background=self.UI_BG, foreground=self.UI_TEXT).pack(side="left")
+        tk.Label(ctrl, text=self.t("tt_src_label", "源语言"), font=self._ui_font(10), background=self.UI_BG, foreground=self.UI_TEXT).pack(side="left")
+        self._tt_source_var = tk.StringVar(value=self.t("tr_auto", "自动检测"))
+        src_combo = ttk.Combobox(ctrl, textvariable=self._tt_source_var, values=[self.t("tr_auto", "自动检测")] + [n for n, _ in self._TRANS_TARGETS], width=11, state="readonly")
+        src_combo.pack(side="left", padx=4)
+        src_combo.bind("<<ComboboxSelected>>", lambda e: self._tt_go())
         tk.Label(ctrl, text="⇄", font=self._ui_font(11), background=self.UI_BG, foreground=self.UI_MUTED).pack(side="left", padx=6)
         tk.Label(ctrl, text=self.t("tt_tgt_label", "目标语言"), font=self._ui_font(10), background=self.UI_BG, foreground=self.UI_TEXT).pack(side="left")
         self._tt_target_var = tk.StringVar(value=self._tgt_name(self.trans_target()))
         combo = ttk.Combobox(ctrl, textvariable=self._tt_target_var, values=[n for n, _ in self._TRANS_TARGETS], width=11, state="readonly")
         combo.pack(side="left", padx=4)
         combo.bind("<<ComboboxSelected>>", lambda e: self._tt_go())
+        self._tt_ai_var = tk.IntVar(value=1 if (self.cfg.get("Translate", "TTUseAI", fallback="1") or "1") != "0" else 0)
+        ttk.Checkbutton(ctrl, text=self.t("tt_use_ai", "启用AI翻译"), variable=self._tt_ai_var, command=self._tt_ai_toggle).pack(side="left", padx=(12, 0))
         body = tk.Frame(panel, background=self.UI_BG); body.pack(fill="x", padx=14, pady=(0, 10))
         def text_col(parent, title):
             col = tk.Frame(parent, background="#FFFFFF", relief="solid", borderwidth=1)
@@ -5912,17 +5918,36 @@ try {
             try: self.after_cancel(self._tt_after)
             except Exception: pass
         self._tt_after = self.after(350, self._tt_go)
+    def _tt_ai_toggle(self):
+        """「启用AI翻译」勾选变化: 落盘记住选择 (Jane 2026-11-25 13:59: 不勾就绝不调 AI 模型)。"""
+        if not self.cfg.has_section("Translate"): self.cfg.add_section("Translate")
+        self.cfg.set("Translate", "TTUseAI", "1" if self._tt_ai_var.get() else "0"); self.save_config()
+    def _ai_text_translate(self, text, target, source=None):
+        """文本翻译的 AI 通道 (Jane 2026-11-25 13:54 要求, 与 F4 同款合并引擎): 配了 Key 先让大模型译——懂上下文, 质量优于免费接口;
+        没配 Key / 接口出错 / 返回空, 一律 None, 调用方回退在线翻译通道。必须在后台线程里调。"""
+        cfg = self._ai_cfg()
+        if not cfg["key"]: return None
+        src_hint = f"原文是{self._tgt_name(source)}, " if source else ""
+        prompt = f"{src_hint}把下面这段文字翻译成{self._tgt_name(target)}, 只输出译文, 不要加任何解释、引号或原文:\n{text}"
+        try: r = self._ai_chat_messages([{"role": "user", "content": prompt}], timeout=15)
+        except Exception: return None
+        return r or None
     def _tt_go(self):
         if getattr(self, "_tt_panel", None) is None: return
         text = self._tt_in.get("1.0", "end").strip()
         if not text:
             self._tt_out.delete("1.0", "end"); self._tt_status.set(""); return
         target = self._tgt_code(self._tt_target_var.get())
+        source = None  # 源语言下拉: 自动检测=None, 选了具体语言就按它译 (与截图翻译结果窗同款, Jane 13:32 要求文本翻译也能改源语言)
+        _sv = getattr(self, "_tt_source_var", None)
+        if _sv is not None and _sv.get() != self.t("tr_auto", "自动检测"): source = self._tgt_code(_sv.get())
         self._tt_gen = getattr(self, "_tt_gen", 0) + 1
         gen = self._tt_gen
+        use_ai = not hasattr(self, "_tt_ai_var") or bool(self._tt_ai_var.get())  # 没勾「启用AI翻译」: 根本不调 AI (主线程读开关, 后台线程不碰 Tk 变量)
         self._tt_status.set(self.t("tt_translating", "翻译中…"))
         def work():
-            res = self.translate_text_to(text, target)
+            res = self._ai_text_translate(text, target, source) if use_ai else None  # 勾了才先 AI (配了 Key 才真走)
+            if res is None: res = self.translate_text_to(text, target, source=source)  # AI 没配/失效 -> 在线翻译通道
             def done():
                 if gen != getattr(self, "_tt_gen", 0): return  # 已有更新的翻译在跑, 这次结果作废 (防旧结果盖新)
                 if res is None:
@@ -6479,8 +6504,8 @@ try {
         inp.bind("<Return>", on_enter)
         render_all(); refresh_recent()
 
-    # 截图翻译可选目标语言 (显示名, 代码): 代码与免费 Google 通道/Google 云一致, 百度/有道在各自函数里另做映射;
-    # 源语言恒为自动检测。主窗口与翻译结果窗的下拉都读这张表, 加语言只改这里。
+    # 翻译语言表 (显示名, 代码): 代码与免费 Google 通道/Google 云一致, 百度/有道在各自函数里另做映射;
+    # 截图翻译目标/结果窗源语言/文本翻译源与目标的下拉都读这张表, 加语言只改这里。
     _TRANS_TARGETS = [("中文", "zh-CN"), ("繁體中文", "zh-TW"), ("English", "en"), ("日本語", "ja"),
                       ("한국어", "ko"), ("Français", "fr"), ("Deutsch", "de"), ("Español", "es"),
                       ("Русский", "ru"), ("Português", "pt"), ("Italiano", "it"), ("ไทย", "th"), ("Tiếng Việt", "vi")]
@@ -6517,14 +6542,14 @@ try {
             url = "https://translate.googleapis.com/translate_a/single?" + urllib.parse.urlencode(
                 {"client": "gtx", "sl": source or "auto", "tl": target, "dt": "t", "q": q})
             req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-            with urllib.request.urlopen(req, timeout=12) as r:
+            with urllib.request.urlopen(req, timeout=8) as r:
                 d = _json.loads(r.read().decode("utf-8"))
             return "".join(seg[0] for seg in (d[0] or []) if seg and seg[0])
         def via_mymemory(q):
             src = source or ("zh-CN" if has_cjk else "en")
             url = "https://api.mymemory.translated.net/get?" + urllib.parse.urlencode({"q": q, "langpair": f"{src}|{target}"})
             req = urllib.request.Request(url, headers={"User-Agent": "SPST"})
-            with urllib.request.urlopen(req, timeout=12) as r:
+            with urllib.request.urlopen(req, timeout=10) as r:
                 d = _json.loads(r.read().decode("utf-8"))
             return (d.get("responseData") or {}).get("translatedText") or ""
         def via_api(q):
@@ -6536,17 +6561,19 @@ try {
             if tc["service"] == "google" and tc["google_key"]:
                 return self._google_translate(q, target, tc["google_key"], source)
             return ""
+        chans = [("api", via_api), ("google", via_google), ("mymemory", via_mymemory)]
+        sticky = getattr(self, "_trans_sticky", None)
+        if sticky and time.time() - sticky[1] < 120 and sticky[0] in ("google", "mymemory"):
+            chans.sort(key=lambda c: 0 if c[0] == sticky[0] else 1)  # 上次哪条免费通道通了优先走它: Google 通道在某些网络下连不上/极慢, 不黏住的话每次翻译都要先等它超时才落备用通道 (Jane 真机 F4 等约 10 秒的主因)
         out = []
         for g in groups:
             t = ""
-            try: t = via_api(g)
-            except Exception: t = ""
-            if not t:
-                try: t = via_google(g)
+            for name, fn in chans:
+                try: t = fn(g)
                 except Exception: t = ""
-            if not t:
-                try: t = via_mymemory(g)
-                except Exception: return None
+                if t:
+                    self._trans_sticky = (name, time.time())
+                    break
             if not t: return None
             out.append(t)
         return "\n".join(out)
@@ -6601,19 +6628,57 @@ try {
                 out = list(texts)
                 for i, p in zip(need, parts): out[i] = p
                 return out, True
-        translations, any_ok = [], False  # 整段路不通: 逐行兜底 (行已合并成整行, 质量仍远好于碎片时代)
-        for t in texts:
-            if not re.search(r"[A-Za-z\u4e00-\u9fff]", t):
-                translations.append(t); continue
-            r = self.translate_text_to(t, target, source)
-            if r: any_ok = True; translations.append(r)
-            else: translations.append(t)
+        translations, any_ok = list(texts), False  # 整段路不通: 逐行兜底 (行已合并成整行, 质量仍远好于碎片时代); 多行并发译, 不再逐行串行等通道超时链
+        def _one(i):
+            return i, self.translate_text_to(texts[i], target, source)
+        if len(need) == 1:
+            i, r = _one(need[0])
+            if r: translations[i] = r; any_ok = True
+        else:
+            from concurrent.futures import ThreadPoolExecutor
+            with ThreadPoolExecutor(max_workers=min(6, len(need))) as ex:
+                for i, r in ex.map(_one, need):
+                    if r: translations[i] = r; any_ok = True
         return translations, any_ok
+    def _ai_vision_translate(self, img, target):
+        """F4 合并引擎的 AI 通道 (Jane 2026-11-25 13:41 定案): 配了 Key 先让视觉模型一次读图+翻译——不经 OCR 逐字认, 认字即译最准;
+        没配 Key / 接口出错 / 回复格式不对 / 图里没可译文字, 一律返回 None, 调用方立刻走 OCR 通道。必须在后台线程里调。"""
+        cfg = self._ai_cfg()
+        if not cfg["key"]: return None
+        if target:
+            prompt = (f"识别图片中的全部文字, 并翻译成{self._tgt_name(target)}。严格按下面的格式输出, 不要输出任何其他内容:\n"
+                      "第一部分: 识别到的原文, 保留原来的换行。\n然后单独一行只写 ===\n第二部分: 译文, 换行尽量与原文一一对应。")
+        else:
+            prompt = ("识别图片中的全部文字: 如果主要是中文就翻译成英文, 否则翻译成中文。严格按下面的格式输出, 不要输出任何其他内容:\n"
+                      "第一部分: 识别到的原文, 保留原来的换行。\n然后单独一行只写 ===\n第二部分: 译文, 换行尽量与原文一一对应。")
+        try: r = self._ai_chat_image(img, prompt, timeout=20)
+        except Exception: return None
+        if not r or "===" not in r: return None
+        orig_part, tr_part = r.split("===", 1)
+        orig_lines = [ln.strip() for ln in orig_part.replace("\r\n", "\n").split("\n") if ln.strip()]
+        tr_lines = [ln.strip() for ln in tr_part.replace("\r\n", "\n").split("\n") if ln.strip()]
+        if not orig_lines or not tr_lines: return None
+        if not any(re.search(r"[A-Za-z\u4e00-\u9fff]", t) for t in orig_lines): return None  # 只有数字/符号: 交回 OCR 路径, 那边会给「没有可翻译的文字」的提示
+        if target is None:
+            joined = "".join(orig_lines)
+            target = "en" if any("\u4e00" <= ch <= "\u9fff" for ch in joined) else "zh-CN"
+        if len(tr_lines) == len(orig_lines):
+            lines = [{"t": t, "x": 0, "y": i * 10, "w": 0, "h": 10} for i, t in enumerate(orig_lines)]
+            return lines, tr_lines, target
+        lines = [{"t": "\n".join(orig_lines), "x": 0, "y": 0, "w": 0, "h": 10}]  # 行数对不上: 整段成一对, 显示与复制都不受影响
+        return lines, ["\n".join(tr_lines)], target
     def translate_image_inplace(self, img, target=None, anchor=None):
         """有道式截图翻译: OCR 每行文字+位置 -> 逐行翻译 -> 译文绘回原图 -> 弹翻译结果窗 (可切换目标语言/对照开关)。
         拿不到行坐标时回退到原来的纯文字翻译流程。"""
         import threading
         def work():
+            ai = self._ai_vision_translate(img, target)  # 合并引擎: AI 看图优先, 失效 (含没配 Key) 立刻回退下面的 OCR 通道
+            if ai is not None:
+                lines, translations, tgt = ai
+                def deliver_ai():
+                    if anchor: self._show_translate_bar(img, lines, tgt, translations, anchor)
+                    else: self.show_translate_compare(img, lines, tgt, translations)
+                self._ui_queue.put(deliver_ai); return
             lines = self.ocr_lines(img)
             if not lines:
                 # 拿不到行坐标: 在本线程把纯文字 OCR 也做了再交给文字翻译流程,
