@@ -897,7 +897,8 @@ _ICON_PNG_B64 = (
     "P/h7mEBw82d/zs2HtHEhGsKZr6yFUCkqvx4WgdsWhKEi7/UpDCwUxJ0N4m6GLTX9bk426HBxcsLo5IhFsSDLc0ajEVevX+Hf+Yt/gX/0r36bNHVW8ygM2d"
     "jaZNDrE0UR09mU0NuRba3p332Fa5/9IsV4jK01QZJ48Zz1qtSIYl6ssxQbfqVnIbTRvO0c59Ju365QuNdaPw9ZXZn7LfMaeIEOwMqVHb6njPoJsPVQwtYN"
     "qC3p1ibz03MWkxlRGHhkqPRCDW84EJKT4YwwzhDCYqRY21NaPyPodHLKekGSxizGY3dEhQnX777K6fMjNre26W4NsAiiKOJgb49nR8cYBJ1OThgEfiJuKR"
-    "YVtnYfuHJRIAUkSUwaRgzPzigvJrx88xrvffwhlRXcunKFjTSD5oMiXFS48RJUgasglPePW2GbGhmkxBY13U6PL/zsNxn+8q/wR9/+beogZHNjk9In0KIN"    "44sRvbzLn/lLf5mf+ct/iVffeJNkY+C2At4z39bpUvohroBFycXhIWf33qd4cJ/y8BnP/+Bfc7PbRe4fuO0Ln3bpfdpZ6P+NWZcLN6sj48Gg9hIk8kXw4q"
+    "YVtnYfuHJRIAUkSUwaRgzPzigvJrx88xrvffwhlRXcunKFjTSD5oMiXFS48RJUgasglPePW2GbGhmkxBY13U6PL/zsNxn+8q/wR9/+beogZHNjk9In0KIN"
+    "44sRvbzLn/lLf5mf+ct/iVffeJNkY+C2At4z39bpUvohroBFycXhIWf33qd4cJ/y8BnP/+Bfc7PbRe4fuO0Ln3bpfdpZ6P+NWZcLN6sj48Gg9hIk8kXw4q"
     "ZywGrCg1skt151rMHFzDncZOD/RFqJMFiXFSp8MPcKGEWsyKSlr7D0aEYQJPz83/yPeeWtN/ijX/57LM4PSfMugQgIA8n73/o1TFlx62f/HCLP/ddxr7k1"
     "uBK7qiiqkjztgHTAzvNizo3bdxkOxxx89k2KZ0+ZffKA8uEDwvmUPE3JewNm1jCdOKlvPVvwxq2X+NPtHzOzljzv0O12SbPEGYsWU4r5gp3bt9nb32f/s2"
     "8wuH4LU1fMLs7obG26v15jILPWyd/NwiUT+4e7FV5xaY0nxKcSfiSrMzevxm2qwgYYu1odWtZWhMGqWMTZ602zkfTVgFnpQ4z/Qqr9PdnOJsV4xPxkhLGW"
@@ -1801,7 +1802,8 @@ class App(tk.Tk):
         out, cur = [], None
         for line in lines:
             stripped = line.strip()
-            if stripped.startswith("[") and stripped.endswith("]"):                cur = stripped[1:-1].strip()
+            if stripped.startswith("[") and stripped.endswith("]"):
+                cur = stripped[1:-1].strip()
             elif cur and "=" in line and not stripped.startswith((";", "#")):
                 key = line.split("=", 1)[0].strip().lower()
                 if (cur, key) in pending:
@@ -2700,7 +2702,8 @@ class App(tk.Tk):
     def delete_all(self):
         removable = [r for r in self.records if not r["locked"]]
         if removable and not messagebox.askyesno(self.t("gal_delall", "删除全部"), f"{self.t('msg_delall_pre', '确定删除全部')} {len(removable)} {self.t('msg_delall_suf', '条未锁定记录？锁定的会保留。')}"):
-            return        self.records = [r for r in self.records if r["locked"]]; self.paste_index = 0; self.save_records(); self.refresh_list()
+            return
+        self.records = [r for r in self.records if r["locked"]]; self.paste_index = 0; self.save_records(); self.refresh_list()
     def move(self, d):
         i = self.selected_idx()
         if i < 0 or i not in self._visible: return
@@ -3624,7 +3627,8 @@ class App(tk.Tk):
                 # 冻结屏预览: 画布文字没有透明度, 用实色把位置/平铺密度先画出来, 成品再按不透明度渲染
                 bw, bh = state["box"][2] - ox, state["box"][3] - oy
                 size = int(op.get("size", 18)); gap = int(op.get("gap", 20)); text = op.get("text", "")
-                tw = max(10, int(size * 0.92 * len(text))); th = max(8, size); m = max(6, size // 2); spots = []                pos = op.get("pos", "tile")
+                tw = max(10, int(size * 0.92 * len(text))); th = max(8, size); m = max(6, size // 2); spots = []
+                pos = op.get("pos", "tile")
                 if pos == "tile":
                     yy = 0
                     while yy < bh:
@@ -4523,7 +4527,8 @@ try {
                 if not text: continue
                 try:
                     if score is not None and float(score) < cls._RAPID_MIN_SCORE: continue
-                except Exception: pass                xs = [p[0] for p in box]; ys = [p[1] for p in box]
+                except Exception: pass
+                xs = [p[0] for p in box]; ys = [p[1] for p in box]
                 out.append({"t": text, "x": int(min(xs)), "y": int(min(ys)),
                             "w": int(max(xs) - min(xs)), "h": int(max(ys) - min(ys))})
             cls._rapid_fail_count = 0
@@ -5422,7 +5427,8 @@ try {
 
     def _show_clock_panel(self):
         self._texttrans_on_hide()
-        if getattr(self, "_clock_panel", None) is None:            self._build_clock_panel()
+        if getattr(self, "_clock_panel", None) is None:
+            self._build_clock_panel()
         try: self._body.pack_forget()
         except Exception: pass
         for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_dl_panel"):
@@ -6321,7 +6327,8 @@ try {
         cv = tk.Canvas(wrap, highlightthickness=0, background=CHAT_BG)
         self._ai_cv = cv
         sb = ttk.Scrollbar(wrap, orient="vertical", command=cv.yview)
-        inner = tk.Frame(cv, background=CHAT_BG)        inner.bind("<Configure>", lambda e: cv.configure(scrollregion=cv.bbox("all")))
+        inner = tk.Frame(cv, background=CHAT_BG)
+        inner.bind("<Configure>", lambda e: cv.configure(scrollregion=cv.bbox("all")))
         win_id = cv.create_window((0, 0), window=inner, anchor="nw")
         cv.bind("<Configure>", lambda e: cv.itemconfigure(win_id, width=e.width))
         cv.configure(yscrollcommand=sb.set)
@@ -7220,7 +7227,8 @@ def _acquire_single_instance():
     if sys.platform != "win32": return True
     try:
         import ctypes
-        handle = ctypes.windll.kernel32.CreateMutexW(None, False, "SPST_SingleInstance_Mutex")        if not handle: return True
+        handle = ctypes.windll.kernel32.CreateMutexW(None, False, "SPST_SingleInstance_Mutex")
+        if not handle: return True
         globals()["_SPST_MUTEX_HANDLE"] = handle  # 句柄必须留到进程结束: 关掉它就等于放行第二个实例
         if ctypes.windll.kernel32.GetLastError() == 183:  # ERROR_ALREADY_EXISTS: 已经有一个在跑
             ctypes.windll.user32.MessageBoxW(None, "SPST 已经在运行了 (看屏幕右下角的托盘图标), 不用重复打开。", "SPST", 0x40)  # MB_ICONINFORMATION
