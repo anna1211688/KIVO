@@ -1436,7 +1436,7 @@ _BTN_ICONS_B64 = {
     "gear": "iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAD5klEQVR4nLWUT4jVVRTHv+fce3/vvRnGHExpoj+LIOGBM8ErsSJ+o0VjOeXqB4ENisZr0yaGVlnDMIhItiiIYFCzhbaYwcVo5bgoZxGE+iCHHF1WJkOaZaH2fr977zkt5k9jTY4EneXhns+559+XcGdGaTpgAGBiYjDcYcz/Y7SYM8syM1KtanoSPDExGNZu3LIs59ZXEeLPZ0/s/wgApWlquru7ZWpqikZGRuIdgRfa6he3t5UKOp6UWp5QACG/+d7Dbb/3Lwa7HZgAoKtn+5vWlTfkzZt7nePL7Cqnfd5sMrMTifnk+P1tXRsvbWbrXhOff3l2/MCu2XidA/HC8gFoZ8+Ona7SOqSQ9TZJPpVIa3zR/I6ZS8RsQDjf+eyl5421Rwi6wVVahzp7duwEoLOMW8Ej1epcthckhBiKIocKQPohVFepikoIEUAXsYzF4DX4IpfgBUS9f2Ms+PHUFCHLDBHtBtSQ4ZKKKJhLRNTCbJitMwSyABEAEJFTVYLqHgCUnvyL94/hrVuXVW4ua0nZJKOq2gIVZZdw9MV5IrrGbB4XEUA1srVGYtF37Q8Z/X7i4+YiwxtgDACdX1/aayxvkxi+VaXHiJAY4zhqeMv+xHsajWHf+dwrvUw0qiIJQFDIaSZ+CKAzxlx/uXHsk6sAwGmaWmBQuk79uDUpl18XkXY2yVNEKDMbDuKnzn62b1ejMexrtbqb/HzfMRE9bGxCqiLGuLWqWGGTck/wlb0AFGlq+Pr11TP9EtwDACqSqwSoqhAzoPgNgNbqdedcq51ZKr1MRABBRSJUJVeJUOJ7F7aCAMWaTVuWm9hy1LjkSV/kV0DaTiBmNhQlbp48vv8oANR66w+EqGcIuFtVAOAXY90KEZkWCZsmjx/4ZgADRAsSaK1Wd9KBR6MPXcT8LlTLABEReVE5zMAVJdpGRCslSjTWmhh8vzP2qxvxxg8Xxg9Nz7Hm1kPTdMA2GsM+FvEuY5P3oagAIFUVVUmsS7axK71BmIESgSUGMdbt9iG2Xxg/NF2r1d3c9c3v3UQ3BAARY4gIRlUKADDWGYAQfB6CbwZVUWOtmU3qicgRYwhQavR2zOvHrQcCqCrG2Do2LimxsSTR9ynklDHOErFVxdUYfD8Rw7pSia0jVYwBpLOMRQ9kXoTYldZHX3wwOb7/SOfGHb8yuE00BuOSkhb5I0p0n3Xl/uCbXywmQkvK5oPp1vLyij3qyi3PSIyIobgSYqidO3Hw4u3i7GLOLMtMtVrVkzNC31z1dN9LnvkdEK9UlbfPnTh4sVaru0ZvR8z+Rej/qy1Z6ZIP5t5lWcbArDQODspSAX8Cm0TtanseiCAAAAAASUVORK5CYII=",
     "star": "iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAACeUlEQVR4nNWUQUhUURSG/3PfffNmTGdMxRQ3ErhoxsVkkW0EayEEtRxo0SIiWhRCRfvnrFyVqNUqaNUiWhpEKyMS2pQtzAgXtQkRLH0zOE/fu++cFk8Tx4EZI5DO6t7Lf7/733PPucDhhxBE6LBdNBKxy/Zr71ra7nztiZfqO1d1uYVYY5pbb5jIuACAMVj1ttXPmSsKANJrXz6CcDylg+6V+/mN+CYkjYPdWQ0Mx+NfSxbafkTp1a48OfZ7UtoiU7m4lll5je+9Gr29Jha+AYrnzMEcA2i9/fkp7OarEAaHlZelydylenu2wfG1Wm4ttquEvgMQi9kypEgBcCB0F4oSAEE48okwCWBLWJi0owFRHJiJ8qPszx3WrmNXFJY/WOlU6rrSqceUzEDCDYA0ZNMDsJ1OIpCTAcSA7COQTQ9s/Jsl33+C7lMRisQ1UhGflhn9dBKJ9CsCjklYCUHK3ivjkOwmW4AVBKUL3nR+vvoxq8qNBK5obzo/z+H6kEg0RzqpIcK7UGHSSS0SzXG4PuRN5+fhiq6ukP11XCSDwkKiPDWwpAJ/HNohEARABEgEQKAdUoE/Xp4aWEJhIYEimWpM7QbJ5hiuq1jrkdiJGLJTFjlpKz6AhLUegesqZHNcC1EbPIYIizkCR2chTJQ86nDgv5Wt8jNymhMgIjAPYjFHGEPUIFgUiKSjp7+T7KYzwpHHQWW0tHzivDeZvcJRcFnM5jLs1GBHT38niASQfZz94EJcKYHwsJCaEd44XZroe4gXYBTEKj3oex76qwMQmglku0ULjTUaAKDp3reuPxN3Vtca79EcLIR2PqG9y0I73+nfQf+J5n+J39QzDLg7vrq5AAAAAElFTkSuQmCC",
 }  # 按钮小图标 (22px, PIL 手绘线条风: 图标+文字并排, 与常见软件一致)
-VERSION = "1.4.27"  # v1.4.22: ①去掉内置浏览器整套 (Jane 真机定版不好用: 面板/书签/历史/菜单/pywebview 子进程全删, 工具栏回 8 按钮, 自检减为六项, 打包去 pywebview) ②世界时间加「刷新」(绕过天气 15 分钟节流立即重拉) ③文本翻译框自适应高度 (默认 8 行, 随内容长高至 24 行封顶, 按钮行跟随) ④系统设置/软件自检/历史截图/城市选择全部改为主窗口内面板 (Jane 定版「能收的都收」, 不再弹独立窗口, 重复开窗问题从结构上消除) ⑤启动时清理浏览器残留文件 (bookmarks/browser_history/browser_profile) ⑥工具栏改一行 8 按钮 ⑦截图翻译学有道: F4 出无边框浮动条 (原文区透明盖选区透出真实截图对照/译文框在选区下方、不够翻上方/大小随内容/源语言可选/条内复制原文·译文·AI 智能回复), 完整结果窗保留给无选区入口; v1.4.23: ①修真 bug: 配置解析关 % 插值 (分隔符/路径/接口地址带 % 不再抛错) ②备份导入加固 (JSON 先验货后落盘, 坏备份整包拒绝) + 备份说明去掉书签残留文案 ③英文模式运行时漏网文案两批全清 (汇率/托盘/取色器/下载提示/识别结果窗/AI 气泡与接口报错/测试连接结果/计算器/截图浮层, 三个翻译助手改实例方法并本地化报错) ④F4 纯数字/符号截图提示「没有可翻译的文字」不再误报失败 ⑤删死代码, 新增边缘测试套件; v1.4.24: 修 AI 聊天真机 400 (Jane 实测): 智谱 glm-4v-flash 的 max_tokens 上限 1024, 聊天面板传 2048 被拒 (code 1210); 已在 _ai_chat_messages 对智谱统一钳制 [1,1024], 别家不受影响, test_edge 扩至 17 项含此用例; v1.4.25: ①F4 截图翻译合并引擎 (Jane 定案): 配了 AI Key 先 AI 看图翻译 (一次读图+翻译, 尝试上限 20 秒), AI 失效/没配 Key 立刻回退 OCR 通道 ②F4 提速: 免费翻译通道黏性 (通的通道 120 秒内优先)、Google 超时 12→8 秒、MyMemory 12→10 秒、逐行兜底改并发 ③文本翻译源语言改下拉可选 (自动检测+13 种, 改选即重译并真传引擎) ④文本翻译接 AI 通道 + 「启用AI翻译」勾选 (默认开: 勾上才优先 AI、失效回退在线; 不勾绝不调 AI; 选择落盘 TTUseAI) ⑤_ai_chat_image/_ai_chat_messages 加 timeout 参数 (默认 90 不变); v1.4.26: ①F4 修 AI 回复把提示词的「第一部分/第二部分」标签回声进正文 (改提示词措辞+解析层剥标签兜底) ②全部勾选/单选改圆点指示 (选中绿点/未选空心圈, PIL 生成 Dot.indicator, 含经典 tk 城市勾选) ③工具栏 8 按钮统一样式 (AI 功能去掉蓝色描边款) ④F4 第二轮提速: OCR 与 AI 并行 (回退零等待, Jane 定案保持并行)、OCR 引擎启动预热、「翻译中…」占位浮签 ⑤马赛克/模糊加强: 强度随区域自适应 (旧版几乎无效), F1 编辑器预览改真效果 ⑥全面审查修复 18 项: 多显示器坐标校正、长截图/F4 后台线程兜底、备份验 Config.ini+导出原子写、迷你窗脏值兜底、天气失败负缓存改 60 秒、画廊/预览句柄泄漏、计算器英文错误态、AI 空白返回、强力粘贴验返回值、GlobalLock 判空、WinOCR 逐行容错、import_txt 支持 UTF-16、复制反馈存活守卫、配置双编码全新 parser、分隔符脏值校验; 两 ini 438 键同集 (新增 long_fail); v1.4.27: 功能与 1.4.26 相同, 首次提供安装版 (Inno Setup: 按用户安装/原地升级/开始菜单与桌面快捷方式/设置里可卸载; 发布页同时附 SPST.exe 单文件版与 SPST-Setup 安装包, Jane 2026-11-25 定案)
+VERSION = "1.4.28"  # v1.4.22: ①去掉内置浏览器整套 (Jane 真机定版不好用: 面板/书签/历史/菜单/pywebview 子进程全删, 工具栏回 8 按钮, 自检减为六项, 打包去 pywebview) ②世界时间加「刷新」(绕过天气 15 分钟节流立即重拉) ③文本翻译框自适应高度 (默认 8 行, 随内容长高至 24 行封顶, 按钮行跟随) ④系统设置/软件自检/历史截图/城市选择全部改为主窗口内面板 (Jane 定版「能收的都收」, 不再弹独立窗口, 重复开窗问题从结构上消除) ⑤启动时清理浏览器残留文件 (bookmarks/browser_history/browser_profile) ⑥工具栏改一行 8 按钮 ⑦截图翻译学有道: F4 出无边框浮动条 (原文区透明盖选区透出真实截图对照/译文框在选区下方、不够翻上方/大小随内容/源语言可选/条内复制原文·译文·AI 智能回复), 完整结果窗保留给无选区入口; v1.4.23: ①修真 bug: 配置解析关 % 插值 (分隔符/路径/接口地址带 % 不再抛错) ②备份导入加固 (JSON 先验货后落盘, 坏备份整包拒绝) + 备份说明去掉书签残留文案 ③英文模式运行时漏网文案两批全清 (汇率/托盘/取色器/下载提示/识别结果窗/AI 气泡与接口报错/测试连接结果/计算器/截图浮层, 三个翻译助手改实例方法并本地化报错) ④F4 纯数字/符号截图提示「没有可翻译的文字」不再误报失败 ⑤删死代码, 新增边缘测试套件; v1.4.24: 修 AI 聊天真机 400 (Jane 实测): 智谱 glm-4v-flash 的 max_tokens 上限 1024, 聊天面板传 2048 被拒 (code 1210); 已在 _ai_chat_messages 对智谱统一钳制 [1,1024], 别家不受影响, test_edge 扩至 17 项含此用例; v1.4.25: ①F4 截图翻译合并引擎 (Jane 定案): 配了 AI Key 先 AI 看图翻译 (一次读图+翻译, 尝试上限 20 秒), AI 失效/没配 Key 立刻回退 OCR 通道 ②F4 提速: 免费翻译通道黏性 (通的通道 120 秒内优先)、Google 超时 12→8 秒、MyMemory 12→10 秒、逐行兜底改并发 ③文本翻译源语言改下拉可选 (自动检测+13 种, 改选即重译并真传引擎) ④文本翻译接 AI 通道 + 「启用AI翻译」勾选 (默认开: 勾上才优先 AI、失效回退在线; 不勾绝不调 AI; 选择落盘 TTUseAI) ⑤_ai_chat_image/_ai_chat_messages 加 timeout 参数 (默认 90 不变); v1.4.26: ①F4 修 AI 回复把提示词的「第一部分/第二部分」标签回声进正文 (改提示词措辞+解析层剥标签兜底) ②全部勾选/单选改圆点指示 (选中绿点/未选空心圈, PIL 生成 Dot.indicator, 含经典 tk 城市勾选) ③工具栏 8 按钮统一样式 (AI 功能去掉蓝色描边款) ④F4 第二轮提速: OCR 与 AI 并行 (回退零等待, Jane 定案保持并行)、OCR 引擎启动预热、「翻译中…」占位浮签 ⑤马赛克/模糊加强: 强度随区域自适应 (旧版几乎无效), F1 编辑器预览改真效果 ⑥全面审查修复 18 项: 多显示器坐标校正、长截图/F4 后台线程兜底、备份验 Config.ini+导出原子写、迷你窗脏值兜底、天气失败负缓存改 60 秒、画廊/预览句柄泄漏、计算器英文错误态、AI 空白返回、强力粘贴验返回值、GlobalLock 判空、WinOCR 逐行容错、import_txt 支持 UTF-16、复制反馈存活守卫、配置双编码全新 parser、分隔符脏值校验; 两 ini 438 键同集 (新增 long_fail); v1.4.27: 功能与 1.4.26 相同, 首次提供安装版 (Inno Setup: 按用户安装/原地升级/开始菜单与桌面快捷方式/设置里可卸载; 发布页同时附 SPST.exe 单文件版与 SPST-Setup 安装包, Jane 2026-11-25 定案); v1.4.28: ①修任务栏恢复闪黑 (列表补刷推迟到窗口画出后, 不再同步重建堵第一帧) ②截图/贴图设置并入系统设置 (截图翻译目标语言/对照翻译/延时秒数/UI 检测, 与主窗口共用同一变量两处同步) ③F4 浮动条重做: 原文框全透明只留 1px 细边、与选区等大, 译文框独立白卡与原文框像素等宽左对齐, 功能条独立成条保持自然宽度 ④F4 截图翻译不使用 UI 检测 (纯自由框选, F1 等不受影响) ⑤UI 检测三招: 悬停常驻 UIA 桥实时查元素、假框过滤 (占整窗 85% 以上的容器矩形不要)、拖拽边缘 8px 磁吸 ⑥AI 分工: AI 聊天/看图翻译/标注栏 AI/智能回复/文本翻译五路可各选一家 (缺省跟随当前服务, 指定的那家没 Key 自动回退当前服务), 预设扩到 14 家 (新增 OpenAI/Gemini/Claude/DeepSeek/Kimi/火山豆包/腾讯混元/百度千帆/Grok/Ollama 本地自建), 修 _ai_cfg 镜像串扰真 bug (读别家配置会串到当前服务的 key/地址/模型, 分工会把请求发错地方) ⑦第五轮审查优化: UIA 桥读行加 2.5 秒超时杀桥 (防挂起应用堵死检测)、历史截图画廊缩略图分批渲染 (打开不冻结)、备份导入单文件 64MB 上限、记录/常用语落盘改紧凑 JSON (文件小三成读写更快)
 # v1.4.20: 瘦身版, 功能零变化 — 打包侧剔除未用组件 (cv2 视频插件/级联数据、numpy 测试集、onnxruntime 的 transformers/tools/quantization/datasets/backend), 已模拟验证删除后 OCR 中英文识别正常
 # v1.4.19: ①AI 面板侧边栏去掉「AI 功能」快捷入口组 (功能本体全保留) ②修复 v1.4.18 的 F4 截图翻译主流程 (_translate_lines 误标 @staticmethod 致后台线程静默失败) ③记录上限改硬线 (全锁定时不再突破 2000) ④截图翻译目标语言扩到 13 种 ⑤内嵌微型浏览器 (WebView2 子进程收编: 谷歌翻译主页/书签栏前 8+书签管理/浏览历史/清除数据/页面缩放/下载说明) ⑥文本翻译面板 (打字停笔 350ms 自动翻译, 无缓存每次实时译) + 工具栏按序重排为两行并配线条图标 ⑦品牌头重排 (系统设置移左上挨着 SPST, 副标题「多功能工作台」居中, 右上留空) + 软件图标换 Jane 的樱花小女孩原图 ⑧窗口最小高度解锁 (最大化/缩放恢复正常) ⑨全界面双语化补齐 (约 330 条文案入语言文件, 英文模式复检残留中文 0 条) + 第八轮深查 (线程/网络/浏览器生命周期/热键英文保存往返全过)
 # v1.4.18: ①截图翻译修复 (OCR 碎片合并+整段翻译, 结果窗改纯文本) ②翻译结果窗内嵌 AI 智能回复 ③AI/热键/翻译设置全并入系统设置 ④AI 功能改内嵌面板+豆包式侧边栏+最近对话存档 (圆角气泡) ⑤主窗口简约重设计 (方角) ⑥货币汇率 ⑦计算器 ⑧常用语库面板化+序号 ⑨世界时间 (全球城市自选+当地天气) ⑩无水印下载 (FB/IG/小红书等, 保存位置可每次询问或固定) ⑪历史截图保存设置 (张数/不保存, 含 GIF) ⑫移除网络搜索 ⑬三轮深查整改: AI 回复防串话/时钟计时链/天气失败重试/设置窗滚轮隔离/下载实际文件名/汇率过期刷新/AI 回复增量渲染 (320ms→24ms)/单实例保护/单对话存档封顶 200 条
@@ -1734,7 +1734,15 @@ class App(tk.Tk):
 
     def _on_main_map(self, e=None):
         if e is not None and e.widget is not self: return
-        if getattr(self, "_list_dirty", False): self.refresh_list()
+        if getattr(self, "_list_dirty", False) and not getattr(self, "_map_refresh_pending", False):
+            # 补刷推迟 50ms 再做: 在 <Map> 里同步重建上千行列表会堵住窗口恢复后的第一帧绘制,
+            # Windows 等不到绘制就先给黑帧 (Jane 2026-11-25 真机报「点任务栏打开软件闪黑」)。
+            # 先让窗口按现有内容画出来, 列表随后跟上; 挂起标志防连发 Map 重复排队。
+            self._map_refresh_pending = True
+            self.after(50, self._map_refresh)
+    def _map_refresh(self):
+        self._map_refresh_pending = False
+        if getattr(self, "_list_dirty", False) and self.winfo_viewable(): self.refresh_list()
     def _focus_in_input(self):
         """键盘焦点是不是在输入控件里 (搜索框/间隔/分隔符/下拉框等): 在的话按键先归输入框,
         根窗口上的 Delete/单字热键绑定不许抢 —— 否则在搜索框里删字会把选中的记录删掉。
@@ -1825,7 +1833,13 @@ class App(tk.Tk):
                        "Service", "BaiduAppId", "BaiduKey", "YoudaoAppId", "YoudaoSecret", "GoogleKey", "TransCompare", "TTUseAI",
                        "ReplyKey", "ApiKey", "Model", "BaseUrl",
                        "ZhipuKey", "ZhipuModel", "ZhipuBase", "BailianKey", "BailianModel", "BailianBase",
-                       "SiliconflowKey", "SiliconflowModel", "SiliconflowBase", "CustomKey", "CustomModel", "CustomBase"]}
+                       "SiliconflowKey", "SiliconflowModel", "SiliconflowBase", "CustomKey", "CustomModel", "CustomBase",
+                       "RouteChat", "RouteVision", "RouteReply", "RouteText", "RouteAnnotate",
+                       "OpenaiKey", "OpenaiModel", "OpenaiBase", "GeminiKey", "GeminiModel", "GeminiBase",
+                       "ClaudeKey", "ClaudeModel", "ClaudeBase", "DeepseekKey", "DeepseekModel", "DeepseekBase",
+                       "MoonshotKey", "MoonshotModel", "MoonshotBase", "VolcengineKey", "VolcengineModel", "VolcengineBase",
+                       "HunyuanKey", "HunyuanModel", "HunyuanBase", "QianfanKey", "QianfanModel", "QianfanBase",
+                       "XaiKey", "XaiModel", "XaiBase", "OllamaKey", "OllamaModel", "OllamaBase"]}
         for (sec, k), v in pending.items(): by_sec.setdefault(sec, []).append((known_case.get(k, k), v))
         for sec, items in by_sec.items():
             headers = [i for i, ln in enumerate(out) if ln.strip().lower() == f"[{sec.lower()}]"]
@@ -2132,6 +2146,22 @@ class App(tk.Tk):
     def _save_ui_detect(self):
         if not self.cfg.has_section("Snip"): self.cfg.add_section("Snip")
         self.cfg.set("Snip", "UIDetect", self.ui_detect_var.get()); self.save_config()
+    def _save_snip_compare(self):
+        """设置面板「对照翻译」勾选 → [Snip] TransCompare (与截图翻译结果窗里的同名勾选是同一个设置)"""
+        try:
+            self.cfg.set("Snip", "TransCompare", "1" if self._snip_compare_var.get() else "0"); self.save_config()
+            self.status.set(self.t("set_snip_saved", "截图设置已保存"))
+        except Exception: pass
+    def _save_snip_delay(self):
+        """设置面板「延时截图等待」→ [Snip] DelaySeconds: 非数字回退 3, 钳制 0~60 (延时截图热键用)"""
+        try: secs = float((self._snip_delay_var.get() or "").strip())
+        except Exception: secs = 3.0
+        secs = min(60.0, max(0.0, secs))
+        self._snip_delay_var.set(str(int(secs)) if secs == int(secs) else str(secs))
+        try:
+            self.cfg.set("Snip", "DelaySeconds", self._snip_delay_var.get()); self.save_config()
+            self.status.set(self.t("set_snip_saved", "截图设置已保存"))
+        except Exception: pass
     def _save_trans_target(self):
         if not self.cfg.has_section("Snip"): self.cfg.add_section("Snip")
         self.cfg.set("Snip", "TransTarget", self._tgt_code(self.trans_target_var.get()))
@@ -2347,6 +2377,23 @@ class App(tk.Tk):
         hentry.bind("<FocusOut>", lambda _e: apply_hist()); hentry.bind("<Return>", lambda _e: apply_hist())
         if not self._hist_save_var.get(): hentry.configure(state="disabled")
         ttk.Label(hfrm, text=self.t("set_hist_note", "不勾选 = 截图和 GIF 都不再存入历史 (已存的不会自动删, 可在历史截图里「删除全部」); 上限改小会立即删掉多出的老图。"), foreground="#888888").pack(anchor="w", padx=4, pady=(0, 4))
+        sfrm = ttk.LabelFrame(frm, text=self.t("set_snip_frame", "截图 / 贴图")); sfrm.pack(fill="x", pady=(8, 2))
+        srow1 = ttk.Frame(sfrm); srow1.pack(fill="x", pady=4, padx=4)
+        ttk.Label(srow1, text=self.t("trans_target", "截图翻译目标语言:")).pack(side="left")
+        # 与主窗口的下拉共用同一个变量: 两处改任一处另一处自动同步, 变量的 trace 已负责落盘
+        ttk.Combobox(srow1, textvariable=self.trans_target_var, values=[n for n, _ in self._TRANS_TARGETS], width=11, state="readonly").pack(side="left", padx=4)
+        self._snip_compare_var = tk.BooleanVar(value=(self.cfg.get("Snip", "TransCompare", fallback="1") or "1") != "0")
+        ttk.Checkbutton(srow1, text=self.t("tr_compare", "对照翻译"), variable=self._snip_compare_var, command=self._save_snip_compare).pack(side="left", padx=10)
+        srow2 = ttk.Frame(sfrm); srow2.pack(fill="x", pady=(0, 4), padx=4)
+        ttk.Label(srow2, text=self.t("set_snip_delay", "延时截图等待(秒):")).pack(side="left")
+        self._snip_delay_var = tk.StringVar(value=self.cfg.get("Snip", "DelaySeconds", fallback="3"))
+        dentry = ttk.Entry(srow2, textvariable=self._snip_delay_var, width=5); dentry.pack(side="left", padx=4)
+        dentry.bind("<FocusOut>", lambda _e: self._save_snip_delay()); dentry.bind("<Return>", lambda _e: self._save_snip_delay())
+        srow3 = ttk.Frame(sfrm); srow3.pack(fill="x", pady=(0, 4), padx=4)
+        ttk.Label(srow3, text=self.t("ui_detect", "UI 检测:")).pack(side="left")
+        # 与主窗口截图卡里的单选共用同一个变量: 两处改任一处自动同步, _save_ui_detect 负责落盘
+        for txt, val in [(self.t("detect_none", "不检测"), "0"), (self.t("detect_win", "仅窗口"), "1"), (self.t("detect_elem", "检测元素"), "2")]:
+            ttk.Radiobutton(srow3, text=txt, variable=self.ui_detect_var, value=val, command=self._save_ui_detect).pack(side="left", padx=2)
         aifrm = ttk.LabelFrame(frm, text=self.t("set_ai_frame", "AI 设置 (看图翻译/智能回复)")); aifrm.pack(fill="x", pady=(8, 2))
         self._build_ai_form(aifrm)
         tfrm = ttk.LabelFrame(frm, text=self.t("set_trans_frame", "翻译服务设置")); tfrm.pack(fill="x", pady=(8, 2))
@@ -2464,6 +2511,7 @@ class App(tk.Tk):
             for name in self._BACKUP_FILES:
                 if name in z.namelist():
                     data = z.read(name)
+                    if len(data) > 64 * 1024 * 1024: raise ValueError("backup entry too large")  # 解压后单文件封顶 64MB: 正常备份远到不了, 防构造的压缩包把内存撑爆
                     if ".json" in name: json.loads(data.decode("utf-8"))  # 先验货再覆盖: JSON 已损坏的备份整包拒绝, 不拿坏数据顶掉现有好数据
                     if name == "Config.ini":  # Config.ini 同样先验货: 旧版只验 JSON, 坏 ini 落盘后下次启动静默回退默认 = 设置/密钥全丢还报导入成功 (审查发现)
                         import io
@@ -2508,6 +2556,9 @@ class App(tk.Tk):
         try:
             import keyboard; keyboard.unhook_all()
         except Exception: pass
+        try:
+            if getattr(self, "_uia_proc", None): self._uia_proc.kill()  # 常驻 UIA 桥进程随软件一起退, 不留孤儿
+        except Exception: pass
         self.destroy()
     # ---------- 常用语库 (长期保存, 与临时复制队列分开; 存 phrases.json, 带 .bak 备份) ----------
     def load_phrases(self):
@@ -2522,7 +2573,7 @@ class App(tk.Tk):
                 except Exception: continue
     def save_phrases(self):
         try:
-            text = json.dumps(self.phrases, ensure_ascii=False, indent=1)
+            text = json.dumps(self.phrases, ensure_ascii=False, separators=(",", ":"))  # 紧凑格式: 文件更小、写盘/下次加载都更快 (loads 不挑格式, 旧文件照常读)
             _atomic_write(PHRASES_PATH, text)
             try: _atomic_write(PHRASES_PATH + ".bak", text)
             except Exception: pass
@@ -2722,7 +2773,7 @@ class App(tk.Tk):
             self._records_dirty = False
             self._write_records()
     def _write_records(self):
-        text = json.dumps(self.records, ensure_ascii=False, indent=1)
+        text = json.dumps(self.records, ensure_ascii=False, separators=(",", ":"))  # 同上: 2000 条记录时 indent 版白多三成体积
         _atomic_write(RECORDS_PATH, text)
         try: _atomic_write(RECORDS_PATH + ".bak", text)  # 同步留一份备份, 供下次启动损坏时回退
         except Exception: pass
@@ -3462,6 +3513,7 @@ class App(tk.Tk):
             self._restore_main_after_snip(); messagebox.showerror(self.t("snip_fail", "截图失败"), str(e)); return
         try: ui_mode = int(self.cfg.get("Snip", "UIDetect", fallback="2"))  # UI 检测: 0 不检测 / 1 仅窗口 / 2 检测元素
         except Exception: ui_mode = 2
+        if finish_mode == "translate": ui_mode = 0  # 截图翻译不用 UI 检测 (Jane 2026-11-25): 要译的文字块常跨窗口/气泡, 窗口与元素吸附会跟拖拽抢选区, 一律自由框选
         top_windows = self._enum_top_windows() if ui_mode else []
         snap_rects = [r for _, r in top_windows]  # Windows 下枚举真实窗口; 其他系统为空, 自动退回自由框选
         hwnd_of = {r: h for h, r in top_windows}
@@ -3484,7 +3536,23 @@ class App(tk.Tk):
         state = {"x": 0, "y": 0, "rect": None, "snap": None, "hex": "", "phase": "select",
                  "box": None, "ops": [], "op_items": [], "undone": [], "tool": None,
                  "color": "#FF0000", "width": 3, "drag": None, "tb": None}
+        def apply_uia(rect, pt):
+            """UIA 悬停结果 (已回到主线程) 应用校验: 覆盖层还在框选阶段、没在拖拽、鼠标没跑远、
+            矩形罩得住当前鼠标点、不是占满整窗的假框、且比当前吸附框更小, 才换上。"""
+            try:
+                if state.get("phase") != "select" or state.get("pressed"): return
+                mx, my = state.get("mx"), state.get("my")
+                if mx is None or abs(mx - pt[0]) > 12 or abs(my - pt[1]) > 12: return
+                if not rect or not (rect[0] <= mx <= rect[2] and rect[1] <= my <= rect[3]): return
+                win = self.pick_window(mx, my, snap_rects)
+                if not win or not self._plausible_element(rect, win): return
+                cur = state.get("snap")
+                if cur and (rect[2] - rect[0]) * (rect[3] - rect[1]) >= (cur[2] - cur[0]) * (cur[3] - cur[1]): return
+                state["snap"] = rect; state["uia_rect"] = rect
+                canvas.delete("snap"); canvas.create_rectangle(*rect, outline="#1E90FF", width=2, tags="snap")
+            except Exception: pass
         def show_info(e, extra=""):
+            state["mx"], state["my"] = e.x, e.y
             _now = time.time()
             if _now - state.get("_info_t", 0) < 0.033: return  # 节流到约 30 帧/秒: 放大镜每帧要裁图+缩放+画网格, 不节流截图时明显发卡
             state["_info_t"] = _now
@@ -3497,7 +3565,16 @@ class App(tk.Tk):
                         child = self._smallest_child_rect(hwnd_of.get(snap), e.x, e.y)
                         state["child_key"] = key; state["child_rect"] = child
                     child = state.get("child_rect")
-                    if child and (child[2] - child[0]) * (child[3] - child[1]) < (snap[2] - snap[0]) * (snap[3] - snap[1]): snap = child
+                    if child and self._plausible_element(child, snap): snap = child  # 假框过滤: 占满整窗的子矩形是内容容器, 不是控件
+                    ukey = (e.x // 8, e.y // 8, snap)
+                    if state.get("uia_key") != ukey:  # 悬停 UIA: 位置格或所在窗口变了才查常驻桥, 结果异步回来由 apply_uia 校验换框
+                        state["uia_key"] = ukey
+                        gen = state["uia_gen"] = state.get("uia_gen", 0) + 1
+                        def _cb(r, _gen=gen, _pt=(e.x, e.y)):
+                            if state.get("uia_gen") == _gen: apply_uia(r, _pt)
+                        self._uia_bridge_query_async(e.x, e.y, _cb)
+                    u = state.get("uia_rect")  # 已查到的 UIA 框还罩得住鼠标就继续用它, 免得每帧被窗口框顶回去闪烁
+                    if u and u[0] <= e.x <= u[2] and u[1] <= e.y <= u[3] and self._plausible_element(u, snap): snap = u
                 state["snap"] = snap
                 canvas.delete("snap")
                 if snap: canvas.create_rectangle(*snap, outline="#1E90FF", width=2, tags="snap")  # 识别线: 蓝色实线 (用户反馈黄色刺眼、虚线不如实线清楚, 对照 PixPin)
@@ -3550,14 +3627,31 @@ class App(tk.Tk):
                 sel_win.after(900, lambda: canvas.delete("copied"))
         sel_win.bind("<KeyPress>", on_key); sel_win.focus_set()
         self._force_foreground(sel_win)  # 抢键盘焦点, 保证框选阶段 Esc/+/-/C 都落在截图窗上
-        def down(e): state.update(x=e.x, y=e.y); canvas.delete("snap"); show_info(e)
+        def down(e):
+            state.update(x=e.x, y=e.y, drag_xy=(e.x, e.y), pressed=True); canvas.delete("snap")
+            if ui_mode and snap_rects:  # 拖拽磁吸的候选边线: 全部窗口边 + (元素模式) 当前窗口子控件边与已知的 UIA/吸附框边
+                ex, ey = [], []
+                for r in snap_rects: ex += [r[0], r[2]]; ey += [r[1], r[3]]
+                if ui_mode == 2:
+                    w0 = self.pick_window(e.x, e.y, snap_rects)
+                    if w0:
+                        for r in self._enum_child_rects(hwnd_of.get(w0)): ex += [r[0], r[2]]; ey += [r[1], r[3]]
+                    for rr in (state.get("uia_rect"), state.get("snap")):
+                        if rr: ex += [rr[0], rr[2]]; ey += [rr[1], rr[3]]
+                state["mag"] = (ex, ey)
+            show_info(e)
         def drag(e):
+            ax, ay = e.x, e.y
+            if state.get("mag"): ax, ay = self._magnet(e.x, e.y, state["mag"][0], state["mag"][1])  # 边缘磁吸: 8px 内贴到最近的候选边线
+            state["drag_xy"] = (ax, ay)
             if state["rect"]: canvas.delete(state["rect"])
-            state["rect"] = canvas.create_rectangle(state["x"], state["y"], e.x, e.y, outline="#1E90FF", width=2)
-            show_info(e, f"| {self.t('snip_sel', '选区')} {abs(e.x-state['x'])}x{abs(e.y-state['y'])}")
+            state["rect"] = canvas.create_rectangle(state["x"], state["y"], ax, ay, outline="#1E90FF", width=2)
+            show_info(e, f"| {self.t('snip_sel', '选区')} {abs(ax-state['x'])}x{abs(ay-state['y'])}")
         canvas.bind("<Motion>", show_info)
         def up(e):
-            box = (min(state["x"], e.x), min(state["y"], e.y), max(state["x"], e.x), max(state["y"], e.y))
+            state["pressed"] = False
+            ex, ey = state.get("drag_xy", (e.x, e.y))  # 用磁吸后的角点定框 (没拖动时 drag_xy 就是按下点, 单击判定不受影响)
+            box = (min(state["x"], ex), min(state["y"], ey), max(state["x"], ex), max(state["y"], ey))
             if box[2] - box[0] <= 5 and box[3] - box[1] <= 5 and state.get("snap"):
                 box = tuple(state["snap"])
                 if ui_mode == 2:  # 检测元素: 单击时用 UI Automation 把选区精修到真正的控件 (按钮/输入框等)
@@ -3766,9 +3860,9 @@ class App(tk.Tk):
             tk.Button(r2, text="OCR", font=("Microsoft YaHei", 9), relief="flat", bg="#F2F2F2",
                       command=lambda: self.recognize(self.render_ops(full.crop(state["box"]), state["ops"]), "ocr")).pack(side="left", padx=1)
             tk.Button(r2, text=self.t("snip_translate_btn2", "翻译"), font=("Microsoft YaHei", 9), relief="flat", bg="#F2F2F2",
-                      command=lambda: self.translate_image_inplace(self.render_ops(full.crop(state["box"]), state["ops"]), anchor=state["box"])).pack(side="left", padx=1)
+                      command=lambda: self.translate_image_inplace(self.render_ops(full.crop(state["box"]), state["ops"]), anchor=state["box"], route="annotate")).pack(side="left", padx=1)
             tk.Button(r2, text=self.t("snip_ai_btn", "AI翻译"), font=("Microsoft YaHei", 9), relief="flat", bg="#F2F2F2",
-                      command=lambda: self.ai_translate_image(self.render_ops(full.crop(state["box"]), state["ops"]))).pack(side="left", padx=1)
+                      command=lambda: self.ai_translate_image(self.render_ops(full.crop(state["box"]), state["ops"]), route="annotate")).pack(side="left", padx=1)
             def do_watermark():
                 _suspend_esc()  # 对话框打开期间摘全局 Esc (同取色器)
                 params = self._ask_watermark(sel_win, state["color"])
@@ -3927,7 +4021,7 @@ class App(tk.Tk):
             adj_menu.add_command(label=self.t("menu_saveas", "另存为 (Ctrl+S)"), command=lambda: finish("save"))
             adj_menu.add_separator()
             adj_menu.add_command(label=self.t("menu_ocr", "OCR 识别"), command=lambda: self.recognize(self.render_ops(full.crop(state["box"]), state["ops"]), "ocr"))
-            adj_menu.add_command(label=self.t("menu_trans_img", "翻译图中文字"), command=lambda: self.translate_image_inplace(self.render_ops(full.crop(state["box"]), state["ops"]), anchor=state["box"]))
+            adj_menu.add_command(label=self.t("menu_trans_img", "翻译图中文字"), command=lambda: self.translate_image_inplace(self.render_ops(full.crop(state["box"]), state["ops"]), anchor=state["box"], route="annotate"))
             adj_menu.add_separator()
             adj_menu.add_command(label=self.t("menu_cancel_snip", "取消截图 (Esc)"), command=close_overlay)
             canvas.bind("<Button-3>", lambda e: adj_menu.tk_popup(e.x_root, e.y_root))
@@ -4033,8 +4127,8 @@ class App(tk.Tk):
         menu = tk.Menu(win, tearoff=0)
         menu.add_command(label=self.t("pin_annotate", "标注这张图"), command=lambda: (win.destroy(), self.open_editor(state["img"])))
         menu.add_command(label=self.t("pin_ocr", "OCR 识别这张图"), command=lambda: self.recognize(state["img"], "ocr"))
-        menu.add_command(label=self.t("menu_trans_img", "翻译图中文字"), command=lambda: self.translate_image_inplace(state["img"]))
-        menu.add_command(label=self.t("ai_img_title", "AI 看图翻译"), command=lambda: self.ai_translate_image(state["img"]))
+        menu.add_command(label=self.t("menu_trans_img", "翻译图中文字"), command=lambda: self.translate_image_inplace(state["img"], route="annotate"))
+        menu.add_command(label=self.t("ai_img_title", "AI 看图翻译"), command=lambda: self.ai_translate_image(state["img"], route="annotate"))
         menu.add_command(label=self.t("pin_code", "扫这张图的码"), command=lambda: self.recognize(state["img"], "code"))
         menu.add_command(label=self.t("pin_rotate", "旋转 90°"), command=lambda: (state.update(img=state["img"].rotate(-90, expand=True)), render()))
         alpha = tk.Menu(menu, tearoff=0)
@@ -4360,6 +4454,43 @@ class App(tk.Tk):
             user32.EnumChildWindows(hwnd, CB(cb), 0)
             return min(found, key=lambda r: (r[2] - r[0]) * (r[3] - r[1])) if found else None
         except Exception: return None
+    @staticmethod
+    def _plausible_element(rect, win_rect):
+        """元素候选合理性过滤 (Jane 实拍吐槽检测不准后加): 占了窗口 85% 以上的子矩形多半是
+        内容容器 (如浏览器渲染区) 而不是控件, 画出来只会误导; 太小的碎片也不是元素。纯逻辑。"""
+        if not rect or not win_rect: return False
+        w, h = rect[2] - rect[0], rect[3] - rect[1]
+        ww, wh = win_rect[2] - win_rect[0], win_rect[3] - win_rect[1]
+        if w < 4 or h < 4 or ww <= 0 or wh <= 0: return False
+        if w * h >= ww * wh: return False
+        return (w * h) < 0.85 * (ww * wh)
+    @staticmethod
+    def _magnet(x, y, edges_x, edges_y, thr=8):
+        """拖拽边缘磁吸 (PixPin 式): 角点离某条候选边线 <=thr px 就贴上去, 两轴独立取最近。纯逻辑。"""
+        def near(v, edges):
+            best, bd = v, thr + 1
+            for e in edges:
+                d = abs(v - e)
+                if d < bd: best, bd = e, d
+            return best
+        return near(x, edges_x), near(y, edges_y)
+    @staticmethod
+    def _enum_child_rects(hwnd):
+        """枚举 hwnd 的全部可见子窗口矩形 (给拖拽磁吸备候选边线); 非 Windows/失败返回空"""
+        if sys.platform != "win32" or not hwnd: return []
+        try:
+            import ctypes.wintypes as wt
+            user32 = ctypes.windll.user32; out = []
+            CB = ctypes.WINFUNCTYPE(ctypes.c_bool, wt.HWND, wt.LPARAM)
+            def cb(h, _):
+                try:
+                    if user32.IsWindowVisible(h):
+                        r = wt.RECT(); user32.GetWindowRect(h, ctypes.byref(r))
+                        if r.right > r.left and r.bottom > r.top: out.append((r.left, r.top, r.right, r.bottom))
+                except Exception: pass
+                return True
+            user32.EnumChildWindows(hwnd, CB(cb), 0); return out
+        except Exception: return []
     # UI Automation 取元素矩形脚本 (与 OCR 同一条 PowerShell 桥, 系统自带能力, 零依赖)
     _WIN_UIA_PS1 = (
         "Add-Type -AssemblyName UIAutomationClient; Add-Type -AssemblyName UIAutomationTypes; "
@@ -4382,6 +4513,70 @@ class App(tk.Tk):
             return (l, t, r, b) if r - l >= 4 and b - t >= 4 else None
         except Exception: return None
 
+    # 常驻 UIA 桥脚本: 进程活着反复读坐标行、回矩形行; 冷启动只付一次, 悬停查询只要几十毫秒
+    _WIN_UIA_LOOP_PS1 = (
+        "Add-Type -AssemblyName UIAutomationClient; Add-Type -AssemblyName UIAutomationTypes; "
+        "while (($line = [Console]::In.ReadLine()) -ne $null) { "
+        "try { $p = $line.Split(','); "
+        "$el = [System.Windows.Automation.AutomationElement]::FromPoint((New-Object System.Windows.Point([int]$p[0], [int]$p[1]))); "
+        "if ($el) { $r = $el.Current.BoundingRectangle; [Console]::Out.WriteLine(\"$([int]$r.Left),$([int]$r.Top),$([int]$r.Right),$([int]$r.Bottom)\") } "
+        "else { [Console]::Out.WriteLine('') } } catch { [Console]::Out.WriteLine('') }; [Console]::Out.Flush() }")
+    def _uia_bridge_query_async(self, x, y, cb):
+        """悬停 UIA 查询入口: 把 (x, y, cb) 丢给桥工作线程; 结果经 _ui_queue 回主线程调 cb(rect|None)。
+        非 Windows 直接返回 (悬停退回纯 Win32 路径); 桥的任何故障都静默, 绝不影响截图主流程。"""
+        if sys.platform != "win32": return
+        import threading
+        try:
+            if getattr(self, "_uia_q", None) is None:
+                import queue as _q
+                self._uia_q = _q.Queue(); self._uia_proc = None
+                threading.Thread(target=self._uia_bridge_run, daemon=True).start()
+            self._uia_q.put((int(x), int(y), cb))
+        except Exception: pass
+    def _uia_bridge_run(self):
+        """桥工作线程: 只查最新位置 (积压的旧点全丢), 进程死了下次查询自动重拉"""
+        import subprocess
+        while True:
+            try: x, y, cb = self._uia_q.get()
+            except Exception: return
+            try:
+                while True: x, y, cb = self._uia_q.get_nowait()
+            except Exception: pass
+            rect = None
+            try:
+                proc = getattr(self, "_uia_proc", None)
+                if proc is None or proc.poll() is not None:
+                    proc = subprocess.Popen(["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", self._WIN_UIA_LOOP_PS1],
+                                            stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True,
+                                            encoding="utf-8", errors="ignore", creationflags=0x08000000)  # CREATE_NO_WINDOW
+                    self._uia_proc = proc
+                proc.stdin.write(f"{x},{y}\n"); proc.stdin.flush()
+                parts = self._uia_readline(proc).strip().split(",")
+                if len(parts) == 4:
+                    l, t, r, b = (int(v) for v in parts)
+                    if r - l >= 4 and b - t >= 4: rect = (l, t, r, b)
+            except Exception:
+                try:
+                    if getattr(self, "_uia_proc", None): self._uia_proc.kill()
+                except Exception: pass
+                self._uia_proc = None
+            try: self._ui_queue.put(lambda: cb(rect))
+            except Exception: pass
+    def _uia_readline(self, proc, timeout=2.5):
+        """带超时地读桥一行: 个别应用的无障碍树会让 UIA 查询一直挂起, 无超时的 readline 会把桥工作线程
+        永久堵死 (悬停检测整场失效、桥进程也成孤儿)。超时就杀进程 (读线程随之 EOF 退出), 下次查询自动重拉新桥。"""
+        import threading
+        box = {}
+        def rd():
+            try: box["line"] = proc.stdout.readline()
+            except Exception: box["line"] = ""
+        th = threading.Thread(target=rd, daemon=True); th.start(); th.join(timeout)
+        if th.is_alive():
+            try: proc.kill()
+            except Exception: pass
+            if getattr(self, "_uia_proc", None) is proc: self._uia_proc = None
+            return ""
+        return box.get("line") or ""
     # ---------- OCR / 扫码 (v1.2, 可选引擎, 没装时优雅提示) ----------
     _ocr_engine = None  # RapidOCR 实例缓存: 旧版每次识别都重建引擎、重加载模型 (数秒), 只建一次
     _ocr_engine_broken = False  # RapidOCR 加载失败过就不再重试: 坏的安装每次重试都要白等几秒
@@ -4843,14 +5038,27 @@ try {
         ttk.Button(btns, text=self.t("cmn_save", "保存"), command=do_save).pack(side="left", padx=4)
         load_fields()
     # ---------- AI 视觉接口 (看图翻译/智能回复): 云端免费接口, OpenAI 兼容格式, 在「AI 设置」里选服务填 key ----------
-    _AI_PRESETS = {  # 服务 -> (显示名, 接口地址, 默认模型)
+    _AI_PRESETS = {  # 服务 -> (显示名, 接口地址, 默认模型); 全部走 OpenAI 兼容的 /chat/completions, Jane 2026-11-25 要求补齐主流厂商
         "zhipu": ("智谱 GLM-4V-Flash (免费)", "https://open.bigmodel.cn/api/paas/v4", "glm-4v-flash"),
         "bailian": ("阿里云百炼 Qwen-VL", "https://dashscope.aliyuncs.com/compatible-mode/v1", "qwen-vl-plus"),
         "siliconflow": ("硅基流动 Qwen2.5-VL", "https://api.siliconflow.cn/v1", "Qwen/Qwen2.5-VL-7B-Instruct"),
+        "openai": ("OpenAI GPT-4o", "https://api.openai.com/v1", "gpt-4o"),
+        "gemini": ("Google Gemini", "https://generativelanguage.googleapis.com/v1beta/openai", "gemini-2.0-flash"),
+        "claude": ("Anthropic Claude", "https://api.anthropic.com/v1", "claude-sonnet-4-5-20250929"),
+        "deepseek": ("DeepSeek (深度求索)", "https://api.deepseek.com/v1", "deepseek-chat"),
+        "moonshot": ("Kimi (Moonshot)", "https://api.moonshot.cn/v1", "moonshot-v1-8k-vision-preview"),
+        "volcengine": ("火山方舟 豆包", "https://ark.cn-beijing.volces.com/api/v3", "doubao-1-5-vision-pro-32k-250115"),
+        "hunyuan": ("腾讯混元", "https://api.hunyuan.cloud.tencent.com/v1", "hunyuan-vision"),
+        "qianfan": ("百度千帆 文心", "https://qianfan.baidubce.com/v2", "ernie-4.5-turbo-vl"),
+        "xai": ("xAI Grok", "https://api.x.ai/v1", "grok-2-vision"),
+        "ollama": ("Ollama 本地/自建", "http://localhost:11434/v1", "qwen2.5vl"),
         "custom": ("自定义 (OpenAI 兼容接口)", "", ""),
     }
     _AI_NAMES_EN = {"zhipu": "Zhipu GLM-4V-Flash (Free)", "bailian": "Alibaba Bailian Qwen-VL",
-                    "siliconflow": "SiliconFlow Qwen2.5-VL", "custom": "Custom (OpenAI-compatible API)"}
+                    "siliconflow": "SiliconFlow Qwen2.5-VL", "openai": "OpenAI GPT-4o", "gemini": "Google Gemini",
+                    "claude": "Anthropic Claude", "deepseek": "DeepSeek", "moonshot": "Kimi (Moonshot)",
+                    "volcengine": "Volcengine Doubao", "hunyuan": "Tencent Hunyuan", "qianfan": "Baidu Qianfan ERNIE",
+                    "xai": "xAI Grok", "ollama": "Ollama (Local / Self-hosted)", "custom": "Custom (OpenAI-compatible API)"}
 
     def _ai_preset_name(self, key):
         if self.lang == "English": return self._AI_NAMES_EN.get(key, key)
@@ -4872,14 +5080,29 @@ try {
         if svc not in self._AI_PRESETS: svc = "zhipu"
         _name, pbase, pmodel = self._AI_PRESETS[svc]
         pre = svc.capitalize()
-        return {"service": svc, "key": g(pre + "Key") or g("ApiKey"),
-                "base": g(pre + "Base") or g("BaseUrl") or pbase,
-                "model": g(pre + "Model") or g("Model") or pmodel}
+        # 通用 ApiKey/Model/BaseUrl 是「当前服务」的镜像, 只许当前服务本人用: 旧版对任何服务都回退到它,
+        # 读别家配置时把当前服务的 key/地址/模型全串了过去 (表单里别家字段会显示当前服务的 key, 分工会把请求发错地方)
+        active = svc == (g("Service", "zhipu") or "zhipu")
+        return {"service": svc, "key": g(pre + "Key") or (g("ApiKey") if active else ""),
+                "base": g(pre + "Base") or (g("BaseUrl") if active else "") or pbase,
+                "model": g(pre + "Model") or (g("Model") if active else "") or pmodel}
+    _AI_ROUTES = {"chat": "RouteChat", "vision": "RouteVision", "reply": "RouteReply", "text": "RouteText", "annotate": "RouteAnnotate"}
+    def _ai_cfg_for(self, route):
+        """按「分工」设置取某个功能用的 AI 配置 (Jane 2026-11-25 要求多 AI 分工): 分工里给这个功能指定了
+        服务、且那家填了 key, 就用那家; 没指定/指定无效/那家没 key, 一律跟随当前服务, 永不因分工报错。"""
+        rk = self._AI_ROUTES.get(route or "")
+        if rk:
+            svc = (self.cfg.get("AI", rk, fallback="") or "").strip()
+            if svc in self._AI_PRESETS:
+                c = self._ai_cfg(svc)
+                if c["key"]: return c
+        return self._ai_cfg()
     def _ai_store(self):
         """AI 设置窗打开时把四家服务的已存值都读出来 (切来切去互不丢失)"""
         return {k: [c["key"], c["model"], c["base"]] for k in self._AI_PRESETS for c in [self._ai_cfg(k)]}
-    def _save_ai_settings(self, active_svc, store):
-        """把四家服务的值分别存好, 再把当前服务镜像到通用 ApiKey/Model/BaseUrl, 最后落盘"""
+    def _save_ai_settings(self, active_svc, store, routes=None):
+        """把四家服务的值分别存好, 再把当前服务镜像到通用 ApiKey/Model/BaseUrl, 最后落盘;
+        routes 给了就一并存分工 ({RouteChat: 服务键或空串}, 空串=跟随当前服务)"""
         if not self.cfg.has_section("AI"): self.cfg.add_section("AI")
         for svc, (k, m, b) in store.items():
             pre = svc.capitalize()
@@ -4887,6 +5110,8 @@ try {
         k, m, b = store[active_svc]
         self.cfg.set("AI", "Service", active_svc)
         self.cfg.set("AI", "ApiKey", k); self.cfg.set("AI", "Model", m); self.cfg.set("AI", "BaseUrl", b)
+        if routes:
+            for rk, sv in routes.items(): self.cfg.set("AI", rk, sv)
         self.save_config()
     @staticmethod
     def _ai_image_dataurl(img):
@@ -4896,19 +5121,19 @@ try {
         if m > 1600: im = im.resize((max(1, round(w * 1600 / m)), max(1, round(h * 1600 / m))), Image.LANCZOS)
         buf = io.BytesIO(); im.save(buf, "JPEG", quality=82)
         return "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode("ascii")
-    def _ai_chat_image(self, img, prompt, cfg=None, temperature=0.7, timeout=90):
+    def _ai_chat_image(self, img, prompt, cfg=None, temperature=0.7, timeout=90, route=None):
         """把图+提示词发给视觉模型, 返回模型回复的纯文本; 配置缺失/接口出错抛 RuntimeError (带人话原因)。
         只用标准库 urllib, 不加新依赖; 调用方必须在后台线程里调 (网络往返几秒起)。
         cfg 可显式传入 (设置窗的「测试」用窗里还没保存的值): 旧版靠临时改 self.cfg 实现,
         测试期间用户若触发了任何一次保存, 没点保存的测试 key 就会被写进 Config.ini。"""
         return self._ai_chat_messages([{"role": "user", "content": [
             {"type": "text", "text": prompt},
-            {"type": "image_url", "image_url": {"url": self._ai_image_dataurl(img)}}]}], cfg=cfg, temperature=temperature, timeout=timeout)
-    def _ai_chat_messages(self, messages, cfg=None, temperature=0.7, max_tokens=1024, timeout=90):
+            {"type": "image_url", "image_url": {"url": self._ai_image_dataurl(img)}}]}], cfg=cfg, temperature=temperature, timeout=timeout, route=route)
+    def _ai_chat_messages(self, messages, cfg=None, temperature=0.7, max_tokens=1024, timeout=90, route=None):
         """把一组 OpenAI 格式消息发给当前 AI 服务, 返回回复纯文本 (看图/纯文本会话共用); 配置缺失/出错抛 RuntimeError。
         只用标准库 urllib; 调用方必须在后台线程里调。cfg 显式传入时用传入值 (设置窗测试用), 不碰 self.cfg。"""
         import urllib.request, urllib.error, json as _json
-        cfg = cfg or self._ai_cfg()
+        cfg = cfg or (self._ai_cfg_for(route) if route else self._ai_cfg())
         if not cfg["key"]: raise RuntimeError("还没填 AI 接口的 API Key: 「系统设置」窗口的「AI 设置」区里选服务、填 key 即可 (智谱 GLM-4V-Flash 免费)。")
         if not cfg["base"] or not cfg["model"]: raise RuntimeError("AI 设置里的接口地址/模型名没填完整, 先到「系统设置」里的「AI 设置」区补上。")
         if cfg.get("service") == "zhipu": max_tokens = max(1, min(int(max_tokens), 1024))  # 智谱 glm-4v-flash 的 max_tokens 只许 [1,1024]: 聊天面板传 2048 会被 400 拒绝 (Jane 真机 2026-11-25 实测 code 1210)
@@ -4933,9 +5158,9 @@ try {
         if isinstance(content, list):  # 个别服务把回复拆成片段数组
             content = "".join(str(p.get("text", "")) for p in content if isinstance(p, dict))
         return (content or "").strip()
-    def _ai_ready(self):
-        """用 AI 功能前先看 key 填没填: 没填就问一句要不要现在去设置"""
-        if self._ai_cfg()["key"]: return True
+    def _ai_ready(self, route=None):
+        """用 AI 功能前先看 key 填没填 (route 给了就看分工后实际要用的那家): 没填就问一句要不要现在去设置"""
+        if (self._ai_cfg_for(route) if route else self._ai_cfg())["key"]: return True
         if messagebox.askyesno(self.t("ai_no_key_title", "AI 功能"), self.t("ai_no_key_msg", "还没填 AI 接口的 API Key。\n推荐用智谱 GLM-4V-Flash: 免费, 到 open.bigmodel.cn 注册后在控制台创建 API Key 即可。\n\n现在去设置?")):
             self.open_system_settings()
         return False
@@ -4988,15 +5213,30 @@ try {
         ttk.Button(btns, text=self.t("cmn_test", "测试"), command=do_test).pack(side="left", padx=4)
         def do_save():
             stash()
-            self._save_ai_settings(cur["service"], store)
+            routes = {rk: ("" if var.get() == follow_text else inv_names.get(var.get(), "")) for rk, var in route_vars.items()}
+            self._save_ai_settings(cur["service"], store, routes)
             self.status.set(f"{self.t('ai_saved2', 'AI 服务已保存')}: {names[cur['service']]} / {store[cur['service']][1]}")
             test_var.set(self.t("cmn_saved", "已保存 ✓"))
         ttk.Button(btns, text=self.t("cmn_save", "保存"), command=do_save).pack(side="left", padx=4)
+        follow_text = self.t("ai_route_follow", "跟随当前服务")
+        inv_names = {v: k for k, v in names.items()}
+        route_defs = [("RouteChat", "ai_route_chat", "AI 聊天"), ("RouteVision", "ai_route_vision", "看图翻译"),
+                      ("RouteAnnotate", "ai_route_annotate", "标注栏 AI"), ("RouteReply", "ai_route_reply", "智能回复"),
+                      ("RouteText", "ai_route_text", "文本翻译")]
+        rframe = ttk.LabelFrame(parent, text=self.t("ai_route_frame", "分工 (哪个功能用哪个 AI)"))
+        rframe.grid(row=7, column=0, columnspan=2, padx=8, pady=(2, 8), sticky="w")
+        route_vars = {}
+        for i, (rk, lk, lz) in enumerate(route_defs):
+            ttk.Label(rframe, text=self.t(lk, lz) + ":").grid(row=i, column=0, sticky="e", padx=6, pady=3)
+            cur_r = (self.cfg.get("AI", rk, fallback="") or "").strip()
+            var = tk.StringVar(value=names.get(cur_r, follow_text))
+            ttk.Combobox(rframe, textvariable=var, values=[follow_text] + list(names.values()), width=30, state="readonly").grid(row=i, column=1, sticky="w", pady=3)
+            route_vars[rk] = var
         load_fields()
     # ---------- AI 功能: 看图翻译 / 智能回复 ----------
-    def ai_translate_image(self, img):
+    def ai_translate_image(self, img, route="vision"):
         """AI 看图翻译: 视觉模型直接看整张图翻译 (理解版面和上下文, 艺术字/复杂排版比 OCR 逐行翻得准); 后台线程跑"""
-        if not self._ai_ready(): return
+        if not self._ai_ready(route): return
         if getattr(self, "_ai_busy", False):  # 上一张图还在等模型回复: 别重复发请求、叠结果窗
             self.status.set(self.t("ai_busy", "AI 正在处理上一张图, 稍等它回复完再试")); return
         self._ai_busy = True
@@ -5004,7 +5244,7 @@ try {
         import threading
         def work():
             try:
-                res = self._ai_chat_image(img, self._AI_TRANSLATE_PROMPT, temperature=0.3)  # 翻译要稳, 温度调低少发挥
+                res = self._ai_chat_image(img, self._AI_TRANSLATE_PROMPT, temperature=0.3, route=route)  # 翻译要稳, 温度调低少发挥
                 self._ui_queue.put(lambda: (setattr(self, "_ai_busy", False), self._show_ai_translate(img, res)))
             except Exception as e:
                 msg = str(e)
@@ -5046,15 +5286,15 @@ try {
         return out[:3] if out else []
     def snip_ai_translate(self):
         """看图翻译 (截图工具栏「AI翻译」/贴图右键菜单入口): 先查 key, 再框选一张图 -> AI 直接读图翻译"""
-        if not self._ai_ready(): return
+        if not self._ai_ready("vision"): return
         self._snip_finish_mode = "ai"; self.snip_region()
 
     def snip_reply(self):
         """智能回复: 框选聊天区域 -> AI 读懂对话给 3 条候选 -> 点一条直接粘进刚才的聊天窗口"""
-        if not self._ai_ready(): return  # 先查 key: 没填就别让用户白框选一趟, 截完才弹窗问
+        if not self._ai_ready("reply"): return  # 先查 key: 没填就别让用户白框选一趟, 截完才弹窗问
         self._snip_finish_mode = "reply"; self.snip_region()
     def ai_smart_reply(self, img):
-        if not self._ai_ready(): return
+        if not self._ai_ready("reply"): return
         if getattr(self, "_ai_busy", False):
             self.status.set(self.t("ai_busy", "AI 正在处理上一张图, 稍等它回复完再试")); return
         self._ai_busy = True
@@ -5062,7 +5302,7 @@ try {
         import threading
         def work():
             try:
-                res = self._ai_chat_image(img, self._AI_REPLY_PROMPT)
+                res = self._ai_chat_image(img, self._AI_REPLY_PROMPT, route="reply")
                 cands = self._parse_replies(res) or ([res] if res else [])
                 self._ui_queue.put(lambda: (setattr(self, "_ai_busy", False), self._show_reply_candidates(img, cands)))
             except Exception as e:
@@ -6050,11 +6290,11 @@ try {
     def _ai_text_translate(self, text, target, source=None):
         """文本翻译的 AI 通道 (Jane 2026-11-25 13:54 要求, 与 F4 同款合并引擎): 配了 Key 先让大模型译——懂上下文, 质量优于免费接口;
         没配 Key / 接口出错 / 返回空, 一律 None, 调用方回退在线翻译通道。必须在后台线程里调。"""
-        cfg = self._ai_cfg()
+        cfg = self._ai_cfg_for("text")
         if not cfg["key"]: return None
         src_hint = f"原文是{self._tgt_name(source)}, " if source else ""
         prompt = f"{src_hint}把下面这段文字翻译成{self._tgt_name(target)}, 只输出译文, 不要加任何解释、引号或原文:\n{text}"
-        try: r = self._ai_chat_messages([{"role": "user", "content": prompt}], timeout=15)
+        try: r = self._ai_chat_messages([{"role": "user", "content": prompt}], timeout=15, route="text")
         except Exception: return None
         return r if (r and r.strip()) else None  # 纯空白也是真值字符串: 旧版原样返回, 面板显示空白还报成功、不回退在线通道 (审查发现)
     def _tt_go(self):
@@ -6294,7 +6534,7 @@ try {
         再点一次, 或点面板顶栏的「返回」, 切回主界面。没填 key 时先弹提示带去系统设置, 不切换"""
         if getattr(self, "_ai_view_on", False):
             self._show_main_view(); return
-        if not self._ai_ready(): return
+        if not self._ai_ready("chat"): return
         self._show_ai_panel()
 
     def _wheel_bind(self, on):
@@ -6539,7 +6779,7 @@ try {
             cid_ref = getattr(self, "_ai_chat_id", None)
             def work():
                 try:
-                    r = self._ai_chat_messages(msgs, max_tokens=2048)
+                    r = self._ai_chat_messages(msgs, max_tokens=2048, route="chat")
                     def done():
                         busy["on"] = False
                         if self._ai_chat_history is hist_ref:
@@ -6765,10 +7005,10 @@ try {
                 for i, r in ex.map(_one, need):
                     if r: translations[i] = r; any_ok = True
         return translations, any_ok
-    def _ai_vision_translate(self, img, target):
+    def _ai_vision_translate(self, img, target, route="vision"):
         """F4 合并引擎的 AI 通道 (Jane 2026-11-25 13:41 定案): 配了 Key 先让视觉模型一次读图+翻译——不经 OCR 逐字认, 认字即译最准;
         没配 Key / 接口出错 / 回复格式不对 / 图里没可译文字, 一律返回 None, 调用方立刻走 OCR 通道。必须在后台线程里调。"""
-        cfg = self._ai_cfg()
+        cfg = self._ai_cfg_for(route)
         if not cfg["key"]: return None
         if target:
             prompt = (f"识别图片中的全部文字, 并翻译成{self._tgt_name(target)}。输出格式严格如下, 不要输出任何其他内容, 也不要给原文和译文加任何标题或标签:\n"
@@ -6776,7 +7016,7 @@ try {
         else:
             prompt = ("识别图片中的全部文字: 如果主要是中文就翻译成英文, 否则翻译成中文。输出格式严格如下, 不要输出任何其他内容, 也不要给原文和译文加任何标题或标签:\n"
                       "先输出识别到的原文 (保留原来的换行), 然后单独一行只写 ===, 最后输出译文 (换行尽量与原文一一对应)。")
-        try: r = self._ai_chat_image(img, prompt, timeout=20)
+        try: r = self._ai_chat_image(img, prompt, timeout=20, route=route)
         except Exception: return None
         if not r or "===" not in r: return None
         orig_part, tr_part = r.split("===", 1)
@@ -6821,7 +7061,7 @@ try {
         if w is not None:
             try: w.destroy()
             except Exception: pass
-    def translate_image_inplace(self, img, target=None, anchor=None):
+    def translate_image_inplace(self, img, target=None, anchor=None, route="vision"):
         """有道式截图翻译: OCR 每行文字+位置 -> 逐行翻译 -> 译文绘回原图 -> 弹翻译结果窗 (可切换目标语言/对照开关)。
         拿不到行坐标时回退到原来的纯文字翻译流程。"""
         import threading
@@ -6837,7 +7077,7 @@ try {
             import concurrent.futures
             pool = concurrent.futures.ThreadPoolExecutor(max_workers=1)
             ocr_fut = pool.submit(self.ocr_lines, img)  # OCR 与 AI 并行先跑: AI 失效时回退零等待 (AI 成功则这份结果不用)
-            ai = self._ai_vision_translate(img, target)  # 合并引擎: AI 看图优先, 失效 (含没配 Key) 立刻回退下面的 OCR 通道
+            ai = self._ai_vision_translate(img, target, route=route)  # 合并引擎: AI 看图优先, 失效 (含没配 Key) 立刻回退下面的 OCR 通道; route 决定用哪家 AI (F4=vision, 标注栏/贴图=annotate)
             if ai is not None:
                 pool.shutdown(wait=False)
                 lines, translations, tgt = ai
@@ -6902,7 +7142,7 @@ try {
         后台用截图向 AI 要 3 条候选, 渲染进 reply_box (粘贴=关承载窗+隐藏主窗+粘回刚才的窗口, 复制, 换一批)。
         on_layout 在每次渲染后调用 (浮动条靠它重新对齐选区; 结果窗不需要)。"""
         import threading
-        if not self._ai_ready(): return  # 没填 Key: 它会提示并带去系统设置
+        if not self._ai_ready("reply"): return  # 没填 Key: 它会提示并带去系统设置
         if getattr(self, "_ai_busy", False):
             busy_var.set(self.t("tr_busy_short", "AI 正在处理上一张图, 稍等它回复完")); return
         self._ai_busy = True
@@ -6935,7 +7175,7 @@ try {
             if on_layout: on_layout()
         def work():
             try:
-                res = self._ai_chat_image(img, self._AI_REPLY_PROMPT)
+                res = self._ai_chat_image(img, self._AI_REPLY_PROMPT, route="reply")
                 cands = self._parse_replies(res) or ([res] if res else [])
                 self._ui_queue.put(lambda: show_cands(cands))
             except Exception as e:
@@ -7061,48 +7301,53 @@ try {
         bar.bind("<Destroy>", lambda e: setattr(self, "_trans_bar", None) if e.widget is bar and getattr(self, "_trans_bar", None) is bar else None)
         try: bar.focus_force()
         except Exception: pass
-        root = tk.Frame(bar, bg=self.UI_SURFACE, highlightthickness=1, highlightbackground="#B9C8D8")
+        # Jane 2026-11-25 定版: 原文框与译文框彻底分开成两个独立框, 中间留透明间隔;
+        # 原文框整框全透明 (不带白边白底, 只一圈细框线, 透出的就是选区本身);
+        # 两框等宽且都等于选区宽, 左边对齐 —— 旧版是一整张白卡片套着透明区, 选区外全是白边, 译文框宽度还是估的, 两框对不齐。
+        RBG = MAGIC if MAGIC else self.UI_BG
+        root = tk.Frame(bar, bg=RBG)
         root.pack(fill="both", expand=True)
         ax1, ay1, ax2, ay2 = anchor
         sel_w = max(120, ax2 - ax1)
+        sel_h = max(24, ay2 - ay1)
         wch = max(30, min(110, int(sel_w / 9)))  # 框宽跟着选区宽 (字符数近似)
         def _disp_w(s):
             return sum(2 if ord(ch) > 0x2E7F else 1 for ch in s)
-        def _dl(content, cap):
-            return max(1, min(cap, sum(max(1, math.ceil(_disp_w(ln) / max(10, wch))) for ln in content.split("\n"))))
+        wch_tran = max(24, int(wch * 11 / 13))  # 译文字号更大, 每行字符数按比例减 (只用于估行数/高度, 宽度由定宽框保证)
+        def _tran_lines(content):
+            return max(1, min(12, sum(max(1, math.ceil(_disp_w(ln) / max(10, wch_tran))) for ln in content.split("\n"))))
         orig_txt = "\n".join(l["t"] for l in lines)
         tran_txt = "\n".join(st["translations"])
-        oh = _dl(orig_txt, 10)
-        th = max(1, min(12, sum(max(1, math.ceil(_disp_w(ln) / max(10, int(wch * 11 / 13)))) for ln in tran_txt.split("\n"))))
-        # 翻转判定: 译文+工具条放选区下方还够不够 (估算: 译文字号 13 行高约 24, 工具条约 36)
-        flip = (ay2 + th * 24 + 44 > bar.winfo_screenheight() - 4) and (ay1 - (th * 24 + 44) >= 4)
-        def _text_box(parent, content, height, font_size, fg, width_chars):
-            t = tk.Text(parent, width=width_chars, height=height, wrap="word", font=self._ui_font(font_size),
-                        bg=self.UI_SURFACE, fg=fg, relief="solid", bd=1, padx=8, pady=5,
-                        insertbackground=self.UI_ACCENT)
-            t.insert("1.0", content)
-            t.pack(side="left")
-            return t
+        th = _tran_lines(tran_txt)
+        # 翻转判定: 译文框+工具条放选区下方还够不够 (估算: 译文行高约 24, 工具条约 40, 两个间隔共 12)
+        need = th * 24 + 64
+        flip = (ay2 + need > bar.winfo_screenheight() - 4) and (ay1 - need >= 4)
         reply_box = ttk.Frame(root); reply_box.pack(side="bottom", fill="x")  # AI 回复候选区 (先占位, 空着不占高)
-        strip = tk.Frame(root, bg=self.UI_BG)
-        orig_wrap = tk.Frame(root, bg=self.UI_SURFACE)
-        tran_wrap = tk.Frame(root, bg=self.UI_SURFACE)
-        if flip:  # 译文翻到选区上方: [译文][工具条][原文]
-            tran_wrap.pack(side="top", fill="x", pady=(6, 0)); strip.pack(side="top", fill="x", pady=(6, 0)); orig_wrap.pack(side="top", fill="x", pady=(6, 6))
-        else:     # 常规: [原文][译文][工具条]
-            orig_wrap.pack(side="top", fill="x", pady=(6, 0)); tran_wrap.pack(side="top", fill="x", pady=(6, 0)); strip.pack(side="top", fill="x", pady=(6, 0))
-        wch_tran = max(24, int(wch * 11 / 13))  # 译文字号更大, 字符数按比例减, 两框像素宽才对齐
-        orig_wrap.configure(highlightthickness=1, highlightbackground="#B9C8D8")
+        orig_card = tk.Frame(root, bg=(MAGIC if MAGIC else self.UI_SURFACE), width=sel_w, height=sel_h,
+                             highlightthickness=1, highlightbackground="#7AA5D8")
+        orig_card.pack_propagate(False)
+        tran_hold = tk.Frame(root, bg=self.UI_SURFACE, width=sel_w, height=th * 24 + 12,
+                             highlightthickness=1, highlightbackground="#B9C8D8")
+        tran_hold.pack_propagate(False)
+        strip = tk.Frame(root, bg=self.UI_BG, highlightthickness=1, highlightbackground="#B9C8D8")
+        def _gap():
+            tk.Frame(root, bg=RBG, height=6).pack(side="top", fill="x")
+        if flip:  # 译文翻到选区上方: [工具条][译文框][原文框], 原文框仍对准选区
+            strip.pack(side="top", anchor="w"); _gap(); tran_hold.pack(side="top", anchor="w"); _gap(); orig_card.pack(side="top", anchor="w")
+        else:     # 常规: [原文框][译文框][工具条]
+            orig_card.pack(side="top", anchor="w"); _gap(); tran_hold.pack(side="top", anchor="w"); _gap(); strip.pack(side="top", anchor="w")
         if MAGIC:
-            orig_text = None
-            zone = tk.Frame(orig_wrap, bg=MAGIC, width=sel_w, height=max(24, ay2 - ay1))  # 透明区就是选区本身大小: 透出的正好是你框住的那块真实内容
-            zone.pack(side="left"); zone.pack_propagate(False)
-            bar._bar_orig = zone
-        else:
-            orig_text = _text_box(orig_wrap, orig_txt, oh, 11, self.UI_TEXT, wch)
-            bar._bar_orig = orig_text
+            orig_text = None  # 原文框整框透明: 里面什么都不放, 透出的真实截图就是原文 (最准, 也不重复印字)
+            bar._bar_orig = orig_card
+        else:  # 无透明能力的平台 (开发机): 回退成识别文本框, 尺寸仍与译文框一致
+            orig_text = tk.Text(orig_card, wrap="word", font=self._ui_font(11), bg=self.UI_SURFACE, fg=self.UI_TEXT,
+                                relief="flat", bd=0, padx=8, pady=5, insertbackground=self.UI_ACCENT)
+            orig_text.insert("1.0", orig_txt); orig_text.pack(fill="both", expand=True)
+            bar._bar_orig = orig_card
         bar._bar_orig_txt = orig_txt
-        tran_text = _text_box(tran_wrap, tran_txt, th, 13, self.UI_TEXT, wch_tran)
+        tran_text = tk.Text(tran_hold, wrap="word", font=self._ui_font(13), bg=self.UI_SURFACE, fg=self.UI_TEXT,
+                            relief="flat", bd=0, padx=8, pady=5, insertbackground=self.UI_ACCENT)
+        tran_text.insert("1.0", tran_txt); tran_text.pack(fill="both", expand=True)
         bar._bar_tran = tran_text
         state = {"moved": False}
         def place():
@@ -7114,7 +7359,7 @@ try {
                     px = min(max(0, bar.winfo_x()), max(0, sw - ww)); py = min(max(0, bar.winfo_y()), max(0, sh - wh))
                 else:
                     px = ax1
-                    py = ay1 - (orig_wrap.winfo_y() + 1)  # 原文框对准选区 (+1 是 root 的高亮边)
+                    py = ay1 - orig_card.winfo_y()  # 原文框对准选区 (root 已无边框, 不用再补 1px)
                     if py + wh > sh - 4: py = max(4, sh - wh - 4)
                     if py < 4: py = 4
                     if px + ww > sw - 4: px = sw - ww - 4
@@ -7155,8 +7400,9 @@ try {
         def _bar_apply(trs):
             new_txt = "\n".join(trs)
             tran_text.delete("1.0", "end"); tran_text.insert("1.0", new_txt)
-            tran_text.configure(height=max(1, min(12, sum(max(1, math.ceil(_disp_w(ln) / max(10, wch_tran))) for ln in new_txt.split("\n")))))
+            tran_hold.configure(height=_tran_lines(new_txt) * 24 + 12)
             place()
+
         tgt_var.trace_add("write", retranslate)
         src_var.trace_add("write", retranslate)
         drag = {}
@@ -7284,19 +7530,16 @@ try {
         grid = self._gallery_grid
         for c in grid.winfo_children(): c.destroy()
         self._gallery_photos = []
+        gen = getattr(self, "_gallery_gen", 0) + 1; self._gallery_gen = gen  # 旧一轮的分批填充靠代号作废, 防切面板/重渲染后还往旧格子里塞图
         all_files = self._gallery_files()
         files = all_files[:60]  # 只展示最近 60 个, 防几百个时全量解码卡顿
         self._gallery_count_var.set(f"{self.t('gal_total_pre', '共')} {len(all_files)} {self.t('gal_total_suf', '个')}" + (self.t("gal_recent60", " (只显示最近 60 个)") if len(all_files) > 60 else ""))
         if not files:
             ttk.Label(grid, text=self.t("gal_empty", "还没有截图, 先按 F1 截一张")).pack(padx=20, pady=20); return
+        cells = []
         for i, name in enumerate(files):
             cell = ttk.Frame(grid); cell.grid(row=i // 4, column=i % 4, padx=8, pady=8)
-            try:
-                with Image.open(os.path.join(self.shots_dir, name)) as im: thumb = im.copy()  # 必须关句柄: Windows 下开着的文件删不掉, 画廊里刚看过的图会删了又冒出来 (审查发现)
-                thumb.thumbnail((160, 110))
-                photo = ImageTk.PhotoImage(thumb); self._gallery_photos.append(photo)
-                tk.Label(cell, image=photo).pack()
-            except Exception: pass
+            img_lbl = tk.Label(cell); img_lbl.pack()
             label = ("GIF " if name.lower().endswith(".gif") else "") + (name[5:20] if name.startswith("shot_") else name[4:19])
             ttk.Label(cell, text=label, font=("", 8)).pack()
             btns = ttk.Frame(cell); btns.pack()
@@ -7306,6 +7549,20 @@ try {
                 except Exception: pass
                 cell.destroy(); self.refresh_shots(); self._gallery_render()
             ttk.Button(btns, text=self.t("cmn_delete", "删除"), width=6, command=delete).pack(side="left", padx=1)
+            cells.append((img_lbl, name))
+        def fill(start=0):
+            if getattr(self, "_gallery_gen", 0) != gen: return
+            for img_lbl, name in cells[start:start + 10]:
+                try:
+                    with Image.open(os.path.join(self.shots_dir, name)) as im:  # 原地缩略 (旧版先整图 copy 再缩, 白拷一遍全图); PhotoImage 已拷贝像素, 原图立刻关, 不占句柄
+                        im.thumbnail((160, 110))
+                        photo = ImageTk.PhotoImage(im)
+                    self._gallery_photos.append(photo); img_lbl.config(image=photo)
+                except Exception: pass
+            if start + 10 < len(cells):
+                try: self.after(10, lambda: fill(start + 10))
+                except Exception: pass
+        fill()  # 缩略图解码分批做: 60 张全尺寸截图一张张解码要几秒, 旧版同步全做完才显示, 打开画廊像卡死; 现在格子先出、图分批跟上
     def _gallery_delete_all(self):
         files = self._gallery_files()
         if not files:
@@ -7387,6 +7644,8 @@ try {
 
     def _show_main(self):
         self.deiconify(); self.lift()
+        try: self.update_idletasks()  # 先把第一帧的布局算完, 别让恢复中的窗口拿半成品尺寸去绘制 (闪黑的另一半)
+        except Exception: pass
         try: self.focus_force()
         except Exception: pass
 
@@ -7414,6 +7673,9 @@ try {
             self._tray = None
         try:
             import keyboard; keyboard.unhook_all()
+        except Exception: pass
+        try:
+            if getattr(self, "_uia_proc", None): self._uia_proc.kill()  # 常驻 UIA 桥进程随软件一起退, 不留孤儿
         except Exception: pass
         self.destroy()
 
