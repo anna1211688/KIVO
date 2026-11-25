@@ -33,6 +33,8 @@ jobs:
           path: dist/SPST.exe
       - name: Install Inno Setup
         run: choco install innosetup -y --no-progress
+      - name: Fetch Chinese installer language file
+        run: Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jrsoftware/issrc/main/Files/Languages/ChineseSimplified.isl" -OutFile "C:\Program Files (x86)\Inno Setup 6\Languages\ChineseSimplified.isl"
       - name: Build installer
         run: '& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DAppVersion=1.4.27 SPST.iss'
       - name: Publish release v1.4.27
