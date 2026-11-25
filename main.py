@@ -1436,7 +1436,8 @@ _BTN_ICONS_B64 = {
     "gear": "iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAD5klEQVR4nLWUT4jVVRTHv+fce3/vvRnGHExpoj+LIOGBM8ErsSJ+o0VjOeXqB4ENisZr0yaGVlnDMIhItiiIYFCzhbaYwcVo5bgoZxGE+iCHHF1WJkOaZaH2fr977zkt5k9jTY4EneXhns+559+XcGdGaTpgAGBiYjDcYcz/Y7SYM8syM1KtanoSPDExGNZu3LIs59ZXEeLPZ0/s/wgApWlquru7ZWpqikZGRuIdgRfa6he3t5UKOp6UWp5QACG/+d7Dbb/3Lwa7HZgAoKtn+5vWlTfkzZt7nePL7Cqnfd5sMrMTifnk+P1tXRsvbWbrXhOff3l2/MCu2XidA/HC8gFoZ8+Ona7SOqSQ9TZJPpVIa3zR/I6ZS8RsQDjf+eyl5421Rwi6wVVahzp7duwEoLOMW8Ej1epcthckhBiKIocKQPohVFepikoIEUAXsYzF4DX4IpfgBUS9f2Ms+PHUFCHLDBHtBtSQ4ZKKKJhLRNTCbJitMwSyABEAEJFTVYLqHgCUnvyL94/hrVuXVW4ua0nZJKOq2gIVZZdw9MV5IrrGbB4XEUA1srVGYtF37Q8Z/X7i4+YiwxtgDACdX1/aayxvkxi+VaXHiJAY4zhqeMv+xHsajWHf+dwrvUw0qiIJQFDIaSZ+CKAzxlx/uXHsk6sAwGmaWmBQuk79uDUpl18XkXY2yVNEKDMbDuKnzn62b1ejMexrtbqb/HzfMRE9bGxCqiLGuLWqWGGTck/wlb0AFGlq+Pr11TP9EtwDACqSqwSoqhAzoPgNgNbqdedcq51ZKr1MRABBRSJUJVeJUOJ7F7aCAMWaTVuWm9hy1LjkSV/kV0DaTiBmNhQlbp48vv8oANR66w+EqGcIuFtVAOAXY90KEZkWCZsmjx/4ZgADRAsSaK1Wd9KBR6MPXcT8LlTLABEReVE5zMAVJdpGRCslSjTWmhh8vzP2qxvxxg8Xxg9Nz7Hm1kPTdMA2GsM+FvEuY5P3oagAIFUVVUmsS7axK71BmIESgSUGMdbt9iG2Xxg/NF2r1d3c9c3v3UQ3BAARY4gIRlUKADDWGYAQfB6CbwZVUWOtmU3qicgRYwhQavR2zOvHrQcCqCrG2Do2LimxsSTR9ynklDHOErFVxdUYfD8Rw7pSia0jVYwBpLOMRQ9kXoTYldZHX3wwOb7/SOfGHb8yuE00BuOSkhb5I0p0n3Xl/uCbXywmQkvK5oPp1vLyij3qyi3PSIyIobgSYqidO3Hw4u3i7GLOLMtMtVrVkzNC31z1dN9LnvkdEK9UlbfPnTh4sVaru0ZvR8z+Rej/qy1Z6ZIP5t5lWcbArDQODspSAX8Cm0TtanseiCAAAAAASUVORK5CYII=",
     "star": "iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAACeUlEQVR4nNWUQUhUURSG/3PfffNmTGdMxRQ3ErhoxsVkkW0EayEEtRxo0SIiWhRCRfvnrFyVqNUqaNUiWhpEKyMS2pQtzAgXtQkRLH0zOE/fu++cFk8Tx4EZI5DO6t7Lf7/733PPucDhhxBE6LBdNBKxy/Zr71ra7nztiZfqO1d1uYVYY5pbb5jIuACAMVj1ttXPmSsKANJrXz6CcDylg+6V+/mN+CYkjYPdWQ0Mx+NfSxbafkTp1a48OfZ7UtoiU7m4lll5je+9Gr29Jha+AYrnzMEcA2i9/fkp7OarEAaHlZelydylenu2wfG1Wm4ttquEvgMQi9kypEgBcCB0F4oSAEE48okwCWBLWJi0owFRHJiJ8qPszx3WrmNXFJY/WOlU6rrSqceUzEDCDYA0ZNMDsJ1OIpCTAcSA7COQTQ9s/Jsl33+C7lMRisQ1UhGflhn9dBKJ9CsCjklYCUHK3ivjkOwmW4AVBKUL3nR+vvoxq8qNBK5obzo/z+H6kEg0RzqpIcK7UGHSSS0SzXG4PuRN5+fhiq6ukP11XCSDwkKiPDWwpAJ/HNohEARABEgEQKAdUoE/Xp4aWEJhIYEimWpM7QbJ5hiuq1jrkdiJGLJTFjlpKz6AhLUegesqZHNcC1EbPIYIizkCR2chTJQ86nDgv5Wt8jNymhMgIjAPYjFHGEPUIFgUiKSjp7+T7KYzwpHHQWW0tHzivDeZvcJRcFnM5jLs1GBHT38niASQfZz94EJcKYHwsJCaEd44XZroe4gXYBTEKj3oex76qwMQmglku0ULjTUaAKDp3reuPxN3Vtca79EcLIR2PqG9y0I73+nfQf+J5n+J39QzDLg7vrq5AAAAAElFTkSuQmCC",
 }  # 按钮小图标 (22px, PIL 手绘线条风: 图标+文字并排, 与常见软件一致)
-VERSION = "1.4.20"  # v1.4.20: 瘦身版, 功能零变化 — 打包侧剔除未用组件 (cv2 视频插件/级联数据、numpy 测试集、onnxruntime 的 transformers/tools/quantization/datasets/backend), 已模拟验证删除后 OCR 中英文识别正常
+VERSION = "1.4.21"  # v1.4.21: 稳定性加固六项 (功能不变): ①崩溃日志 (主线程/后台线程/Tk 回调三路异常 + faulthandler, 写 crash.log) ②系统设置新增「软件自检」(七项逐项查) ③数据备份/恢复 (一键导出 zip, 导入后无保存退出防回写) ④记录列表增量刷新 (追加/单改/交换只动变动行) ⑤记录保存合并落盘 (600ms 防抖, 退出/隐藏立即刷盘) ⑥配置保存核查为原子写 (原已实现, 未动)
+# v1.4.20: 瘦身版, 功能零变化 — 打包侧剔除未用组件 (cv2 视频插件/级联数据、numpy 测试集、onnxruntime 的 transformers/tools/quantization/datasets/backend), 已模拟验证删除后 OCR 中英文识别正常
 # v1.4.19: ①AI 面板侧边栏去掉「AI 功能」快捷入口组 (功能本体全保留) ②修复 v1.4.18 的 F4 截图翻译主流程 (_translate_lines 误标 @staticmethod 致后台线程静默失败) ③记录上限改硬线 (全锁定时不再突破 2000) ④截图翻译目标语言扩到 13 种 ⑤内嵌微型浏览器 (WebView2 子进程收编: 谷歌翻译主页/书签栏前 8+书签管理/浏览历史/清除数据/页面缩放/下载说明) ⑥文本翻译面板 (打字停笔 350ms 自动翻译, 无缓存每次实时译) + 工具栏按序重排为两行并配线条图标 ⑦品牌头重排 (系统设置移左上挨着 SPST, 副标题「多功能工作台」居中, 右上留空) + 软件图标换 Jane 的樱花小女孩原图 ⑧窗口最小高度解锁 (最大化/缩放恢复正常) ⑨全界面双语化补齐 (约 330 条文案入语言文件, 英文模式复检残留中文 0 条) + 第八轮深查 (线程/网络/浏览器生命周期/热键英文保存往返全过)
 # v1.4.18: ①截图翻译修复 (OCR 碎片合并+整段翻译, 结果窗改纯文本) ②翻译结果窗内嵌 AI 智能回复 ③AI/热键/翻译设置全并入系统设置 ④AI 功能改内嵌面板+豆包式侧边栏+最近对话存档 (圆角气泡) ⑤主窗口简约重设计 (方角) ⑥货币汇率 ⑦计算器 ⑧常用语库面板化+序号 ⑨世界时间 (全球城市自选+当地天气) ⑩无水印下载 (FB/IG/小红书等, 保存位置可每次询问或固定) ⑪历史截图保存设置 (张数/不保存, 含 GIF) ⑫移除网络搜索 ⑬三轮深查整改: AI 回复防串话/时钟计时链/天气失败重试/设置窗滚轮隔离/下载实际文件名/汇率过期刷新/AI 回复增量渲染 (320ms→24ms)/单实例保护/单对话存档封顶 200 条
 # v1.4.7: 新增一键截图翻译 (F4 预设, 自动检测源语言, 目标语言主窗口可设中文/English) + v1.4.6 的工具栏同窗/图片复制双通道/窗口自适应高度
@@ -1472,6 +1473,45 @@ PHRASES_PATH = os.path.join(BASE, "phrases.json")
 BOOKMARKS_PATH = os.path.join(BASE, "bookmarks.json")
 BROWSER_HISTORY_PATH = os.path.join(BASE, "browser_history.json")  # 浏览器访问历史 (菜单里查看/清空)  # 浏览器书签 (与常用语库同款存法: 原子写 + .bak)  # 常用语库: 与临时队列分开存, 不被删全部/去重/上限清理影响
 AI_CHATS_PATH = os.path.join(BASE, "ai_chats.json")  # AI 最近对话: 多个对话存档, 与常用语库同款存法
+
+CRASH_LOG_PATH = os.path.join(BASE, "crash.log")
+_crash_seen = {}
+def _log_crash(where, exc_type, exc, tb):
+    """把异常写进 crash.log (主线程/后台线程/Tk 回调三路都往这汇): 打包成 EXE 后没有控制台,
+    异常不落盘就永远查不到 (v1.4.18 的 F4 静默失败就是这么藏了很久)。同一错误 60 秒内只记一次, 防刷屏;
+    文件超过约 1MB 时只留尾部。日志本身出错绝不能影响程序。"""
+    try:
+        import traceback as _tb
+        text = "".join(_tb.format_exception(exc_type, exc, tb)) if exc_type else str(exc)
+        key = (where, text.strip().splitlines()[-1] if text.strip() else "")
+        now = time.time()
+        if now - _crash_seen.get(key, 0) < 60: return
+        _crash_seen[key] = now
+        try:
+            if os.path.exists(CRASH_LOG_PATH) and os.path.getsize(CRASH_LOG_PATH) > 1_000_000:
+                tail = open(CRASH_LOG_PATH, encoding="utf-8", errors="replace").read()[-200_000:]
+                _atomic_write(CRASH_LOG_PATH, tail)
+        except Exception: pass
+        with open(CRASH_LOG_PATH, "a", encoding="utf-8") as f:
+            f.write(f"\n===== {time.strftime('%Y-%m-%d %H:%M:%S')} [{where}] =====\n{text}\n")
+    except Exception: pass
+def _install_crash_logging():
+    """装三路异常钩子 + C 级崩溃记录 (faulthandler): sys 钩子管主线程未捕获异常,
+    threading 钩子管后台线程 (翻译/下载/识别都在后台, 以前异常直接消失), faulthandler 管原生库硬崩溃。"""
+    import threading
+    def _sys_hook(exc_type, exc, tb):
+        _log_crash("main", exc_type, exc, tb)
+        sys.__excepthook__(exc_type, exc, tb)
+    sys.excepthook = _sys_hook
+    def _thr_hook(args):
+        _log_crash(f"thread:{getattr(args.thread, 'name', '?')}", args.exc_type, args.exc_value, args.exc_traceback)
+    threading.excepthook = _thr_hook
+    try:
+        import faulthandler
+        fh = open(os.path.join(BASE, "crash_native.log"), "a", encoding="utf-8")
+        faulthandler.enable(file=fh)
+        globals()["_faulthandler_file"] = fh  # 保住句柄别被回收
+    except Exception: pass
 
 def _atomic_write(path, text):
     """原子写: 先写临时文件再 os.replace 换名。直接覆盖写时若断电/崩溃, 文件会写一半损坏,
@@ -1665,12 +1705,14 @@ class App(tk.Tk):
             self.minsize(min(620, w), min(500, h))  # 最小高度只保底 500: 窗口可自由缩放/最大化, 标题栏 ─ ▢ ✕ 都是系统标准按钮
             self.resizable(True, True)
         except Exception: pass
+    def report_callback_exception(self, exc, val, tb):
+        _log_crash("tk-callback", exc, val, tb)  # 只记录不弹窗: 回调异常不该把软件带崩, 但必须留痕可查
     def _poll_ui_queue(self):
         try:
             while True:
                 fn = self._ui_queue.get_nowait()
                 try: fn()
-                except Exception: pass
+                except Exception as e: _log_crash("ui-queue", type(e), e, e.__traceback__)
         except queue.Empty: pass
         try: self.after(15, self._poll_ui_queue)
         except tk.TclError: pass
@@ -2230,9 +2272,125 @@ class App(tk.Tk):
         self._build_translate_form(tfrm)
         hkfrm = ttk.LabelFrame(frm, text=self.t("hotkey_settings", "热键设置")); hkfrm.pack(fill="x", pady=(8, 2))
         self._build_hotkey_form(win, hkfrm)
+        cfrm = ttk.LabelFrame(frm, text=self.t("set_check_frame", "软件自检")); cfrm.pack(fill="x", pady=(8, 2))
+        ttk.Button(cfrm, text=self.t("chk_run", "开始自检"), command=self._open_selfcheck).pack(anchor="w", padx=6, pady=6)
+        bfrm = ttk.LabelFrame(frm, text=self.t("set_backup_frame", "数据备份")); bfrm.pack(fill="x", pady=(8, 2))
+        brow2 = ttk.Frame(bfrm); brow2.pack(fill="x", padx=6, pady=(6, 2))
+        ttk.Button(brow2, text=self.t("bak_export", "导出备份"), command=self._backup_export_dialog).pack(side="left")
+        ttk.Button(brow2, text=self.t("bak_import", "导入备份"), command=self._backup_import_dialog).pack(side="left", padx=6)
+        ttk.Label(bfrm, text=self.t("bak_note", "备份包含设置、复制记录、常用语、书签、浏览历史、AI 对话等全部数据 (含你填过的密钥, 请妥善保管)。导入备份后软件会立即关闭且不保存当前状态, 重新打开即是备份里的数据。"), foreground="#888888", wraplength=560, justify="left").pack(anchor="w", padx=6, pady=(0, 6))
         win.update_idletasks()
         cap = max(420, win.winfo_screenheight() - 170)  # 内容再多, 窗口也不超过屏幕 (剩下的靠滚动)
         cv.configure(width=frm.winfo_reqwidth(), height=min(frm.winfo_reqheight(), cap))
+    # ---------- 软件自检 ----------
+    def _open_selfcheck(self):
+        win = tk.Toplevel(self); win.title(self.t("chk_title", "软件自检")); win.resizable(False, False)
+        frm = tk.Frame(win, background="#FFFFFF"); frm.pack(fill="both", expand=True, padx=16, pady=14)
+        items = [("data", "chk_data_dir", "数据目录可写"), ("config", "chk_config", "配置文件完好"),
+                 ("records", "chk_records", "记录数据完好"), ("ocr", "chk_ocr", "OCR 识别引擎"),
+                 ("translate", "chk_translate", "翻译通道"), ("browser", "chk_browser", "浏览器组件"),
+                 ("hotkey", "chk_hotkey", "全局热键")]
+        vars_ = {}
+        for key, lk, zh in items:
+            row = ttk.Frame(frm); row.pack(fill="x", pady=3)
+            ttk.Label(row, text=self.t(lk, zh), width=18).pack(side="left")
+            v = tk.StringVar(value=self.t("chk_wait", "检测中…")); vars_[key] = v
+            ttk.Label(row, textvariable=v).pack(side="left")
+        ttk.Button(frm, text=self.t("cmn_close", "关闭"), command=win.destroy).pack(anchor="e", pady=(10, 0))
+        def set_row(k, ok, extra=""):
+            def apply():
+                if not win.winfo_exists(): return
+                vars_[k].set((self.t("chk_ok", "正常") if ok else self.t("chk_bad", "异常")) + (f" — {extra}" if extra else ""))
+            self._ui_queue.put(apply)
+        def work():
+            try:
+                p = os.path.join(BASE, ".selfcheck.tmp")
+                with open(p, "w", encoding="utf-8") as f: f.write("ok")
+                os.remove(p); set_row("data", True)
+            except Exception as e: set_row("data", False, str(e)[:50])
+            try:
+                cp = configparser.ConfigParser(strict=False); cp.read(CONFIG_PATH, encoding="utf-8-sig")
+                set_row("config", len(cp.sections()) > 0)
+            except Exception as e: set_row("config", False, str(e)[:50])
+            ok = False
+            for p in (RECORDS_PATH, RECORDS_PATH + ".bak"):
+                try:
+                    if os.path.exists(p) and isinstance(json.loads(open(p, encoding="utf-8").read()), list): ok = True; break
+                except Exception: pass
+            set_row("records", ok)
+            try: set_row("ocr", self._rapid_engine() is not None)
+            except Exception as e: set_row("ocr", False, str(e)[:50])
+            try: set_row("translate", self.translate_text_to("hello", "zh-CN") is not None)
+            except Exception as e: set_row("translate", False, str(e)[:50])
+            try:
+                import importlib.util
+                okb = importlib.util.find_spec("webview") is not None
+                if okb and sys.platform == "win32":
+                    try:
+                        import winreg
+                        k = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}")
+                        winreg.CloseKey(k)
+                    except Exception: okb = False
+                set_row("browser", okb)
+            except Exception as e: set_row("browser", False, str(e)[:50])
+            n = len(getattr(self, "_hk_handles", []) or [])
+            if n: set_row("hotkey", True, f"{n}{self.t('chk_count_suffix', ' 个已注册')}")
+            else: set_row("hotkey", False, self.t("chk_hotkey_note", "仅窗口内热键 (全局热键未注册)"))
+        import threading
+        threading.Thread(target=work, daemon=True).start()
+    # ---------- 数据备份/恢复 ----------
+    _BACKUP_FILES = ["Config.ini", "records.json", "records.json.bak", "phrases.json", "phrases.json.bak",
+                     "bookmarks.json", "bookmarks.json.bak", "browser_history.json", "ai_chats.json"]
+    def _export_backup(self, path):
+        import zipfile
+        with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as z:
+            z.writestr("spst_backup.json", json.dumps({"app": "SPST", "version": VERSION, "time": time.strftime("%Y-%m-%d %H:%M:%S")}, ensure_ascii=False))
+            for name in self._BACKUP_FILES:
+                p = os.path.join(BASE, name)
+                if os.path.exists(p): z.write(p, name)
+    def _import_backup(self, path):
+        import zipfile
+        with zipfile.ZipFile(path) as z:
+            if "spst_backup.json" not in z.namelist(): raise ValueError("not an SPST backup")
+            for name in self._BACKUP_FILES:
+                if name in z.namelist():
+                    tmp = os.path.join(BASE, name + ".tmp")
+                    with open(tmp, "wb") as f: f.write(z.read(name))
+                    os.replace(tmp, os.path.join(BASE, name))
+    def _backup_export_dialog(self):
+        path = filedialog.asksaveasfilename(title=self.t("bak_export_title", "保存备份文件"),
+                                            defaultextension=".zip", filetypes=[("ZIP", "*.zip")],
+                                            initialfile=f"SPST_backup_{time.strftime('%Y%m%d')}.zip")
+        if not path: return
+        try:
+            self.save_records(immediate=True); self.save_config()  # 先把最新数据刷盘再打包, 备份不落下刚加的记录
+            self._export_backup(path)
+            self.status.set(f"{self.t('bak_exported', '备份已导出')}: {path}")
+        except Exception as e:
+            messagebox.showerror(self.t("bak_done_title", "备份"), str(e), parent=self)
+    def _backup_import_dialog(self):
+        path = filedialog.askopenfilename(title=self.t("bak_import_title", "选择备份文件"), filetypes=[("ZIP", "*.zip")])
+        if not path: return
+        if not messagebox.askyesno(self.t("bak_done_title", "备份"), self.t("bak_confirm", "导入将覆盖当前的设置、记录、常用语、书签和 AI 对话, 且软件会立即关闭 (不保存当前状态), 确定继续?"), parent=self): return
+        try: self._import_backup(path)
+        except Exception:
+            messagebox.showerror(self.t("bak_done_title", "备份"), self.t("bak_bad_file", "不是有效的 SPST 备份文件"), parent=self); return
+        messagebox.showinfo(self.t("bak_done_title", "备份"), self.t("bak_imported", "备份已导入, 软件现在关闭; 重新打开 SPST 即生效"), parent=self)
+        self._quit_no_save()
+    def _quit_no_save(self):
+        """导入备份后专用退出: 绝不能走正常退出路径 (那会把内存里的旧数据再写回去覆盖刚导入的备份)。"""
+        _bp = getattr(self, "_browser_proc", None)
+        if _bp is not None:
+            try: _bp.terminate()
+            except Exception: pass
+        if self._tray is not None:
+            try: self._tray.stop()
+            except Exception: pass
+            self._tray = None
+        try:
+            import keyboard; keyboard.unhook_all()
+        except Exception: pass
+        self.destroy()
     # ---------- 常用语库 (长期保存, 与临时复制队列分开; 存 phrases.json, 带 .bak 备份) ----------
     def load_phrases(self):
         self.phrases = []
@@ -2381,14 +2539,38 @@ class App(tk.Tk):
         if not self.winfo_viewable():
             # 主窗口没显示 (在托盘里) 时重建上百行列表看不见也用不上, 每次 F6/F7 都白花几十毫秒:
             # 只标脏, 窗口重新显示时由 <Map> 钩子补刷一次
-            self._list_dirty = True; self._row_iids = []; self._refresh_mini(); return
+            self._list_dirty = True; self._row_iids = []; self._list_state = None; self._refresh_mini(); return
         self._list_dirty = False
-        self.listbox.delete(*self.listbox.get_children()); self._row_iids = []
-        for row, i in enumerate(self._visible):
-            r = self.records[i]
-            prefix = "🔒 " if r["locked"] else ""
-            self._row_iids.append(self.listbox.insert("", "end", values=(i + 1, f"{prefix}{r['text'][:120]}"),
-                                                      tags=("odd",) if row % 2 else ()))
+        snap = [(self.records[i]["text"], self.records[i]["locked"]) for i in self._visible]
+        prev = getattr(self, "_list_state", None)
+        done = False
+        if prev is not None and len(self._row_iids) == len(prev[0]) and len(self.listbox.get_children()) == len(prev[0]):
+            pvis, psnap = prev
+            if len(snap) >= len(psnap) and self._visible[:len(pvis)] == pvis and snap[:len(psnap)] == psnap:
+                # 纯追加 (F6 连按的主场景): 只插新行, 已有行一行不动, 不再整表删了重画
+                for row in range(len(psnap), len(snap)):
+                    i = self._visible[row]
+                    prefix = "🔒 " if snap[row][1] else ""
+                    self._row_iids.append(self.listbox.insert("", "end", values=(i + 1, f"{prefix}{snap[row][0][:120]}"),
+                                                              tags=("odd",) if row % 2 else ()))
+                done = True
+            elif len(snap) == len(psnap) and self._visible == pvis:
+                diff = [r for r in range(len(snap)) if snap[r] != psnap[r]]
+                if len(diff) == 1 or (len(diff) == 2 and snap[diff[0]] == psnap[diff[1]] and snap[diff[1]] == psnap[diff[0]]):
+                    # 单行变化 (锁定切换) 或两行交换 (上移/下移): 只更新变动行
+                    for row in diff:
+                        i = self._visible[row]
+                        prefix = "🔒 " if snap[row][1] else ""
+                        self.listbox.item(self._row_iids[row], values=(i + 1, f"{prefix}{snap[row][0][:120]}"))
+                    done = True
+        if not done:
+            self.listbox.delete(*self.listbox.get_children()); self._row_iids = []
+            for row, i in enumerate(self._visible):
+                r = self.records[i]
+                prefix = "🔒 " if r["locked"] else ""
+                self._row_iids.append(self.listbox.insert("", "end", values=(i + 1, f"{prefix}{r['text'][:120]}"),
+                                                          tags=("odd",) if row % 2 else ()))
+        self._list_state = (list(self._visible), snap)
         self._refresh_mini()
     def load_records(self):
         # 主文件损坏 (异常退出等) 时回退到上次的备份, 别让整个队列静默清零
@@ -2404,7 +2586,24 @@ class App(tk.Tk):
                         return
                 except Exception: continue
         self.records = []
-    def save_records(self):
+    def save_records(self, immediate=False):
+        """记录落盘: 默认合并写 — 600ms 内的多次改动只写一次 (F6 连按时不再每条都全量写两遍文件);
+        immediate=True 立即写 (退出时兜底)。真正的写盘在 _write_records。"""
+        if immediate:
+            self._records_dirty = False
+            self._write_records(); return
+        self._records_dirty = True
+        if not getattr(self, "_records_flush_pending", False):
+            self._records_flush_pending = True
+            try: self.after(600, self._flush_records)
+            except Exception:  # 事件循环不可用 (极早期/已销毁): 直接写, 不能丢
+                self._records_flush_pending = False; self._records_dirty = False; self._write_records()
+    def _flush_records(self):
+        self._records_flush_pending = False
+        if getattr(self, "_records_dirty", False):
+            self._records_dirty = False
+            self._write_records()
+    def _write_records(self):
         text = json.dumps(self.records, ensure_ascii=False, indent=1)
         _atomic_write(RECORDS_PATH, text)
         try: _atomic_write(RECORDS_PATH + ".bak", text)  # 同步留一份备份, 供下次启动损坏时回退
@@ -7067,7 +7266,7 @@ try {
             _sv = (self.sleep_var.get() or "").strip()
             if _sv.isdigit(): self.cfg.set("Config", "SleepTime", _sv)
         except Exception: pass
-        self.save_config(); self.save_records()
+        self.save_config(); self.save_records(immediate=True)
         self.withdraw()
         if not self._tray_notified:
             self._tray_notified = True
@@ -7083,7 +7282,7 @@ try {
         if _bp is not None:
             try: _bp.terminate()
             except Exception: pass
-        self.save_config(); self.save_records()
+        self.save_config(); self.save_records(immediate=True)
         if self._tray is not None:
             try: self._tray.stop()
             except Exception: pass
@@ -7175,6 +7374,7 @@ def _run_browser_host(url):
     except Exception: pass
 
 if __name__ == "__main__":
+    _install_crash_logging()
     if len(sys.argv) >= 3 and sys.argv[1] == "--browser":
         _run_browser_host(sys.argv[2])  # 浏览器子进程: 不走单实例, 不启主程序
     elif _acquire_single_instance(): App().mainloop()
