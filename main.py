@@ -1436,7 +1436,8 @@ _BTN_ICONS_B64 = {
     "gear": "iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAD5klEQVR4nLWUT4jVVRTHv+fce3/vvRnGHExpoj+LIOGBM8ErsSJ+o0VjOeXqB4ENisZr0yaGVlnDMIhItiiIYFCzhbaYwcVo5bgoZxGE+iCHHF1WJkOaZaH2fr977zkt5k9jTY4EneXhns+559+XcGdGaTpgAGBiYjDcYcz/Y7SYM8syM1KtanoSPDExGNZu3LIs59ZXEeLPZ0/s/wgApWlquru7ZWpqikZGRuIdgRfa6he3t5UKOp6UWp5QACG/+d7Dbb/3Lwa7HZgAoKtn+5vWlTfkzZt7nePL7Cqnfd5sMrMTifnk+P1tXRsvbWbrXhOff3l2/MCu2XidA/HC8gFoZ8+Ona7SOqSQ9TZJPpVIa3zR/I6ZS8RsQDjf+eyl5421Rwi6wVVahzp7duwEoLOMW8Ej1epcthckhBiKIocKQPohVFepikoIEUAXsYzF4DX4IpfgBUS9f2Ms+PHUFCHLDBHtBtSQ4ZKKKJhLRNTCbJitMwSyABEAEJFTVYLqHgCUnvyL94/hrVuXVW4ua0nZJKOq2gIVZZdw9MV5IrrGbB4XEUA1srVGYtF37Q8Z/X7i4+YiwxtgDACdX1/aayxvkxi+VaXHiJAY4zhqeMv+xHsajWHf+dwrvUw0qiIJQFDIaSZ+CKAzxlx/uXHsk6sAwGmaWmBQuk79uDUpl18XkXY2yVNEKDMbDuKnzn62b1ejMexrtbqb/HzfMRE9bGxCqiLGuLWqWGGTck/wlb0AFGlq+Pr11TP9EtwDACqSqwSoqhAzoPgNgNbqdedcq51ZKr1MRABBRSJUJVeJUOJ7F7aCAMWaTVuWm9hy1LjkSV/kV0DaTiBmNhQlbp48vv8oANR66w+EqGcIuFtVAOAXY90KEZkWCZsmjx/4ZgADRAsSaK1Wd9KBR6MPXcT8LlTLABEReVE5zMAVJdpGRCslSjTWmhh8vzP2qxvxxg8Xxg9Nz7Hm1kPTdMA2GsM+FvEuY5P3oagAIFUVVUmsS7axK71BmIESgSUGMdbt9iG2Xxg/NF2r1d3c9c3v3UQ3BAARY4gIRlUKADDWGYAQfB6CbwZVUWOtmU3qicgRYwhQavR2zOvHrQcCqCrG2Do2LimxsSTR9ynklDHOErFVxdUYfD8Rw7pSia0jVYwBpLOMRQ9kXoTYldZHX3wwOb7/SOfGHb8yuE00BuOSkhb5I0p0n3Xl/uCbXywmQkvK5oPp1vLyij3qyi3PSIyIobgSYqidO3Hw4u3i7GLOLMtMtVrVkzNC31z1dN9LnvkdEK9UlbfPnTh4sVaru0ZvR8z+Rej/qy1Z6ZIP5t5lWcbArDQODspSAX8Cm0TtanseiCAAAAAASUVORK5CYII=",
     "star": "iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAACeUlEQVR4nNWUQUhUURSG/3PfffNmTGdMxRQ3ErhoxsVkkW0EayEEtRxo0SIiWhRCRfvnrFyVqNUqaNUiWhpEKyMS2pQtzAgXtQkRLH0zOE/fu++cFk8Tx4EZI5DO6t7Lf7/733PPucDhhxBE6LBdNBKxy/Zr71ra7nztiZfqO1d1uYVYY5pbb5jIuACAMVj1ttXPmSsKANJrXz6CcDylg+6V+/mN+CYkjYPdWQ0Mx+NfSxbafkTp1a48OfZ7UtoiU7m4lll5je+9Gr29Jha+AYrnzMEcA2i9/fkp7OarEAaHlZelydylenu2wfG1Wm4ttquEvgMQi9kypEgBcCB0F4oSAEE48okwCWBLWJi0owFRHJiJ8qPszx3WrmNXFJY/WOlU6rrSqceUzEDCDYA0ZNMDsJ1OIpCTAcSA7COQTQ9s/Jsl33+C7lMRisQ1UhGflhn9dBKJ9CsCjklYCUHK3ivjkOwmW4AVBKUL3nR+vvoxq8qNBK5obzo/z+H6kEg0RzqpIcK7UGHSSS0SzXG4PuRN5+fhiq6ukP11XCSDwkKiPDWwpAJ/HNohEARABEgEQKAdUoE/Xp4aWEJhIYEimWpM7QbJ5hiuq1jrkdiJGLJTFjlpKz6AhLUegesqZHNcC1EbPIYIizkCR2chTJQ86nDgv5Wt8jNymhMgIjAPYjFHGEPUIFgUiKSjp7+T7KYzwpHHQWW0tHzivDeZvcJRcFnM5jLs1GBHT38niASQfZz94EJcKYHwsJCaEd44XZroe4gXYBTEKj3oex76qwMQmglku0ULjTUaAKDp3reuPxN3Vtca79EcLIR2PqG9y0I73+nfQf+J5n+J39QzDLg7vrq5AAAAAElFTkSuQmCC",
 }  # 按钮小图标 (22px, PIL 手绘线条风: 图标+文字并排, 与常见软件一致)
-VERSION = "1.4.22"  # v1.4.22: ①去掉内置浏览器整套 (Jane 真机定版不好用: 面板/书签/历史/菜单/pywebview 子进程全删, 工具栏回 8 按钮, 自检减为六项, 打包去 pywebview) ②世界时间加「刷新」(绕过天气 15 分钟节流立即重拉) ③文本翻译框自适应高度 (默认 8 行, 随内容长高至 24 行封顶, 按钮行跟随) ④系统设置/软件自检/历史截图/城市选择全部改为主窗口内面板 (Jane 定版「能收的都收」, 不再弹独立窗口, 重复开窗问题从结构上消除) ⑤启动时清理浏览器残留文件 (bookmarks/browser_history/browser_profile) ⑥工具栏改一行 8 按钮 ⑦截图翻译学有道: F4 出无边框浮动条 (原文区透明盖选区透出真实截图对照/译文框在选区下方、不够翻上方/大小随内容/源语言可选/条内复制原文·译文·AI 智能回复), 完整结果窗保留给无选区入口
+VERSION = "1.4.23"  # v1.4.23: 配置含 % 不再丢整份设置; 剪贴板锁定失败不泄漏; 原子写 fsync; 同行 OCR 框不再裁上沿; 分享链接去掉尾标点; AI 地址仅 http(s); 截图文件名限制在 shots 内
+# v1.4.22: ①去掉内置浏览器整套 (Jane 真机定版不好用: 面板/书签/历史/菜单/pywebview 子进程全删, 工具栏回 8 按钮, 自检减为六项, 打包去 pywebview) ②世界时间加「刷新」(绕过天气 15 分钟节流立即重拉) ③文本翻译框自适应高度 (默认 8 行, 随内容长高至 24 行封顶, 按钮行跟随) ④系统设置/软件自检/历史截图/城市选择全部改为主窗口内面板 (Jane 定版「能收的都收」, 不再弹独立窗口, 重复开窗问题从结构上消除) ⑤启动时清理浏览器残留文件 (bookmarks/browser_history/browser_profile) ⑥工具栏改一行 8 按钮 ⑦截图翻译学有道: F4 出无边框浮动条 (原文区透明盖选区透出真实截图对照/译文框在选区下方、不够翻上方/大小随内容/源语言可选/条内复制原文·译文·AI 智能回复), 完整结果窗保留给无选区入口
 # v1.4.20: 瘦身版, 功能零变化 — 打包侧剔除未用组件 (cv2 视频插件/级联数据、numpy 测试集、onnxruntime 的 transformers/tools/quantization/datasets/backend), 已模拟验证删除后 OCR 中英文识别正常
 # v1.4.19: ①AI 面板侧边栏去掉「AI 功能」快捷入口组 (功能本体全保留) ②修复 v1.4.18 的 F4 截图翻译主流程 (_translate_lines 误标 @staticmethod 致后台线程静默失败) ③记录上限改硬线 (全锁定时不再突破 2000) ④截图翻译目标语言扩到 13 种 ⑤内嵌微型浏览器 (WebView2 子进程收编: 谷歌翻译主页/书签栏前 8+书签管理/浏览历史/清除数据/页面缩放/下载说明) ⑥文本翻译面板 (打字停笔 350ms 自动翻译, 无缓存每次实时译) + 工具栏按序重排为两行并配线条图标 ⑦品牌头重排 (系统设置移左上挨着 SPST, 副标题「多功能工作台」居中, 右上留空) + 软件图标换 Jane 的樱花小女孩原图 ⑧窗口最小高度解锁 (最大化/缩放恢复正常) ⑨全界面双语化补齐 (约 330 条文案入语言文件, 英文模式复检残留中文 0 条) + 第八轮深查 (线程/网络/浏览器生命周期/热键英文保存往返全过)
 # v1.4.18: ①截图翻译修复 (OCR 碎片合并+整段翻译, 结果窗改纯文本) ②翻译结果窗内嵌 AI 智能回复 ③AI/热键/翻译设置全并入系统设置 ④AI 功能改内嵌面板+豆包式侧边栏+最近对话存档 (圆角气泡) ⑤主窗口简约重设计 (方角) ⑥货币汇率 ⑦计算器 ⑧常用语库面板化+序号 ⑨世界时间 (全球城市自选+当地天气) ⑩无水印下载 (FB/IG/小红书等, 保存位置可每次询问或固定) ⑪历史截图保存设置 (张数/不保存, 含 GIF) ⑫移除网络搜索 ⑬三轮深查整改: AI 回复防串话/时钟计时链/天气失败重试/设置窗滚轮隔离/下载实际文件名/汇率过期刷新/AI 回复增量渲染 (320ms→24ms)/单实例保护/单对话存档封顶 200 条
@@ -1512,12 +1513,26 @@ def _install_crash_logging():
         globals()["_faulthandler_file"] = fh  # 保住句柄别被回收
     except Exception: pass
 
+def _ini_scalar(value):
+    """配置值写成一行: 换行或空字符会把 ini 截断成新的键, 保存时直接抹掉。"""
+    return str(value).replace("\r", " ").replace("\n", " ").replace("\x00", "")
+
 def _atomic_write(path, text):
-    """原子写: 先写临时文件再 os.replace 换名。直接覆盖写时若断电/崩溃, 文件会写一半损坏,
-    记录和配置 (含翻译密钥) 就全丢了; 原子写保证磁盘上永远是完整的新版或旧版。"""
-    tmp = path + ".tmp"
-    with open(tmp, "w", encoding="utf-8") as f: f.write(text)
-    os.replace(tmp, path)
+    """原子写: 先写临时文件、刷盘再 os.replace。直接覆盖写时若断电/崩溃, 文件会写一半损坏,
+    记录和配置 (含翻译密钥) 就全丢了; 换名保证磁盘上永远是完整的新版或旧版。"""
+    tmp = f"{path}.{os.getpid()}.tmp"
+    try:
+        with open(tmp, "w", encoding="utf-8") as f:
+            f.write(text)
+            f.flush()
+            try: os.fsync(f.fileno())
+            except OSError: pass
+        os.replace(tmp, path)
+    except Exception:
+        try:
+            if os.path.exists(tmp): os.remove(tmp)
+        except OSError: pass
+        raise
 
 def _migrate_old_data():
     """老数据搬移 (新目录还没有 Config.ini 时才搬, 已存在的文件不覆盖):
@@ -1749,7 +1764,7 @@ class App(tk.Tk):
                                       "bracketleft", "bracketright")
     # ---------- config (兼容原版字段) ----------
     def load_config(self):
-        c = configparser.ConfigParser(strict=False)  # strict=False: 老版本 ini 里万一有重复段, 取最后的值而不是整份配置静默回退默认
+        c = configparser.ConfigParser(strict=False, interpolation=None)  # interpolation=None: API Key / 路径里的 % 不能按插值解析, 否则 set/get 直接失败, 整次保存被吞掉
         defaults = {f"HotKey{i}": "无" for i in range(13)}; defaults.update(DEFAULT_HOTKEYS)
         c.read_dict({"Config": {"SleepTime": "80", "WaveSet": "0", "AutoRun": "0", "Language": "Chinese", "PasteEnter": "0", "PasteRemove": "1",
                                 "MiniFormTime": "5", "MiniFormSet": "0", "AddChar": "1", "LetterSet": "0", "ShowHotKey": "F2"},
@@ -1776,11 +1791,14 @@ class App(tk.Tk):
         )
         p = next((candidate for candidate in candidates if os.path.isfile(candidate)), None)
         if p:
-            lp = configparser.ConfigParser(strict=False)
+            lp = configparser.ConfigParser(strict=False, interpolation=None)
             for enc in ("utf-8-sig", "gbk"):
                 try: lp.read(p, encoding=enc); break
                 except Exception: continue
-            if lp.has_section("UI"): self._strings = dict(lp.items("UI"))
+            try:
+                if lp.has_section("UI"): self._strings = dict(lp.items("UI"))
+            except Exception:
+                self._strings = {}
     def t(self, key, zh):
         return self._strings.get(key, zh).replace("\\n", "\n")  # ini 里多行文案写成 \n 转义, 这里还原
     def save_config(self):
@@ -1807,7 +1825,7 @@ class App(tk.Tk):
             elif cur and "=" in line and not stripped.startswith((";", "#")):
                 key = line.split("=", 1)[0].strip().lower()
                 if (cur, key) in pending:
-                    line = f"{line.split('=', 1)[0].strip()}={pending.pop((cur, key))}"
+                    line = f"{line.split('=', 1)[0].strip()}={_ini_scalar(pending.pop((cur, key)))}"
             out.append(line)
         # 文件里没有的键: 段已存在就插入该段末尾; 段不存在才在文件尾新建段。
         # (旧写法一律在文件尾追加 [段], 会造出重复段, 下次读取 DuplicateSectionError 后静默丢配置)
@@ -1825,9 +1843,9 @@ class App(tk.Tk):
             headers = [i for i, ln in enumerate(out) if ln.strip().lower() == f"[{sec.lower()}]"]
             if headers:
                 nxt = next((i for i in range(headers[0] + 1, len(out)) if out[i].strip().startswith("[")), len(out))
-                out[nxt:nxt] = [f"{k}={v}" for k, v in items]
+                out[nxt:nxt] = [f"{k}={_ini_scalar(v)}" for k, v in items]
             else:
-                out += [f"[{sec}]"] + [f"{k}={v}" for k, v in items]
+                out += [f"[{sec}]"] + [f"{k}={_ini_scalar(v)}" for k, v in items]
         _atomic_write(CONFIG_PATH, "\n".join(out) + "\n")
     @property
     def sleep_ms(self):
@@ -2386,8 +2404,15 @@ class App(tk.Tk):
                 os.remove(p); set_row("data", True)
             except Exception as e: set_row("data", False, str(e)[:50])
             try:
-                cp = configparser.ConfigParser(strict=False); cp.read(CONFIG_PATH, encoding="utf-8-sig")
-                set_row("config", len(cp.sections()) > 0)
+                cp = configparser.ConfigParser(strict=False, interpolation=None)
+                loaded = False
+                for enc in ("utf-8-sig", "gbk"):
+                    try:
+                        cp.read(CONFIG_PATH, encoding=enc)
+                        loaded = len(cp.sections()) > 0
+                        if loaded: break
+                    except Exception: continue
+                set_row("config", loaded)
             except Exception as e: set_row("config", False, str(e)[:50])
             ok = False
             for p in (RECORDS_PATH, RECORDS_PATH + ".bak"):
@@ -2741,7 +2766,10 @@ class App(tk.Tk):
             data = (text + "\0").encode("utf-16-le")
             h = k.GlobalAlloc(0x0002, len(data))  # GMEM_MOVEABLE
             if not h: return False
-            ptr = k.GlobalLock(h); ctypes.memmove(ptr, data, len(data)); k.GlobalUnlock(h)
+            ptr = k.GlobalLock(h)
+            if not ptr:
+                k.GlobalFree(ctypes.c_void_p(h)); return False
+            ctypes.memmove(ptr, data, len(data)); k.GlobalUnlock(h)
             opened = False
             for _ in range(5):  # 剪贴板可能被别的程序短暂占用, 重试几次
                 if u.OpenClipboard(None): opened = True; break
@@ -2913,7 +2941,9 @@ class App(tk.Tk):
         self.refresh_list(); self.show_mini()
     def paste_all(self):
         if not self.records: return
-        self._paste_text(self.separator().join(r["text"] for r in self.records)); self.show_mini()
+        text = self.separator().join(r["text"] for r in self.records)
+        if self._paste_text(text):
+            self.show_mini()
     def paste_selected(self):
         i = self.selected_idx()
         if i >= 0:
@@ -3191,7 +3221,7 @@ class App(tk.Tk):
         """历史截图只保留最近 HistoryMax 张 (默认 100), 多出的老图删掉防文件夹无限膨胀; 系统设置里改小上限时也立即调一次"""
         try: keep = int(self.cfg.get("Snip", "HistoryMax", fallback="100"))
         except Exception: keep = 100
-        keep = max(1, keep)
+        keep = max(1, min(keep, 5000))
         try:
             files = sorted((os.path.join(self.shots_dir, f) for f in os.listdir(self.shots_dir)
                             if (f.startswith("shot_") and f.endswith(".png")) or (f.startswith("gif_") and f.endswith(".gif"))), key=os.path.getmtime)
@@ -4553,8 +4583,11 @@ try {
         rows = []
         for ln in sorted(lines, key=lambda l: (l["y"] + l["h"] / 2, l["x"])):
             cy = ln["y"] + ln["h"] / 2
-            if rows and abs(cy - (rows[-1][0]["y"] + rows[-1][0]["h"] / 2)) <= 0.5 * med_h: rows[-1].append(ln)
-            else: rows.append([ln])
+            if rows:
+                prev = rows[-1][-1]
+                if abs(cy - (prev["y"] + prev["h"] / 2)) <= 0.5 * med_h:
+                    rows[-1].append(ln); continue
+            rows.append([ln])
         def cjk(ch): return "\u4e00" <= ch <= "\u9fff"
         out = []
         for row in rows:
@@ -4569,9 +4602,11 @@ try {
                 if deduped: b = b[1:]  # 重叠区同一个字被认了两次: 去掉重复字且不再加空格 (until t + the -> until the)
                 joiner = "" if (deduped or not a or not b or cjk(a[-1]) or cjk(b[0])) else " "
                 cur["t"] = a + joiner + b
-                cur["w"] = max(cur["x"] + cur["w"], nxt["x"] + nxt["w"]) - cur["x"]
-                cur["h"] = max(cur["y"] + cur["h"], nxt["y"] + nxt["h"]) - cur["y"]
-                cur["y"] = min(cur["y"], nxt["y"])
+                x1 = min(cur["x"], nxt["x"]); y1 = min(cur["y"], nxt["y"])
+                x2 = max(cur["x"] + cur["w"], nxt["x"] + nxt["w"])
+                y2 = max(cur["y"] + cur["h"], nxt["y"] + nxt["h"])
+                cur["x"], cur["y"] = x1, y1
+                cur["w"], cur["h"] = max(1, x2 - x1), max(1, y2 - y1)
             out.append(cur)
         return out
     @classmethod
@@ -4841,8 +4876,9 @@ try {
         cfg = cfg or self._ai_cfg()
         if not cfg["key"]: raise RuntimeError("还没填 AI 接口的 API Key: 「系统设置」窗口的「AI 设置」区里选服务、填 key 即可 (智谱 GLM-4V-Flash 免费)。")
         if not cfg["base"] or not cfg["model"]: raise RuntimeError("AI 设置里的接口地址/模型名没填完整, 先到「系统设置」里的「AI 设置」区补上。")
+        base = self._http_base(cfg["base"])
         payload = {"model": cfg["model"], "max_tokens": max_tokens, "temperature": temperature, "messages": messages}
-        req = urllib.request.Request(cfg["base"].rstrip("/") + "/chat/completions",
+        req = urllib.request.Request(base + "/chat/completions",
                                      data=_json.dumps(payload).encode("utf-8"),
                                      headers={"Content-Type": "application/json",
                                               "Authorization": "Bearer " + cfg["key"], "User-Agent": "SPST"})
@@ -4862,6 +4898,19 @@ try {
         if isinstance(content, list):  # 个别服务把回复拆成片段数组
             content = "".join(str(p.get("text", "")) for p in content if isinstance(p, dict))
         return (content or "").strip()
+    @staticmethod
+    def _http_base(url):
+        """自定义 AI 地址只允许 http/https, 拒绝 file:// 等会把本机文件或密钥送到意外协议的写法。"""
+        base = (url or "").strip().rstrip("/")
+        low = base.lower()
+        if not (low.startswith("https://") or low.startswith("http://")):
+            raise RuntimeError("AI 接口地址必须以 http:// 或 https:// 开头。")
+        if any(ch in base for ch in " \t\r\n\\"):
+            raise RuntimeError("AI 接口地址不能包含空格、换行或反斜杠。")
+        rest = base.split("://", 1)[1]
+        if not rest or rest.startswith(("/", "?")):
+            raise RuntimeError("AI 接口地址不完整。")
+        return base
     def _ai_ready(self):
         """用 AI 功能前先看 key 填没填: 没填就问一句要不要现在去设置"""
         if self._ai_cfg()["key"]: return True
@@ -6005,10 +6054,18 @@ try {
 
     @staticmethod
     def _dl_clean_url(text):
-        """分享文案里混着说明文字时, 只把第一个 http(s) 链接抠出来 (小红书/抖音的系统分享都是这种格式)"""
+        """分享文案里混着说明文字时, 只把第一个 http(s) 链接抠出来 (小红书/抖音的系统分享都是这种格式)。
+        去掉包在括号或句号里的尾巴, 但保留路径里成对的括号, 例如 Wikipedia 的 Foo_(bar)。"""
         import re as _re
-        m = _re.search(r"https?://[^\s，。；]+", text or "")
-        return m.group(0) if m else (text or "").strip()
+        raw = (text or "").strip()
+        m = _re.search(r"https?://[^\s<>\"'，。；、！？》）」』]+", raw)
+        if not m: return raw
+        url = m.group(0).rstrip(".,;:!?\"'")
+        while url.endswith(")") and url.count("(") < url.count(")"):
+            url = url[:-1]
+        while url.endswith("]") and url.count("[") < url.count("]"):
+            url = url[:-1]
+        return url
 
     def _dl_dir(self):
         d = ""
@@ -6115,6 +6172,7 @@ try {
             try: os.makedirs(outdir, exist_ok=True)
             except Exception: pass
             opts = {"quiet": True, "no_warnings": True, "noplaylist": True, "socket_timeout": 20, "retries": 3,
+                    "windowsfilenames": True,
                     "outtmpl": os.path.join(outdir, "%(title).80s [%(id)s].%(ext)s"),
                     "format": "best/bv*+ba/bestvideo+bestaudio",
                     "progress_hooks": [hook]}
@@ -7024,11 +7082,27 @@ try {
     def ocr_selected_shot(self):
         sel = self.shots_list.curselection() if hasattr(self, "shots_list") else ()
         if not sel or not HAS_PIL: messagebox.showinfo("OCR", self.t("ocr_pick_first", "先在截图列表里选一张")); return
-        with Image.open(os.path.join(self.shots_dir, self.shots_list.get(sel[0]))) as _im: self.recognize(_im.copy(), "ocr")
+        path = self._shot_file(self.shots_list.get(sel[0]))
+        if not path: return
+        with Image.open(path) as _im: self.recognize(_im.copy(), "ocr")
+
+    def _shot_file(self, name):
+        """历史文件只允许 shots 目录里的 png/gif 文件名, 拒绝带路径的名字。"""
+        raw = str(name or "")
+        base = os.path.basename(raw)
+        if not base or base != raw or not base.lower().endswith((".png", ".gif")): return None
+        root = os.path.abspath(self.shots_dir)
+        full = os.path.abspath(os.path.join(root, base))
+        try:
+            if os.path.commonpath([root, full]) != root: return None
+        except ValueError: return None
+        return full
 
     def _pin_file(self, name):
         """从历史文件钉图: 打开后立刻复制一份并关文件, 不让文件句柄一直挂在贴图上"""
-        with Image.open(os.path.join(self.shots_dir, name)) as _im: self.pin_image(_im.copy())
+        path = self._shot_file(name)
+        if not path or not os.path.isfile(path): return
+        with Image.open(path) as _im: self.pin_image(_im.copy())
     # ---------- 截图历史画廊 (v1.2) ----------
     def open_gallery(self):
         """历史截图入口 (主窗口按钮): 切到主窗口内的画廊面板 (Jane 2026-11-25 定版面板化, 不再弹独立窗口)"""
@@ -7089,7 +7163,9 @@ try {
         for i, name in enumerate(files):
             cell = ttk.Frame(grid); cell.grid(row=i // 4, column=i % 4, padx=8, pady=8)
             try:
-                im = Image.open(os.path.join(self.shots_dir, name)); thumb = im.copy(); thumb.thumbnail((160, 110))
+                path = self._shot_file(name)
+                if not path: continue
+                im = Image.open(path); thumb = im.copy(); thumb.thumbnail((160, 110))
                 photo = ImageTk.PhotoImage(thumb); self._gallery_photos.append(photo)
                 tk.Label(cell, image=photo).pack()
             except Exception: pass
@@ -7098,8 +7174,10 @@ try {
             btns = ttk.Frame(cell); btns.pack()
             ttk.Button(btns, text=self.t("gal_pin", "钉图"), width=6, command=lambda n=name: self._pin_file(n)).pack(side="left", padx=1)
             def delete(n=name, cell=cell):
-                try: os.remove(os.path.join(self.shots_dir, n))
-                except Exception: pass
+                path = self._shot_file(n)
+                if path:
+                    try: os.remove(path)
+                    except Exception: pass
                 cell.destroy(); self.refresh_shots(); self._gallery_render()
             ttk.Button(btns, text=self.t("cmn_delete", "删除"), width=6, command=delete).pack(side="left", padx=1)
     def _gallery_delete_all(self):
@@ -7109,7 +7187,9 @@ try {
         if not messagebox.askyesno(self.t("gal_delall", "删除全部"), f"{self.t('gal_delall_pre', '确定要删除全部')} {len(files)} {self.t('gal_delall_suf', '个历史截图/录制文件吗? 删除后不能恢复。')}", parent=self): return
         n = 0
         for f in files:
-            try: os.remove(os.path.join(self.shots_dir, f)); n += 1
+            path = self._shot_file(f)
+            if not path: continue
+            try: os.remove(path); n += 1
             except Exception: pass
         self.refresh_shots(); self._gallery_render()
         self.status.set(f"{self.t('gal_deleted', '已删除全部历史截图')} ({n})")
