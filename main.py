@@ -1768,9 +1768,13 @@ class App(tk.Tk):
         # 语言文件是程序自带资源而不是用户数据: 优先读 EXE 内置的那份 (BUNDLE), 升级后新文案立刻生效;
         # 早期版本把语言文件释放到数据目录 (AppData) 且从不更新, 旧文件会一直盖住新文案 —— 真机上已经去掉的
         # 「(合并自 Snipaste 核心功能, 需 Pillow)」还一直显示就是这个原因; 数据目录里的只作兜底。
-        p = os.path.join(BUNDLE, "Language", f"{self.lang}.ini")
-        if not os.path.exists(p): p = os.path.join(BASE, "Language", f"{self.lang}.ini")
-        if os.path.exists(p):
+        candidates = (
+            os.path.join(BUNDLE, "Language", f"{self.lang}.ini"),  # 打包资源
+            os.path.join(BASE, "Language", f"{self.lang}.ini"),   # 源码目录的 Language/
+            os.path.join(BASE, f"{self.lang}.ini"),               # 源码根目录
+        )
+        p = next((candidate for candidate in candidates if os.path.isfile(candidate)), None)
+        if p:
             lp = configparser.ConfigParser(strict=False)
             for enc in ("utf-8-sig", "gbk"):
                 try: lp.read(p, encoding=enc); break
@@ -2819,14 +2823,23 @@ class App(tk.Tk):
         before_seq, before_text = self._clip_sequence(), None
         if not self._foreground_is_self():
             before_text = self.clip_get()
-            self._send_combo(0x58 if cut else 0x43)  # 替用户在当前软件里按 Ctrl+X / Ctrl+C
-            deadline = time.time() + max(0.3, self.sleep_ms / 1000 * 6)  # 等剪贴板真的变了再读, 最多约 0.5 秒
+            sent = self._send_combo(0x58 if cut else 0x43)  # 替用户在当前软件里按 Ctrl+X / Ctrl+C
+            if not sent:
+                self.refresh_list()
+                return  # 模拟按键失败: 不把旧剪贴板内容误加入队列
+            deadline = time.time() + max(0.3, self.sleep_ms / 1000 * 6)
+            changed = False
             while time.time() < deadline:
                 seq = self._clip_sequence()
                 if seq is not None and before_seq is not None:
-                    if seq != before_seq: break
-                elif self.clip_get() != before_text: break
+                    changed = seq != before_seq
+                else:
+                    changed = self.clip_get() != before_text
+                if changed: break
                 time.sleep(0.015)
+            if not changed:
+                self.refresh_list()
+                return  # 未确认剪贴板更新, 绝不将之前的内容当作新复制
         n = len(self.records)
         text = self.clip_get()
         lines = [ln for ln in text.splitlines() if ln.strip()]
@@ -2862,27 +2875,31 @@ class App(tk.Tk):
     _WPS_PROCS = ("et.exe", "wps.exe", "wpp.exe")
     def _paste_text(self, text, enter=False):
         self.clip_set(text)
-        if not self._foreground_is_self():
-            time.sleep(0.03)
-            if self._foreground_process_name() in self._WPS_PROCS:
-                self._type_text(text)  # WPS: 逐字打进目标窗口
-            else:
-                self._send_combo(0x56)  # Ctrl+V: 真的粘进目标窗口, 不只是放剪贴板
-            if enter:  # 粘完稍等目标程序处理完再回车确认 (太快回车会赶在粘贴落地之前)
-                time.sleep(0.15); self._send_enter()
-        self.beep()
+        if self._foreground_is_self():
+            return False  # 仅更新剪贴板, 没有实际粘贴到目标窗口
+        time.sleep(0.03)
+        if self._foreground_process_name() in self._WPS_PROCS:
+            success = bool(self._type_text(text))  # WPS: 逐字打进目标窗口
+        else:
+            success = bool(self._send_combo(0x56))  # Ctrl+V: 发送粘贴键到目标窗口
+        if success and enter:  # 仅成功发出粘贴后再回车
+            time.sleep(0.15)
+            self._send_enter()
+        if success: self.beep()
+        return success
     def paste_next(self):
         if not self.records: return
         if self.paste_index >= len(self.records): self.paste_index = 0
         rec = self.records[self.paste_index]
-        self._paste_text(rec["text"], enter=self.paste_enter_var.get())
-        if self.paste_remove_var.get() and not rec["locked"]:
-            # 粘完即删 (消费模式): 删掉刚粘的这条, 下一条自动顶到当前位置, 序号不用前进
-            del self.records[self.paste_index]
-            if self.paste_index >= len(self.records): self.paste_index = 0
-            self.save_records()
-        else:
-            self.paste_index += 1
+        success = self._paste_text(rec["text"], enter=self.paste_enter_var.get())
+        if success:
+            if self.paste_remove_var.get() and not rec["locked"]:
+                # 只有实际向其他窗口发送粘贴后才消费记录
+                del self.records[self.paste_index]
+                if self.paste_index >= len(self.records): self.paste_index = 0
+                self.save_records()
+            else:
+                self.paste_index += 1
         self.refresh_list(); self.show_mini()
     def paste_all(self):
         if not self.records: return
