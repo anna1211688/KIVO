@@ -34,11 +34,11 @@ jobs:
       - name: Install Inno Setup
         run: choco install innosetup -y --no-progress
       - name: Build installer
-        run: '& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DAppVersion=1.4.26 SPST.iss'
-      - name: Publish release v1.4.26
+        run: '& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DAppVersion=1.4.27 SPST.iss'
+      - name: Publish release v1.4.27
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          printf '%s\n' 'SPST v1.4.26' '配置里的百分号不再导致设置保存失败。' '剪贴板、记录落盘、OCR 合并框和分享链接解析做了修正。' '下载 SPST.exe 双击即可运行，无需安装 Python。' '首次打开若弹出 SmartScreen，点「更多信息 → 仍要运行」。' > notes.txt
-          gh release create v1.4.26 dist/SPST.exe installer\SPST-Setup-1.4.26.exe --title "SPST v1.4.26" --notes-file notes.txt || gh release upload v1.4.26 dist/SPST.exe installer\SPST-Setup-1.4.26.exe --clobber
+          printf '%s\n' 'SPST v1.4.27' '配置里的百分号不再导致设置保存失败。' '剪贴板、记录落盘、OCR 合并框和分享链接解析做了修正。' '下载 SPST.exe 双击即可运行，无需安装 Python。' '首次打开若弹出 SmartScreen，点「更多信息 → 仍要运行」。' > notes.txt
+          gh release create v1.4.27 dist/SPST.exe installer\SPST-Setup-1.4.27.exe --title "SPST v1.4.27" --notes-file notes.txt || gh release upload v1.4.27 dist/SPST.exe installer\SPST-Setup-1.4.27.exe --clobber
