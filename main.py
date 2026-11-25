@@ -1436,8 +1436,7 @@ _BTN_ICONS_B64 = {
     "gear": "iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAD5klEQVR4nLWUT4jVVRTHv+fce3/vvRnGHExpoj+LIOGBM8ErsSJ+o0VjOeXqB4ENisZr0yaGVlnDMIhItiiIYFCzhbaYwcVo5bgoZxGE+iCHHF1WJkOaZaH2fr977zkt5k9jTY4EneXhns+559+XcGdGaTpgAGBiYjDcYcz/Y7SYM8syM1KtanoSPDExGNZu3LIs59ZXEeLPZ0/s/wgApWlquru7ZWpqikZGRuIdgRfa6he3t5UKOp6UWp5QACG/+d7Dbb/3Lwa7HZgAoKtn+5vWlTfkzZt7nePL7Cqnfd5sMrMTifnk+P1tXRsvbWbrXhOff3l2/MCu2XidA/HC8gFoZ8+Ona7SOqSQ9TZJPpVIa3zR/I6ZS8RsQDjf+eyl5421Rwi6wVVahzp7duwEoLOMW8Ej1epcthckhBiKIocKQPohVFepikoIEUAXsYzF4DX4IpfgBUS9f2Ms+PHUFCHLDBHtBtSQ4ZKKKJhLRNTCbJitMwSyABEAEJFTVYLqHgCUnvyL94/hrVuXVW4ua0nZJKOq2gIVZZdw9MV5IrrGbB4XEUA1srVGYtF37Q8Z/X7i4+YiwxtgDACdX1/aayxvkxi+VaXHiJAY4zhqeMv+xHsajWHf+dwrvUw0qiIJQFDIaSZ+CKAzxlx/uXHsk6sAwGmaWmBQuk79uDUpl18XkXY2yVNEKDMbDuKnzn62b1ejMexrtbqb/HzfMRE9bGxCqiLGuLWqWGGTck/wlb0AFGlq+Pr11TP9EtwDACqSqwSoqhAzoPgNgNbqdedcq51ZKr1MRABBRSJUJVeJUOJ7F7aCAMWaTVuWm9hy1LjkSV/kV0DaTiBmNhQlbp48vv8oANR66w+EqGcIuFtVAOAXY90KEZkWCZsmjx/4ZgADRAsSaK1Wd9KBR6MPXcT8LlTLABEReVE5zMAVJdpGRCslSjTWmhh8vzP2qxvxxg8Xxg9Nz7Hm1kPTdMA2GsM+FvEuY5P3oagAIFUVVUmsS7axK71BmIESgSUGMdbt9iG2Xxg/NF2r1d3c9c3v3UQ3BAARY4gIRlUKADDWGYAQfB6CbwZVUWOtmU3qicgRYwhQavR2zOvHrQcCqCrG2Do2LimxsSTR9ynklDHOErFVxdUYfD8Rw7pSia0jVYwBpLOMRQ9kXoTYldZHX3wwOb7/SOfGHb8yuE00BuOSkhb5I0p0n3Xl/uCbXywmQkvK5oPp1vLyij3qyi3PSIyIobgSYqidO3Hw4u3i7GLOLMtMtVrVkzNC31z1dN9LnvkdEK9UlbfPnTh4sVaru0ZvR8z+Rej/qy1Z6ZIP5t5lWcbArDQODspSAX8Cm0TtanseiCAAAAAASUVORK5CYII=",
     "star": "iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAACeUlEQVR4nNWUQUhUURSG/3PfffNmTGdMxRQ3ErhoxsVkkW0EayEEtRxo0SIiWhRCRfvnrFyVqNUqaNUiWhpEKyMS2pQtzAgXtQkRLH0zOE/fu++cFk8Tx4EZI5DO6t7Lf7/733PPucDhhxBE6LBdNBKxy/Zr71ra7nztiZfqO1d1uYVYY5pbb5jIuACAMVj1ttXPmSsKANJrXz6CcDylg+6V+/mN+CYkjYPdWQ0Mx+NfSxbafkTp1a48OfZ7UtoiU7m4lll5je+9Gr29Jha+AYrnzMEcA2i9/fkp7OarEAaHlZelydylenu2wfG1Wm4ttquEvgMQi9kypEgBcCB0F4oSAEE48okwCWBLWJi0owFRHJiJ8qPszx3WrmNXFJY/WOlU6rrSqceUzEDCDYA0ZNMDsJ1OIpCTAcSA7COQTQ9s/Jsl33+C7lMRisQ1UhGflhn9dBKJ9CsCjklYCUHK3ivjkOwmW4AVBKUL3nR+vvoxq8qNBK5obzo/z+H6kEg0RzqpIcK7UGHSSS0SzXG4PuRN5+fhiq6ukP11XCSDwkKiPDWwpAJ/HNohEARABEgEQKAdUoE/Xp4aWEJhIYEimWpM7QbJ5hiuq1jrkdiJGLJTFjlpKz6AhLUegesqZHNcC1EbPIYIizkCR2chTJQ86nDgv5Wt8jNymhMgIjAPYjFHGEPUIFgUiKSjp7+T7KYzwpHHQWW0tHzivDeZvcJRcFnM5jLs1GBHT38niASQfZz94EJcKYHwsJCaEd44XZroe4gXYBTEKj3oex76qwMQmglku0ULjTUaAKDp3reuPxN3Vtca79EcLIR2PqG9y0I73+nfQf+J5n+J39QzDLg7vrq5AAAAAElFTkSuQmCC",
 }  # 按钮小图标 (22px, PIL 手绘线条风: 图标+文字并排, 与常见软件一致)
-VERSION = "1.4.23"  # v1.4.23: 配置含 % 不再丢整份设置; 剪贴板锁定失败不泄漏; 原子写 fsync; 同行 OCR 框不再裁上沿; 分享链接去掉尾标点; AI 地址仅 http(s); 截图文件名限制在 shots 内
-# v1.4.22: ①去掉内置浏览器整套 (Jane 真机定版不好用: 面板/书签/历史/菜单/pywebview 子进程全删, 工具栏回 8 按钮, 自检减为六项, 打包去 pywebview) ②世界时间加「刷新」(绕过天气 15 分钟节流立即重拉) ③文本翻译框自适应高度 (默认 8 行, 随内容长高至 24 行封顶, 按钮行跟随) ④系统设置/软件自检/历史截图/城市选择全部改为主窗口内面板 (Jane 定版「能收的都收」, 不再弹独立窗口, 重复开窗问题从结构上消除) ⑤启动时清理浏览器残留文件 (bookmarks/browser_history/browser_profile) ⑥工具栏改一行 8 按钮 ⑦截图翻译学有道: F4 出无边框浮动条 (原文区透明盖选区透出真实截图对照/译文框在选区下方、不够翻上方/大小随内容/源语言可选/条内复制原文·译文·AI 智能回复), 完整结果窗保留给无选区入口
+VERSION = "1.4.23"  # v1.4.22: ①去掉内置浏览器整套 (Jane 真机定版不好用: 面板/书签/历史/菜单/pywebview 子进程全删, 工具栏回 8 按钮, 自检减为六项, 打包去 pywebview) ②世界时间加「刷新」(绕过天气 15 分钟节流立即重拉) ③文本翻译框自适应高度 (默认 8 行, 随内容长高至 24 行封顶, 按钮行跟随) ④系统设置/软件自检/历史截图/城市选择全部改为主窗口内面板 (Jane 定版「能收的都收」, 不再弹独立窗口, 重复开窗问题从结构上消除) ⑤启动时清理浏览器残留文件 (bookmarks/browser_history/browser_profile) ⑥工具栏改一行 8 按钮 ⑦截图翻译学有道: F4 出无边框浮动条 (原文区透明盖选区透出真实截图对照/译文框在选区下方、不够翻上方/大小随内容/源语言可选/条内复制原文·译文·AI 智能回复), 完整结果窗保留给无选区入口; v1.4.23: ①修真 bug: 配置解析关 % 插值 (分隔符/路径/接口地址带 % 不再抛错) ②备份导入加固 (JSON 先验货后落盘, 坏备份整包拒绝) + 备份说明去掉书签残留文案 ③英文模式运行时漏网文案两批全清 (汇率/托盘/取色器/下载提示/识别结果窗/AI 气泡与接口报错/测试连接结果/计算器/截图浮层, 三个翻译助手改实例方法并本地化报错) ④F4 纯数字/符号截图提示「没有可翻译的文字」不再误报失败 ⑤删死代码, 新增边缘测试套件
 # v1.4.20: 瘦身版, 功能零变化 — 打包侧剔除未用组件 (cv2 视频插件/级联数据、numpy 测试集、onnxruntime 的 transformers/tools/quantization/datasets/backend), 已模拟验证删除后 OCR 中英文识别正常
 # v1.4.19: ①AI 面板侧边栏去掉「AI 功能」快捷入口组 (功能本体全保留) ②修复 v1.4.18 的 F4 截图翻译主流程 (_translate_lines 误标 @staticmethod 致后台线程静默失败) ③记录上限改硬线 (全锁定时不再突破 2000) ④截图翻译目标语言扩到 13 种 ⑤内嵌微型浏览器 (WebView2 子进程收编: 谷歌翻译主页/书签栏前 8+书签管理/浏览历史/清除数据/页面缩放/下载说明) ⑥文本翻译面板 (打字停笔 350ms 自动翻译, 无缓存每次实时译) + 工具栏按序重排为两行并配线条图标 ⑦品牌头重排 (系统设置移左上挨着 SPST, 副标题「多功能工作台」居中, 右上留空) + 软件图标换 Jane 的樱花小女孩原图 ⑧窗口最小高度解锁 (最大化/缩放恢复正常) ⑨全界面双语化补齐 (约 330 条文案入语言文件, 英文模式复检残留中文 0 条) + 第八轮深查 (线程/网络/浏览器生命周期/热键英文保存往返全过)
 # v1.4.18: ①截图翻译修复 (OCR 碎片合并+整段翻译, 结果窗改纯文本) ②翻译结果窗内嵌 AI 智能回复 ③AI/热键/翻译设置全并入系统设置 ④AI 功能改内嵌面板+豆包式侧边栏+最近对话存档 (圆角气泡) ⑤主窗口简约重设计 (方角) ⑥货币汇率 ⑦计算器 ⑧常用语库面板化+序号 ⑨世界时间 (全球城市自选+当地天气) ⑩无水印下载 (FB/IG/小红书等, 保存位置可每次询问或固定) ⑪历史截图保存设置 (张数/不保存, 含 GIF) ⑫移除网络搜索 ⑬三轮深查整改: AI 回复防串话/时钟计时链/天气失败重试/设置窗滚轮隔离/下载实际文件名/汇率过期刷新/AI 回复增量渲染 (320ms→24ms)/单实例保护/单对话存档封顶 200 条
@@ -1513,26 +1512,12 @@ def _install_crash_logging():
         globals()["_faulthandler_file"] = fh  # 保住句柄别被回收
     except Exception: pass
 
-def _ini_scalar(value):
-    """配置值写成一行: 换行或空字符会把 ini 截断成新的键, 保存时直接抹掉。"""
-    return str(value).replace("\r", " ").replace("\n", " ").replace("\x00", "")
-
 def _atomic_write(path, text):
-    """原子写: 先写临时文件、刷盘再 os.replace。直接覆盖写时若断电/崩溃, 文件会写一半损坏,
-    记录和配置 (含翻译密钥) 就全丢了; 换名保证磁盘上永远是完整的新版或旧版。"""
-    tmp = f"{path}.{os.getpid()}.tmp"
-    try:
-        with open(tmp, "w", encoding="utf-8") as f:
-            f.write(text)
-            f.flush()
-            try: os.fsync(f.fileno())
-            except OSError: pass
-        os.replace(tmp, path)
-    except Exception:
-        try:
-            if os.path.exists(tmp): os.remove(tmp)
-        except OSError: pass
-        raise
+    """原子写: 先写临时文件再 os.replace 换名。直接覆盖写时若断电/崩溃, 文件会写一半损坏,
+    记录和配置 (含翻译密钥) 就全丢了; 原子写保证磁盘上永远是完整的新版或旧版。"""
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f: f.write(text)
+    os.replace(tmp, path)
 
 def _migrate_old_data():
     """老数据搬移 (新目录还没有 Config.ini 时才搬, 已存在的文件不覆盖):
@@ -1764,7 +1749,7 @@ class App(tk.Tk):
                                       "bracketleft", "bracketright")
     # ---------- config (兼容原版字段) ----------
     def load_config(self):
-        c = configparser.ConfigParser(strict=False, interpolation=None)  # interpolation=None: API Key / 路径里的 % 不能按插值解析, 否则 set/get 直接失败, 整次保存被吞掉
+        c = configparser.ConfigParser(strict=False, interpolation=None)  # strict=False: 老版本 ini 里万一有重复段, 取最后的值而不是整份配置静默回退默认; interpolation=None: 用户填的分隔符/路径/网址里带 % 时默认插值会让 set/get 直接抛错, 本软件不用插值语法
         defaults = {f"HotKey{i}": "无" for i in range(13)}; defaults.update(DEFAULT_HOTKEYS)
         c.read_dict({"Config": {"SleepTime": "80", "WaveSet": "0", "AutoRun": "0", "Language": "Chinese", "PasteEnter": "0", "PasteRemove": "1",
                                 "MiniFormTime": "5", "MiniFormSet": "0", "AddChar": "1", "LetterSet": "0", "ShowHotKey": "F2"},
@@ -1783,22 +1768,14 @@ class App(tk.Tk):
         # 语言文件是程序自带资源而不是用户数据: 优先读 EXE 内置的那份 (BUNDLE), 升级后新文案立刻生效;
         # 早期版本把语言文件释放到数据目录 (AppData) 且从不更新, 旧文件会一直盖住新文案 —— 真机上已经去掉的
         # 「(合并自 Snipaste 核心功能, 需 Pillow)」还一直显示就是这个原因; 数据目录里的只作兜底。
-        candidates = (
-            os.path.join(BUNDLE, "Language", f"{self.lang}.ini"),
-            os.path.join(BASE, "Language", f"{self.lang}.ini"),
-            os.path.join(BUNDLE, f"{self.lang}.ini"),
-            os.path.join(BASE, f"{self.lang}.ini"),
-        )
-        p = next((candidate for candidate in candidates if os.path.isfile(candidate)), None)
-        if p:
+        p = os.path.join(BUNDLE, "Language", f"{self.lang}.ini")
+        if not os.path.exists(p): p = os.path.join(BASE, "Language", f"{self.lang}.ini")
+        if os.path.exists(p):
             lp = configparser.ConfigParser(strict=False, interpolation=None)
             for enc in ("utf-8-sig", "gbk"):
                 try: lp.read(p, encoding=enc); break
                 except Exception: continue
-            try:
-                if lp.has_section("UI"): self._strings = dict(lp.items("UI"))
-            except Exception:
-                self._strings = {}
+            if lp.has_section("UI"): self._strings = dict(lp.items("UI"))
     def t(self, key, zh):
         return self._strings.get(key, zh).replace("\\n", "\n")  # ini 里多行文案写成 \n 转义, 这里还原
     def save_config(self):
@@ -1825,7 +1802,7 @@ class App(tk.Tk):
             elif cur and "=" in line and not stripped.startswith((";", "#")):
                 key = line.split("=", 1)[0].strip().lower()
                 if (cur, key) in pending:
-                    line = f"{line.split('=', 1)[0].strip()}={_ini_scalar(pending.pop((cur, key)))}"
+                    line = f"{line.split('=', 1)[0].strip()}={pending.pop((cur, key))}"
             out.append(line)
         # 文件里没有的键: 段已存在就插入该段末尾; 段不存在才在文件尾新建段。
         # (旧写法一律在文件尾追加 [段], 会造出重复段, 下次读取 DuplicateSectionError 后静默丢配置)
@@ -1843,9 +1820,9 @@ class App(tk.Tk):
             headers = [i for i, ln in enumerate(out) if ln.strip().lower() == f"[{sec.lower()}]"]
             if headers:
                 nxt = next((i for i in range(headers[0] + 1, len(out)) if out[i].strip().startswith("[")), len(out))
-                out[nxt:nxt] = [f"{k}={_ini_scalar(v)}" for k, v in items]
+                out[nxt:nxt] = [f"{k}={v}" for k, v in items]
             else:
-                out += [f"[{sec}]"] + [f"{k}={_ini_scalar(v)}" for k, v in items]
+                out += [f"[{sec}]"] + [f"{k}={v}" for k, v in items]
         _atomic_write(CONFIG_PATH, "\n".join(out) + "\n")
     @property
     def sleep_ms(self):
@@ -2404,15 +2381,8 @@ class App(tk.Tk):
                 os.remove(p); set_row("data", True)
             except Exception as e: set_row("data", False, str(e)[:50])
             try:
-                cp = configparser.ConfigParser(strict=False, interpolation=None)
-                loaded = False
-                for enc in ("utf-8-sig", "gbk"):
-                    try:
-                        cp.read(CONFIG_PATH, encoding=enc)
-                        loaded = len(cp.sections()) > 0
-                        if loaded: break
-                    except Exception: continue
-                set_row("config", loaded)
+                cp = configparser.ConfigParser(strict=False, interpolation=None); cp.read(CONFIG_PATH, encoding="utf-8-sig")
+                set_row("config", len(cp.sections()) > 0)
             except Exception as e: set_row("config", False, str(e)[:50])
             ok = False
             for p in (RECORDS_PATH, RECORDS_PATH + ".bak"):
@@ -2443,11 +2413,16 @@ class App(tk.Tk):
         import zipfile
         with zipfile.ZipFile(path) as z:
             if "spst_backup.json" not in z.namelist(): raise ValueError("not an SPST backup")
+            payload = {}
             for name in self._BACKUP_FILES:
                 if name in z.namelist():
-                    tmp = os.path.join(BASE, name + ".tmp")
-                    with open(tmp, "wb") as f: f.write(z.read(name))
-                    os.replace(tmp, os.path.join(BASE, name))
+                    data = z.read(name)
+                    if ".json" in name: json.loads(data.decode("utf-8"))  # 先验货再覆盖: JSON 已损坏的备份整包拒绝, 不拿坏数据顶掉现有好数据
+                    payload[name] = data
+            for name, data in payload.items():
+                tmp = os.path.join(BASE, name + ".tmp")
+                with open(tmp, "wb") as f: f.write(data)
+                os.replace(tmp, os.path.join(BASE, name))
     def _backup_export_dialog(self):
         path = filedialog.asksaveasfilename(title=self.t("bak_export_title", "保存备份文件"),
                                             defaultextension=".zip", filetypes=[("ZIP", "*.zip")],
@@ -2462,7 +2437,7 @@ class App(tk.Tk):
     def _backup_import_dialog(self):
         path = filedialog.askopenfilename(title=self.t("bak_import_title", "选择备份文件"), filetypes=[("ZIP", "*.zip")])
         if not path: return
-        if not messagebox.askyesno(self.t("bak_done_title", "备份"), self.t("bak_confirm", "导入将覆盖当前的设置、记录、常用语、书签和 AI 对话, 且软件会立即关闭 (不保存当前状态), 确定继续?"), parent=self): return
+        if not messagebox.askyesno(self.t("bak_done_title", "备份"), self.t("bak_confirm", "导入将覆盖当前的设置、记录、常用语和 AI 对话, 且软件会立即关闭 (不保存当前状态), 确定继续?"), parent=self): return
         try: self._import_backup(path)
         except Exception:
             messagebox.showerror(self.t("bak_done_title", "备份"), self.t("bak_bad_file", "不是有效的 SPST 备份文件"), parent=self); return
@@ -2766,10 +2741,7 @@ class App(tk.Tk):
             data = (text + "\0").encode("utf-16-le")
             h = k.GlobalAlloc(0x0002, len(data))  # GMEM_MOVEABLE
             if not h: return False
-            ptr = k.GlobalLock(h)
-            if not ptr:
-                k.GlobalFree(ctypes.c_void_p(h)); return False
-            ctypes.memmove(ptr, data, len(data)); k.GlobalUnlock(h)
+            ptr = k.GlobalLock(h); ctypes.memmove(ptr, data, len(data)); k.GlobalUnlock(h)
             opened = False
             for _ in range(5):  # 剪贴板可能被别的程序短暂占用, 重试几次
                 if u.OpenClipboard(None): opened = True; break
@@ -2849,45 +2821,30 @@ class App(tk.Tk):
         return None
     def multi_cut(self): self.multi_copy(cut=True)  # 多次剪切: 与多次复制成对 (原版 HotKey7)
     def multi_copy(self, cut=False):
-        # 只有确认目标程序真的更新了剪贴板，才允许把内容加入队列；否则绝不复用旧剪贴板。
-        external = not self._foreground_is_self()
-        if external:
-            before_seq, before_text = self._clip_sequence(), self.clip_get()
-            if not self._send_combo(0x58 if cut else 0x43):
-                self.refresh_list()
-                return False
-            changed = False
-            deadline = time.time() + max(0.3, self.sleep_ms / 1000 * 6)
+        before_seq, before_text = self._clip_sequence(), None
+        if not self._foreground_is_self():
+            before_text = self.clip_get()
+            self._send_combo(0x58 if cut else 0x43)  # 替用户在当前软件里按 Ctrl+X / Ctrl+C
+            deadline = time.time() + max(0.3, self.sleep_ms / 1000 * 6)  # 等剪贴板真的变了再读, 最多约 0.5 秒
             while time.time() < deadline:
                 seq = self._clip_sequence()
-                current = self.clip_get()
-                if before_seq is not None and seq is not None:
-                    changed = seq != before_seq
-                else:
-                    changed = current != before_text
-                if changed: break
+                if seq is not None and before_seq is not None:
+                    if seq != before_seq: break
+                elif self.clip_get() != before_text: break
                 time.sleep(0.015)
-            if not changed:
-                self.refresh_list()
-                return False
         n = len(self.records)
         text = self.clip_get()
-        if not text.strip():
-            self.refresh_list()
-            return False
         lines = [ln for ln in text.splitlines() if ln.strip()]
         if len(lines) > 1:
-            for ln in lines: self.add_record(ln, save=False)
+            for ln in lines: self.add_record(ln, save=False)  # v1.3.4: WPS 表格/列表整块复制时按行自动拆成多条; 批量加只在最后存一次盘
             self.save_records()
         else:
             self.add_record(text)
-        added = len(self.records) > n
-        if added:
-            self.beep()
-            _next = self.records[min(self.paste_index, len(self.records) - 1)]["text"][:26]
+        if len(self.records) > n:
+            self.beep()  # 真入队了才响, 没选中文字时不假响
+            _next = self.records[min(self.paste_index, len(self.records) - 1)]["text"][:26]  # 进度理论上不会越界, 钳一下防个别删除路径漏调进度时这里 IndexError
             self.show_mini(f"{self.t('mini_total', '共')} {len(self.records)} {self.t('mini_records', '条')} · {self.t('mini_next', '下一条')}: {_next}")
         self.refresh_list()
-        return added
     def _send_enter(self):
         """向当前前台窗口发送一次回车 (确认/提交); SendInput -> keybd_event -> keyboard 三层兜底"""
         if sys.platform == "win32":
@@ -2909,30 +2866,23 @@ class App(tk.Tk):
     # 对这类目标改走逐字打字 (与强力粘贴同路, 不依赖剪贴板和粘贴命令, 单元格里打字即输入)
     _WPS_PROCS = ("et.exe", "wps.exe", "wpp.exe")
     def _paste_text(self, text, enter=False):
-        # 窗口焦点仍在 SnapPaste 时并没有发生粘贴；不能把队列项误当作已消费。
-        if self._foreground_is_self():
-            return False
         self.clip_set(text)
-        time.sleep(0.03)
-        if self._foreground_process_name() in self._WPS_PROCS:
-            pasted = bool(self._type_text(text))
-        else:
-            pasted = bool(self._send_combo(0x56))
-        if not pasted:
-            return False
-        if enter:
-            time.sleep(0.15)
-            self._send_enter()
+        if not self._foreground_is_self():
+            time.sleep(0.03)
+            if self._foreground_process_name() in self._WPS_PROCS:
+                self._type_text(text)  # WPS: 逐字打进目标窗口
+            else:
+                self._send_combo(0x56)  # Ctrl+V: 真的粘进目标窗口, 不只是放剪贴板
+            if enter:  # 粘完稍等目标程序处理完再回车确认 (太快回车会赶在粘贴落地之前)
+                time.sleep(0.15); self._send_enter()
         self.beep()
-        return True
     def paste_next(self):
         if not self.records: return
         if self.paste_index >= len(self.records): self.paste_index = 0
         rec = self.records[self.paste_index]
-        if not self._paste_text(rec["text"], enter=self.paste_enter_var.get()):
-            return
+        self._paste_text(rec["text"], enter=self.paste_enter_var.get())
         if self.paste_remove_var.get() and not rec["locked"]:
-            # 仅在目标窗口确认执行粘贴后消费记录。
+            # 粘完即删 (消费模式): 删掉刚粘的这条, 下一条自动顶到当前位置, 序号不用前进
             del self.records[self.paste_index]
             if self.paste_index >= len(self.records): self.paste_index = 0
             self.save_records()
@@ -2941,9 +2891,7 @@ class App(tk.Tk):
         self.refresh_list(); self.show_mini()
     def paste_all(self):
         if not self.records: return
-        text = self.separator().join(r["text"] for r in self.records)
-        if self._paste_text(text):
-            self.show_mini()
+        self._paste_text(self.separator().join(r["text"] for r in self.records)); self.show_mini()
     def paste_selected(self):
         i = self.selected_idx()
         if i >= 0:
@@ -2987,11 +2935,8 @@ class App(tk.Tk):
                     i.u.ki.dwFlags = (0x0004 if unicode_ else 0) | (0x0002 if up else 0); return i
                 batch = [ev(*p) for p in self._type_units(text)]
                 for j in range(0, len(batch), 200):  # 分批发送, 防超长文本一次塞爆
-                    part = batch[j:j+200]
-                    chunk = (_INPUT * len(part))(*part)
-                    sent = u.SendInput(len(part), chunk, ctypes.sizeof(_INPUT))
-                    if sent != len(part):
-                        return False  # 部分发送不能报告成功，也不能再用 fallback 重复输入
+                    chunk = (_INPUT * len(batch[j:j+200]))(*batch[j:j+200])
+                    u.SendInput(len(batch[j:j+200]), chunk, ctypes.sizeof(_INPUT))
                 return True
             except Exception: pass
         try:
@@ -3221,7 +3166,7 @@ class App(tk.Tk):
         """历史截图只保留最近 HistoryMax 张 (默认 100), 多出的老图删掉防文件夹无限膨胀; 系统设置里改小上限时也立即调一次"""
         try: keep = int(self.cfg.get("Snip", "HistoryMax", fallback="100"))
         except Exception: keep = 100
-        keep = max(1, min(keep, 5000))
+        keep = max(1, keep)
         try:
             files = sorted((os.path.join(self.shots_dir, f) for f in os.listdir(self.shots_dir)
                             if (f.startswith("shot_") and f.endswith(".png")) or (f.startswith("gif_") and f.endswith(".gif"))), key=os.path.getmtime)
@@ -3528,7 +3473,7 @@ class App(tk.Tk):
         def drag(e):
             if state["rect"]: canvas.delete(state["rect"])
             state["rect"] = canvas.create_rectangle(state["x"], state["y"], e.x, e.y, outline="#1E90FF", width=2)
-            show_info(e, f"| 选区 {abs(e.x-state['x'])}x{abs(e.y-state['y'])}")
+            show_info(e, f"| {self.t('snip_sel', '选区')} {abs(e.x-state['x'])}x{abs(e.y-state['y'])}")
         canvas.bind("<Motion>", show_info)
         def up(e):
             box = (min(state["x"], e.x), min(state["y"], e.y), max(state["x"], e.x), max(state["y"], e.y))
@@ -4279,20 +4224,6 @@ class App(tk.Tk):
         hits = [r for r in rects if r[0] <= x <= r[2] and r[1] <= y <= r[3] and r[2] > r[0] and r[3] > r[1]]
         return min(hits, key=lambda r: (r[2] - r[0]) * (r[3] - r[1])) if hits else None
     @staticmethod
-    def list_window_rects():
-        if sys.platform != "win32": return []
-        try:
-            import ctypes.wintypes as wt
-            user32 = ctypes.windll.user32; rects = []
-            CB = ctypes.WINFUNCTYPE(ctypes.c_bool, wt.HWND, wt.LPARAM)
-            def cb(hwnd, _):
-                if user32.IsWindowVisible(hwnd):
-                    r = wt.RECT(); user32.GetWindowRect(hwnd, ctypes.byref(r))
-                    if r.right - r.left > 20 and r.bottom - r.top > 20: rects.append((r.left, r.top, r.right, r.bottom))
-                return True
-            user32.EnumWindows(CB(cb), 0); return rects
-        except Exception: return []
-    @staticmethod
     def _enum_top_windows():
         """枚举顶层可见窗口, 返回 [(hwnd, rect)]; 非 Windows 返回空"""
         if sys.platform != "win32": return []
@@ -4583,11 +4514,8 @@ try {
         rows = []
         for ln in sorted(lines, key=lambda l: (l["y"] + l["h"] / 2, l["x"])):
             cy = ln["y"] + ln["h"] / 2
-            if rows:
-                prev = rows[-1][-1]
-                if abs(cy - (prev["y"] + prev["h"] / 2)) <= 0.5 * med_h:
-                    rows[-1].append(ln); continue
-            rows.append([ln])
+            if rows and abs(cy - (rows[-1][0]["y"] + rows[-1][0]["h"] / 2)) <= 0.5 * med_h: rows[-1].append(ln)
+            else: rows.append([ln])
         def cjk(ch): return "\u4e00" <= ch <= "\u9fff"
         out = []
         for row in rows:
@@ -4602,11 +4530,9 @@ try {
                 if deduped: b = b[1:]  # 重叠区同一个字被认了两次: 去掉重复字且不再加空格 (until t + the -> until the)
                 joiner = "" if (deduped or not a or not b or cjk(a[-1]) or cjk(b[0])) else " "
                 cur["t"] = a + joiner + b
-                x1 = min(cur["x"], nxt["x"]); y1 = min(cur["y"], nxt["y"])
-                x2 = max(cur["x"] + cur["w"], nxt["x"] + nxt["w"])
-                y2 = max(cur["y"] + cur["h"], nxt["y"] + nxt["h"])
-                cur["x"], cur["y"] = x1, y1
-                cur["w"], cur["h"] = max(1, x2 - x1), max(1, y2 - y1)
+                cur["w"] = max(cur["x"] + cur["w"], nxt["x"] + nxt["w"]) - cur["x"]
+                cur["h"] = max(cur["y"] + cur["h"], nxt["y"] + nxt["h"]) - cur["y"]
+                cur["y"] = min(cur["y"], nxt["y"])
             out.append(cur)
         return out
     @classmethod
@@ -4668,15 +4594,15 @@ try {
     def _show_recognize_result(self, kind, res):
         if kind == "ocr":
             if res is None:
-                hint = ("内置识别引擎现在不可用, 请重启本软件再试; 若反复出现, 请把这个提示截图发我看看。") \
+                hint = self.t("ocr_off_hint_frozen", "内置识别引擎现在不可用, 请重启本软件再试; 若反复出现, 请把这个提示截图发我看看。") \
                     if getattr(sys, "frozen", False) else \
-                    ("还没装 OCR 引擎, 装一次即可 (离线可用):\n\npip install rapidocr-onnxruntime\n\n或装 Tesseract 程序 + pip install pytesseract")
+                    self.t("ocr_off_hint_src", "还没装 OCR 引擎, 装一次即可 (离线可用):\n\npip install rapidocr-onnxruntime\n\n或装 Tesseract 程序 + pip install pytesseract")
                 messagebox.showinfo(self.t("ocr_off_title", "OCR 未启用"), hint); return
-            self.show_text_result("OCR 识别结果", res or "(没识别到文字, 换个更清晰的截图试试)", translate=True)
+            self.show_text_result(self.t("ocr_result_title", "OCR 识别结果"), res or self.t("ocr_none_text", "(没识别到文字, 换个更清晰的截图试试)"), translate=True)
         else:
             if res is None:
                 messagebox.showinfo(self.t("code_off_title", "扫码未启用"), self.t("code_off_msg", "还没装扫码引擎, 装一次即可:\n\npip install opencv-python-headless")); return
-            self.show_text_result("扫码结果", "\n".join(res) if res else "(没扫到二维码/条码)")
+            self.show_text_result(self.t("code_result_title", "扫码结果"), "\n".join(res) if res else self.t("code_none_text", "(没扫到二维码/条码)"))
     # ---------- 截图翻译: OCR 出的文字自动英<->中互译 ----------
     def translate_text(self, text):
         """把文字在 英文<->简体中文 间翻译 (含汉字则译成英文, 否则译成中文)。
@@ -4693,8 +4619,7 @@ try {
                 "baidu_id": g("BaiduAppId"), "baidu_key": g("BaiduKey"),
                 "youdao_id": g("YoudaoAppId"), "youdao_secret": g("YoudaoSecret"),
                 "google_key": g("GoogleKey")}
-    @staticmethod
-    def _baidu_translate(q, target, appid, key, source=None):
+    def _baidu_translate(self, q, target, appid, key, source=None):
         """百度翻译开放平台: sign = md5(appid+q+salt+密钥), 成功返回译文, 出错抛异常 (带错误码)。"""
         import urllib.request, urllib.parse, json as _json, hashlib, random
         salt = str(random.randint(10000, 99999))
@@ -4705,10 +4630,9 @@ try {
         req = urllib.request.Request(url, headers={"User-Agent": "SPST"})
         with urllib.request.urlopen(req, timeout=12) as r:
             d = _json.loads(r.read().decode("utf-8"))
-        if d.get("error_code"): raise RuntimeError(f"百度翻译错误 {d.get('error_code')}: {d.get('error_msg', '')}")
+        if d.get("error_code"): raise RuntimeError(f"{self.t('tr_err_baidu', '百度翻译错误')} {d.get('error_code')}: {d.get('error_msg', '')}")
         return "\n".join(seg.get("dst", "") for seg in d.get("trans_result") or [])
-    @staticmethod
-    def _youdao_translate(q, target, appkey, secret, source=None):
+    def _youdao_translate(self, q, target, appkey, secret, source=None):
         """有道翻译 (网易智云) v3 签名: sha256(appKey+input+salt+curtime+密钥), 成功返回译文, 出错抛异常。"""
         import urllib.request, urllib.parse, json as _json, hashlib, time as _time, uuid
         salt = str(uuid.uuid4()); curtime = str(int(_time.time()))
@@ -4721,10 +4645,9 @@ try {
                                      headers={"Content-Type": "application/x-www-form-urlencoded", "User-Agent": "SPST"})
         with urllib.request.urlopen(req, timeout=12) as r:
             d = _json.loads(r.read().decode("utf-8"))
-        if str(d.get("errorCode", "0")) != "0": raise RuntimeError(f"有道翻译错误码 {d.get('errorCode')}")
+        if str(d.get("errorCode", "0")) != "0": raise RuntimeError(f"{self.t('tr_err_youdao', '有道翻译错误码')} {d.get('errorCode')}")
         return "\n".join(d.get("translation") or [])
-    @staticmethod
-    def _google_translate(q, target, apikey, source=None):
+    def _google_translate(self, q, target, apikey, source=None):
         """谷歌云翻译 API v2 (只需 API 密钥): 成功返回译文 (HTML 实体已还原), 出错抛异常。"""
         import urllib.request, urllib.parse, json as _json, html as _html
         url = "https://translation.googleapis.com/language/translate/v2?key=" + urllib.parse.quote(apikey)
@@ -4735,7 +4658,7 @@ try {
                                      headers={"Content-Type": "application/x-www-form-urlencoded", "User-Agent": "SPST"})
         with urllib.request.urlopen(req, timeout=12) as r:
             d = _json.loads(r.read().decode("utf-8"))
-        if d.get("error"): raise RuntimeError(f"谷歌翻译错误 {d['error'].get('code')}: {d['error'].get('message', '')}")
+        if d.get("error"): raise RuntimeError(f"{self.t('tr_err_google', '谷歌翻译错误')} {d['error'].get('code')}: {d['error'].get('message', '')}")
         trs = (d.get("data") or {}).get("translations") or []
         return _html.unescape(trs[0].get("translatedText", "")) if trs else ""
     def _build_translate_form(self, parent):
@@ -4789,9 +4712,9 @@ try {
                         r = self._google_translate("Hello, nice to meet you.", "zh-CN", pair[1])
                     else:
                         r = self.translate_text_to("Hello, nice to meet you.", "zh-CN")
-                    msg = f"测试成功: Hello, nice to meet you. → {r}" if r else "测试失败: 没拿到译文"
+                    msg = f"{self.t('tst_ok', '测试成功')}: Hello, nice to meet you. → {r}" if r else f"{self.t('tst_fail', '测试失败')}: {self.t('tr_test_none', '没拿到译文')}"
                 except Exception as e:
-                    msg = f"测试失败: {e}"
+                    msg = f"{self.t('tst_fail', '测试失败')}: {e}"
                 self._ui_queue.put(lambda: test_var.set(msg))
             threading.Thread(target=work, daemon=True).start()
         ttk.Button(btns, text=self.t("cmn_test", "测试"), command=do_test).pack(side="left", padx=4)
@@ -4876,9 +4799,8 @@ try {
         cfg = cfg or self._ai_cfg()
         if not cfg["key"]: raise RuntimeError("还没填 AI 接口的 API Key: 「系统设置」窗口的「AI 设置」区里选服务、填 key 即可 (智谱 GLM-4V-Flash 免费)。")
         if not cfg["base"] or not cfg["model"]: raise RuntimeError("AI 设置里的接口地址/模型名没填完整, 先到「系统设置」里的「AI 设置」区补上。")
-        base = self._http_base(cfg["base"])
         payload = {"model": cfg["model"], "max_tokens": max_tokens, "temperature": temperature, "messages": messages}
-        req = urllib.request.Request(base + "/chat/completions",
+        req = urllib.request.Request(cfg["base"].rstrip("/") + "/chat/completions",
                                      data=_json.dumps(payload).encode("utf-8"),
                                      headers={"Content-Type": "application/json",
                                               "Authorization": "Bearer " + cfg["key"], "User-Agent": "SPST"})
@@ -4888,9 +4810,9 @@ try {
         except urllib.error.HTTPError as e:
             try: detail = e.read().decode("utf-8", "ignore")[:200]
             except Exception: detail = ""
-            raise RuntimeError(f"AI 接口返回 {e.code} 错误。{detail}")
+            raise RuntimeError(self.t("ai_err_http", "AI 接口返回 {code} 错误。{detail}").replace("{code}", str(e.code)).replace("{detail}", detail))
         except Exception as e:
-            raise RuntimeError(f"AI 接口连不上 ({e}), 检查网络后重试。")
+            raise RuntimeError(self.t("ai_err_conn", "AI 接口连不上 ({e}), 检查网络后重试。").replace("{e}", str(e)))
         try:
             content = d["choices"][0]["message"]["content"]
         except Exception:
@@ -4898,19 +4820,6 @@ try {
         if isinstance(content, list):  # 个别服务把回复拆成片段数组
             content = "".join(str(p.get("text", "")) for p in content if isinstance(p, dict))
         return (content or "").strip()
-    @staticmethod
-    def _http_base(url):
-        """自定义 AI 地址只允许 http/https, 拒绝 file:// 等会把本机文件或密钥送到意外协议的写法。"""
-        base = (url or "").strip().rstrip("/")
-        low = base.lower()
-        if not (low.startswith("https://") or low.startswith("http://")):
-            raise RuntimeError("AI 接口地址必须以 http:// 或 https:// 开头。")
-        if any(ch in base for ch in " \t\r\n\\"):
-            raise RuntimeError("AI 接口地址不能包含空格、换行或反斜杠。")
-        rest = base.split("://", 1)[1]
-        if not rest or rest.startswith(("/", "?")):
-            raise RuntimeError("AI 接口地址不完整。")
-        return base
     def _ai_ready(self):
         """用 AI 功能前先看 key 填没填: 没填就问一句要不要现在去设置"""
         if self._ai_cfg()["key"]: return True
@@ -4958,9 +4867,9 @@ try {
             def work():
                 try:
                     r = self._ai_chat_image(test_img, "只输出图片中的文字, 不要解释。", cfg=test_cfg)
-                    msg = f"测试成功: 模型读出了「{r[:40]}」" if r else "测试失败: 模型没返回内容"
+                    msg = f"{self.t('tst_ok', '测试成功')}: {self.t('ai_test_read', '模型读出了')}「{r[:40]}」" if r else f"{self.t('tst_fail', '测试失败')}: {self.t('ai_test_none', '模型没返回内容')}"
                 except Exception as e:
-                    msg = f"测试失败: {e}"
+                    msg = f"{self.t('tst_fail', '测试失败')}: {e}"
                 self._ui_queue.put(lambda: test_var.set(msg))
             threading.Thread(target=work, daemon=True).start()
         ttk.Button(btns, text=self.t("cmn_test", "测试"), command=do_test).pack(side="left", padx=4)
@@ -5344,7 +5253,7 @@ try {
         tk.Label(card, textvariable=disp_var, font=self._ui_font(22, True), background=W, foreground=self.UI_TEXT, anchor="e").pack(fill="x", padx=14, pady=(0, 6))
         st = {"acc": None, "op": None, "fresh": True}
         def fmt(v):
-            if v != v or v in (float("inf"), float("-inf")): return "错误"
+            if v != v or v in (float("inf"), float("-inf")): return self.t("calc_error", "错误")
             if abs(v - round(v)) < 1e-12 and abs(v) < 1e16: return str(int(round(v)))
             return f"{v:.10f}".rstrip("0").rstrip(".") or "0"
         def cur():
@@ -6054,18 +5963,10 @@ try {
 
     @staticmethod
     def _dl_clean_url(text):
-        """分享文案里混着说明文字时, 只把第一个 http(s) 链接抠出来 (小红书/抖音的系统分享都是这种格式)。
-        去掉包在括号或句号里的尾巴, 但保留路径里成对的括号, 例如 Wikipedia 的 Foo_(bar)。"""
+        """分享文案里混着说明文字时, 只把第一个 http(s) 链接抠出来 (小红书/抖音的系统分享都是这种格式)"""
         import re as _re
-        raw = (text or "").strip()
-        m = _re.search(r"https?://[^\s<>\"'，。；、！？》）」』]+", raw)
-        if not m: return raw
-        url = m.group(0).rstrip(".,;:!?\"'")
-        while url.endswith(")") and url.count("(") < url.count(")"):
-            url = url[:-1]
-        while url.endswith("]") and url.count("[") < url.count("]"):
-            url = url[:-1]
-        return url
+        m = _re.search(r"https?://[^\s，。；]+", text or "")
+        return m.group(0) if m else (text or "").strip()
 
     def _dl_dir(self):
         d = ""
@@ -6172,7 +6073,6 @@ try {
             try: os.makedirs(outdir, exist_ok=True)
             except Exception: pass
             opts = {"quiet": True, "no_warnings": True, "noplaylist": True, "socket_timeout": 20, "retries": 3,
-                    "windowsfilenames": True,
                     "outtmpl": os.path.join(outdir, "%(title).80s [%(id)s].%(ext)s"),
                     "format": "best/bv*+ba/bestvideo+bestaudio",
                     "progress_hooks": [hook]}
@@ -6194,16 +6094,16 @@ try {
                     st_var.set(f"{self.t('dl_saved', '已保存')}: {title[:50]}")
                 else:
                     dur = info.get("duration")
-                    extra = f", 时长 {int(dur)//60}:{int(dur)%60:02d}" if dur else ""
+                    extra = f"{self.t('dl_dur_pre', ', 时长 ')}{int(dur)//60}:{int(dur)%60:02d}" if dur else ""
                     st_var.set(f"{self.t('dl_parse_ok', '解析成功')}: {title[:60]} ({self.t('dl_platform_word', '平台')}: {site}{extra}) —— {self.t('dl_click_dl', '点「开始下载」保存')}")
             def done_err(msg):
                 set_busy(False)
                 hint = ""
                 low = msg.lower()
                 if "login" in low or "cookies" in low or "sign in" in low:
-                    hint = " 这个内容可能需要登录: 勾选「使用 Chrome 登录状态」并关闭 Chrome 后重试。"
+                    hint = self.t("dl_hint_login", " 这个内容可能需要登录: 勾选「使用 Chrome 登录状态」并关闭 Chrome 后重试。")
                 elif "unsupported url" in low:
-                    hint = " 这个链接暂时不支持, 换一条帖子/视频的分享链接试试。"
+                    hint = self.t("dl_hint_unsupported", " 这个链接暂时不支持, 换一条帖子/视频的分享链接试试。")
                 st_var.set(f"{self.t('dl_failed', '失败')}: " + msg[:150] + hint)
             try:
                 with yt_dlp.YoutubeDL(opts) as ydl:
@@ -6511,7 +6411,7 @@ try {
                         set_send_enabled(True)
                         if self._ai_chat_history is hist_ref:
                             hide_typing()
-                            add_bubble("assistant", f"(出错了: {msg})")
+                            add_bubble("assistant", f"({self.t('ai_err_word', '出错了')}: {msg})")
                         else:
                             self.status.set(f"{self.t('ai_reply_failed2', 'AI 回复失败')}: {msg[:80]}")
                     self._ui_queue.put(fail)
@@ -6718,6 +6618,8 @@ try {
                 # 拿不到行坐标: 在本线程把纯文字 OCR 也做了再交给文字翻译流程,
                 # 旧版直接调 translate_image 会把整套 OCR 再跑一遍 (RapidOCR 一遍好几秒)
                 self.translate_image(img, target, text=self.ocr_image(img), anchor=anchor); return
+            if not any(re.search(r"[A-Za-z\u4e00-\u9fff]", l["t"]) for l in lines):  # 只有数字/符号: 没东西可译, 别误报「翻译失败」
+                self._ui_queue.put(lambda: messagebox.showinfo(self.t("snip_trans_title", "截图翻译"), self.t("tr_only_symbols", "识别到的只有数字或符号, 没有可翻译的文字"))); return
             tgt = target
             if tgt is None:
                 joined = "".join(l["t"] for l in lines)
@@ -7082,27 +6984,11 @@ try {
     def ocr_selected_shot(self):
         sel = self.shots_list.curselection() if hasattr(self, "shots_list") else ()
         if not sel or not HAS_PIL: messagebox.showinfo("OCR", self.t("ocr_pick_first", "先在截图列表里选一张")); return
-        path = self._shot_file(self.shots_list.get(sel[0]))
-        if not path: return
-        with Image.open(path) as _im: self.recognize(_im.copy(), "ocr")
-
-    def _shot_file(self, name):
-        """历史文件只允许 shots 目录里的 png/gif 文件名, 拒绝带路径的名字。"""
-        raw = str(name or "")
-        base = os.path.basename(raw)
-        if not base or base != raw or not base.lower().endswith((".png", ".gif")): return None
-        root = os.path.abspath(self.shots_dir)
-        full = os.path.abspath(os.path.join(root, base))
-        try:
-            if os.path.commonpath([root, full]) != root: return None
-        except ValueError: return None
-        return full
+        with Image.open(os.path.join(self.shots_dir, self.shots_list.get(sel[0]))) as _im: self.recognize(_im.copy(), "ocr")
 
     def _pin_file(self, name):
         """从历史文件钉图: 打开后立刻复制一份并关文件, 不让文件句柄一直挂在贴图上"""
-        path = self._shot_file(name)
-        if not path or not os.path.isfile(path): return
-        with Image.open(path) as _im: self.pin_image(_im.copy())
+        with Image.open(os.path.join(self.shots_dir, name)) as _im: self.pin_image(_im.copy())
     # ---------- 截图历史画廊 (v1.2) ----------
     def open_gallery(self):
         """历史截图入口 (主窗口按钮): 切到主窗口内的画廊面板 (Jane 2026-11-25 定版面板化, 不再弹独立窗口)"""
@@ -7163,9 +7049,7 @@ try {
         for i, name in enumerate(files):
             cell = ttk.Frame(grid); cell.grid(row=i // 4, column=i % 4, padx=8, pady=8)
             try:
-                path = self._shot_file(name)
-                if not path: continue
-                im = Image.open(path); thumb = im.copy(); thumb.thumbnail((160, 110))
+                im = Image.open(os.path.join(self.shots_dir, name)); thumb = im.copy(); thumb.thumbnail((160, 110))
                 photo = ImageTk.PhotoImage(thumb); self._gallery_photos.append(photo)
                 tk.Label(cell, image=photo).pack()
             except Exception: pass
@@ -7174,10 +7058,8 @@ try {
             btns = ttk.Frame(cell); btns.pack()
             ttk.Button(btns, text=self.t("gal_pin", "钉图"), width=6, command=lambda n=name: self._pin_file(n)).pack(side="left", padx=1)
             def delete(n=name, cell=cell):
-                path = self._shot_file(n)
-                if path:
-                    try: os.remove(path)
-                    except Exception: pass
+                try: os.remove(os.path.join(self.shots_dir, n))
+                except Exception: pass
                 cell.destroy(); self.refresh_shots(); self._gallery_render()
             ttk.Button(btns, text=self.t("cmn_delete", "删除"), width=6, command=delete).pack(side="left", padx=1)
     def _gallery_delete_all(self):
@@ -7187,9 +7069,7 @@ try {
         if not messagebox.askyesno(self.t("gal_delall", "删除全部"), f"{self.t('gal_delall_pre', '确定要删除全部')} {len(files)} {self.t('gal_delall_suf', '个历史截图/录制文件吗? 删除后不能恢复。')}", parent=self): return
         n = 0
         for f in files:
-            path = self._shot_file(f)
-            if not path: continue
-            try: os.remove(path); n += 1
+            try: os.remove(os.path.join(self.shots_dir, f)); n += 1
             except Exception: pass
         self.refresh_shots(); self._gallery_render()
         self.status.set(f"{self.t('gal_deleted', '已删除全部历史截图')} ({n})")
