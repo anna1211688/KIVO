@@ -1436,7 +1436,7 @@ _BTN_ICONS_B64 = {
     "gear": "iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAD5klEQVR4nLWUT4jVVRTHv+fce3/vvRnGHExpoj+LIOGBM8ErsSJ+o0VjOeXqB4ENisZr0yaGVlnDMIhItiiIYFCzhbaYwcVo5bgoZxGE+iCHHF1WJkOaZaH2fr977zkt5k9jTY4EneXhns+559+XcGdGaTpgAGBiYjDcYcz/Y7SYM8syM1KtanoSPDExGNZu3LIs59ZXEeLPZ0/s/wgApWlquru7ZWpqikZGRuIdgRfa6he3t5UKOp6UWp5QACG/+d7Dbb/3Lwa7HZgAoKtn+5vWlTfkzZt7nePL7Cqnfd5sMrMTifnk+P1tXRsvbWbrXhOff3l2/MCu2XidA/HC8gFoZ8+Ona7SOqSQ9TZJPpVIa3zR/I6ZS8RsQDjf+eyl5421Rwi6wVVahzp7duwEoLOMW8Ej1epcthckhBiKIocKQPohVFepikoIEUAXsYzF4DX4IpfgBUS9f2Ms+PHUFCHLDBHtBtSQ4ZKKKJhLRNTCbJitMwSyABEAEJFTVYLqHgCUnvyL94/hrVuXVW4ua0nZJKOq2gIVZZdw9MV5IrrGbB4XEUA1srVGYtF37Q8Z/X7i4+YiwxtgDACdX1/aayxvkxi+VaXHiJAY4zhqeMv+xHsajWHf+dwrvUw0qiIJQFDIaSZ+CKAzxlx/uXHsk6sAwGmaWmBQuk79uDUpl18XkXY2yVNEKDMbDuKnzn62b1ejMexrtbqb/HzfMRE9bGxCqiLGuLWqWGGTck/wlb0AFGlq+Pr11TP9EtwDACqSqwSoqhAzoPgNgNbqdedcq51ZKr1MRABBRSJUJVeJUOJ7F7aCAMWaTVuWm9hy1LjkSV/kV0DaTiBmNhQlbp48vv8oANR66w+EqGcIuFtVAOAXY90KEZkWCZsmjx/4ZgADRAsSaK1Wd9KBR6MPXcT8LlTLABEReVE5zMAVJdpGRCslSjTWmhh8vzP2qxvxxg8Xxg9Nz7Hm1kPTdMA2GsM+FvEuY5P3oagAIFUVVUmsS7axK71BmIESgSUGMdbt9iG2Xxg/NF2r1d3c9c3v3UQ3BAARY4gIRlUKADDWGYAQfB6CbwZVUWOtmU3qicgRYwhQavR2zOvHrQcCqCrG2Do2LimxsSTR9ynklDHOErFVxdUYfD8Rw7pSia0jVYwBpLOMRQ9kXoTYldZHX3wwOb7/SOfGHb8yuE00BuOSkhb5I0p0n3Xl/uCbXywmQkvK5oPp1vLyij3qyi3PSIyIobgSYqidO3Hw4u3i7GLOLMtMtVrVkzNC31z1dN9LnvkdEK9UlbfPnTh4sVaru0ZvR8z+Rej/qy1Z6ZIP5t5lWcbArDQODspSAX8Cm0TtanseiCAAAAAASUVORK5CYII=",
     "star": "iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAACeUlEQVR4nNWUQUhUURSG/3PfffNmTGdMxRQ3ErhoxsVkkW0EayEEtRxo0SIiWhRCRfvnrFyVqNUqaNUiWhpEKyMS2pQtzAgXtQkRLH0zOE/fu++cFk8Tx4EZI5DO6t7Lf7/733PPucDhhxBE6LBdNBKxy/Zr71ra7nztiZfqO1d1uYVYY5pbb5jIuACAMVj1ttXPmSsKANJrXz6CcDylg+6V+/mN+CYkjYPdWQ0Mx+NfSxbafkTp1a48OfZ7UtoiU7m4lll5je+9Gr29Jha+AYrnzMEcA2i9/fkp7OarEAaHlZelydylenu2wfG1Wm4ttquEvgMQi9kypEgBcCB0F4oSAEE48okwCWBLWJi0owFRHJiJ8qPszx3WrmNXFJY/WOlU6rrSqceUzEDCDYA0ZNMDsJ1OIpCTAcSA7COQTQ9s/Jsl33+C7lMRisQ1UhGflhn9dBKJ9CsCjklYCUHK3ivjkOwmW4AVBKUL3nR+vvoxq8qNBK5obzo/z+H6kEg0RzqpIcK7UGHSSS0SzXG4PuRN5+fhiq6ukP11XCSDwkKiPDWwpAJ/HNohEARABEgEQKAdUoE/Xp4aWEJhIYEimWpM7QbJ5hiuq1jrkdiJGLJTFjlpKz6AhLUegesqZHNcC1EbPIYIizkCR2chTJQ86nDgv5Wt8jNymhMgIjAPYjFHGEPUIFgUiKSjp7+T7KYzwpHHQWW0tHzivDeZvcJRcFnM5jLs1GBHT38niASQfZz94EJcKYHwsJCaEd44XZroe4gXYBTEKj3oex76qwMQmglku0ULjTUaAKDp3reuPxN3Vtca79EcLIR2PqG9y0I73+nfQf+J5n+J39QzDLg7vrq5AAAAAElFTkSuQmCC",
 }  # 按钮小图标 (22px, PIL 手绘线条风: 图标+文字并排, 与常见软件一致)
-VERSION = "1.4.25"  # v1.4.22: ①去掉内置浏览器整套 (Jane 真机定版不好用: 面板/书签/历史/菜单/pywebview 子进程全删, 工具栏回 8 按钮, 自检减为六项, 打包去 pywebview) ②世界时间加「刷新」(绕过天气 15 分钟节流立即重拉) ③文本翻译框自适应高度 (默认 8 行, 随内容长高至 24 行封顶, 按钮行跟随) ④系统设置/软件自检/历史截图/城市选择全部改为主窗口内面板 (Jane 定版「能收的都收」, 不再弹独立窗口, 重复开窗问题从结构上消除) ⑤启动时清理浏览器残留文件 (bookmarks/browser_history/browser_profile) ⑥工具栏改一行 8 按钮 ⑦截图翻译学有道: F4 出无边框浮动条 (原文区透明盖选区透出真实截图对照/译文框在选区下方、不够翻上方/大小随内容/源语言可选/条内复制原文·译文·AI 智能回复), 完整结果窗保留给无选区入口; v1.4.23: ①修真 bug: 配置解析关 % 插值 (分隔符/路径/接口地址带 % 不再抛错) ②备份导入加固 (JSON 先验货后落盘, 坏备份整包拒绝) + 备份说明去掉书签残留文案 ③英文模式运行时漏网文案两批全清 (汇率/托盘/取色器/下载提示/识别结果窗/AI 气泡与接口报错/测试连接结果/计算器/截图浮层, 三个翻译助手改实例方法并本地化报错) ④F4 纯数字/符号截图提示「没有可翻译的文字」不再误报失败 ⑤删死代码, 新增边缘测试套件; v1.4.24: 修 AI 聊天真机 400 (Jane 实测): 智谱 glm-4v-flash 的 max_tokens 上限 1024, 聊天面板传 2048 被拒 (code 1210); 已在 _ai_chat_messages 对智谱统一钳制 [1,1024], 别家不受影响, test_edge 扩至 17 项含此用例; v1.4.25: ①F4 截图翻译合并引擎 (Jane 定案): 配了 AI Key 先 AI 看图翻译 (一次读图+翻译, 尝试上限 20 秒), AI 失效/没配 Key 立刻回退 OCR 通道 ②F4 提速: 免费翻译通道黏性 (通的通道 120 秒内优先)、Google 超时 12→8 秒、MyMemory 12→10 秒、逐行兜底改并发 ③文本翻译源语言改下拉可选 (自动检测+13 种, 改选即重译并真传引擎) ④文本翻译接 AI 通道 + 「启用AI翻译」勾选 (默认开: 勾上才优先 AI、失效回退在线; 不勾绝不调 AI; 选择落盘 TTUseAI) ⑤_ai_chat_image/_ai_chat_messages 加 timeout 参数 (默认 90 不变)
+VERSION = "1.4.26"  # v1.4.22: ①去掉内置浏览器整套 (Jane 真机定版不好用: 面板/书签/历史/菜单/pywebview 子进程全删, 工具栏回 8 按钮, 自检减为六项, 打包去 pywebview) ②世界时间加「刷新」(绕过天气 15 分钟节流立即重拉) ③文本翻译框自适应高度 (默认 8 行, 随内容长高至 24 行封顶, 按钮行跟随) ④系统设置/软件自检/历史截图/城市选择全部改为主窗口内面板 (Jane 定版「能收的都收」, 不再弹独立窗口, 重复开窗问题从结构上消除) ⑤启动时清理浏览器残留文件 (bookmarks/browser_history/browser_profile) ⑥工具栏改一行 8 按钮 ⑦截图翻译学有道: F4 出无边框浮动条 (原文区透明盖选区透出真实截图对照/译文框在选区下方、不够翻上方/大小随内容/源语言可选/条内复制原文·译文·AI 智能回复), 完整结果窗保留给无选区入口; v1.4.23: ①修真 bug: 配置解析关 % 插值 (分隔符/路径/接口地址带 % 不再抛错) ②备份导入加固 (JSON 先验货后落盘, 坏备份整包拒绝) + 备份说明去掉书签残留文案 ③英文模式运行时漏网文案两批全清 (汇率/托盘/取色器/下载提示/识别结果窗/AI 气泡与接口报错/测试连接结果/计算器/截图浮层, 三个翻译助手改实例方法并本地化报错) ④F4 纯数字/符号截图提示「没有可翻译的文字」不再误报失败 ⑤删死代码, 新增边缘测试套件; v1.4.24: 修 AI 聊天真机 400 (Jane 实测): 智谱 glm-4v-flash 的 max_tokens 上限 1024, 聊天面板传 2048 被拒 (code 1210); 已在 _ai_chat_messages 对智谱统一钳制 [1,1024], 别家不受影响, test_edge 扩至 17 项含此用例; v1.4.25: ①F4 截图翻译合并引擎 (Jane 定案): 配了 AI Key 先 AI 看图翻译 (一次读图+翻译, 尝试上限 20 秒), AI 失效/没配 Key 立刻回退 OCR 通道 ②F4 提速: 免费翻译通道黏性 (通的通道 120 秒内优先)、Google 超时 12→8 秒、MyMemory 12→10 秒、逐行兜底改并发 ③文本翻译源语言改下拉可选 (自动检测+13 种, 改选即重译并真传引擎) ④文本翻译接 AI 通道 + 「启用AI翻译」勾选 (默认开: 勾上才优先 AI、失效回退在线; 不勾绝不调 AI; 选择落盘 TTUseAI) ⑤_ai_chat_image/_ai_chat_messages 加 timeout 参数 (默认 90 不变); v1.4.26: ①F4 修 AI 回复把提示词的「第一部分/第二部分」标签回声进正文 (改提示词措辞+解析层剥标签兜底) ②全部勾选/单选改圆点指示 (选中绿点/未选空心圈, PIL 生成 Dot.indicator, 含经典 tk 城市勾选) ③工具栏 8 按钮统一样式 (AI 功能去掉蓝色描边款) ④F4 第二轮提速: OCR 与 AI 并行 (回退零等待, Jane 定案保持并行)、OCR 引擎启动预热、「翻译中…」占位浮签 ⑤马赛克/模糊加强: 强度随区域自适应 (旧版几乎无效), F1 编辑器预览改真效果 ⑥全面审查修复 18 项: 多显示器坐标校正、长截图/F4 后台线程兜底、备份验 Config.ini+导出原子写、迷你窗脏值兜底、天气失败负缓存改 60 秒、画廊/预览句柄泄漏、计算器英文错误态、AI 空白返回、强力粘贴验返回值、GlobalLock 判空、WinOCR 逐行容错、import_txt 支持 UTF-16、复制反馈存活守卫、配置双编码全新 parser、分隔符脏值校验; 两 ini 438 键同集 (新增 long_fail)
 # v1.4.20: 瘦身版, 功能零变化 — 打包侧剔除未用组件 (cv2 视频插件/级联数据、numpy 测试集、onnxruntime 的 transformers/tools/quantization/datasets/backend), 已模拟验证删除后 OCR 中英文识别正常
 # v1.4.19: ①AI 面板侧边栏去掉「AI 功能」快捷入口组 (功能本体全保留) ②修复 v1.4.18 的 F4 截图翻译主流程 (_translate_lines 误标 @staticmethod 致后台线程静默失败) ③记录上限改硬线 (全锁定时不再突破 2000) ④截图翻译目标语言扩到 13 种 ⑤内嵌微型浏览器 (WebView2 子进程收编: 谷歌翻译主页/书签栏前 8+书签管理/浏览历史/清除数据/页面缩放/下载说明) ⑥文本翻译面板 (打字停笔 350ms 自动翻译, 无缓存每次实时译) + 工具栏按序重排为两行并配线条图标 ⑦品牌头重排 (系统设置移左上挨着 SPST, 副标题「多功能工作台」居中, 右上留空) + 软件图标换 Jane 的樱花小女孩原图 ⑧窗口最小高度解锁 (最大化/缩放恢复正常) ⑨全界面双语化补齐 (约 330 条文案入语言文件, 英文模式复检残留中文 0 条) + 第八轮深查 (线程/网络/浏览器生命周期/热键英文保存往返全过)
 # v1.4.18: ①截图翻译修复 (OCR 碎片合并+整段翻译, 结果窗改纯文本) ②翻译结果窗内嵌 AI 智能回复 ③AI/热键/翻译设置全并入系统设置 ④AI 功能改内嵌面板+豆包式侧边栏+最近对话存档 (圆角气泡) ⑤主窗口简约重设计 (方角) ⑥货币汇率 ⑦计算器 ⑧常用语库面板化+序号 ⑨世界时间 (全球城市自选+当地天气) ⑩无水印下载 (FB/IG/小红书等, 保存位置可每次询问或固定) ⑪历史截图保存设置 (张数/不保存, 含 GIF) ⑫移除网络搜索 ⑬三轮深查整改: AI 回复防串话/时钟计时链/天气失败重试/设置窗滚轮隔离/下载实际文件名/汇率过期刷新/AI 回复增量渲染 (320ms→24ms)/单实例保护/单对话存档封顶 200 条
@@ -1488,7 +1488,7 @@ def _log_crash(where, exc_type, exc, tb):
         _crash_seen[key] = now
         try:
             if os.path.exists(CRASH_LOG_PATH) and os.path.getsize(CRASH_LOG_PATH) > 1_000_000:
-                tail = open(CRASH_LOG_PATH, encoding="utf-8", errors="replace").read()[-200_000:]
+                with open(CRASH_LOG_PATH, encoding="utf-8", errors="replace") as _f: tail = _f.read()[-200_000:]
                 _atomic_write(CRASH_LOG_PATH, tail)
         except Exception: pass
         with open(CRASH_LOG_PATH, "a", encoding="utf-8") as f:
@@ -1507,7 +1507,11 @@ def _install_crash_logging():
     threading.excepthook = _thr_hook
     try:
         import faulthandler
-        fh = open(os.path.join(BASE, "crash_native.log"), "a", encoding="utf-8")
+        _np = os.path.join(BASE, "crash_native.log")
+        if os.path.exists(_np) and os.path.getsize(_np) > 2_000_000:  # 原生日志原先只追加无上限, 反复崩溃能无限涨: 启动时截断只留尾部
+            with open(_np, encoding="utf-8", errors="replace") as _f: _tail = _f.read()[-200_000:]
+            _atomic_write(_np, _tail)
+        fh = open(_np, "a", encoding="utf-8")
         faulthandler.enable(file=fh)
         globals()["_faulthandler_file"] = fh  # 保住句柄别被回收
     except Exception: pass
@@ -1687,6 +1691,7 @@ class App(tk.Tk):
         self.cfg = self.load_config()
         self._load_lang()
         self._apply_theme()
+        self.after(2500, self._ocr_warmup)  # 空闲预热 OCR 引擎: 首次建引擎加载三模型要数秒, 别让第一次走 OCR 的 F4 干等
         self.build_ui()
         self._fit_window_to_content()
         self.load_records()
@@ -1749,18 +1754,23 @@ class App(tk.Tk):
                                       "bracketleft", "bracketright")
     # ---------- config (兼容原版字段) ----------
     def load_config(self):
-        c = configparser.ConfigParser(strict=False, interpolation=None)  # strict=False: 老版本 ini 里万一有重复段, 取最后的值而不是整份配置静默回退默认; interpolation=None: 用户填的分隔符/路径/网址里带 % 时默认插值会让 set/get 直接抛错, 本软件不用插值语法
-        defaults = {f"HotKey{i}": "无" for i in range(13)}; defaults.update(DEFAULT_HOTKEYS)
-        c.read_dict({"Config": {"SleepTime": "80", "WaveSet": "0", "AutoRun": "0", "Language": "Chinese", "PasteEnter": "0", "PasteRemove": "1",
-                                "MiniFormTime": "5", "MiniFormSet": "0", "AddChar": "1", "LetterSet": "0", "ShowHotKey": "F2"},
-                     "HotKey": defaults, "Snip": dict(DEFAULT_SNIP_KEYS),
-                     "OCHotKey": {"HotKey": "无", "OCAutoSet": "0"}})
-        if os.path.exists(CONFIG_PATH):
-            # 原版是 GBK, 新版是 UTF-8: 依次尝试, 不再乱码
-            for enc in ("utf-8-sig", "gbk"):
-                try: c.read(CONFIG_PATH, encoding=enc); break
-                except Exception: continue
-        return c
+        hk_defaults = {f"HotKey{i}": "无" for i in range(13)}; hk_defaults.update(DEFAULT_HOTKEYS)
+        defaults_dict = {"Config": {"SleepTime": "80", "WaveSet": "0", "AutoRun": "0", "Language": "Chinese", "PasteEnter": "0", "PasteRemove": "1",
+                                    "MiniFormTime": "5", "MiniFormSet": "0", "AddChar": "1", "LetterSet": "0", "ShowHotKey": "F2"},
+                         "HotKey": hk_defaults, "Snip": dict(DEFAULT_SNIP_KEYS),
+                         "OCHotKey": {"HotKey": "无", "OCAutoSet": "0"}}
+        def _fresh():
+            # strict=False: 老版本 ini 里万一有重复段, 取最后的值而不是整份配置静默回退默认; interpolation=None: 用户填的分隔符/路径/网址里带 % 时默认插值会让 set/get 直接抛错, 本软件不用插值语法
+            c = configparser.ConfigParser(strict=False, interpolation=None)
+            c.read_dict(defaults_dict); return c
+        if not os.path.exists(CONFIG_PATH): return _fresh()
+        # 原版是 GBK, 新版是 UTF-8: 依次尝试; 每轮用全新 parser——同一 parser 第一轮解析到一半抛错时,
+        # 已读入的段会残留, 第二轮在其上合并出混合配置 (2026-11-25 审查发现)
+        for enc in ("utf-8-sig", "gbk"):
+            c = _fresh()
+            try: c.read(CONFIG_PATH, encoding=enc); return c
+            except Exception: continue
+        return _fresh()
     def _load_lang(self):
         """语言: 读 Language/<Language>.ini 的 [UI] 段 (沿用原版的语言文件机制); 缺键时回退到代码里的中文原文"""
         self.lang = self.cfg.get("Config", "Language", fallback="Chinese").strip() or "Chinese"
@@ -1773,8 +1783,9 @@ class App(tk.Tk):
         if os.path.exists(p):
             lp = configparser.ConfigParser(strict=False, interpolation=None)
             for enc in ("utf-8-sig", "gbk"):
+                lp = configparser.ConfigParser(strict=False, interpolation=None)  # 每轮全新: 防半解析残留污染下一轮 (同 load_config)
                 try: lp.read(p, encoding=enc); break
-                except Exception: continue
+                except Exception: lp = configparser.ConfigParser(strict=False, interpolation=None); continue
             if lp.has_section("UI"): self._strings = dict(lp.items("UI"))
     def t(self, key, zh):
         return self._strings.get(key, zh).replace("\\n", "\n")  # ini 里多行文案写成 \n 转义, 这里还原
@@ -1899,6 +1910,29 @@ class App(tk.Tk):
             st.configure("Card.TLabel", background="#FFFFFF", foreground=tx)
             st.configure("Card.TRadiobutton", background="#FFFFFF", foreground=tx)
             st.configure("Card.TCheckbutton", background="#FFFFFF", foreground=tx)
+            try:  # 勾选/单选指示器统一圆点 (Jane 2026-11-25 18:48 定版): 未选=空心圈, 选中=绿色圆点; 替换 clam 的 indicator 元素即全软件生效
+                from PIL import Image as _PI, ImageDraw as _PD, ImageTk as _PT
+                def _dot(on, dis=False):
+                    S = 64; im = _PI.new("RGBA", (S, S), (0, 0, 0, 0)); dr = _PD.Draw(im)
+                    ring = (169, 223, 197, 255) if (on and dis) else (34, 181, 115, 255) if on else (201, 206, 214, 255) if dis else (154, 163, 178, 255)
+                    fill = (242, 243, 245, 255) if (dis and not on) else (255, 255, 255, 255)
+                    dr.ellipse([9, 9, S - 9, S - 9], outline=ring, width=5, fill=fill)
+                    if on: dr.ellipse([S / 2 - 10, S / 2 - 10, S / 2 + 10, S / 2 + 10], fill=ring)
+                    return _PT.PhotoImage(im.resize((16, 16), _PI.LANCZOS))
+                self._dot_off, self._dot_on = _dot(False), _dot(True)
+                self._dot_off_d, self._dot_on_d = _dot(False, True), _dot(True, True)
+                st.element_create("Dot.indicator", "image", self._dot_off,
+                                  ("disabled selected", self._dot_on_d), ("selected", self._dot_on), ("disabled", self._dot_off_d))
+                def _swap_ind(style_name, old_el):  # 原生 element 名不许重定义 (Duplicate element): 新建 Dot.indicator 再改布局引用它
+                    def rec(node):
+                        nm, opts = node
+                        if nm == old_el: nm = "Dot.indicator"
+                        if "children" in opts: opts = dict(opts, children=[rec(c) for c in opts["children"]])
+                        return (nm, opts)
+                    st.layout(style_name, [rec(n) for n in st.layout(style_name)])
+                _swap_ind("TCheckbutton", "Checkbutton.indicator")
+                _swap_ind("TRadiobutton", "Radiobutton.indicator")
+            except Exception: pass
             st.configure("TCheckbutton", background=bg, foreground=tx)
             st.configure("TRadiobutton", background=bg, foreground=tx)
             st.configure("Treeview", background=self.UI_SURFACE, fieldbackground=self.UI_SURFACE,
@@ -1937,12 +1971,12 @@ class App(tk.Tk):
         self.search_var = tk.StringVar(); self.search_var.trace_add("write", lambda *a: self._schedule_search_refresh())
         tk.Frame(self, background=self.UI_BORDER, height=1).pack(fill="x")
         self.lang_var = tk.StringVar(value=self.lang)  # 语言切换的界面已搬进「系统设置」窗口, 这里只留变量
-        # ---------- 工具栏: 方角按钮 (主窗口不用圆角, Jane 要求; AI 功能用描边款突出一点) ----------
+        # ---------- 工具栏: 方角按钮 (主窗口不用圆角, Jane 要求; 八个按钮同款, 不给 AI 功能搞特殊描边——Jane 2026-11-25 18:57 定版: 未选中也蓝字蓝框看着不一致) ----------
         bar = tk.Frame(self, background=self.UI_BG); bar.pack(fill="x", padx=12, pady=(10, 2))
         for _idx, (txt, cmd, var_, icn) in enumerate([(self.t("copy_paste", "复制粘贴"), self._show_main_view, "soft", "copy"),
                                (self.t("phrase_library", "常用语库"), self.open_phrases, "soft", "phrases"),
                                (self.t("text_translate", "文本翻译"), self._show_texttrans_panel, "soft", "translate"),
-                               (self.t("ai_chat", "AI 功能"), self.open_ai_chat, "outline", "ai"),
+                               (self.t("ai_chat", "AI 功能"), self.open_ai_chat, "soft", "ai"),
                                (self.t("fx_rates", "货币汇率"), self.open_fx, "soft", "fx"),
                                (self.t("world_clock", "世界时间"), self.open_world_clock, "soft", "clock"),
                                (self.t("calculator", "计算器"), self.open_calc, "soft", "calc"),
@@ -1993,7 +2027,8 @@ class App(tk.Tk):
         opt = card_section(self.t("paste_options", "粘贴选项"))
         opt1 = ttk.Frame(opt, style="Card.TFrame"); opt1.pack(fill="x")
         opt2 = ttk.Frame(opt, style="Card.TFrame"); opt2.pack(fill="x", pady=(5, 0))
-        self.sep_var = tk.StringVar(value=self.cfg.get("Config", "Separator", fallback="enter"))
+        _sep0 = self.cfg.get("Config", "Separator", fallback="enter")
+        self.sep_var = tk.StringVar(value=_sep0 if _sep0 in ("enter", "tab", "none") else "enter")  # ini 里是空/怪值时别让三个单选一个都不选中 (行为本来有回退, 但界面会显得没选)
         for txt, val in [(self.t("sep_enter", "记录间回车"), "enter"), (self.t("sep_tab", "记录间 TAB"), "tab"), (self.t("sep_none", "无分隔"), "none")]:
             ttk.Radiobutton(opt1, text=txt, variable=self.sep_var, value=val, command=self._save_entry_settings, style="Card.TRadiobutton").pack(side="left", padx=4)
         ttk.Label(opt1, text=self.t("custom", "自定义:"), style="Card.TLabel").pack(side="left")
@@ -2117,6 +2152,7 @@ class App(tk.Tk):
     def apply_autorun(self):
         """开机自启 (原版 AutoRun): 写/删 HKCU Run 项; 只对 Windows 生效"""
         if sys.platform != "win32": return
+        key = None
         try:
             import winreg
             key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_SET_VALUE)
@@ -2130,8 +2166,11 @@ class App(tk.Tk):
                 for legacy in ("SPST", "SnapPaste"):
                     try: winreg.DeleteValue(key, legacy)
                     except FileNotFoundError: pass
-            winreg.CloseKey(key)
         except Exception: pass
+        finally:
+            if key is not None:
+                try: winreg.CloseKey(key)
+                except Exception: pass
     def _refresh_mini(self):
         """迷你窗口的列表与主列表保持同步 (迷你窗不带搜索过滤, 行号即记录号; 同样分 序号|文本内容 两列)"""
         try:
@@ -2155,7 +2194,8 @@ class App(tk.Tk):
         """迷你窗口 (原版 MiniForm): 独立小窗, 里面是完整记录列表 + 锁定/删除/删除全部/上移/下移按钮;
         双击某行 = 从该行开始顺序粘贴。MiniFormSet=1 常显, 否则操作后显示 MiniFormTime 秒"""
         always = self.cfg.get("Config", "MiniFormSet", fallback="0") == "1"
-        secs = self.cfg.getint("Config", "MiniFormTime", fallback=5)
+        try: secs = self.cfg.getint("Config", "MiniFormTime", fallback=5)
+        except Exception: secs = 5  # ini 被手改成非数字时 getint 直接抛 ValueError, 而这里在 try 之外: 迷你窗会静默失效
         if not always and secs <= 0: return
         try:
             if self._mini_win is None or not self._mini_win.winfo_exists():
@@ -2404,11 +2444,18 @@ class App(tk.Tk):
                      "ai_chats.json"]
     def _export_backup(self, path):
         import zipfile
-        with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as z:
-            z.writestr("spst_backup.json", json.dumps({"app": "SPST", "version": VERSION, "time": time.strftime("%Y-%m-%d %H:%M:%S")}, ensure_ascii=False))
-            for name in self._BACKUP_FILES:
-                p = os.path.join(BASE, name)
-                if os.path.exists(p): z.write(p, name)
+        tmp = path + ".tmp"  # 先写临时再换名: 旧版直接在目标路径建 zip, 中途失败会把原有的一份好备份截断销毁 (审查发现)
+        try:
+            with zipfile.ZipFile(tmp, "w", zipfile.ZIP_DEFLATED) as z:
+                z.writestr("spst_backup.json", json.dumps({"app": "SPST", "version": VERSION, "time": time.strftime("%Y-%m-%d %H:%M:%S")}, ensure_ascii=False))
+                for name in self._BACKUP_FILES:
+                    p = os.path.join(BASE, name)
+                    if os.path.exists(p): z.write(p, name)
+            os.replace(tmp, path)
+        except Exception:
+            try: os.remove(tmp)
+            except Exception: pass
+            raise
     def _import_backup(self, path):
         import zipfile
         with zipfile.ZipFile(path) as z:
@@ -2418,6 +2465,15 @@ class App(tk.Tk):
                 if name in z.namelist():
                     data = z.read(name)
                     if ".json" in name: json.loads(data.decode("utf-8"))  # 先验货再覆盖: JSON 已损坏的备份整包拒绝, 不拿坏数据顶掉现有好数据
+                    if name == "Config.ini":  # Config.ini 同样先验货: 旧版只验 JSON, 坏 ini 落盘后下次启动静默回退默认 = 设置/密钥全丢还报导入成功 (审查发现)
+                        import io
+                        ok_ini = False
+                        for enc in ("utf-8-sig", "gbk"):
+                            try:
+                                _cp = configparser.ConfigParser(strict=False, interpolation=None); _cp.optionxform = str
+                                _cp.read_file(io.StringIO(data.decode(enc))); ok_ini = True; break
+                            except Exception: continue
+                        if not ok_ini: raise ValueError("bad Config.ini in backup")
                     payload[name] = data
             for name, data in payload.items():
                 tmp = os.path.join(BASE, name + ".tmp")
@@ -2741,7 +2797,9 @@ class App(tk.Tk):
             data = (text + "\0").encode("utf-16-le")
             h = k.GlobalAlloc(0x0002, len(data))  # GMEM_MOVEABLE
             if not h: return False
-            ptr = k.GlobalLock(h); ctypes.memmove(ptr, data, len(data)); k.GlobalUnlock(h)
+            ptr = k.GlobalLock(h)
+            if not ptr: k.GlobalFree(ctypes.c_void_p(h)); return False  # 锁失败返回 NULL: 不判空直接 memmove 是往空地址写 = 进程硬崩溃 (审查发现)
+            ctypes.memmove(ptr, data, len(data)); k.GlobalUnlock(h)
             opened = False
             for _ in range(5):  # 剪贴板可能被别的程序短暂占用, 重试几次
                 if u.OpenClipboard(None): opened = True; break
@@ -2934,10 +2992,11 @@ class App(tk.Tk):
                     i = _INPUT(); i.type = 1; i.u.ki.wVk = vk; i.u.ki.wScan = scan
                     i.u.ki.dwFlags = (0x0004 if unicode_ else 0) | (0x0002 if up else 0); return i
                 batch = [ev(*p) for p in self._type_units(text)]
+                sent_all = True
                 for j in range(0, len(batch), 200):  # 分批发送, 防超长文本一次塞爆
                     chunk = (_INPUT * len(batch[j:j+200]))(*batch[j:j+200])
-                    u.SendInput(len(batch[j:j+200]), chunk, ctypes.sizeof(_INPUT))
-                return True
+                    if u.SendInput(len(batch[j:j+200]), chunk, ctypes.sizeof(_INPUT)) != len(batch[j:j+200]): sent_all = False; break  # 被 UIPI 等拦截时实际注入 0 个: 旧版不看返回值恒报成功, 字没落进目标窗也不走兜底 (审查发现)
+                if sent_all: return True
             except Exception: pass
         try:
             import keyboard; keyboard.write(text); return True
@@ -2974,8 +3033,12 @@ class App(tk.Tk):
         p = filedialog.askopenfilename(filetypes=[("文本/INI", "*.txt *.ini"), ("全部", "*.*")])
         if p:
             raw = open(p, "rb").read(); lines = []
-            for enc in ("utf-8-sig", "gbk"):
-                try: lines = raw.decode(enc).splitlines(); break
+            encs = ("utf-16",) if raw[:2] in (b"\xff\xfe", b"\xfe\xff") else ("utf-8-sig", "gbk", "utf-16")  # Excel 导出的「Unicode 文本」是 UTF-16: 旧版只试 utf-8/gbk, \x00 在 utf-8 里合法会「成功」解成满屏乱码还报导入成功 (审查发现)
+            for enc in encs:
+                try:
+                    dec = raw.decode(enc)
+                    if "\x00" in dec: continue  # 解出来带 NUL = 编码不对, 换下一种
+                    lines = dec.splitlines(); break
                 except Exception: lines = []
             n0 = len(self.records)
             for ln in lines: self.add_record(ln, save=False)
@@ -3221,26 +3284,32 @@ class App(tk.Tk):
             self._restore_main_after_snip(); self.status.set(self.t("long_win_only", "长截图目前仅支持 Windows")); return
         import threading
         def work():
-            u = ctypes.windll.user32
-            u.mouse_event.argtypes = [ctypes.c_uint, ctypes.c_uint, ctypes.c_uint, ctypes.c_uint, ctypes.c_void_p]
-            x1, y1, x2, y2 = box
-            u.SetCursorPos((x1 + x2) // 2, (y1 + y2) // 2); time.sleep(0.2)
-            frames, last_sig, still = [], None, 0
-            for _ in range(30):
-                if u.GetAsyncKeyState(0x1B) & 0x8000: break  # Esc 中止
-                fr = ImageGrab.grab(bbox=(x1, y1, x2, y2)); frames.append(fr)
-                sig = fr.resize((8, 8)).tobytes()
-                if sig == last_sig:
-                    still += 1
-                    if still >= 2: break  # 连续两帧没变化 = 滚到底了
-                else: still = 0
-                last_sig = sig
-                u.mouse_event(0x0800, 0, 0, (-600) & 0xFFFFFFFF, None)  # MOUSEEVENTF_WHEEL 向下滚一格
-                time.sleep(0.35)
-            img = self._stitch_frames(frames) if frames else None
+            img = None
+            try:
+                u = ctypes.windll.user32
+                u.mouse_event.argtypes = [ctypes.c_uint, ctypes.c_uint, ctypes.c_uint, ctypes.c_uint, ctypes.c_void_p]
+                x1, y1, x2, y2 = box
+                u.SetCursorPos((x1 + x2) // 2, (y1 + y2) // 2); time.sleep(0.2)
+                frames, last_sig, still = [], None, 0
+                for _ in range(30):
+                    if u.GetAsyncKeyState(0x1B) & 0x8000: break  # Esc 中止
+                    fr = ImageGrab.grab(bbox=(x1, y1, x2, y2), all_screens=True); frames.append(fr)
+                    if sum(f.height for f in frames) > 40000: break  # 帧高累计上限: 4K 全屏 30 帧约 750MB, 不封顶拼接会 MemoryError (审查发现)
+                    sig = fr.resize((8, 8)).tobytes()
+                    if sig == last_sig:
+                        still += 1
+                        if still >= 2: break  # 连续两帧没变化 = 滚到底了
+                    else: still = 0
+                    last_sig = sig
+                    u.mouse_event(0x0800, 0, 0, (-600) & 0xFFFFFFFF, None)  # MOUSEEVENTF_WHEEL 向下滚一格
+                    time.sleep(0.35)
+                img = self._stitch_frames(frames) if frames else None
+            except Exception:
+                img = None  # 抓帧/拼接任何失败 (锁屏抢占、MemoryError 等): 绝不能让线程静默死亡——done 必须照常排队恢复主窗口 (审查发现)
             def done():
                 self._restore_main_after_snip()
-                if img is None: return
+                if img is None:
+                    self.status.set(self.t("long_fail", "长截图失败或已取消, 没有生成图片")); return
                 self.save_shot(img); self.status.set(f"{self.t('long_done', '长截图完成')}: {img.width}×{img.height}{self.t('long_done_suf', ', 已打开编辑器 (可标注/复制/钉图)')}")
                 self.open_editor(img)
             self._ui_queue.put(done)
@@ -3277,7 +3346,7 @@ class App(tk.Tk):
         def tick():
             if rec["stop"] or time.time() - rec["t0"] > max_seconds or len(rec["frames"]) >= 200: finish(); return  # 帧数封顶 200: 全攒内存里, 大选区长录会吃掉近 1GB
             try:
-                fr = ImageGrab.grab(bbox=box)
+                fr = ImageGrab.grab(bbox=box, all_screens=True)
                 if fr.width > 960: fr = fr.resize((960, max(1, int(fr.height * 960 / fr.width))))
                 rec["frames"].append(fr.convert("RGB"))
                 lab.config(text=f"{self.t('gif_rec', '● GIF 录制中')} {time.time() - rec['t0']:.0f}s · {len(rec['frames'])} {self.t('gif_frames', '帧')}")
@@ -3398,6 +3467,18 @@ class App(tk.Tk):
         hwnd_of = {r: h for h, r in top_windows}
         self._snip_active = True
         sel_win = tk.Toplevel(self); sel_win.attributes("-fullscreen", True); sel_win.attributes("-topmost", True)
+        if sys.platform == "win32":
+            try:  # 多显示器校正: -fullscreen 只盖主屏, 但 full 是虚拟桌面图; 副屏在左/上 (虚拟原点为负) 或副屏在右 (虚拟宽大于主屏) 时,
+                # 鼠标坐标/窗口吸附矩形/裁剪框三套坐标会整体错位 (审查发现)。把覆盖层用 SetWindowPos 精确铺到虚拟桌面上, 内部坐标即与图一致。
+                _u = ctypes.windll.user32
+                _vx, _vy = _u.GetSystemMetrics(76), _u.GetSystemMetrics(77)
+                _vw, _vh = _u.GetSystemMetrics(78), _u.GetSystemMetrics(79)
+                if (_vx, _vy) != (0, 0) or _vw != sel_win.winfo_screenwidth() or _vh != sel_win.winfo_screenheight():
+                    sel_win.attributes("-fullscreen", False); sel_win.overrideredirect(True)
+                    sel_win.geometry(f"{_vw}x{_vh}+0+0"); sel_win.update_idletasks()
+                    _u.SetWindowPos.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_uint]
+                    _u.SetWindowPos(ctypes.c_void_p(sel_win.winfo_id()), ctypes.c_void_p(-1), _vx, _vy, _vw, _vh, 0x0010 | 0x0040)
+            except Exception: pass
         canvas = tk.Canvas(sel_win, cursor="crosshair", highlightthickness=0); canvas.pack(fill="both", expand=True)
         photo = ImageTk.PhotoImage(full); canvas.create_image(0, 0, anchor="nw", image=photo); canvas.image = photo
         state = {"x": 0, "y": 0, "rect": None, "snap": None, "hex": "", "phase": "select",
@@ -3576,8 +3657,20 @@ class App(tk.Tk):
             t, c, w = op["type"], op["color"], op["width"]; ids = []
             if t in ("rect", "mosaic", "blur"):
                 x1, y1, x2, y2 = [v + (ox if k % 2 == 0 else oy) for k, v in enumerate(op["box"])]
-                kw = dict(outline=c, width=w) if t == "rect" else dict(fill="#888888", stipple="gray25", outline=c, width=1)
-                ids.append(canvas.create_rectangle(x1, y1, x2, y2, tags="op", **kw))
+                if t == "rect":
+                    ids.append(canvas.create_rectangle(x1, y1, x2, y2, outline=c, width=w, tags="op"))
+                else:
+                    done = False
+                    if x2 - x1 > 4 and y2 - y1 > 4:
+                        try:  # 预览直接上真效果 (与导出共用 _fx_region): 旧版只铺灰网纹, 看着像没生效 (Jane 19:09 实测)
+                            ph = ImageTk.PhotoImage(self._fx_region(full.crop((x1, y1, x2, y2)), t))
+                            state.setdefault("op_photos", []).append(ph)  # PhotoImage 必须留引用, 否则被回收成空白
+                            ids.append(canvas.create_image(x1, y1, anchor="nw", image=ph, tags="op"))
+                            ids.append(canvas.create_rectangle(x1, y1, x2, y2, outline=c, width=1, tags="op"))
+                            done = True
+                        except Exception: pass
+                    if not done:
+                        ids.append(canvas.create_rectangle(x1, y1, x2, y2, fill="#888888", stipple="gray25", outline=c, width=1, tags="op"))
             elif t == "ellipse":
                 x1, y1, x2, y2 = [v + (ox if k % 2 == 0 else oy) for k, v in enumerate(op["box"])]
                 ids.append(canvas.create_oval(x1, y1, x2, y2, outline=c, width=w, tags="op"))
@@ -3862,8 +3955,10 @@ class App(tk.Tk):
         sel = self.shots_list.curselection()
         if not sel or not HAS_PIL: return
         try:
-            im = Image.open(os.path.join(self.shots_dir, self.shots_list.get(sel[0]))); im.thumbnail((120, 80))
-            self._preview_photo = ImageTk.PhotoImage(im); self.shot_preview.config(image=self._preview_photo, text="")
+            with Image.open(os.path.join(self.shots_dir, self.shots_list.get(sel[0]))) as im:  # PhotoImage 已拷贝像素, 原图立刻关: 旧版从不关, 被预览过的老截图在 Windows 下删不掉 (审查发现)
+                im.thumbnail((120, 80))
+                self._preview_photo = ImageTk.PhotoImage(im)
+            self.shot_preview.config(image=self._preview_photo, text="")
         except Exception: pass
     def pin_selected_shot(self):
         sel = self.shots_list.curselection() if hasattr(self, "shots_list") else ()
@@ -4052,6 +4147,17 @@ class App(tk.Tk):
         if font is None: font = ImageFont.load_default()
         if len(cls._FONT2_CACHE) < 64: cls._FONT2_CACHE[size] = font
         return font
+    @staticmethod
+    def _fx_region(region, kind):
+        """马赛克/模糊的实际处理 (最终渲染与截图编辑器预览共用同一份, 强度随区域短边自适应):
+        旧版固定 12px 块 / 高斯半径 8, 在大截图的大字上几乎看不出效果 (Jane 2026-11-25 19:09 真机实测像没生效)。"""
+        w, h = region.size
+        if kind == "mosaic":
+            block = max(16, min(40, min(w, h) // 8))
+            small = region.resize((max(1, w // block), max(1, h // block)), Image.NEAREST)
+            return small.resize((w, h), Image.NEAREST)
+        r = max(10, min(32, min(w, h) // 8))
+        return region.filter(ImageFilter.GaussianBlur(r)).filter(ImageFilter.GaussianBlur(r))  # 两遍高斯才糊得透
     @classmethod
     def render_ops(cls, base, ops):
         """把标注操作列表画到图上, 返回新图。ops 可撤销重绘, 单元测试也走这里。"""
@@ -4111,14 +4217,11 @@ class App(tk.Tk):
             elif t == "blur":
                 x1, y1, x2, y2 = [int(v) for v in op["box"]]
                 if x2 - x1 > 4 and y2 - y1 > 4:
-                    region = img.crop((x1, y1, x2, y2)).filter(ImageFilter.GaussianBlur(8))
-                    img.paste(region, (x1, y1)); d = ImageDraw.Draw(img)
+                    img.paste(cls._fx_region(img.crop((x1, y1, x2, y2)), "blur"), (x1, y1)); d = ImageDraw.Draw(img)
             elif t == "mosaic":
                 x1, y1, x2, y2 = [int(v) for v in op["box"]]
                 if x2 - x1 > 4 and y2 - y1 > 4:
-                    region = img.crop((x1, y1, x2, y2))
-                    small = region.resize((max(1, (x2-x1)//12), max(1, (y2-y1)//12)), Image.NEAREST)
-                    img.paste(small.resize(region.size, Image.NEAREST), (x1, y1)); d = ImageDraw.Draw(img)
+                    img.paste(cls._fx_region(img.crop((x1, y1, x2, y2)), "mosaic"), (x1, y1)); d = ImageDraw.Draw(img)
         return img
     def open_editor(self, base_img):
         if not HAS_PIL: return
@@ -4433,13 +4536,22 @@ try {
             if isinstance(data, dict): data = [data]  # 只有一行时 ConvertTo-Json 给的是对象不是数组
             out = []
             for d in data:
-                t = re.sub(r"(?<=[\u4e00-\u9fff])\s+(?=[\u4e00-\u9fff])", "", str(d.get("t", ""))).strip()
-                if t: out.append({"t": t, "x": int(d["x"]), "y": int(d["y"]), "w": int(d["w"]), "h": int(d["h"])})
+                try:
+                    t = re.sub(r"(?<=[\u4e00-\u9fff])\s+(?=[\u4e00-\u9fff])", "", str(d.get("t", ""))).strip()
+                    if t: out.append({"t": t, "x": int(d["x"]), "y": int(d["y"]), "w": int(d["w"]), "h": int(d["h"])})
+                except Exception: continue  # 一行字段不全只丢这一行: 旧版共用外层 try, 一行坏数据废掉整次识别还误报引擎不可用 (审查发现)
             return cls._scale_lines(out, _scale)
         except Exception:
             return None
         finally:
             import shutil; shutil.rmtree(tmp, ignore_errors=True)
+    def _ocr_warmup(self):
+        """后台把 RapidOCR 引擎提前建好 (懒加载单例, 建一次常驻); 只构造不推理, 与正常识别不冲突。"""
+        import threading
+        def run():
+            try: self._rapid_engine()
+            except Exception: pass
+        threading.Thread(target=run, daemon=True).start()
     @classmethod
     def _rapid_engine(cls):
         """RapidOCR 引擎单例 (懒加载): 首次识别才建, 建好常驻复用 (重建要重新加载三个模型, 数秒);
@@ -4914,7 +5026,7 @@ try {
         copy_btn = ttk.Button(bar, text=self.t("ai_copy_trans", "复制译文"))
         def do_copy():
             self.clip_set(box.get("1.0", "end").strip()); copy_btn.config(text=self.t("cmn_copied", "已复制 ✓"))
-            win.after(1200, lambda: copy_btn.config(text=self.t("ai_copy_trans", "复制译文")))
+            win.after(1200, lambda: win.winfo_exists() and copy_btn.config(text=self.t("ai_copy_trans", "复制译文")))
         copy_btn.config(command=do_copy); copy_btn.pack(side="left", padx=2)
         def to_queue():
             added = 0
@@ -5253,6 +5365,7 @@ try {
         tk.Label(card, textvariable=trail_var, font=self._ui_font(9), background=W, foreground=self.UI_MUTED, anchor="e").pack(fill="x", padx=14, pady=(10, 0))
         tk.Label(card, textvariable=disp_var, font=self._ui_font(22, True), background=W, foreground=self.UI_TEXT, anchor="e").pack(fill="x", padx=14, pady=(0, 6))
         st = {"acc": None, "op": None, "fresh": True}
+        ERR = self.t("calc_error", "错误")  # 错误态判断统一用这份 (显示也是它): 旧版判断写死中文, 英文模式显示 Error 后判断永不成立、状态错乱 (审查发现)
         def fmt(v):
             if v != v or v in (float("inf"), float("-inf")): return self.t("calc_error", "错误")
             if abs(v - round(v)) < 1e-12 and abs(v) < 1e16: return str(int(round(v)))
@@ -5273,18 +5386,18 @@ try {
             st["acc"] = None; st["op"] = None; st["fresh"] = True
         def press_digit(d):
             d0 = disp_var.get()
-            if st["fresh"] or d0 in ("0", "错误"):
+            if st["fresh"] or d0 in ("0", ERR):
                 disp_var.set(d); st["fresh"] = False
             elif len(d0.replace("-", "").replace(".", "")) < 16:
                 disp_var.set(d0 + d)
         def press_dot():
             d0 = disp_var.get()
-            if st["fresh"] or d0 == "错误":
+            if st["fresh"] or d0 == ERR:
                 disp_var.set("0."); st["fresh"] = False
             elif "." not in d0:
                 disp_var.set(d0 + ".")
         def press_op(o):
-            if disp_var.get() == "错误": return
+            if disp_var.get() == ERR: return
             v = cur()
             if st["acc"] is not None and st["op"] and not st["fresh"]:
                 try: v = apply(st["acc"], st["op"], v)
@@ -5293,7 +5406,7 @@ try {
             st["acc"] = v; st["op"] = o; st["fresh"] = True
             trail_var.set(f"{fmt(v)} {o}")
         def press_eq():
-            if st["acc"] is None or not st["op"] or disp_var.get() == "错误": return
+            if st["acc"] is None or not st["op"] or disp_var.get() == ERR: return
             v = cur()
             try: r = apply(st["acc"], st["op"], v)
             except ZeroDivisionError: show_error(); return
@@ -5308,10 +5421,10 @@ try {
             d0 = disp_var.get()[:-1]
             disp_var.set(d0 if d0 not in ("", "-") else "0")
         def press_pct():
-            if disp_var.get() == "错误": return
+            if disp_var.get() == ERR: return
             disp_var.set(fmt(cur() / 100)); st["fresh"] = True
         def press_neg():
-            if disp_var.get() == "错误": return
+            if disp_var.get() == ERR: return
             v = cur()
             if v != 0: disp_var.set(fmt(-v))
         grid = tk.Frame(card, background=W); grid.pack(padx=10, pady=(0, 12))
@@ -5607,6 +5720,9 @@ try {
             cb = tk.Checkbutton(inner, text=txt, variable=v, font=self._ui_font(10),
                                 bg=self.UI_SURFACE, fg=self.UI_TEXT, activebackground=self.UI_SURFACE,
                                 anchor="w", command=on_toggle)
+            if getattr(self, "_dot_off", None) is not None:  # 与 ttk 控件同款圆点 (原生方框关掉, 选中显示绿点图)
+                try: cb.configure(indicatoron=0, image=self._dot_off, selectimage=self._dot_on, compound="left", relief="flat", bd=0, highlightthickness=0)
+                except Exception: pass
             cb.pack(fill="x", padx=6, pady=1)
         self._clockset_cv.yview_moveto(0)
         self._clockset_refresh_cnt()
@@ -5681,6 +5797,7 @@ try {
     def _wx_local_coords(self):
         c = getattr(self, "_local_coords", "unset")
         if c != "unset": return c
+        if time.time() - getattr(self, "_local_coords_fail_at", 0) < 60: return None  # 失败只缓存 60 秒: 旧版把 None 永久缓存, 开机断网一次整场会话都没天气 (审查发现)
         coords = None
         try:
             import urllib.request
@@ -5689,7 +5806,8 @@ try {
                 d = json.loads(r.read().decode("utf-8"))
             if d.get("latitude") is not None: coords = (float(d["latitude"]), float(d["longitude"]))
         except Exception: coords = None
-        self._local_coords = coords
+        if coords is not None: self._local_coords = coords
+        else: self._local_coords_fail_at = time.time()
         return coords
 
     def _wx_coords(self, tzname, name):
@@ -5697,7 +5815,10 @@ try {
         if tzname in self._CLOCK_GEO: return self._CLOCK_GEO[tzname]
         cache = getattr(self, "_geo_cache", None)
         if cache is None: cache = self._geo_cache = {}
-        if tzname in cache: return cache[tzname]
+        if tzname in cache:
+            v = cache[tzname]
+            if v is not None: return v
+            if time.time() - getattr(self, "_geo_fail_at", {}).get(tzname, 0) < 60: return None  # 失败负缓存只活 60 秒 (同 _wx_local_coords)
         coords = None
         try:
             import urllib.request, urllib.parse
@@ -5709,7 +5830,11 @@ try {
             res = d.get("results") or []
             if res: coords = (float(res[0]["latitude"]), float(res[0]["longitude"]))
         except Exception: coords = None
-        cache[tzname] = coords
+        if coords is not None: cache[tzname] = coords
+        else:
+            fa = getattr(self, "_geo_fail_at", None)
+            if fa is None: fa = self._geo_fail_at = {}
+            fa[tzname] = time.time()
         return coords
 
     def _wx_query(self, coords):
@@ -5931,7 +6056,7 @@ try {
         prompt = f"{src_hint}把下面这段文字翻译成{self._tgt_name(target)}, 只输出译文, 不要加任何解释、引号或原文:\n{text}"
         try: r = self._ai_chat_messages([{"role": "user", "content": prompt}], timeout=15)
         except Exception: return None
-        return r or None
+        return r if (r and r.strip()) else None  # 纯空白也是真值字符串: 旧版原样返回, 面板显示空白还报成功、不回退在线通道 (审查发现)
     def _tt_go(self):
         if getattr(self, "_tt_panel", None) is None: return
         text = self._tt_in.get("1.0", "end").strip()
@@ -6646,17 +6771,25 @@ try {
         cfg = self._ai_cfg()
         if not cfg["key"]: return None
         if target:
-            prompt = (f"识别图片中的全部文字, 并翻译成{self._tgt_name(target)}。严格按下面的格式输出, 不要输出任何其他内容:\n"
-                      "第一部分: 识别到的原文, 保留原来的换行。\n然后单独一行只写 ===\n第二部分: 译文, 换行尽量与原文一一对应。")
+            prompt = (f"识别图片中的全部文字, 并翻译成{self._tgt_name(target)}。输出格式严格如下, 不要输出任何其他内容, 也不要给原文和译文加任何标题或标签:\n"
+                      "先输出识别到的原文 (保留原来的换行), 然后单独一行只写 ===, 最后输出译文 (换行尽量与原文一一对应)。")
         else:
-            prompt = ("识别图片中的全部文字: 如果主要是中文就翻译成英文, 否则翻译成中文。严格按下面的格式输出, 不要输出任何其他内容:\n"
-                      "第一部分: 识别到的原文, 保留原来的换行。\n然后单独一行只写 ===\n第二部分: 译文, 换行尽量与原文一一对应。")
+            prompt = ("识别图片中的全部文字: 如果主要是中文就翻译成英文, 否则翻译成中文。输出格式严格如下, 不要输出任何其他内容, 也不要给原文和译文加任何标题或标签:\n"
+                      "先输出识别到的原文 (保留原来的换行), 然后单独一行只写 ===, 最后输出译文 (换行尽量与原文一一对应)。")
         try: r = self._ai_chat_image(img, prompt, timeout=20)
         except Exception: return None
         if not r or "===" not in r: return None
         orig_part, tr_part = r.split("===", 1)
-        orig_lines = [ln.strip() for ln in orig_part.replace("\r\n", "\n").split("\n") if ln.strip()]
-        tr_lines = [ln.strip() for ln in tr_part.replace("\r\n", "\n").split("\n") if ln.strip()]
+        def _strip_labels(lines):
+            out = []
+            for ln in lines:
+                bare = ln.strip().strip("【】[] ")
+                if re.fullmatch(r"(第一部分|第二部分|原文|译文|翻译|翻译结果|识别结果|识别到的原文|original|translation|part\s*[12])[:：]?", bare, re.I): continue  # 整行只是标签: 扔掉
+                m = re.match(r"^(第一部分|第二部分|原文|译文|翻译)[:：]\s*(.+)$", ln)  # 标签和正文挤在一行: 只剥标签
+                out.append(m.group(2) if m else ln)
+            return [x for x in out if x.strip()]
+        orig_lines = _strip_labels([ln.strip() for ln in orig_part.replace("\r\n", "\n").split("\n") if ln.strip()])
+        tr_lines = _strip_labels([ln.strip() for ln in tr_part.replace("\r\n", "\n").split("\n") if ln.strip()])
         if not orig_lines or not tr_lines: return None
         if not any(re.search(r"[A-Za-z\u4e00-\u9fff]", t) for t in orig_lines): return None  # 只有数字/符号: 交回 OCR 路径, 那边会给「没有可翻译的文字」的提示
         if target is None:
@@ -6667,33 +6800,77 @@ try {
             return lines, tr_lines, target
         lines = [{"t": "\n".join(orig_lines), "x": 0, "y": 0, "w": 0, "h": 10}]  # 行数对不上: 整段成一对, 显示与复制都不受影响
         return lines, ["\n".join(tr_lines)], target
+    def _f4_busy_show(self, anchor):
+        """F4 等待占位 (主线程调): 选区下方浮一个小「翻译中…」, 结果一到就撤——体感提速, 也让用户知道软件在干活。
+        30 秒兜底自毁: 任何退出路径漏了撤, 它也不会赖在屏幕上。"""
+        self._f4_busy_done()
+        if not anchor: return
+        try:
+            w = tk.Toplevel(self); w.overrideredirect(True)
+            try: w.attributes("-topmost", True)
+            except Exception: pass
+            tk.Label(w, text=self.t("tt_translating", "翻译中…"), font=self._ui_font(9), background="#333333", foreground="#FFFFFF", padx=10, pady=4).pack()
+            y = anchor[1] + anchor[3] + 6
+            if y + 34 > self.winfo_screenheight(): y = max(0, anchor[1] - 34)
+            w.geometry(f"+{max(0, anchor[0])}+{y}")
+            self._f4_busy_win = w
+            w.after(30000, self._f4_busy_done)
+        except Exception: pass
+    def _f4_busy_done(self):
+        w = getattr(self, "_f4_busy_win", None); self._f4_busy_win = None
+        if w is not None:
+            try: w.destroy()
+            except Exception: pass
     def translate_image_inplace(self, img, target=None, anchor=None):
         """有道式截图翻译: OCR 每行文字+位置 -> 逐行翻译 -> 译文绘回原图 -> 弹翻译结果窗 (可切换目标语言/对照开关)。
         拿不到行坐标时回退到原来的纯文字翻译流程。"""
         import threading
+        self._f4_busy_show(anchor)
         def work():
+            try: work_body()
+            except Exception:  # 后台线程任何未预料异常: 至少撤掉占位并给用户一句提示, 不许静默死亡 (审查发现: _ai_cfg/OCR 引擎等都有 try 外的抛点)
+                def _err():
+                    self._f4_busy_done()
+                    messagebox.showinfo(self.t("snip_trans_title", "截图翻译"), self.t("tr_fail_net2", "翻译失败: 在线翻译接口没连上, 检查网络后重试。"))
+                self._ui_queue.put(_err)
+        def work_body():
+            import concurrent.futures
+            pool = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+            ocr_fut = pool.submit(self.ocr_lines, img)  # OCR 与 AI 并行先跑: AI 失效时回退零等待 (AI 成功则这份结果不用)
             ai = self._ai_vision_translate(img, target)  # 合并引擎: AI 看图优先, 失效 (含没配 Key) 立刻回退下面的 OCR 通道
             if ai is not None:
+                pool.shutdown(wait=False)
                 lines, translations, tgt = ai
                 def deliver_ai():
+                    self._f4_busy_done()
                     if anchor: self._show_translate_bar(img, lines, tgt, translations, anchor)
                     else: self.show_translate_compare(img, lines, tgt, translations)
                 self._ui_queue.put(deliver_ai); return
-            lines = self.ocr_lines(img)
+            try: lines = ocr_fut.result()
+            except Exception: lines = []
+            pool.shutdown(wait=False)
             if not lines:
                 # 拿不到行坐标: 在本线程把纯文字 OCR 也做了再交给文字翻译流程,
                 # 旧版直接调 translate_image 会把整套 OCR 再跑一遍 (RapidOCR 一遍好几秒)
+                self._ui_queue.put(self._f4_busy_done)
                 self.translate_image(img, target, text=self.ocr_image(img), anchor=anchor); return
             if not any(re.search(r"[A-Za-z\u4e00-\u9fff]", l["t"]) for l in lines):  # 只有数字/符号: 没东西可译, 别误报「翻译失败」
-                self._ui_queue.put(lambda: messagebox.showinfo(self.t("snip_trans_title", "截图翻译"), self.t("tr_only_symbols", "识别到的只有数字或符号, 没有可翻译的文字"))); return
+                def _only_symbols():
+                    self._f4_busy_done()
+                    messagebox.showinfo(self.t("snip_trans_title", "截图翻译"), self.t("tr_only_symbols", "识别到的只有数字或符号, 没有可翻译的文字"))
+                self._ui_queue.put(_only_symbols); return
             tgt = target
             if tgt is None:
                 joined = "".join(l["t"] for l in lines)
                 tgt = "en" if any("\u4e00" <= ch <= "\u9fff" for ch in joined) else "zh-CN"
             translations, any_ok = self._translate_lines(lines, tgt)
             if not any_ok:
-                self._ui_queue.put(lambda: messagebox.showinfo(self.t("snip_trans_title", "截图翻译"), self.t("tr_fail_net2", "翻译失败: 在线翻译接口没连上, 检查网络后重试。"))); return
+                def _fail():
+                    self._f4_busy_done()
+                    messagebox.showinfo(self.t("snip_trans_title", "截图翻译"), self.t("tr_fail_net2", "翻译失败: 在线翻译接口没连上, 检查网络后重试。"))
+                self._ui_queue.put(_fail); return
             def deliver():
+                self._f4_busy_done()
                 if anchor: self._show_translate_bar(img, lines, tgt, translations, anchor)
                 else: self.show_translate_compare(img, lines, tgt, translations)
             self._ui_queue.put(deliver)
@@ -6855,7 +7032,7 @@ try {
             except Exception: txt0 = "\n".join(l["t"] for l in lines)
             self.clip_set(txt0)
             copy_btn.config(text=self.t("cmn_copied", "已复制 ✓"))
-            win.after(1200, lambda: copy_btn.config(text=self.t("tr_copy_orig", "复制原文")))
+            win.after(1200, lambda: win.winfo_exists() and copy_btn.config(text=self.t("tr_copy_orig", "复制原文")))
         copy_btn.config(command=do_copy); copy_btn.pack(side="left", padx=2)
         def shown_trans():
             w = getattr(win, "_trans_text", None)
@@ -7023,7 +7200,7 @@ try {
         def do_copy():
             self.clip_set(box.get("1.0", "end").strip())
             copy_btn.config(text=self.t("cmn_copied", "已复制 ✓"))  # 给个明确反馈, 不然点了像没反应 (真机反馈过)
-            win.after(1200, lambda: copy_btn.config(text=self.t("ocr_copy_result", "复制结果")))
+            win.after(1200, lambda: win.winfo_exists() and copy_btn.config(text=self.t("ocr_copy_result", "复制结果")))
         copy_btn.config(command=do_copy); copy_btn.pack(side="left", padx=2)
         def to_queue():
             added = 0
@@ -7115,7 +7292,8 @@ try {
         for i, name in enumerate(files):
             cell = ttk.Frame(grid); cell.grid(row=i // 4, column=i % 4, padx=8, pady=8)
             try:
-                im = Image.open(os.path.join(self.shots_dir, name)); thumb = im.copy(); thumb.thumbnail((160, 110))
+                with Image.open(os.path.join(self.shots_dir, name)) as im: thumb = im.copy()  # 必须关句柄: Windows 下开着的文件删不掉, 画廊里刚看过的图会删了又冒出来 (审查发现)
+                thumb.thumbnail((160, 110))
                 photo = ImageTk.PhotoImage(thumb); self._gallery_photos.append(photo)
                 tk.Label(cell, image=photo).pack()
             except Exception: pass
