@@ -2062,3 +2062,85 @@ class ChatSearchAndTitleTests(unittest.TestCase):
         # 搜索框接线
         self.assertIn("ai_chat_search", SOURCE)
         self.assertIn("def _search_chats", SOURCE)
+
+
+def _project_stub():
+    """构造带项目数据层方法的轻量 stub (不写盘)。"""
+    app_node = next(n for n in TREE.body if isinstance(n, ast.ClassDef) and n.name == "App")
+    ns = {"os": os, "json": json, "time": time}
+    for name in ("_sanitize_project", "create_project", "delete_project"):
+        node = next(n for n in app_node.body if isinstance(n, ast.FunctionDef) and n.name == name)
+        exec(ast.get_source_segment(SOURCE, node), ns)
+    tnode = next(n for n in app_node.body if isinstance(n, ast.Assign)
+                 and any(isinstance(t, ast.Name) and t.id == "_PROJECT_TEMPLATES" for t in n.targets))
+    templates = eval(compile(ast.Expression(tnode.value), "<x>", "eval"))
+    class Stub:
+        _PROJECT_MAX, _PROJECT_NOTES_MAX = 30, 20000
+        _PROJECT_TODO_MAX, _PROJECT_LINK_MAX = 100, 50
+        _PROJECT_TEMPLATES = templates
+        def __init__(self): self._projects = []
+        _sanitize_project = ns["_sanitize_project"]
+        create_project = ns["create_project"]
+        delete_project = ns["delete_project"]
+        def save_projects(self): pass
+    return Stub()
+
+
+class ProjectFeatureTests(unittest.TestCase):
+    """v1.6.3 项目工作台: 模板、数据清洗与 CRUD。"""
+
+    def test_templates_match_reference(self):
+        s = _project_stub()
+        self.assertEqual([t["title"] for t in s._PROJECT_TEMPLATES],
+                         ["通用办公写作", "数据分析与可视化", "会议与信息复盘", "市场调研与竞品分析"])
+        for t in s._PROJECT_TEMPLATES:
+            self.assertTrue(t["key"] and t["desc"])
+            self.assertGreaterEqual(len(t["todos"]), 3)
+
+    def test_create_from_template_seeds_todos(self):
+        s = _project_stub()
+        p = s.create_project("data")
+        self.assertEqual(p["template"], "data")
+        self.assertEqual(len(p["todos"]), 3)
+        self.assertTrue(all(t["done"] is False for t in p["todos"]))
+        self.assertEqual(len(s._projects), 1)
+
+    def test_create_blank_project(self):
+        s = _project_stub()
+        p = s.create_project()
+        self.assertEqual(p["template"], "")
+        self.assertEqual(p["todos"], []); self.assertEqual(p["links"], [])
+
+    def test_sanitize_caps_and_dedup(self):
+        s = _project_stub()
+        raw = {"id": 123, "title": "  x  ", "notes": "n" * 30000,
+               "todos": [{"text": "a", "done": 1}, {"text": "a"}, {"text": "b", "done": 0},
+                         {"text": ""}, "bad"],
+               "links": [{"name": "f", "path": "/a", "kind": "file"},
+                         {"path": "/a", "kind": "file"}, {"path": "https://x", "kind": "weird"}],
+               "pin": 5, "template": "office"}
+        out = s._sanitize_project(raw)
+        self.assertEqual(len(out["notes"]), 20000)       # 笔记封顶
+        self.assertEqual([t["text"] for t in out["todos"]], ["a", "b"])  # 去重+丢空
+        self.assertTrue(out["todos"][0]["done"])
+        self.assertEqual(len(out["links"]), 2)            # 链接去重, 非法 kind 回退 url
+        self.assertEqual(out["links"][1]["kind"], "url")
+        self.assertEqual(out["pin"], 1)
+
+    def test_sanitize_rejects_bad(self):
+        s = _project_stub()
+        self.assertIsNone(s._sanitize_project({"id": "no"}))
+        self.assertIsNone(s._sanitize_project({"title": "x"}))
+
+    def test_delete(self):
+        s = _project_stub()
+        p = s.create_project(); s.delete_project(p["id"])
+        self.assertEqual(s._projects, [])
+
+    def test_wiring(self):
+        self.assertIn("def open_projects", SOURCE)
+        self.assertIn("def _build_project_panel", SOURCE)
+        self.assertIn('"project"', SOURCE)               # 图标字典键
+        self.assertIn('self.open_projects', SOURCE)
+        self.assertIn('"_project_panel"', SOURCE)        # 互斥隐藏
+        self.assertIn('PROJECTS_PATH', SOURCE)

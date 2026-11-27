@@ -433,6 +433,7 @@ _BTN_ICONS_B64 = {
     "download": "iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAACFElEQVR4nMVUz2sTQRh93zeT3TbY2FAtPRUpHiQigkgvetCL6MHjehIkiJdA9Q8QHBf0DyiSSyl66K3Bm4ce/QMUEW0QxB83sRA1CSnJ7s58HmJSS350Syu+48w3b9+892aB1BCCCKWf/0dIreB46f2RKDeVqfufmwgvJ3vN856MRhgAOprXiLOf8j/mFgEAgaiDEe/gKFjnBZJJM5yamEgS2FjAIodKDCECUepM9mPFvvCfiLvJaxjRQt1qimMFIxpzH/W4o2M3USELwAIA3a1GIAbY/kRICYCxXR4RhhDMSzX9a7YkmeyMxC1LwrfIyy4g3n4G5q8CpV0ULzfLhRogBNCutgy3IgAjvGQdpMOT+QfsT4dQekGiFqAnipSbD+HiE81j3+tdu2iggqPrE4hChWxu6d19nsw/knYjApwif0pJ1NqoLxeuQXrODxKPDq9CFkZ048mZx67TeE4TOY+Uxy7pfHEJbsIYHkU6nhgA8NDBCFOU3JGo9QGsiGw7aJYLNVRPD/j6N4ZZQTBmZ/3bdYWV83G+9OqiIz5VL59bLQTrXrWwubsVYejGizwk9JUFwbqqVG7Ys1duF7XvF+O4bQno/xoFzACI4Gx/TcipjGaXxG/ebjy9B2O4p7z/QLa2NrtRMM0DcoG6D6C/TxhyU5I/H6d4pOIeTl5d8me9lldLeeUZAB2n7esXK9spjxwMvwEghsO9GKLCEwAAAABJRU5ErkJggg==",
     "gear": "iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAD5klEQVR4nLWUT4jVVRTHv+fce3/vvRnGHExpoj+LIOGBM8ErsSJ+o0VjOeXqB4ENisZr0yaGVlnDMIhItiiIYFCzhbaYwcVo5bgoZxGE+iCHHF1WJkOaZaH2fr977zkt5k9jTY4EneXhns+559+XcGdGaTpgAGBiYjDcYcz/Y7SYM8syM1KtanoSPDExGNZu3LIs59ZXEeLPZ0/s/wgApWlquru7ZWpqikZGRuIdgRfa6he3t5UKOp6UWp5QACG/+d7Dbb/3Lwa7HZgAoKtn+5vWlTfkzZt7nePL7Cqnfd5sMrMTifnk+P1tXRsvbWbrXhOff3l2/MCu2XidA/HC8gFoZ8+Ona7SOqSQ9TZJPpVIa3zR/I6ZS8RsQDjf+eyl5421Rwi6wVVahzp7duwEoLOMW8Ej1epcthckhBiKIocKQPohVFepikoIEUAXsYzF4DX4IpfgBUS9f2Ms+PHUFCHLDBHtBtSQ4ZKKKJhLRNTCbJitMwSyABEAEJFTVYLqHgCUnvyL94/hrVuXVW4ua0nZJKOq2gIVZZdw9MV5IrrGbB4XEUA1srVGYtF37Q8Z/X7i4+YiwxtgDACdX1/aayxvkxi+VaXHiJAY4zhqeMv+xHsajWHf+dwrvUw0qiIJQFDIaSZ+CKAzxlx/uXHsk6sAwGmaWmBQuk79uDUpl18XkXY2yVNEKDMbDuKnzn62b1ejMexrtbqb/HzfMRE9bGxCqiLGuLWqWGGTck/wlb0AFGlq+Pr11TP9EtwDACqSqwSoqhAzoPgNgNbqdedcq51ZKr1MRABBRSJUJVeJUOJ7F7aCAMWaTVuWm9hy1LjkSV/kV0DaTiBmNhQlbp48vv8oANR66w+EqGcIuFtVAOAXY90KEZkWCZsmjx/4ZgADRAsSaK1Wd9KBR6MPXcT8LlTLABEReVE5zMAVJdpGRCslSjTWmhh8vzP2qxvxxg8Xxg9Nz7Hm1kPTdMA2GsM+FvEuY5P3oagAIFUVVUmsS7axK71BmIESgSUGMdbt9iG2Xxg/NF2r1d3c9c3v3UQ3BAARY4gIRlUKADDWGYAQfB6CbwZVUWOtmU3qicgRYwhQavR2zOvHrQcCqCrG2Do2LimxsSTR9ynklDHOErFVxdUYfD8Rw7pSia0jVYwBpLOMRQ9kXoTYldZHX3wwOb7/SOfGHb8yuE00BuOSkhb5I0p0n3Xl/uCbXywmQkvK5oPp1vLyij3qyi3PSIyIobgSYqidO3Hw4u3i7GLOLMtMtVrVkzNC31z1dN9LnvkdEK9UlbfPnTh4sVaru0ZvR8z+Rej/qy1Z6ZIP5t5lWcbArDQODspSAX8Cm0TtanseiCAAAAAASUVORK5CYII=",
     "star": "iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAACeUlEQVR4nNWUQUhUURSG/3PfffNmTGdMxRQ3ErhoxsVkkW0EayEEtRxo0SIiWhRCRfvnrFyVqNUqaNUiWhpEKyMS2pQtzAgXtQkRLH0zOE/fu++cFk8Tx4EZI5DO6t7Lf7/733PPucDhhxBE6LBdNBKxy/Zr71ra7nztiZfqO1d1uYVYY5pbb5jIuACAMVj1ttXPmSsKANJrXz6CcDylg+6V+/mN+CYkjYPdWQ0Mx+NfSxbafkTp1a48OfZ7UtoiU7m4lll5je+9Gr29Jha+AYrnzMEcA2i9/fkp7OarEAaHlZelydylenu2wfG1Wm4ttquEvgMQi9kypEgBcCB0F4oSAEE48okwCWBLWJi0owFRHJiJ8qPszx3WrmNXFJY/WOlU6rrSqceUzEDCDYA0ZNMDsJ1OIpCTAcSA7COQTQ9s/Jsl33+C7lMRisQ1UhGflhn9dBKJ9CsCjklYCUHK3ivjkOwmW4AVBKUL3nR+vvoxq8qNBK5obzo/z+H6kEg0RzqpIcK7UGHSSS0SzXG4PuRN5+fhiq6ukP11XCSDwkKiPDWwpAJ/HNohEARABEgEQKAdUoE/Xp4aWEJhIYEimWpM7QbJ5hiuq1jrkdiJGLJTFjlpKz6AhLUegesqZHNcC1EbPIYIizkCR2chTJQ86nDgv5Wt8jNymhMgIjAPYjFHGEPUIFgUiKSjp7+T7KYzwpHHQWW0tHzivDeZvcJRcFnM5jLs1GBHT38niASQfZz94EJcKYHwsJCaEd44XZroe4gXYBTEKj3oex76qwMQmglku0ULjTUaAKDp3reuPxN3Vtca79EcLIR2PqG9y0I73+nfQf+J5n+J39QzDLg7vrq5AAAAAElFTkSuQmCC",
+    "project": "iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAg0lEQVR4nO3YQQ6AIAwF0Wq8/5X1AkZaCIwk89ZV+gFJMEKSJHGOZN096b3DzkRNtfneZ7q0Aow0siTEVaidtd2GtJpa2syL5qRlZpUOEfHRZ+Yj/rXKFlp2NFbG334FDEAzAM0ANAPQDEAzAM0ANAPQtg/gpZ5WuagTK0H8SJAkaZ0HxmsMM1Zne3AAAAAASUVORK5CYII=",
 }  # 按钮小图标 (22px, PIL 手绘线条风: 图标+文字并排, 与常见软件一致)
 VERSION = "1.6.3"  # v1.6.3: AI 助手七项优化 — ①token 预算上下文裁剪+早期对话自动摘要 ②长期记忆按相关性注入 TopN ③429 按 Retry-After 自动退避重试 ④提示词库/角色预设(本地 ai_prompts.json, 按会话持久化) ⑤图片统一压到长边 1568/JPEG q85+data URL 缓存+一轮多图 ⑥流式中断后断点续写 ⑦跨对话搜索+首轮自动标题; 测试 197 项。历史: v1.6.2: 九个新功能 — ①全局快捷面板(F12, 搜索记录/常用语/安全算术, 回车即粘贴) ②划词 AI(Ctrl+Alt+A, 光标浮窗: 翻译/润色/总结/解释/换语气, 自动还原剪贴板) ③截图贴图增强(取色器历史色板 HEX/RGB/HSL+屏幕取色、屏幕标尺、二维码生成) ④开发者工具箱(时间戳/JSON/正则/Base64/单位换算, 纯标准库) ⑤深色模式(31 个深色令牌, 重启生效) ⑥番茄钟(25/5, 时长可配) ⑦窗口管理(置顶/半透明/分屏/居中) ⑧更新镜像通道(GitHub 兼容反代, 镜像优先) ⑨图片批量处理(缩放/格式/质量/水印, 后台线程); 测试 170 项。历史: v1.4.22: ①去掉内置浏览器整套 (Jane 真机定版不好用: 面板/书签/历史/菜单/pywebview 子进程全删, 工具栏回 8 按钮, 自检减为六项, 打包去 pywebview) ②世界时间加「刷新」(绕过天气 15 分钟节流立即重拉) ③文本翻译框自适应高度 (默认 8 行, 随内容长高至 24 行封顶, 按钮行跟随) ④系统设置/软件自检/历史截图/城市选择全部改为主窗口内面板 (Jane 定版「能收的都收」, 不再弹独立窗口, 重复开窗问题从结构上消除) ⑤启动时清理浏览器残留文件 (bookmarks/browser_history/browser_profile) ⑥工具栏改一行 8 按钮 ⑦截图翻译学有道: F4 出无边框浮动条 (原文区透明盖选区透出真实截图对照/译文框在选区下方、不够翻上方/大小随内容/源语言可选/条内复制原文·译文·AI 智能回复), 完整结果窗保留给无选区入口; v1.4.23: ①修真 bug: 配置解析关 % 插值 (分隔符/路径/接口地址带 % 不再抛错) ②备份导入加固 (JSON 先验货后落盘, 坏备份整包拒绝) + 备份说明去掉书签残留文案 ③英文模式运行时漏网文案两批全清 (汇率/托盘/取色器/下载提示/识别结果窗/AI 气泡与接口报错/测试连接结果/计算器/截图浮层, 三个翻译助手改实例方法并本地化报错) ④F4 纯数字/符号截图提示「没有可翻译的文字」不再误报失败 ⑤删死代码, 新增边缘测试套件; v1.4.24: 修 AI 聊天真机 400 (Jane 实测): 智谱 glm-4v-flash 的 max_tokens 上限 1024, 聊天面板传 2048 被拒 (code 1210); 已在 _ai_chat_messages 对智谱统一钳制 [1,1024], 别家不受影响, test_edge 扩至 17 项含此用例; v1.4.25: ①F4 截图翻译合并引擎 (Jane 定案): 配了 AI Key 先 AI 看图翻译 (一次读图+翻译, 尝试上限 20 秒), AI 失效/没配 Key 立刻回退 OCR 通道 ②F4 提速: 免费翻译通道黏性 (通的通道 120 秒内优先)、Google 超时 12→8 秒、MyMemory 12→10 秒、逐行兜底改并发 ③文本翻译源语言改下拉可选 (自动检测+13 种, 改选即重译并真传引擎) ④文本翻译接 AI 通道 + 「启用AI翻译」勾选 (默认开: 勾上才优先 AI、失效回退在线; 不勾绝不调 AI; 选择落盘 TTUseAI) ⑤_ai_chat_image/_ai_chat_messages 加 timeout 参数 (默认 90 不变); v1.4.26: ①F4 修 AI 回复把提示词的「第一部分/第二部分」标签回声进正文 (改提示词措辞+解析层剥标签兜底) ②全部勾选/单选改圆点指示 (选中绿点/未选空心圈, PIL 生成 Dot.indicator, 含经典 tk 城市勾选) ③工具栏 8 按钮统一样式 (AI 功能去掉蓝色描边款) ④F4 第二轮提速: OCR 与 AI 并行 (回退零等待, Jane 定案保持并行)、OCR 引擎启动预热、「翻译中…」占位浮签 ⑤马赛克/模糊加强: 强度随区域自适应 (旧版几乎无效), F1 编辑器预览改真效果 ⑥全面审查修复 18 项: 多显示器坐标校正、长截图/F4 后台线程兜底、备份验 Config.ini+导出原子写、迷你窗脏值兜底、天气失败负缓存改 60 秒、画廊/预览句柄泄漏、计算器英文错误态、AI 空白返回、强力粘贴验返回值、GlobalLock 判空、WinOCR 逐行容错、import_txt 支持 UTF-16、复制反馈存活守卫、配置双编码全新 parser、分隔符脏值校验; 两 ini 438 键同集 (新增 long_fail); v1.4.27: 功能与 1.4.26 相同, 首次提供安装版 (Inno Setup: 按用户安装/原地升级/开始菜单与桌面快捷方式/设置里可卸载; 发布页同时附 KIVO.exe 单文件版与 KIVO-Setup 安装包, Jane 2026-11-25 定案); v1.4.28: ①修任务栏恢复闪黑 (列表补刷推迟到窗口画出后, 不再同步重建堵第一帧) ②截图/贴图设置并入系统设置 (截图翻译目标语言/对照翻译/延时秒数/UI 检测, 与主窗口共用同一变量两处同步) ③F4 浮动条重做: 原文框全透明只留 1px 细边、与选区等大, 译文框独立白卡与原文框像素等宽左对齐, 功能条独立成条保持自然宽度 ④F4 截图翻译不使用 UI 检测 (纯自由框选, F1 等不受影响) ⑤UI 检测三招: 悬停常驻 UIA 桥实时查元素、假框过滤 (占整窗 85% 以上的容器矩形不要)、拖拽边缘 8px 磁吸 ⑥AI 分工: AI 聊天/看图翻译/标注栏 AI/智能回复/文本翻译五路可各选一家 (缺省跟随当前服务, 指定的那家没 Key 自动回退当前服务), 预设扩到 14 家 (新增 OpenAI/Gemini/Claude/DeepSeek/Kimi/火山豆包/腾讯混元/百度千帆/Grok/Ollama 本地自建), 修 _ai_cfg 镜像串扰真 bug (读别家配置会串到当前服务的 key/地址/模型, 分工会把请求发错地方) ⑦第五轮审查优化: UIA 桥读行加 2.5 秒超时杀桥 (防挂起应用堵死检测)、历史截图画廊缩略图分批渲染 (打开不冻结)、备份导入单文件 64MB 上限、记录/常用语落盘改紧凑 JSON (文件小三成读写更快); v1.4.29: ①品牌升级为 KIVO 启沃 (新 Logo/配色/功能改名/启动页/关于 KIVO) ②左侧边栏导航 (Jane 定序: AI 助手第一/翻译中心第二, 世界时钟与货币汇率分开) ③Dots.ai 第 15 家预设 + 深度思考开关 (实测: 正文被思考吃空时自动关思考重试一次) ④AI 聊天 GPT/豆包式改造 (+菜单附件/建议行/最近对话置顶重命名删除/圆角弹窗/气泡内豆包式图标行含朗读) ⑤迷你翻译 F10 + 复制即译 F11 (独立开关与热键, 跟随文本翻译的 AI 开关, 复制即译只按热键触发不监听剪贴板) ⑥约时间换算 (含单语复制模式)/对方作息提示/复制双语 ⑦计算器放大居中+计算历史/汇率 30 币种国旗/世界时钟天气图标+温馨提醒+分享 ⑧全局圆角 (主窗口外框直角除外)+KIVO 配色+弹窗美化, 标注默认矩形 ⑨设置内检查更新+一键更新 (下载字节数检/MZ 验头/SHA256+RSA 签名双重验证, 无 .sig 的版本拒装) ⑩第六轮深度审查: 边栏最小高度 600 防裁设置项 v1.4.30: 千问审查整改 — OCR 引擎锁竞态 (锁改为类定义时建好)、F7 消费模式只在粘成功时删记录、F4 碎片合并框并集底边、下载链接剥尾标点、恢复 _ini_scalar/_http_base 护栏、save_config/save_phrases 落盘失败记 crash.log。 v1.5.0: AI 助手全面升级 — 模型中心 (多服务商多模型档案/任务级选模型/连接测试/同服务商故障切换)、聊天流式输出与停止生成、图片上下文与图片备份、长期记忆、PDF/Word/Excel 附件解析、附件与历史读取上限、深色边栏与品牌蓝统一、备份事务回滚、热键冲突提示、AI 报错脱敏加固。
 # v1.4.20: 瘦身版, 功能零变化 — 打包侧剔除未用组件 (cv2 视频插件/级联数据、numpy 测试集、onnxruntime 的 transformers/tools/quantization/datasets/backend), 已模拟验证删除后 OCR 中英文识别正常
@@ -472,6 +473,7 @@ PHRASES_PATH = os.path.join(BASE, "phrases.json")
 AI_CHATS_PATH = os.path.join(BASE, "ai_chats.json")  # AI 最近对话: 多个对话存档, 与常用语库同款存法
 AI_MEMORY_PATH = os.path.join(BASE, "ai_memory.json")  # AI 长期记忆: 用户主动保存的条目, 聊天时作为 system 上下文带上
 AI_PROMPTS_PATH = os.path.join(BASE, "ai_prompts.json")  # 提示词库/角色预设 (v1.6.3)
+PROJECTS_PATH = os.path.join(BASE, "projects.json")  # 项目工作台 (v1.6.3)
 
 CRASH_LOG_PATH = os.path.join(BASE, "crash.log")
 _crash_seen = {}
@@ -1499,6 +1501,7 @@ class App(tk.Tk):
         def _nav_group(text):
             tk.Label(side, text=text, font=self._ui_font(9, True), background=SIDE, foreground=self.UI_MUTED).pack(anchor="w", padx=18, pady=(10, 3))
         _nav("ai", self.t("ai_chat", "AI 助手"), "ai", self.open_ai_chat)
+        _nav("project", self.t("project_title", "项目"), "project", self.open_projects)
         _nav("trans", self.t("nav_trans", "翻译中心"), "translate", self._show_texttrans_panel)
         _nav("clip", self.t("copy_paste", "剪贴板"), "copy", self._show_main_view)
         _nav("phrases", self.t("phrase_library", "常用语"), "phrases", self.open_phrases)
@@ -1880,7 +1883,7 @@ class App(tk.Tk):
             self._build_settings_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel", "_project_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -2320,7 +2323,7 @@ class App(tk.Tk):
             self._build_selfcheck_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel", "_project_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -2585,7 +2588,7 @@ class App(tk.Tk):
             self._build_phrases_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel", "_project_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -6680,6 +6683,98 @@ try {
         del items[sel[0]]
         self._save_prompt_library(items); refresh()
 
+    # ---- 项目工作台 (v1.6.3): 本地 projects.json, 每个项目含 笔记 + 待办 + 文件/网址链接; 4 个内置模板 ----
+    _PROJECT_MAX = 30
+    _PROJECT_NOTES_MAX = 20000
+    _PROJECT_TODO_MAX = 100
+    _PROJECT_LINK_MAX = 50
+    _PROJECT_TEMPLATES = [
+        {"key": "office", "title": "通用办公写作",
+         "desc": "覆盖总结、写作、润色与翻译，结论先行、结构清晰。",
+         "todos": ["明确本次写作的目标与读者", "列出提纲，结论先行", "完成初稿并润色校对"]},
+        {"key": "data", "title": "数据分析与可视化",
+         "desc": "读取表格与数据、核验统计口径，输出分析结论与图表建议。",
+         "todos": ["确认数据来源与统计口径", "清洗数据并核对关键指标", "输出结论与可视化建议"]},
+        {"key": "meeting", "title": "会议与信息复盘",
+         "desc": "会议纪要、决策与待办提取，跨聊天和文档追踪进展。",
+         "todos": ["整理会议纪要与关键决策", "拆解待办并指定负责人和时间", "跟进各项进展直到关闭"]},
+        {"key": "market", "title": "市场调研与竞品分析",
+         "desc": "行业与竞品调研，统一维度对比，输出结论与建议。",
+         "todos": ["确定调研范围与对比维度", "收集行业与竞品资料", "统一维度对比并输出建议"]}]
+    def _sanitize_project(self, c):
+        """校验/裁剪单个项目存档, 结构不合法返回 None。"""
+        if not isinstance(c, dict) or not isinstance(c.get("id"), int): return None
+        title = str(c.get("title") or "未命名项目")[:80]
+        notes = str(c.get("notes") or "")[:self._PROJECT_NOTES_MAX]
+        todos, seen_t = [], set()
+        raw_todos = c.get("todos")
+        for t in raw_todos if isinstance(raw_todos, list) else []:
+            if not isinstance(t, dict): continue
+            tx = str(t.get("text") or "").strip()[:500]
+            if not tx or tx in seen_t: continue
+            seen_t.add(tx); todos.append({"text": tx, "done": bool(t.get("done"))})
+            if len(todos) >= self._PROJECT_TODO_MAX: break
+        links, seen_l = [], set()
+        raw_links = c.get("links")
+        for l in raw_links if isinstance(raw_links, list) else []:
+            if not isinstance(l, dict): continue
+            kind = l.get("kind") if l.get("kind") in ("file", "url") else "url"
+            name = str(l.get("name") or "").strip()[:200]
+            path = str(l.get("path") or "").strip()[:1000]
+            if not path or path in seen_l: continue
+            seen_l.add(path); links.append({"name": name or path, "path": path, "kind": kind})
+            if len(links) >= self._PROJECT_LINK_MAX: break
+        tpl = c.get("template")
+        return {"id": c["id"], "title": title, "notes": notes, "todos": todos, "links": links,
+                "created": c.get("created") or 0, "updated": c.get("updated") or 0,
+                "pin": 1 if c.get("pin") else 0,
+                "template": tpl if isinstance(tpl, str) and tpl else ""}
+    def _load_projects(self):
+        for p in (PROJECTS_PATH, PROJECTS_PATH + ".bak"):
+            try:
+                if not os.path.exists(p) or os.path.getsize(p) > 10 * 1024 * 1024: continue
+                data = json.loads(open(p, encoding="utf-8").read())
+                if isinstance(data, list):
+                    out = []
+                    for c in data:
+                        s = self._sanitize_project(c)
+                        if s is not None: out.append(s)
+                    return out[:self._PROJECT_MAX]
+            except Exception:
+                continue
+        return []
+    def save_projects(self):
+        """项目改动频次低, 直接原子写主文件 + .bak。"""
+        try:
+            text = json.dumps(self._projects, ensure_ascii=False)
+            _atomic_write(PROJECTS_PATH, text)
+            try: _atomic_write(PROJECTS_PATH + ".bak", text)
+            except Exception: pass
+        except Exception:
+            pass
+    def create_project(self, template_key=None, title=None):
+        """新建项目 (可从模板), 加入列表并落盘, 返回新项目。"""
+        tpl = next((t for t in self._PROJECT_TEMPLATES if t["key"] == template_key), None)
+        pid = int(time.time() * 1000)
+        if tpl is not None:
+            title = title or tpl["title"]
+            todos = [{"text": x, "done": False} for x in tpl["todos"]]
+            note = tpl["desc"]
+            tpl_key = tpl["key"]
+        else:
+            title = title or "未命名项目"
+            todos, note, tpl_key = [], "", ""
+        now = time.time()
+        project = {"id": pid, "title": title[:80], "notes": note, "todos": todos,
+                   "links": [], "created": now, "updated": now, "pin": 0, "template": tpl_key}
+        self._projects.insert(0, project)
+        del self._projects[self._PROJECT_MAX:]
+        self.save_projects()
+        return project
+    def delete_project(self, pid):
+        self._projects = [x for x in self._projects if x.get("id") != pid]
+        self.save_projects()
+
     def _read_attach_text(self, path):
         """读附件文件为纯文本, 返回 (text, err): 文本直读 (utf-8/gbk), PDF/Word/Excel 纯本地提取 (无第三方库);
         上限 12MB; 旧版 Office 格式与读不出的文件返回人话 err。"""
@@ -7147,7 +7242,7 @@ try {
             self._build_calc_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_phrases_panel", "_clock_panel", "_dl_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_phrases_panel", "_clock_panel", "_dl_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel", "_project_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -7470,7 +7565,7 @@ try {
             self._build_clock_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_dl_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_dl_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel", "_project_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -7736,7 +7831,7 @@ try {
             self._build_clockset_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel", "_project_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -8147,7 +8242,7 @@ try {
             self._build_texttrans_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_clock_panel", "_dl_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_clock_panel", "_dl_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel", "_project_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -8471,7 +8566,7 @@ try {
             self._build_dl_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_clock_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_clock_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel", "_project_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -10333,7 +10428,7 @@ try {
             self._build_gallery_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel", "_project_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -10963,7 +11058,7 @@ try {
             self._build_dev_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_project_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -11108,7 +11203,7 @@ try {
             self._build_pomo_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel", "_project_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -11272,6 +11367,256 @@ try {
             self._win_move(hwnd, x0 + half_w, y0, full_w - half_w, full_h)
         else:  # center
             self._win_move(hwnd, x0 + half_w // 2, y0 + full_h // 4, half_w, full_h // 2)
+    def open_projects(self):
+        self._nav_show("project")
+        self._show_project_panel()
+    def _show_project_panel(self):
+        self._texttrans_on_hide()
+        if getattr(self, "_project_panel", None) is None:
+            self._build_project_panel()
+        try: self._body.pack_forget()
+        except Exception: pass
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel",
+                     "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel",
+                     "_project_panel"):
+            p = getattr(self, attr, None)
+            if p is not None:
+                try: p.pack_forget()
+                except Exception: pass
+        self._ai_view_on = False
+        self._forget_aux_panels()
+        self._project_panel.pack(fill="both", expand=True, before=self._status_sep)
+    def _build_project_panel(self):
+        from tkinter import font as tkfont
+        panel = tk.Frame(self._content, background="#FFFFFF"); self._project_panel = panel
+        self._projects = self._load_projects()
+        self._current_project = None
+        SIDE_BG, MAIN_BG = "#F5F5F7", "#FFFFFF"
+        side = tk.Frame(panel, background=SIDE_BG, width=224); side.pack(side="left", fill="y"); side.pack_propagate(False)
+        tk.Frame(panel, background=self.UI_BORDER, width=1).pack(side="left", fill="y")
+        maincol = tk.Frame(panel, background=MAIN_BG); maincol.pack(side="left", fill="both", expand=True)
+        # 新建空白项目
+        ttk.Button(side, text=self.t("pj_new", "+ 新建项目"), style="Accent.TButton",
+                   command=lambda: open_project(self.create_project())).pack(fill="x", padx=12, pady=(12, 6))
+        search_var = tk.StringVar()
+        sbox = ttk.Entry(side, textvariable=search_var); sbox.pack(fill="x", padx=12, pady=(0, 4))
+        sbox.insert(0, self.t("pj_search", "搜索项目…"))
+        sbox.bind("<FocusIn>", lambda e: sbox.delete(0, "end") if sbox.get() == self.t("pj_search", "搜索项目…") else None)
+        tk.Label(side, text=self.t("pj_recent", "最近项目"), font=self._ui_font(9, True),
+                 background=SIDE_BG, foreground=self.UI_MUTED).pack(anchor="w", padx=14, pady=(8, 2))
+        rwrap = tk.Frame(side, background=SIDE_BG); rwrap.pack(fill="both", expand=True, padx=6, pady=(2, 8))
+        rcv = tk.Canvas(rwrap, background=SIDE_BG, highlightthickness=0); rcv.pack(side="left", fill="both", expand=True)
+        rinner = tk.Frame(rcv, background=SIDE_BG); rwin = rcv.create_window((0, 0), window=rinner, anchor="nw")
+        rinner.bind("<Configure>", lambda e: rcv.configure(scrollregion=rcv.bbox("all")))
+        rcv.bind("<Configure>", lambda e: rcv.itemconfigure(rwin, width=e.width))
+        # 主区: 顶栏 + 可滚动内容
+        head = tk.Frame(maincol, background=MAIN_BG); head.pack(fill="x", padx=14, pady=(12, 4))
+        self._panel_title(head, self.t("project_title", "项目"), "project")
+        back = tk.Label(head, text=self.t("cmn_back", "返回"), font=self._ui_font(9),
+                        background=MAIN_BG, foreground=self.UI_MUTED, cursor="hand2")
+        back.pack(side="right"); back.bind("<Button-1>", lambda e: self._show_main_view())
+        cv = tk.Canvas(maincol, background=MAIN_BG, highlightthickness=0); cv.pack(fill="both", expand=True, padx=(8, 0))
+        sb = ttk.Scrollbar(maincol, orient="vertical", command=cv.yview); sb.pack(side="right", fill="y")
+        cv.configure(yscrollcommand=sb.set)
+        inner = tk.Frame(cv, background=MAIN_BG); cwin = cv.create_window((0, 0), window=inner, anchor="nw")
+        inner.bind("<Configure>", lambda e: cv.configure(scrollregion=cv.bbox("all")))
+        cv.bind("<Configure>", lambda e: cv.itemconfigure(cwin, width=e.width - 8))
+        # 滚轮只绑专用 bind class, 不污染全局 (离开面板不影响其他滚动区)
+        self.bind_class("PJWheel", "<MouseWheel>", lambda e: cv.yview_scroll(int(-e.delta / 120), "units"))
+        self.bind_class("PJWheel", "<Button-4>", lambda e: cv.yview_scroll(-1, "units"))
+        self.bind_class("PJWheel", "<Button-5>", lambda e: cv.yview_scroll(1, "units"))
+        cv.bindtags(cv.bindtags() + ("PJWheel",))
+        def _section_title(parent, text):
+            tk.Label(parent, text=text, font=self._ui_font(11, True), background=MAIN_BG,
+                     foreground=self.UI_TEXT).pack(anchor="w", padx=14, pady=(14, 4))
+        def _dashed_card(parent, tpl):
+            c = tk.Canvas(parent, height=92, background=MAIN_BG, highlightthickness=0)
+            c.pack(fill="x", padx=14, pady=5)
+            def draw(_e=None):
+                c.delete("box"); w = c.winfo_width()
+                if w < 40: return
+                c.create_polygon(_rrect_pts(w, 92, 14), smooth=True, outline="#B7C0CC",
+                                 fill="#FAFBFD", width=1.4, dash=(5, 4), tags="box"); c.tag_lower("box")
+            c.bind("<Configure>", draw)
+            f = tk.Frame(c, background="#FAFBFD")
+            c.create_window(14, 12, anchor="nw", window=f)
+            tk.Label(f, text=tpl["title"], font=self._ui_font(12, True), background="#FAFBFD",
+                     foreground=self.UI_TEXT).pack(anchor="w")
+            tk.Label(f, text=tpl["desc"], font=self._ui_font(9), background="#FAFBFD",
+                     foreground=self.UI_MUTED, wraplength=520, justify="left").pack(anchor="w", pady=(2, 0))
+            plus = tk.Label(c, text="+", font=self._ui_font(18), background="#FAFBFD",
+                            foreground=self.UI_MUTED, cursor="hand2")
+            def place_plus(_e=None):
+                plus.place(x=c.winfo_width() - 34, y=28)
+            c.bind("<Configure>", place_plus, add="+")
+            def go(_e=None):
+                proj = self.create_project(tpl["key"]); open_project(proj)
+            for w in (c, f, plus):
+                w.bind("<Button-1>", go)
+        def render_empty():
+            tk.Label(inner, text=self.t("pj_from_tpl", "从模板创建"), font=self._ui_font(10, True),
+                     background=MAIN_BG, foreground=self.UI_TEXT_2).pack(anchor="w", padx=14, pady=(10, 2))
+            for tpl in self._PROJECT_TEMPLATES:
+                _dashed_card(inner, tpl)
+        def _open_link(link):
+            try:
+                if link["kind"] == "url":
+                    import webbrowser; webbrowser.open(link["path"])
+                elif hasattr(os, "startfile"):
+                    os.startfile(link["path"])
+                else:
+                    import webbrowser; webbrowser.open(link["path"])
+            except Exception as e:
+                self.status.set(str(e))
+        def render_detail(proj):
+            _section_title(inner, self.t("pj_notes", "笔记"))
+            note_box = tk.Text(inner, height=7, wrap="word", font=self._ui_font(10),
+                               relief="solid", bd=1, background="#FBFCFE", foreground=self.UI_TEXT)
+            note_box.pack(fill="x", padx=14); note_box.insert("1.0", proj["notes"])
+            def save_notes(_e=None):
+                proj["notes"] = note_box.get("1.0", "end").strip()[:self._PROJECT_NOTES_MAX]
+                proj["updated"] = time.time(); self.save_projects()
+                self.status.set(self.t("pj_saved", "已保存 ✓"))
+            note_box.bind("<FocusOut>", save_notes)
+            ttk.Button(inner, text=self.t("pj_save_note", "保存笔记"), style="Tool.TButton",
+                       command=save_notes).pack(anchor="w", padx=14, pady=6)
+            # 待办
+            _section_title(inner, self.t("pj_todos", "待办"))
+            trow = tk.Frame(inner, background=MAIN_BG); trow.pack(fill="x", padx=14)
+            t_ent = tk.Entry(trow); t_ent.pack(side="left", fill="x", expand=True)
+            prog = tk.Label(inner, background=MAIN_BG, foreground=self.UI_MUTED, font=self._ui_font(9))
+            prog.pack(anchor="w", padx=14, pady=(4, 0))
+            tlist = tk.Frame(inner, background=MAIN_BG); tlist.pack(fill="x", padx=14, pady=(2, 0))
+            def refresh_prog():
+                done = sum(1 for x in proj["todos"] if x["done"])
+                prog.configure(text=self.t("pj_prog", "已完成 {a}/{b}").format(a=done, b=len(proj["todos"])))
+            def refresh_todos():
+                for w in tlist.winfo_children(): w.destroy()
+                for i, td in enumerate(proj["todos"]):
+                    row = tk.Frame(tlist, background=MAIN_BG); row.pack(fill="x", pady=2)
+                    var = tk.BooleanVar(value=td["done"])
+                    def toggle(v=var, td=td):
+                        td["done"] = v.get(); self.save_projects(); refresh_prog()
+                    ttk.Checkbutton(row, text=td["text"], variable=var, command=toggle).pack(side="left")
+                    x = tk.Label(row, text="✕", background=MAIN_BG, foreground=self.UI_MUTED, cursor="hand2")
+                    x.pack(side="right"); x.bind("<Button-1>", lambda e, i=i: remove_todo(i))
+                refresh_prog()
+            def add_todo(_e=None):
+                tx = t_ent.get().strip()
+                if not tx: return
+                if len(proj["todos"]) >= self._PROJECT_TODO_MAX:
+                    self.toast(self.t("pj_todo_max", "待办最多 100 条")); return
+                proj["todos"].append({"text": tx[:500], "done": False}); t_ent.delete(0, "end")
+                self.save_projects(); refresh_todos()
+            def remove_todo(i):
+                del proj["todos"][i]; self.save_projects(); refresh_todos()
+            t_ent.bind("<Return>", add_todo)
+            ttk.Button(trow, text=self.t("pj_add_todo", "添加"), style="Tool.TButton",
+                       command=add_todo).pack(side="left", padx=6)
+            refresh_todos()
+            # 链接
+            _section_title(inner, self.t("pj_links", "文件 / 网址链接"))
+            lrow = tk.Frame(inner, background=MAIN_BG); lrow.pack(fill="x", padx=14)
+            llist = tk.Frame(inner, background=MAIN_BG); llist.pack(fill="x", padx=14, pady=(2, 20))
+            def add_file():
+                path = filedialog.askopenfilename()
+                if not path: return
+                if len(proj["links"]) >= self._PROJECT_LINK_MAX:
+                    self.toast(self.t("pj_link_max", "链接最多 50 条")); return
+                proj["links"].append({"name": os.path.basename(path), "path": path, "kind": "file"})
+                self.save_projects(); refresh_links()
+            def add_url():
+                dlg = tk.Toplevel(self); dlg.title(self.t("pj_add_url", "添加网址"))
+                dlg.geometry("360x150"); dlg.transient(self)
+                ttk.Label(dlg, text="URL:").pack(anchor="w", padx=14, pady=(12, 2))
+                u = ttk.Entry(dlg, width=44); u.pack(padx=14)
+                def ok():
+                    v = u.get().strip()
+                    if not v: return
+                    if len(proj["links"]) >= self._PROJECT_LINK_MAX:
+                        self.toast(self.t("pj_link_max", "链接最多 50 条")); dlg.destroy(); return
+                    proj["links"].append({"name": v, "path": v, "kind": "url"})
+                    self.save_projects(); refresh_links(); dlg.destroy()
+                ttk.Button(dlg, text=self.t("cmn_ok", "确定"), style="Accent.TButton",
+                           command=ok).pack(anchor="w", padx=14, pady=10)
+            ttk.Button(lrow, text=self.t("pj_add_file", "添加文件"), style="Tool.TButton",
+                       command=add_file).pack(side="left")
+            ttk.Button(lrow, text=self.t("pj_add_url_bt", "添加网址"), style="Tool.TButton",
+                       command=add_url).pack(side="left", padx=6)
+            def refresh_links():
+                for w in llist.winfo_children(): w.destroy()
+                for i, lk in enumerate(proj["links"]):
+                    row = tk.Frame(llist, background=MAIN_BG); row.pack(fill="x", pady=2)
+                    mark = "🔗" if lk["kind"] == "url" else "📄"
+                    lb = tk.Label(row, text=f"{mark} {lk['name']}", background=MAIN_BG,
+                                  foreground=self.UI_ACCENT, cursor="hand2", font=self._ui_font(10))
+                    lb.pack(side="left"); lb.bind("<Button-1>", lambda e, lk=lk: _open_link(lk))
+                    x = tk.Label(row, text="✕", background=MAIN_BG, foreground=self.UI_MUTED, cursor="hand2")
+                    x.pack(side="right"); x.bind("<Button-1>", lambda e, i=i: remove_link(i))
+            def remove_link(i):
+                del proj["links"][i]; self.save_projects(); refresh_links()
+            refresh_links()
+        def render_main():
+            for w in inner.winfo_children(): w.destroy()
+            proj = self._current_project
+            if proj is None: render_empty()
+            else: render_detail(proj)
+        def open_project(proj):
+            self._current_project = proj; render_main(); refresh_recent()
+        def refresh_recent():
+            for w in rinner.winfo_children(): w.destroy()
+            q = sbox.get()
+            q = "" if q == self.t("pj_search", "搜索项目…") else q.strip().lower()
+            for proj in self._projects:
+                if q and not (q in proj["title"].lower() or q in proj["notes"].lower()
+                              or any(q in t["text"].lower() for t in proj["todos"])): continue
+                pid = proj["id"]; cur = self._current_project is proj
+                bg = self.UI_SEL_BG if cur else SIDE_BG
+                row = tk.Frame(rinner, background=bg); row.pack(fill="x", pady=1)
+                lb = tk.Label(row, text=proj["title"][:16], font=self._ui_font(10),
+                              background=bg, foreground=self.UI_TEXT, anchor="w")
+                lb.pack(side="left", fill="x", expand=True, padx=(8, 2), pady=6)
+                def menu(e, pid=pid):
+                    p = next((x for x in self._projects if x["id"] == pid), None)
+                    if p is None: return
+                    cm = tk.Menu(self, tearoff=0)
+                    cm.add_command(label=self.t("pj_rename", "重命名"), command=lambda: rename(pid))
+                    cm.add_command(label=(self.t("pj_unpin", "取消置顶") if p.get("pin") else self.t("pj_pin", "置顶")),
+                                   command=lambda: pin(pid))
+                    cm.add_separator(); cm.add_command(label=self.t("pj_delete", "删除"), command=lambda: kill(pid))
+                    try: cm.tk_popup(e.x_root, e.y_root)
+                    finally: cm.grab_release()
+                for w in (row, lb):
+                    w.bind("<Button-1>", lambda e, p=proj: open_project(p))
+                    w.bind("<Button-3>", menu)
+        def pin(pid):
+            p = next((x for x in self._projects if x["id"] == pid), None)
+            if p is None: return
+            p["pin"] = 0 if p.get("pin") else 1
+            self._projects.sort(key=lambda c: (0 if c.get("pin") else 1, -(c.get("updated") or 0)))
+            self.save_projects(); refresh_recent()
+        def rename(pid):
+            p = next((x for x in self._projects if x["id"] == pid), None)
+            if p is None: return
+            dlg = tk.Toplevel(self); dlg.title(self.t("pj_rename", "重命名")); dlg.geometry("320x140"); dlg.transient(self)
+            ttk.Label(dlg, text=self.t("pj_rename", "重命名")).pack(anchor="w", padx=14, pady=(12, 2))
+            v = ttk.Entry(dlg, width=36); v.pack(padx=14); v.insert(0, p["title"]); v.focus_set()
+            def ok():
+                name = v.get().strip()
+                if name: p["title"] = name[:80]; self.save_projects(); refresh_recent()
+                dlg.destroy()
+            ttk.Button(dlg, text=self.t("cmn_ok", "确定"), style="Accent.TButton",
+                       command=ok).pack(anchor="w", padx=14, pady=10)
+        def kill(pid):
+            p = next((x for x in self._projects if x["id"] == pid), None)
+            if p is None: return
+            if not messagebox.askyesno(self.t("pj_delete", "删除"), f"{self.t('pj_delete', '删除')}「{p['title']}」?"): return
+            self.delete_project(pid)
+            if self._current_project is p: self._current_project = None
+            render_main(); refresh_recent()
+        search_var.trace_add("write", lambda *a: refresh_recent())
+        render_main(); refresh_recent()
+
     def open_window_manager(self):
         self._nav_show("winman")
         self._show_winman_panel()
@@ -11282,7 +11627,8 @@ try {
         try: self._body.pack_forget()
         except Exception: pass
         for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel",
-                     "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel"):
+                     "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel",
+                     "_project_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
