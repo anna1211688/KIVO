@@ -386,5 +386,22 @@ class AiStreamingTests(unittest.TestCase):
         self.assertIn('else "停止"', panel)
 
 
+class AiModelCenterLayoutTests(unittest.TestCase):
+    def test_model_center_uses_top_horizontal_tabs(self):
+        body = method_text("_build_ai_form")
+        self.assertIn("ttk.Notebook(parent)", body)
+        self.assertIn('notebook.add(model_tab, text="模型列表")', body)
+        self.assertIn('notebook.add(provider_tab, text="服务商配置")', body)
+        self.assertIn('notebook.add(route_tab, text="任务分配")', body)
+        self.assertIn('notebook.add(test_tab, text="连接测试")', body)
+
+    def test_model_center_lists_every_provider_and_keeps_separate_settings(self):
+        body = method_text("_build_ai_form")
+        self.assertIn("for svc_key in self._AI_PRESETS:", body)
+        self.assertIn('columns = ("provider", "model", "status")', body)
+        self.assertIn("store[svc_key]", body)
+        self.assertIn("self._save_ai_settings(cur[\"service\"], store, routes)", body)
+
+
 if __name__ == "__main__":
     unittest.main()
