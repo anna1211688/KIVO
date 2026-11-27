@@ -4678,8 +4678,15 @@ try {
                         raise RuntimeError("AI 响应超过 2 MiB，已中止")
                     return _json.loads(raw.decode("utf-8"))
             except urllib.error.HTTPError as e:
+                # Never surface raw server diagnostics: they may echo credentials or request data.
                 try: detail = e.read(2048).decode("utf-8", "ignore")[:200]
                 except Exception: detail = ""
+                detail = re.sub(r"(?i)(bearer\\s+)[^\\s,;]+", r"\\1***", detail)
+                detail = re.sub(r"(?i)(api[-_ ]?key\\s*[:=]\\s*)[^\\s,;]+", r"\\1***", detail)
+                detail = re.sub(r"(?i)(authorization\\s*[:=]\\s*)[^\\r\\n]+", r"\\1***", detail)
+                secret = str(cfg.get("key") or "")
+                if secret: detail = detail.replace(secret, "***")
+                detail = re.sub(r"[\\r\\n\\t]+", " ", detail).strip()[:160]
                 raise RuntimeError(self.t("ai_err_http", "AI 接口返回 {code} 错误。{detail}").replace("{code}", str(e.code)).replace("{detail}", detail))
             except Exception as e:
                 if isinstance(e, RuntimeError): raise
