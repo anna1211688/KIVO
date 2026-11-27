@@ -18,29 +18,29 @@ jobs:
           import glob, os, shutil, sysconfig
           sp = sysconfig.get_paths()["purelib"]
           def rm(p):
-              if os.path.isdir(p): shutil.rmtree(p, ignore_errors=True)
-              elif os.path.exists(p): os.remove(p)
+            if os.path.isdir(p): shutil.rmtree(p, ignore_errors=True)
+            elif os.path.exists(p): os.remove(p)
           for f in glob.glob(os.path.join(sp, "cv2", "opencv_videoio_ffmpeg*.dll")): rm(f)
           rm(os.path.join(sp, "cv2", "data"))
           for d in glob.glob(os.path.join(sp, "numpy", "**", "tests"), recursive=True): rm(d)
           for sub in ("transformers", "tools", "quantization", "datasets", "backend"):
-              rm(os.path.join(sp, "onnxruntime", sub))
+            rm(os.path.join(sp, "onnxruntime", sub))
           print("slim done")
-      - run: pyinstaller --noconfirm --onefile --windowed --name SPST --icon SPST.ico --collect-all rapidocr_onnxruntime --collect-all onnxruntime --collect-all tzdata --collect-all yt_dlp --add-data "Config.ini;." --add-data "ding.wav;." --add-data "Chinese.ini;Language" --add-data "English.ini;Language" main.py --exclude-module matplotlib --exclude-module pandas --exclude-module scipy
+      - run: pyinstaller --noconfirm --onefile --windowed --name KIVO --icon SPST.ico --collect-all rapidocr_onnxruntime --collect-all onnxruntime --exclude-module torch --exclude-module torchvision --exclude-module torchaudio --exclude-module tensorflow --exclude-module keras --exclude-module sklearn --exclude-module scipy --exclude-module matplotlib --exclude-module pandas --exclude-module notebook --exclude-module jupyter --exclude-module IPython
       - uses: actions/upload-artifact@v4
         with:
           name: SnapPaste-Windows
-          path: dist/SPST.exe
+          path: dist/KIVO.exe
       - name: Install Inno Setup
         run: choco install innosetup -y --no-progress
       - name: Fetch Chinese installer language file
         run: Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jrsoftware/issrc/main/Files/Languages/ChineseSimplified.isl" -OutFile "C:\Program Files (x86)\Inno Setup 6\Languages\ChineseSimplified.isl"
       - name: Build installer
-        run: '& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DAppVersion=1.4.28 SPST.iss'
-      - name: Publish release v1.4.28
+        run: '& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DAppVersion=1.4.29 SPST.iss'
+      - name: Publish release v1.4.29
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          printf '%s\n' 'SPST v1.4.28' '配置里的百分号不再导致设置保存失败。' '剪贴板、记录落盘、OCR 合并框和分享链接解析做了修正。' '下载 SPST.exe 双击即可运行，无需安装 Python。' '首次打开若弹出 SmartScreen，点「更多信息 → 仍要运行」。' > notes.txt
-          gh release create v1.4.28 dist/SPST.exe installer/SPST-Setup-1.4.28.exe --title "SPST v1.4.28" --notes-file notes.txt || gh release upload v1.4.28 dist/SPST.exe installer/SPST-Setup-1.4.28.exe --clobber
+          printf '%s\n' 'SPST v1.4.29' '配置里的百分号不再导致设置保存失败。' '剪贴板、记录落盘、OCR 合并框和分享链接解析做了修正。' '下载 SPST.exe 双击即可运行，安装包会写入开始菜单。' > notes.txt
+          gh release create v1.4.29 dist/KIVO.exe installer/KIVO-Setup-1.4.29.exe --title "SPST v1.4.29" --notes-file notes.txt || gh release upload v1.4.29 dist/KIVO.exe installer/KIVO-Setup-1.4.29.exe --clobber
