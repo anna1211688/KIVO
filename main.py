@@ -7172,12 +7172,20 @@ try {
                 out.append(cur)
             return out
         def bubble(parent, text, fill, fg):
-            """圆角气泡: 画布上画圆角多边形 + 文字, 尺寸按折行后的文本实测 (圆角点列用模块级 _rrect_pts)"""
-            lines = wrap_px(text, 460)
+            """自适应聊天气泡: 短内容按实际文本宽度收缩, 长内容按聊天区域比例折行, 窗口窄时自动缩小."""
+            # Canvas 可用宽度可能在首次布局时尚未确定; 用聊天区域当前宽度并留出消息行边距.
+            try:
+                viewport = max(240, cv.winfo_width() - 64)
+            except Exception:
+                viewport = 680
+            max_text_w = max(120, min(720, int(viewport * 0.78)))
+            lines = wrap_px(text, max_text_w)
             tw = max((chat_font.measure(l) for l in lines), default=0)
             lh = chat_font.metrics("linespace")
-            padx, pady = 13, 9
-            w, h = tw + padx * 2, lh * len(lines) + pady * 2
+            padx, pady = 14, 10
+            # 气泡宽度只随实际文字宽度增长, 不强制占满; 多行则按最长行计算.
+            w = min(max_text_w + padx * 2, tw + padx * 2)
+            h = lh * max(1, len(lines)) + pady * 2
             c = tk.Canvas(parent, width=w, height=h, highlightthickness=0, background=CHAT_BG)
             c.create_polygon(_rrect_pts(w, h, 16), smooth=True, fill=fill, outline=fill)
             c.create_text(padx, pady, anchor="nw", text="\n".join(lines), font=chat_font, fill=fg)
