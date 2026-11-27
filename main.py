@@ -693,8 +693,8 @@ class _NavItem(tk.Canvas):
         fill = "#334B6C" if self._selected else ("#26364D" if self._hover else None)
         if fill: self.create_polygon(_rrect_pts(204, 40, 10), fill=fill, outline=fill, smooth=True)
         if self._image is not None: self.create_image(16, 20, image=self._image, anchor="w")
-        self.create_text(52, 21, text=self._text, anchor="w", font=self._font,
-                         fill="#1F6AB3" if self._selected else "#1C2634")
+        self.create_text(54, 21, text=self._text, anchor="w", font=self._font,
+                         fill="#FFFFFF" if self._selected else "#D5DFEC")
     def _set_hover(self, on):
         self._hover = bool(on); self._draw()
     def set_selected(self, on):
