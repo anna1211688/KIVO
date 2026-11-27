@@ -1883,7 +1883,7 @@ class App(tk.Tk):
                 if os.path.isdir(image_dir):
                     import re as _re
                     for filename in sorted(os.listdir(image_dir)):
-                        if not _re.fullmatch(r"[0-9a-f]{32}\\.jpg", filename):
+                        if not _re.fullmatch(r"[0-9a-f]{32}\.jpg", filename):
                             continue
                         image_path = os.path.join(image_dir, filename)
                         if not os.path.isfile(image_path):
@@ -1935,7 +1935,7 @@ class App(tk.Tk):
             if len(image_names) != len(set(image_names)):
                 raise ValueError("duplicate chat image entries")
             for name in image_names:
-                if not _re.fullmatch(r"ai_chat_images/[0-9a-f]{32}\\.jpg", name):
+                if not _re.fullmatch(r"ai_chat_images/[0-9a-f]{32}\.jpg", name):
                     raise ValueError("invalid chat image path")
                 info = z.getinfo(name)
                 if info.file_size > 8 * 1024 * 1024:
