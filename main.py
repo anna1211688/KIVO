@@ -958,9 +958,9 @@ class App(tk.Tk):
     UI_BORDER = "#E5EAF0"    # 描边
     UI_TEXT = "#1C2634"      # 主文字
     UI_MUTED = "#7E8CA3"     # 次要文字
-    UI_ACCENT = "#287FD1"    # 品牌蓝: 明亮蔚蓝 (主按钮/焦点/选中)
-    UI_ACCENT_HOVER = "#4A97DC"
-    UI_ACCENT_PRESS = "#1F6AB3"
+    UI_ACCENT = "#3B82F6"    # 品牌蓝 (2026-11-27 UI 第一批统一: 与主按钮/边栏同色, 旧值 #287FD1 在 AI 气泡/发送键/焦点边框上残留会同屏色差)
+    UI_ACCENT_HOVER = "#60A5FA"
+    UI_ACCENT_PRESS = "#2563EB"
     UI_SEL_BG = "#D9E9F8"    # 列表选中行底色
     UI_HEAD_BG = "#EEF2F8"   # 表头底色
     UI_STRIPE = "#F6F9FD"    # 列表斑马纹 (奇数行)
@@ -6903,8 +6903,8 @@ try {
         self._ai_chats = self._load_ai_chats()
         self._ai_chat_id = None
         # ---- 左侧边栏: 新对话 + 最近对话 (侧边的功能入口按钮已按 Jane 要求去掉, 功能本身保留: AI 设置在系统设置里, 看图翻译在截图工具栏/贴图菜单, 智能回复 Shift+F4) ----
-        SIDE_BG = "#F7F8FA"
-        side = tk.Frame(panel, background=SIDE_BG, width=208); side.pack(side="left", fill="y"); side.pack_propagate(False)
+        SIDE_BG = "#F2F6FB"
+        side = tk.Frame(panel, background=SIDE_BG, width=224); side.pack(side="left", fill="y"); side.pack_propagate(False)
         tk.Frame(panel, background=self.UI_BORDER, width=1).pack(side="left", fill="y")
         chatcol = tk.Frame(panel, background=CHAT_BG); chatcol.pack(side="left", fill="both", expand=True)
         ttk.Button(side, text=self.t("ai_new_chat", "+ 新对话"), style="Accent.TButton", command=lambda: new_chat()).pack(fill="x", padx=12, pady=(12, 6))
@@ -7018,14 +7018,14 @@ try {
         def _chip_icon(draw_fn, on=False):
             # 豆包式小方片: 浅蓝圆角方底 + 蓝图标; 激活态 (点赞/点踩选中) 蓝底白图标
             from PIL import ImageDraw as _ID2
-            chip_bg = "#2B83E6" if on else "#E9F2FD"
+            chip_bg = "#3B82F6" if on else "#E9F2FD"
             big = Image.new("RGBA", (84, 84), (0, 0, 0, 0))
             _ID2.Draw(big).rounded_rectangle([2, 2, 82, 82], radius=24, fill=chip_bg)
             g = Image.new("RGBA", (48, 48), (0, 0, 0, 0))
             if draw_fn is _draw_copy:
-                draw_fn(_ID2.Draw(g), "#FFFFFF" if on else "#2B83E6", fill=chip_bg)
+                draw_fn(_ID2.Draw(g), "#FFFFFF" if on else "#3B82F6", fill=chip_bg)
             else:
-                draw_fn(_ID2.Draw(g), "#FFFFFF" if on else "#2B83E6")
+                draw_fn(_ID2.Draw(g), "#FFFFFF" if on else "#3B82F6")
             big.alpha_composite(g.resize((52, 52), Image.LANCZOS), (16, 16))
             return ImageTk.PhotoImage(big.resize((28, 28), Image.LANCZOS))
         self._ai_chip_icons = {"copy": _chip_icon(_draw_copy), "speak": _chip_icon(_draw_speak),
@@ -7171,9 +7171,15 @@ try {
                             out.append(cur); cur = piece; piece = ""
                 out.append(cur)
             return out
+        def _bubble_wrap_w():
+            """气泡折行宽随聊天区实际宽度走 (2026-11-27 AI 批): 旧版写死 348px, 宽面板里长消息早早折行显得局促;
+            改为聊天区的 72% 并夹在 [348, 680] — 短消息仍按实测窄气泡, 长消息少折行。面板刚建未定宽时退回 348。"""
+            try: avail = cv.winfo_width()
+            except Exception: avail = 0
+            return max(348, min(680, int(avail * 0.72))) if avail >= 500 else 348
         def bubble(parent, text, fill, fg):
             """圆角气泡: 画布上画圆角多边形 + 文字, 尺寸按折行后的文本实测 (圆角点列用模块级 _rrect_pts)"""
-            lines = wrap_px(text, 348)
+            lines = wrap_px(text, _bubble_wrap_w())
             tw = max((chat_font.measure(l) for l in lines), default=0)
             lh = chat_font.metrics("linespace")
             padx, pady = 13, 9
@@ -7379,7 +7385,7 @@ try {
             attach.update(kind="file", img=None, name=_os.path.basename(path), text=raw); refresh_attach()
             self.after(60, lambda: inp.focus_force())  # 同上: 附件挂好焦点回输入框
         # ---- 底部输入区: 圆角输入框 (画布圆角底 + 内嵌文本) + 圆角药丸发送键 ----
-        brow = tk.Frame(chatcol, background=CHAT_BG); brow.pack(fill="x", padx=14, pady=(10, 12))
+        brow = tk.Frame(chatcol, background=CHAT_BG); brow.pack(fill="x", padx=14, pady=(12, 14))
         plus_cv = tk.Canvas(brow, width=42, height=42, highlightthickness=0, background=CHAT_BG, cursor="hand2")
         plus_cv.pack(side="left", padx=(0, 8))
         plus_cv.create_oval(2, 2, 40, 40, outline="#C3CCD6", fill="#FFFFFF")
@@ -7398,26 +7404,26 @@ try {
             ]
             self._popup_menu(plus_cv.winfo_rootx(), plus_cv.winfo_rooty(), items, above=True)
         plus_cv.bind("<Button-1>", popup_plus)
-        inbox = tk.Canvas(brow, height=62, highlightthickness=0, background=CHAT_BG)
+        inbox = tk.Canvas(brow, height=76, highlightthickness=0, background=CHAT_BG)
         inbox.pack(side="left", fill="x", expand=True)
         inp = tk.Text(inbox, height=3, width=12, wrap="word", font=self._ui_font(11), background=BUB_AI, foreground=self.UI_TEXT,
                       relief="flat", borderwidth=0, highlightthickness=0, padx=4, pady=2, insertbackground=self.UI_ACCENT)
         self._ai_input = inp
-        inp_win = inbox.create_window(13, 9, anchor="nw", window=inp, width=380, height=44)
+        inp_win = inbox.create_window(13, 9, anchor="nw", window=inp, width=380, height=58)
         def draw_inbox(_e=None):
             wdt = inbox.winfo_width()
             if wdt < 60: return
             inbox.delete("bg")
-            inbox.create_polygon(_rrect_pts(wdt, 62, 16), smooth=True, fill=BUB_AI, outline=BUB_AI, tags="bg")
+            inbox.create_polygon(_rrect_pts(wdt, 76, 16), smooth=True, fill=BUB_AI, outline=BUB_AI, tags="bg")
             inbox.tag_lower("bg")
-            inbox.itemconfigure(inp_win, width=wdt - 26, height=44)
+            inbox.itemconfigure(inp_win, width=wdt - 26, height=58)
         inbox.bind("<Configure>", draw_inbox)
         send_cv = tk.Canvas(brow, width=80, height=42, highlightthickness=0, background=CHAT_BG, cursor="hand2")
         send_cv.pack(side="right", padx=(10, 0))
         send_cv.create_polygon(_rrect_pts(80, 42, 21), smooth=True, fill=self.UI_ACCENT, outline=self.UI_ACCENT, tags="pill")
         send_cv.create_text(40, 21, text=self.t("ai_send", "发送"), font=self._ui_font(11, True), fill="#FFFFFF")
         send_ui["cv"] = send_cv
-        send_cv.bind("<Enter>", lambda e: send_ui["enabled"] and send_cv.itemconfigure("pill", fill="#2B83E6", outline="#2B83E6"))
+        send_cv.bind("<Enter>", lambda e: send_ui["enabled"] and send_cv.itemconfigure("pill", fill=self.UI_ACCENT_HOVER, outline=self.UI_ACCENT_HOVER))
         send_cv.bind("<Leave>", lambda e: send_ui["enabled"] and send_cv.itemconfigure("pill", fill=self.UI_ACCENT, outline=self.UI_ACCENT))
         def send():
             text = inp.get("1.0", "end").strip()
