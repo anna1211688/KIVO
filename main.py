@@ -4623,6 +4623,7 @@ try {
                     if stream_callback is None:
                         return _json.loads(r.read().decode("utf-8"))
                     chunks = []
+                    raw_lines = []
                     saw_sse = False
                     while not (cancel_event is not None and cancel_event.is_set()):
                         line = r.readline(1024 * 1024 + 1)
@@ -4631,7 +4632,10 @@ try {
                         if len(line) > 1024 * 1024:
                             raise RuntimeError("AI 流式响应单行超过 1 MiB，已中止")
                         line = line.decode("utf-8", "replace").strip()
-                        if not line or line.startswith(":") or not line.startswith("data:"):
+                        if not line:
+                            continue
+                        if not line.startswith("data:"):
+                            if not line.startswith(":"): raw_lines.append(line)
                             continue
                         data_line = line[5:].strip()
                         if data_line == "[DONE]":
@@ -4656,7 +4660,9 @@ try {
                     if saw_sse:
                         return {"choices": [{"message": {"content": "".join(chunks)}}]}
                     # 某些兼容接口忽略 stream=true，返回普通 JSON；仍兼容旧响应。
-                    raw = r.read(2 * 1024 * 1024 + 1)
+                    if cancel_event is not None and cancel_event.is_set():
+                        return {"choices": [{"message": {"content": ""}}]}
+                    raw = ("\n".join(raw_lines)).encode("utf-8") + r.read(2 * 1024 * 1024 + 1)
                     if len(raw) > 2 * 1024 * 1024:
                         raise RuntimeError("AI 响应超过 2 MiB，已中止")
                     return _json.loads(raw.decode("utf-8"))
