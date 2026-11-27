@@ -6903,8 +6903,8 @@ try {
         self._ai_chats = self._load_ai_chats()
         self._ai_chat_id = None
         # ---- 左侧边栏: 新对话 + 最近对话 (侧边的功能入口按钮已按 Jane 要求去掉, 功能本身保留: AI 设置在系统设置里, 看图翻译在截图工具栏/贴图菜单, 智能回复 Shift+F4) ----
-        SIDE_BG = "#F7F8FA"
-        side = tk.Frame(panel, background=SIDE_BG, width=208); side.pack(side="left", fill="y"); side.pack_propagate(False)
+        SIDE_BG = "#F3F6FB"
+        side = tk.Frame(panel, background=SIDE_BG, width=224); side.pack(side="left", fill="y"); side.pack_propagate(False)
         tk.Frame(panel, background=self.UI_BORDER, width=1).pack(side="left", fill="y")
         chatcol = tk.Frame(panel, background=CHAT_BG); chatcol.pack(side="left", fill="both", expand=True)
         ttk.Button(side, text=self.t("ai_new_chat", "+ 新对话"), style="Accent.TButton", command=lambda: new_chat()).pack(fill="x", padx=12, pady=(12, 6))
@@ -7173,7 +7173,7 @@ try {
             return out
         def bubble(parent, text, fill, fg):
             """圆角气泡: 画布上画圆角多边形 + 文字, 尺寸按折行后的文本实测 (圆角点列用模块级 _rrect_pts)"""
-            lines = wrap_px(text, 348)
+            lines = wrap_px(text, 460)
             tw = max((chat_font.measure(l) for l in lines), default=0)
             lh = chat_font.metrics("linespace")
             padx, pady = 13, 9
@@ -7379,7 +7379,7 @@ try {
             attach.update(kind="file", img=None, name=_os.path.basename(path), text=raw); refresh_attach()
             self.after(60, lambda: inp.focus_force())  # 同上: 附件挂好焦点回输入框
         # ---- 底部输入区: 圆角输入框 (画布圆角底 + 内嵌文本) + 圆角药丸发送键 ----
-        brow = tk.Frame(chatcol, background=CHAT_BG); brow.pack(fill="x", padx=14, pady=(10, 12))
+        brow = tk.Frame(chatcol, background=CHAT_BG); brow.pack(fill="x", padx=18, pady=(12, 16))
         plus_cv = tk.Canvas(brow, width=42, height=42, highlightthickness=0, background=CHAT_BG, cursor="hand2")
         plus_cv.pack(side="left", padx=(0, 8))
         plus_cv.create_oval(2, 2, 40, 40, outline="#C3CCD6", fill="#FFFFFF")
@@ -7398,19 +7398,19 @@ try {
             ]
             self._popup_menu(plus_cv.winfo_rootx(), plus_cv.winfo_rooty(), items, above=True)
         plus_cv.bind("<Button-1>", popup_plus)
-        inbox = tk.Canvas(brow, height=62, highlightthickness=0, background=CHAT_BG)
+        inbox = tk.Canvas(brow, height=72, highlightthickness=0, background=CHAT_BG)
         inbox.pack(side="left", fill="x", expand=True)
         inp = tk.Text(inbox, height=3, width=12, wrap="word", font=self._ui_font(11), background=BUB_AI, foreground=self.UI_TEXT,
-                      relief="flat", borderwidth=0, highlightthickness=0, padx=4, pady=2, insertbackground=self.UI_ACCENT)
+                      relief="flat", borderwidth=0, highlightthickness=0, padx=8, pady=4, insertbackground=self.UI_ACCENT)
         self._ai_input = inp
-        inp_win = inbox.create_window(13, 9, anchor="nw", window=inp, width=380, height=44)
+        inp_win = inbox.create_window(16, 10, anchor="nw", window=inp, width=380, height=52)
         def draw_inbox(_e=None):
             wdt = inbox.winfo_width()
             if wdt < 60: return
             inbox.delete("bg")
-            inbox.create_polygon(_rrect_pts(wdt, 62, 16), smooth=True, fill=BUB_AI, outline=BUB_AI, tags="bg")
+            inbox.create_polygon(_rrect_pts(wdt, 72, 18), smooth=True, fill=BUB_AI, outline=BUB_AI, tags="bg")
             inbox.tag_lower("bg")
-            inbox.itemconfigure(inp_win, width=wdt - 26, height=44)
+            inbox.itemconfigure(inp_win, width=wdt - 32, height=52)
         inbox.bind("<Configure>", draw_inbox)
         send_cv = tk.Canvas(brow, width=80, height=42, highlightthickness=0, background=CHAT_BG, cursor="hand2")
         send_cv.pack(side="right", padx=(10, 0))
