@@ -1878,6 +1878,23 @@ class App(tk.Tk):
                 for name in self._BACKUP_FILES:
                     p = os.path.join(BASE, name)
                     if os.path.exists(p): z.write(p, name)
+                image_dir = os.path.join(BASE, "ai_chat_images")
+                image_total = 0
+                if os.path.isdir(image_dir):
+                    import re as _re
+                    for filename in sorted(os.listdir(image_dir)):
+                        if not _re.fullmatch(r"[0-9a-f]{32}\\.jpg", filename):
+                            continue
+                        image_path = os.path.join(image_dir, filename)
+                        if not os.path.isfile(image_path):
+                            continue
+                        size = os.path.getsize(image_path)
+                        if size > 8 * 1024 * 1024:
+                            raise ValueError("chat image too large for backup")
+                        image_total += size
+                        if image_total > 64 * 1024 * 1024:
+                            raise ValueError("chat image backup exceeds 64 MiB")
+                        z.write(image_path, "ai_chat_images/" + filename)
             os.replace(tmp, path)
         except Exception:
             try: os.remove(tmp)
@@ -1911,10 +1928,35 @@ class App(tk.Tk):
                             except Exception: continue
                         if not ok_ini: raise ValueError("bad Config.ini in backup")
                     payload[name] = data
-            staged = []  # 两阶段落盘 (2026-11-27 审查): 先把所有文件都写成 .tmp, 再统一 replace; 中途失败不会留下新旧混合状态
+            image_total = 0
+            import re as _re
+            import io as _io
+            image_names = [name for name in z.namelist() if name.startswith("ai_chat_images/")]
+            if len(image_names) != len(set(image_names)):
+                raise ValueError("duplicate chat image entries")
+            for name in image_names:
+                if not _re.fullmatch(r"ai_chat_images/[0-9a-f]{32}\\.jpg", name):
+                    raise ValueError("invalid chat image path")
+                info = z.getinfo(name)
+                if info.file_size > 8 * 1024 * 1024:
+                    raise ValueError("chat image too large")
+                image_total += info.file_size
+                if image_total > 64 * 1024 * 1024:
+                    raise ValueError("chat image backup exceeds 64 MiB")
+                data = z.read(name)
+                if len(data) > 8 * 1024 * 1024:
+                    raise ValueError("chat image too large")
+                try:
+                    with Image.open(_io.BytesIO(data)) as image:
+                        image.verify()
+                except Exception as exc:
+                    raise ValueError("invalid chat image data") from exc
+                payload[name] = data
+            staged = []  # 两阶段落盘: 所有文件先写入临时文件, 再统一替换
             try:
                 for name, data in payload.items():
                     tmp = os.path.join(BASE, name + ".tmp")
+                    os.makedirs(os.path.dirname(tmp), exist_ok=True)
                     with open(tmp, "wb") as f: f.write(data)
                     staged.append((tmp, os.path.join(BASE, name)))
                 for tmp, dst in staged: os.replace(tmp, dst)
