@@ -142,5 +142,148 @@ class SafetyRegressionTests(unittest.TestCase):
                 check(bad)
 
 
+# ---- 2026-11-27 全面审查整改的回归测试: 验签/版本/资产挑选/http 护栏/语言键集/备份护栏 ----
+import json
+import re
+import textwrap
+import zipfile
+
+_TEST_RSA_N = 162981085384131595251459525080711306882316967772221501910582934700591271823244892151988469393288635764485989919236918997176280652681293961377027012749006280567381591256609187477820361021049637466040029980904342415982933389712807348934301863364505154817915230267915888885833079353119423640699467412558054054879
+_TEST_RSA_D = 74533562873610449689205997012283116080533467218536866712880985335175870238406894772224032473049631543973779756007289001089007849634726357880752500100713588806702970794306860085181565143251116193135562181805496122995945349662211249978864149076972199596868672766315627233236149000448649340653718093456957370553
+
+
+def _load_with_ns(name, extra_ns):
+    """load_function 的加强版: 允许给被测函数补它引用的模块级名字 (json/BASE 等)。"""
+    tree = ast.parse(SOURCE)
+    segment = None
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == name:
+            segment = ast.get_source_segment(SOURCE, node)
+            break
+    if segment is None: raise AssertionError(f"function not found: {name}")
+    ns = {"os": os}
+    ns.update(extra_ns)
+    exec(textwrap.dedent(segment), ns)
+    attr = ns[name]
+    return attr.__func__ if isinstance(attr, (staticmethod, classmethod)) else attr
+
+
+def _test_sign(name, version, sha256_hex):
+    import base64, hashlib
+    t = bytes.fromhex("3031300d060960864801650304020105000420") + hashlib.sha256(("%s\n%s\n%s" % (name, version, sha256_hex)).encode("utf-8")).digest()
+    k = (_TEST_RSA_N.bit_length() + 7) // 8
+    em = b"\x00\x01" + b"\xff" * (k - len(t) - 3) + b"\x00" + t
+    sig = pow(int.from_bytes(em, "big"), _TEST_RSA_D, _TEST_RSA_N).to_bytes(k, "big")
+    return base64.b64encode(sig).decode("ascii")
+
+
+class HardeningTests(unittest.TestCase):
+    def test_ver_tuple_orders_prerelease_before_release(self):
+        ver = _load_with_ns("_ver_tuple", {"re": re})
+        self.assertLess(ver("v1.5.0-beta1"), ver("1.5.0"))
+        self.assertLess(ver("1.5.0-beta1"), ver("1.5.0-beta2"))
+        self.assertLess(ver("1.4.30"), ver("v1.5.0-beta1"))
+        self.assertEqual(ver("1.4.30"), ver("v1.4.30"))
+        self.assertGreater(ver("2.0"), ver("1.9.9"))
+
+    def test_pick_setup_asset_prefers_tag_version(self):
+        pick = load_function("_pick_setup_asset")
+        data = {"tag_name": "v1.5.0", "assets": [
+            {"name": "KIVO-Setup-1.4.0.exe", "browser_download_url": "u-old"},
+            {"name": "KIVO-Setup-1.5.0.exe", "browser_download_url": "u-new"},
+            {"name": "KIVO.exe", "browser_download_url": "u-single"}]}
+        self.assertEqual(pick(data), ("u-new", "KIVO-Setup-1.5.0.exe"))
+        data2 = {"tag_name": "v9.9.9", "assets": [{"name": "KIVO-Setup-1.4.0.exe", "browser_download_url": "u-old"}]}
+        self.assertEqual(pick(data2), ("u-old", "KIVO-Setup-1.4.0.exe"))  # 没有同名时退回首个匹配
+        self.assertEqual(pick({"assets": []}), ("", ""))
+
+    def test_verify_update_sig_genuine_and_tampered(self):
+        import types
+        verify = _load_with_ns("_verify_update_sig", {})
+        fake_cls = types.SimpleNamespace(_UPDATE_PUBKEY_N=_TEST_RSA_N, _UPDATE_PUBKEY_E=65537)
+        sha = "a" * 64
+        good = _test_sign("KIVO-Setup-1.5.0.exe", "1.5.0", sha)
+        self.assertTrue(verify(fake_cls, "KIVO-Setup-1.5.0.exe", "1.5.0", sha, good))
+        self.assertFalse(verify(fake_cls, "KIVO-Setup-1.5.0.exe", "1.5.0", "b" * 64, good))  # 改哈希
+        self.assertFalse(verify(fake_cls, "KIVO-Setup-9.9.9.exe", "1.5.0", sha, good))       # 改文件名
+        self.assertFalse(verify(fake_cls, "KIVO-Setup-1.5.0.exe", "9.9.9", sha, good))       # 改版本
+        self.assertFalse(verify(fake_cls, "KIVO-Setup-1.5.0.exe", "1.5.0", sha, "AAAA"))     # 长度不对
+        self.assertFalse(verify(fake_cls, "KIVO-Setup-1.5.0.exe", "1.5.0", sha, ""))         # 空签名
+
+    def test_http_base_rejects_public_http(self):
+        http_base = load_function("_http_base")
+        self.assertEqual(http_base("http://localhost:11434/v1"), "http://localhost:11434/v1")
+        self.assertEqual(http_base("http://192.168.1.10:11434/v1"), "http://192.168.1.10:11434/v1")
+        self.assertEqual(http_base("https://api.example.com/v1"), "https://api.example.com/v1")
+        with self.assertRaises(RuntimeError):
+            http_base("http://api.example.com/v1")  # 公网 http 会明文送 API Key, 必须拒绝
+
+    def test_atomic_write_actually_fsyncs(self):
+        write = load_module_function("_atomic_write")
+        calls = []
+        real_fsync = os.fsync
+        os.fsync = lambda fd: calls.append(fd)
+        try:
+            with tempfile.TemporaryDirectory() as td:
+                target = os.path.join(td, "data.txt")
+                write(target, "payload")
+                with open(target, encoding="utf-8") as f: self.assertEqual(f.read(), "payload")
+        finally:
+            os.fsync = real_fsync
+        self.assertTrue(calls, "_atomic_write 必须 fsync 才能兑现断电不丢的承诺")
+
+    def test_language_files_share_ui_key_set(self):
+        import configparser
+        def ui_keys(fname):
+            cp = configparser.ConfigParser(strict=False, interpolation=None)
+            cp.optionxform = str
+            cp.read(ROOT / fname, encoding="utf-8-sig")
+            return set(cp["UI"].keys())
+        self.assertEqual(ui_keys("Chinese.ini"), ui_keys("English.ini"))
+
+    def _fake_import(self, td):
+        import types
+        fn = _load_with_ns("_import_backup", {"json": json, "BASE": td})
+        return fn, types.SimpleNamespace(_BACKUP_FILES=["records.json"])
+
+    def test_backup_import_rejects_oversized_entry(self):
+        with tempfile.TemporaryDirectory() as td:
+            zp = os.path.join(td, "big.zip")
+            with zipfile.ZipFile(zp, "w", zipfile.ZIP_DEFLATED) as z:
+                z.writestr("kivo_backup.json", json.dumps({"app": "KIVO", "version": "1"}))
+                z.writestr("records.json", " " * (65 * 1024 * 1024))  # 声明 65MB: 读之前就该被拒
+            fn, fake = self._fake_import(td)
+            with self.assertRaises(ValueError):
+                fn(fake, zp)
+
+    def test_backup_import_rejects_wrong_marker_app(self):
+        with tempfile.TemporaryDirectory() as td:
+            zp = os.path.join(td, "fake.zip")
+            with zipfile.ZipFile(zp, "w") as z:
+                z.writestr("kivo_backup.json", json.dumps({"app": "OTHER"}))
+                z.writestr("records.json", "[]")
+            fn, fake = self._fake_import(td)
+            with self.assertRaises(ValueError):
+                fn(fake, zp)
+
+    def test_backup_import_good_package_lands(self):
+        with tempfile.TemporaryDirectory() as td:
+            zp = os.path.join(td, "good.zip")
+            with zipfile.ZipFile(zp, "w") as z:
+                z.writestr("kivo_backup.json", json.dumps({"app": "KIVO", "version": "1"}))
+                z.writestr("records.json", '[{"text": "x", "locked": false}]')
+            fn, fake = self._fake_import(td)
+            fn(fake, zp)
+            with open(os.path.join(td, "records.json"), encoding="utf-8") as f:
+                self.assertIn('"text": "x"', f.read())
+
+    def test_hardening_source_guards(self):
+        atomic = ast.get_source_segment(SOURCE, next(n for n in ast.walk(ast.parse(SOURCE)) if isinstance(n, ast.FunctionDef) and n.name == "_atomic_write"))
+        self.assertIn("os.fsync", atomic)
+        imp = ast.get_source_segment(SOURCE, next(n for n in ast.walk(ast.parse(SOURCE)) if isinstance(n, ast.FunctionDef) and n.name == "_import_backup"))
+        self.assertIn("file_size", imp)  # 读之前先查声明大小
+        self.assertIn("dt.astimezone()", SOURCE)  # 约时间换算按目标日期取时区偏移
+
+
 if __name__ == "__main__":
     unittest.main()
