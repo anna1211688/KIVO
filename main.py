@@ -1013,6 +1013,7 @@ class App(tk.Tk):
         try: threading.Thread(target=self._gc_chat_images, daemon=True, name="kivo-image-gc").start()  # 清孤儿聊天图, 放后台别拖启动
         except Exception: pass
         if self.cfg.get("Config", "MiniFormSet", fallback="0") == "1": self.after(300, self.show_mini)  # 常显模式: 启动即显示迷你窗口
+        self._init_clipboard_watch()  # 后台剪贴板历史 (按设置开关)
         self.after(15, self._poll_ui_queue)  # 15ms 轮询: 热键动作最多等 15ms 就执行 (旧 60ms 每次按键先白等)
         self.protocol("WM_DELETE_WINDOW", self.on_close)
         self.bind("<Map>", self._on_main_map)  # 主窗口从托盘恢复显示时, 补刷隐藏期间标脏的列表
@@ -1897,6 +1898,12 @@ class App(tk.Tk):
         me.bind("<FocusOut>", lambda _e: self._save_mini_settings()); me.bind("<Return>", lambda _e: self._save_mini_settings())
         ttk.Checkbutton(mrow, text=self.t("mini_always", "常显 (不自动隐藏)"), variable=self.mini_always_var, command=self._save_mini_settings).pack(side="left", padx=6)
         ttk.Button(mfrm, text=self.t("mini_show_btn", "立即显示"), command=lambda: self.show_mini()).pack(anchor="w", padx=4, pady=(0, 4))
+        cwfrm = self._set_section(frm, self.t("set_clipwatch_frame", "剪贴板历史"))
+        self._clip_watch_var = tk.BooleanVar(value=getattr(self, "_clip_watch_on", False))
+        ttk.Checkbutton(cwfrm, text=self.t("clip_watch", "自动记录复制的文字到剪贴板历史"),
+                        variable=self._clip_watch_var, command=self._toggle_clip_watch).pack(anchor="w", padx=4, pady=4)
+        ttk.Label(cwfrm, text=self.t("clip_watch_note", "开启后每次复制的文字会自动加入列表（自动去重，单条上限 20 万字，最多 2000 条）；本程序自己的复制不会重复记录。关闭后停止自动记录，已有记录不受影响。"),
+                  foreground=self.UI_MUTED, wraplength=560, justify="left").pack(anchor="w", padx=4, pady=(0, 4))
         nfrm = self._set_section(frm, self.t("set_net_frame", "网络代理"))
         self._proxy_mode_var = tk.StringVar(value=(self.cfg.get("Network", "ProxyMode", fallback="system") or "system").strip())
         self._proxy_server_var = tk.StringVar(value=self.cfg.get("Network", "ProxyServer", fallback=""))
@@ -2893,8 +2900,55 @@ class App(tk.Tk):
             finally: u.CloseClipboard()
         except Exception: return False
     def clip_set(self, text):
+        self._mark_self_clip(text)  # 自己写的剪贴板不进自动历史
         if self._win32_set_clipboard_text(text): return
         self.clipboard_clear(); self.clipboard_append(text); self.update()
+    # ---------- 后台剪贴板历史 (v1.6.1): after 轮询, 可在设置里开关; 自动去重, 本程序自己的复制不记录 ----------
+    _CLIP_POLL_MS = 800
+    def _mark_self_clip(self, text):
+        """标记本程序自己写入的剪贴板内容, 下一次 tick 遇到它会跳过 (标记只消费一次)。"""
+        self._last_self_clip = text or ""
+    def _init_clipboard_watch(self):
+        self._clip_watch_on = False
+        self._clip_tick_scheduled = False
+        self._last_clip_sig = None
+        self._last_self_clip = None
+        if self.cfg.get("Config", "ClipWatch", fallback="1").strip() != "0":
+            self._start_clipboard_watch()
+    def _start_clipboard_watch(self):
+        self._clip_watch_on = True
+        if not getattr(self, "_clip_tick_scheduled", False):
+            self._clip_tick_scheduled = True
+            try: self.after(self._CLIP_POLL_MS, self._clipboard_tick)
+            except Exception: self._clip_tick_scheduled = False
+    def _stop_clipboard_watch(self):
+        self._clip_watch_on = False
+    def _toggle_clip_watch(self):
+        on = bool(self._clip_watch_var.get())
+        self.cfg.set("Config", "ClipWatch", "1" if on else "0")
+        self.save_config()
+        if on: self._start_clipboard_watch()
+        else: self._stop_clipboard_watch()
+        self.status.set(self.t("clip_watch_saved", "剪贴板历史设置已保存"))
+    def _clipboard_tick(self):
+        """定时读剪贴板: 新内容且非本程序写入则入队; 无论成功失败都续排下一次 (开关关闭时停止)。"""
+        self._clip_tick_scheduled = False
+        if getattr(self, "_clip_watch_on", False):
+            try:
+                content = (self.clip_get() or "").strip("\r\n")
+                self_clip = getattr(self, "_last_self_clip", None)
+                if self_clip is not None:
+                    self._last_self_clip = None  # 标记一次性消费
+                if content and content != getattr(self, "_last_clip_sig", None):
+                    is_self = bool(self_clip is not None and self_clip.strip("\r\n") == content)
+                    if not is_self:
+                        self.add_record(content)
+                    self._last_clip_sig = content
+            except Exception:
+                pass
+            self._clip_tick_scheduled = True
+            try: self.after(self._CLIP_POLL_MS, self._clipboard_tick)
+            except Exception: self._clip_tick_scheduled = False
     def separator(self):
         if self.custom_sep.get(): return self.custom_sep.get()
         return {"enter": "\n", "tab": "\t", "none": ""}.get(self.sep_var.get(), "\n")  # ini 被手改成怪值时回退回车, 不许 KeyError 把全部粘贴搞崩
@@ -7151,6 +7205,7 @@ try {
             elif lbl == self.t("clk_conv_zh", "只中文"): m = getattr(self, "_conv_msg_zh", "")
             else: m = getattr(self, "_conv_msg", "")
             if m:
+                self._mark_self_clip(m)
                 self.clipboard_clear(); self.clipboard_append(m)
                 self._conv_result.set(self.t("clk_conv_copied", "确认句已复制, 去粘贴发送吧") + f" ({lbl})")
         ttk.Button(crow, text=self.t("clk_conv_copy", "复制确认句"), command=_conv_copy).pack(side="left", padx=(8, 0))
@@ -7232,6 +7287,7 @@ try {
                     tp = self._wx_tip(res[0], res[1], res[2] if len(res) > 2 else "unknown")
                     if tp: parts.append(tp)
                 try:
+                    self._mark_self_clip("\n".join(parts))
                     self.clipboard_clear(); self.clipboard_append("\n".join(parts))
                     lb.config(text=self.t("clk_shared", "已复制"))
                     def restore():
@@ -7832,6 +7888,7 @@ try {
     def _tt_copy(self):
         t = self._tt_out.get("1.0", "end").strip()
         if t:
+            self._mark_self_clip(t)
             self.clipboard_clear(); self.clipboard_append(t)
             self._tt_status.set(self.t("tt_copied", "译文已复制"))
     # ---------- 迷你翻译窗 + 复制即译热键 (Jane 2026-11-27) ----------
@@ -7928,6 +7985,7 @@ try {
         s = self._mt_in.get("1.0", "end").strip(); d = self._mt_out.get("1.0", "end").strip()
         m = "\n".join(x for x in (s, d) if x) if both else d
         if m:
+            self._mark_self_clip(m)
             self.clipboard_clear(); self.clipboard_append(m)
             self._mt_status.set(self.t("tt_copied_both", "双语已复制 (原文+译文)") if both else self.t("tt_copied", "译文已复制"))
 
@@ -8003,7 +8061,9 @@ try {
         def cp(both):
             d = self._ct_tran.get("1.0", "end").strip()
             m = "\n".join(v for v in (orig, d) if v) if both else d
-            if m: self.clipboard_clear(); self.clipboard_append(m)
+            if m:
+                self._mark_self_clip(m)
+                self.clipboard_clear(); self.clipboard_append(m)
         ttk.Button(btns, text=self.t("tt_copy", "复制译文"), command=lambda: cp(False), style="Accent.TButton").pack(side="right", padx=2)
         ttk.Button(btns, text=self.t("tt_copy_both", "复制双语"), command=lambda: cp(True)).pack(side="right", padx=2)
         win.update_idletasks()
@@ -8033,6 +8093,7 @@ try {
         s = self._tt_in.get("1.0", "end").strip(); d = self._tt_out.get("1.0", "end").strip()
         both = "\n".join(x for x in (s, d) if x)
         if both:
+            self._mark_self_clip(both)
             self.clipboard_clear(); self.clipboard_append(both)
             self._tt_status.set(self.t("tt_copied_both", "双语已复制 (原文+译文)"))
     def _show_dl_panel(self):

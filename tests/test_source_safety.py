@@ -1289,3 +1289,127 @@ class UpdateFallbackTests(unittest.TestCase):
         self.assertIn("_probe_latest_tag", seg)
         self.assertIn("upd_fail_hint", seg)
         self.assertIn("for attempt_timeout in (10, 12)", seg)
+
+
+class ClipboardWatchTests(unittest.TestCase):
+    """v1.6.1 后台剪贴板历史: 外部复制入队、去重、本程序自写跳过、开关与续排。"""
+
+    @classmethod
+    def setUpClass(cls):
+        app_node = next(n for n in TREE.body if isinstance(n, ast.ClassDef) and n.name == "App")
+        ns = {}
+        wanted = ("_mark_self_clip", "_init_clipboard_watch", "_start_clipboard_watch",
+                  "_stop_clipboard_watch", "_toggle_clip_watch", "_clipboard_tick")
+        for name in wanted:
+            node = next(n for n in app_node.body if isinstance(n, ast.FunctionDef) and n.name == name)
+            exec(ast.get_source_segment(SOURCE, node), ns)
+        cls.ns = ns
+
+    def _make_stub(self, enabled=True):
+        holder = {"clip": ""}
+        added, after_calls, saved = [], [], []
+
+        class Stub:
+            _CLIP_POLL_MS = 800
+        for _name, _fn in self.ns.items():
+            if callable(_fn): setattr(Stub, _name, _fn)
+        s = Stub()
+        s._clip_watch_on = enabled
+        s._clip_tick_scheduled = False
+        s._last_clip_sig = None
+        s._last_self_clip = None
+        s.clip_get = lambda: holder["clip"]
+        s.add_record = lambda text: added.append(text)
+        s.after = lambda ms, fn: after_calls.append((ms, fn))
+        return s, holder, added, after_calls
+
+    def test_external_copy_recorded_and_rescheduled(self):
+        s, holder, added, after_calls = self._make_stub()
+        holder["clip"] = "hello world"
+        self.ns["_clipboard_tick"](s)
+        self.assertEqual(added, ["hello world"])
+        self.assertEqual(s._last_clip_sig, "hello world")
+        self.assertTrue(s._clip_tick_scheduled)
+        self.assertEqual(len(after_calls), 1)
+
+    def test_same_content_not_duplicated(self):
+        s, holder, added, _ = self._make_stub()
+        holder["clip"] = "same text"
+        self.ns["_clipboard_tick"](s)
+        self.ns["_clipboard_tick"](s)
+        self.assertEqual(added, ["same text"])
+
+    def test_self_clip_is_skipped_then_marker_consumed(self):
+        s, holder, added, _ = self._make_stub()
+        holder["clip"] = "internal copy"
+        self.ns["_mark_self_clip"](s, "internal copy")
+        self.ns["_clipboard_tick"](s)
+        self.assertEqual(added, [])
+        self.assertEqual(s._last_clip_sig, "internal copy")  # 签名仍记住, 后续不再处理
+        self.assertIsNone(s._last_self_clip)
+        self.ns["_clipboard_tick"](s)
+        self.assertEqual(added, [])
+
+    def test_empty_clipboard_no_record(self):
+        s, holder, added, after_calls = self._make_stub()
+        self.ns["_clipboard_tick"](s)
+        self.assertEqual(added, [])
+        self.assertEqual(len(after_calls), 1)  # 仍续排
+
+    def test_disabled_tick_does_not_reschedule(self):
+        s, holder, added, after_calls = self._make_stub(enabled=False)
+        holder["clip"] = "text while off"
+        self.ns["_clipboard_tick"](s)
+        self.assertEqual(added, [])
+        self.assertEqual(after_calls, [])
+
+    def test_start_guard_and_stop(self):
+        s, _, _, after_calls = self._make_stub()
+        self.ns["_start_clipboard_watch"](s)
+        self.assertTrue(s._clip_watch_on)
+        self.assertTrue(s._clip_tick_scheduled)
+        self.ns["_start_clipboard_watch"](s)  # 不重复排
+        self.assertEqual(len(after_calls), 1)
+        self.ns["_stop_clipboard_watch"](s)
+        self.assertFalse(s._clip_watch_on)
+
+    def test_toggle_persists_and_switches(self):
+        import configparser
+        s, _, _, _ = self._make_stub()
+        cfg = configparser.ConfigParser()
+        cfg.add_section("Config")
+        s.cfg = cfg
+        s.save_config = lambda: None
+        s.status = type("S", (), {"set": staticmethod(lambda *_a: None)})()
+        s.t = lambda key, zh: zh
+
+        class Var:
+            def __init__(self, v): self.v = v
+            def get(self): return self.v
+        s._clip_watch_var = Var(True)
+        self.ns["_toggle_clip_watch"](s)
+        self.assertEqual(cfg.get("Config", "ClipWatch"), "1")
+        self.assertTrue(s._clip_watch_on)
+        s._clip_watch_var = Var(False)
+        self.ns["_toggle_clip_watch"](s)
+        self.assertEqual(cfg.get("Config", "ClipWatch"), "0")
+        self.assertFalse(s._clip_watch_on)
+
+    def test_init_uses_config(self):
+        import configparser
+        s, _, _, after_calls = self._make_stub()
+        cfg = configparser.ConfigParser()
+        cfg.add_section("Config")
+        cfg.set("Config", "ClipWatch", "0")
+        s.cfg = cfg
+        self.ns["_init_clipboard_watch"](s)
+        self.assertFalse(s._clip_watch_on)
+        self.assertEqual(after_calls, [])
+        cfg.set("Config", "ClipWatch", "1")
+        self.ns["_init_clipboard_watch"](s)
+        self.assertTrue(s._clip_watch_on)
+        self.assertEqual(len(after_calls), 1)
+
+    def test_settings_checkbox_in_source(self):
+        self.assertIn('self.t("clip_watch",', SOURCE)
+        self.assertIn("def _toggle_clip_watch", SOURCE)
