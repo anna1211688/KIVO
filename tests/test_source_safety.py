@@ -4,7 +4,10 @@ These tests intentionally avoid importing the Tk application so they can run on
 CI hosts without a desktop session or the optional Windows dependencies.
 """
 import ast
+import json
 import os
+import re
+import time
 import pathlib
 import tempfile
 import unittest
@@ -50,7 +53,7 @@ def _helper_nodes():
 
 
 def _base_ns():
-    ns = {"os": os}
+    ns = {"os": os, "re": re, "json": json, "time": time}
     for node in _helper_nodes():
         exec(ast.get_source_segment(SOURCE, node), ns)
     return ns
@@ -868,6 +871,92 @@ class RecordQueueTests(unittest.TestCase):
         fn(s, ["新的一条"])
         self.assertEqual(len(s.records), 2000)  # 全锁定: 上限是硬线, 新条不入队
         self.assertTrue(all(r["locked"] for r in s.records))
+
+
+class RoundThreePolishTests(unittest.TestCase):
+    """第三轮 (2026-11-28): 版本号比较、备份导出非阻塞、截图目录自愈、长对话分帧"""
+
+    def test_patch_release_beats_base(self):
+        f = load_function("_ver_tuple")
+        self.assertGreater(f("1.5.0.1"), f("1.5.0"))          # 旧版 [:3] 截断会把补丁版判成相等 -> 不提示更新
+        self.assertGreater(f("v1.5.1"), f("1.5.0"))
+        self.assertGreater(f("1.10.0"), f("1.9.9"))           # 字符串比较会错, 逐位数字比较才对
+        self.assertEqual(f("1.5.0"), f("v1.5.0"))
+        self.assertEqual(f("1.5"), f("1.5.0"))
+
+    def test_prerelease_sorts_before_release(self):
+        f = load_function("_ver_tuple")
+        self.assertLess(f("1.5.0-beta1"), f("1.5.0"))
+        self.assertGreater(f("1.6.0"), f("1.5.0-beta9"))
+
+    def test_version_compare_used_by_update_check(self):
+        self.assertIn("self._ver_tuple(tag) > self._ver_tuple(VERSION)", SOURCE)
+
+    def test_backup_export_is_off_main_thread(self):
+        text = method_text("_backup_export_dialog")
+        self.assertIn("threading.Thread", text)
+        self.assertIn("_bak_busy", text)
+        self.assertIn("save_records(immediate=True)", text)   # 打包前仍要把最新数据刷盘
+
+    def test_backup_import_guards_and_prepaints(self):
+        text = method_text("_backup_import_dialog")
+        self.assertIn("update_idletasks()", text)
+        self.assertIn("_bak_busy", text)
+        self.assertEqual(text.count("askyesno"), 1)           # 只问一次
+
+    def test_refresh_shots_recreates_missing_dir(self):
+        text = method_text("refresh_shots")
+        self.assertIn("FileNotFoundError", text)
+        self.assertIn("makedirs", text)
+
+    def test_prune_shots_tolerates_vanished_files(self):
+        self.assertIn("getmtime", method_text("_prune_shots"))
+        self.assertIn("def _mtime", method_text("_prune_shots"))
+
+    def test_chat_history_renders_in_frames(self):
+        text = SOURCE.split("def render_all():", 1)[1][:2600]   # 嵌套在 AI 面板里, 不是 App 的直接方法
+        self.assertIn("_chat_render_gen", text)               # 代次守卫: 切对话时丢弃上一轮
+        self.assertIn("self.after(1", text)
+        self.assertIn("len(hist) <= 20", text)                 # 短对话仍同步一次画完
+        self.assertIn("pending_render", text)                  # 发送新消息前先冲刷, 保证气泡顺序
+
+
+class ChatImageGcTests(unittest.TestCase):
+    """孤儿聊天图片清理: 只删本程序命名、24 小时前、无对话引用的 jpg"""
+
+    def _run(self, refs, files):
+        fn = load_function("_gc_chat_images")
+        td = tempfile.mkdtemp()
+        self.addCleanup(lambda: __import__("shutil").rmtree(td, ignore_errors=True))
+        folder = os.path.join(td, "ai_chat_images"); os.makedirs(folder)
+        chats = os.path.join(td, "ai_chats.json")
+        with open(chats, "w", encoding="utf-8") as f:
+            json.dump(refs, f)
+        old = time.time() - 30 * 3600
+        for name, age in files.items():
+            p = os.path.join(folder, name)
+            with open(p, "wb") as f: f.write(b"x")
+            os.utime(p, (time.time() - age, time.time() - age))
+        fn.__globals__["BASE"] = td
+        fn.__globals__["AI_CHATS_PATH"] = chats
+        removed = fn(None)  # 方法里没用到 self: 传 None 即可
+        return removed, sorted(os.listdir(folder))
+
+    def test_orphan_old_image_removed(self):
+        kept, orphan = "a" * 32 + ".jpg", "b" * 32 + ".jpg"
+        n, left = self._run([{"messages": [{"image_path": "ai_chat_images/" + kept}]}],
+                            {kept: 30 * 3600, orphan: 30 * 3600})
+        self.assertEqual(n, 1)
+        self.assertEqual(left, [kept])
+
+    def test_recent_orphan_kept_as_grace(self):
+        orphan = "c" * 32 + ".jpg"
+        n, left = self._run([], {orphan: 60})
+        self.assertEqual((n, left), (0, [orphan]))
+
+    def test_foreign_files_untouched(self):
+        n, left = self._run([], {"note.txt": 30 * 3600, "README": 30 * 3600})
+        self.assertEqual((n, left), (0, ["README", "note.txt"]))
 
 
 if __name__ == "__main__":

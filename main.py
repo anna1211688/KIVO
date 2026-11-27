@@ -948,6 +948,8 @@ class App(tk.Tk):
         self.apply_hotkeys()
         self.apply_autorun()
         self._setup_tray()
+        try: threading.Thread(target=self._gc_chat_images, daemon=True, name="kivo-image-gc").start()  # 清孤儿聊天图, 放后台别拖启动
+        except Exception: pass
         if self.cfg.get("Config", "MiniFormSet", fallback="0") == "1": self.after(300, self.show_mini)  # 常显模式: 启动即显示迷你窗口
         self.after(15, self._poll_ui_queue)  # 15ms 轮询: 热键动作最多等 15ms 就执行 (旧 60ms 每次按键先白等)
         self.protocol("WM_DELETE_WINDOW", self.on_close)
@@ -1804,7 +1806,9 @@ class App(tk.Tk):
         预发布 (如 v1.5.0-beta1) 必须排在同号正式版之前 (2026-11-27 审查: 旧版对 beta 后缀无感, 会把测试版当正式版提示更新)。"""
         s = str(s or "").strip().lstrip("vV")
         main_part, _, pre = s.partition("-")
-        nums = [int(x) for x in re.findall(r"\d+", main_part)][:3]
+        # 保留全部数字段 (v1.5.1: 旧版 [:3] 截断, 发 v1.5.0.1 这类补丁版时与 v1.5.0 判等 -> 老版本永远不提示更新);
+        # 元组逐位比较时短的天然小于长的, 所以 1.5.0.1 > 1.5.0 > 1.5 正是想要的顺序
+        nums = [int(x) for x in re.findall(r"\d+", main_part)]
         nums += [0] * (3 - len(nums))
         if not pre: return tuple(nums + [1])
         pre_nums = [int(x) for x in re.findall(r"\d+", pre)]
@@ -2184,19 +2188,44 @@ class App(tk.Tk):
                                             defaultextension=".zip", filetypes=[("ZIP", "*.zip")],
                                             initialfile=f"KIVO_backup_{time.strftime('%Y%m%d')}.zip")
         if not path: return
+        if getattr(self, "_bak_busy", False):
+            self.status.set(self.t("bak_busy", "备份正在处理中, 稍等…")); return
         try:
             self.save_records(immediate=True); self.save_config()  # 先把最新数据刷盘再打包, 备份不落下刚加的记录
-            self._export_backup(path)
-            self.status.set(f"{self.t('bak_exported', '备份已导出')}: {path}")
-        except Exception as e:
-            messagebox.showerror(self.t("bak_done_title", "备份"), str(e), parent=self)
+        except Exception: pass
+        # 打包走后台: 备份要顺带压 ai_chat_images, 图多时同步压在主线程上界面会僵住好几秒 (2026-11-28)
+        self._bak_busy = True
+        self.status.set(self.t("bak_exporting", "正在导出备份…"))
+        def work():
+            err = None
+            try: self._export_backup(path)
+            except Exception as e: err = e
+            def done():
+                self._bak_busy = False
+                if err is None:
+                    self.status.set(f"{self.t('bak_exported', '备份已导出')}: {path}")
+                else:
+                    messagebox.showerror(self.t("bak_done_title", "备份"), str(err), parent=self)
+            try: self._ui_queue.put(done)  # 跨线程一律走 UI 队列: 后台线程直接调 Tk 的 after 不安全
+            except Exception: pass
+        threading.Thread(target=work, daemon=True, name="kivo-backup-export").start()
     def _backup_import_dialog(self):
         path = filedialog.askopenfilename(title=self.t("bak_import_title", "选择备份文件"), filetypes=[("ZIP", "*.zip")])
         if not path: return
         if not messagebox.askyesno(self.t("bak_done_title", "备份"), self.t("bak_confirm", "导入将覆盖当前的设置、记录、常用语和 AI 对话, 且软件会立即关闭 (不保存当前状态), 确定继续?"), parent=self): return
+        if getattr(self, "_bak_busy", False):
+            self.status.set(self.t("bak_busy", "备份正在处理中, 稍等…")); return
+        self._bak_busy = True
+        # 导入要解压+校验+事务落盘, 大备份要几秒; 先把提示画出来再干活, 别让界面像卡死
+        try:
+            self.status.set(self.t("bak_importing", "正在导入备份…"))
+            self.update_idletasks()
+        except Exception: pass
         try: self._import_backup(path)
         except Exception:
+            self._bak_busy = False
             messagebox.showerror(self.t("bak_done_title", "备份"), self.t("bak_bad_file", "不是有效的 KIVO 备份文件"), parent=self); return
+        self._bak_busy = False
         messagebox.showinfo(self.t("bak_done_title", "备份"), self.t("bak_imported", "备份已导入, 软件现在关闭; 重新打开 KIVO 即生效"), parent=self)
         self._quit_no_save()
     def _quit_no_save(self):
@@ -3054,17 +3083,31 @@ class App(tk.Tk):
         d = os.path.join(BASE, "shots"); os.makedirs(d, exist_ok=True); return d
     def refresh_shots(self):
         if not hasattr(self, "shots_list"): return
-        self.shots_list.delete(0, "end")
-        for f in sorted(os.listdir(self.shots_dir), reverse=True):
-            if f.lower().endswith((".png", ".gif")): self.shots_list.insert("end", f)
+        try: names = sorted(os.listdir(self.shots_dir), reverse=True)
+        except FileNotFoundError:
+            # 目录被用户/同步盘删掉: 自愈重建, 别让历史面板从此空白且每次刷新都抛一次
+            try: os.makedirs(self.shots_dir, exist_ok=True)
+            except Exception: pass
+            names = []
+        except Exception:
+            names = []
+        try: self.shots_list.delete(0, "end")
+        except Exception: return
+        for f in names:
+            if f.lower().endswith((".png", ".gif")):
+                try: self.shots_list.insert("end", f)
+                except Exception: return
     def _prune_shots(self):
         """历史截图只保留最近 HistoryMax 张 (默认 100), 多出的老图删掉防文件夹无限膨胀; 系统设置里改小上限时也立即调一次"""
         try: keep = int(self.cfg.get("Snip", "HistoryMax", fallback="100"))
         except Exception: keep = 100
         keep = max(1, keep)
         try:
+            def _mtime(p):
+                try: return os.path.getmtime(p)
+                except OSError: return 0  # 刚好被删/被占用: 排最旧, 后面 os.remove 失败也会吞掉
             files = sorted((os.path.join(self.shots_dir, f) for f in os.listdir(self.shots_dir)
-                            if (f.startswith("shot_") and f.endswith(".png")) or (f.startswith("gif_") and f.endswith(".gif"))), key=os.path.getmtime)
+                            if (f.startswith("shot_") and f.endswith(".png")) or (f.startswith("gif_") and f.endswith(".gif"))), key=_mtime)
             for p in files[:max(0, len(files) - keep)]:
                 try: os.remove(p)
                 except OSError: pass
@@ -5008,6 +5051,38 @@ try {
         if m > 1600: im = im.resize((max(1, round(w * 1600 / m)), max(1, round(h * 1600 / m))), Image.LANCZOS)
         buf = io.BytesIO(); im.save(buf, "JPEG", quality=82)
         return "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode("ascii")
+    def _gc_chat_images(self):
+        """清掉没有对话引用的聊天图片 (2026-11-28): 删/清空对话后 ai_chat_images 里的 jpg 就没人管了,
+        一张张堆下去既占磁盘又让备份打包越来越慢。只删 24 小时前的孤儿文件 (误删对话还留一天回收余地),
+        只认 32 位 hex.jpg 这种本程序生成的命名, 别的文件一律不碰; 任意一步出错就停, 绝不误删。"""
+        folder = os.path.join(BASE, "ai_chat_images")
+        try: names = os.listdir(folder)
+        except OSError: return 0
+        if not names: return 0
+        keep = set()
+        for p in (AI_CHATS_PATH, AI_CHATS_PATH + ".bak"):
+            try:
+                with open(p, "rb") as f: raw = f.read(10 * 1024 * 1024)
+                data = json.loads(raw.decode("utf-8"))
+            except Exception:
+                continue
+            if not isinstance(data, list): continue
+            for c in data:
+                if not isinstance(c, dict): continue
+                msgs = c.get("messages")
+                for m in msgs if isinstance(msgs, list) else []:
+                    ip = m.get("image_path") if isinstance(m, dict) else None
+                    if isinstance(ip, str) and ip: keep.add(os.path.basename(ip))
+        cutoff = time.time() - 24 * 3600
+        removed = 0
+        for n in names:
+            if not re.fullmatch(r"[0-9a-f]{32}\.jpg", n) or n in keep: continue
+            p = os.path.join(folder, n)
+            try:
+                if os.path.getmtime(p) > cutoff: continue
+                os.remove(p); removed += 1
+            except OSError: pass
+        return removed
     def _save_ai_chat_image(self, img):
         """Persist a chat image as a bounded JPEG and return a BASE-relative path."""
         import uuid
@@ -8259,15 +8334,50 @@ try {
                 try: lb.destroy()
                 except Exception: pass
                 last_regen["lbl"] = None
+        pending_render = {"flush": None}  # 长对话分帧渲染中: 发送新消息前要先把剩下没铺的旧消息补完, 否则新气泡会被挤到中间
         def render_all():
             last_regen["lbl"] = None
             for r in rows: r.destroy()
             rows.clear()
             if typing["row"] is not None:
                 typing["row"].destroy(); typing["row"] = None
-            hist = self._ai_chat_history
-            for i, m in enumerate(hist):
+            hist = list(self._ai_chat_history)
+            # 分帧渲染: 一次对话最多存 200 条, 每条要建气泡+量字宽+自动换行, 全量同步重建在长对话上要几百毫秒,
+            # 点开「AI 助手」就明显顿一下; 现在超过 20 条就分 8 条一帧铺, 短对话仍是同步一次画完 (行为不变)。
+            gen = getattr(self, "_chat_render_gen", 0) + 1
+            self._chat_render_gen = gen
+            pending_render["flush"] = None; self._chat_render_done = 0  # 上一次分帧的残留一律清掉, 只认这一轮
+            def _put(i):
+                m = hist[i]
                 add_bubble(m["role"], m["content"], with_regen=(m["role"] == "assistant" and i == len(hist) - 1), msg_ref=m)
+            def add_range(start):
+                if getattr(self, "_chat_render_gen", 0) != gen: return  # 期间又切了对话/重渲染: 丢弃这一轮
+                try:
+                    if not inner.winfo_exists(): return
+                except Exception: return
+                end = min(len(hist), start + 8)
+                for i in range(start, end): _put(i)
+                self._chat_render_done = end
+                if end < len(hist):
+                    try: self.after(1, lambda: add_range(end))
+                    except Exception: pass
+                else:
+                    pending_render["flush"] = None
+                    scroll_bottom()
+            def flush_pending():
+                """同步补完剩余旧消息 (只在「分帧渲染途中用户就发了消息」这种极小概率路径上走一次)"""
+                self._chat_render_gen = gen + 1  # 让已排队的下一帧失效, 避免重复铺
+                pending_render["flush"] = None
+                for i in range(getattr(self, "_chat_render_done", 0), len(hist)):
+                    try: _put(i)
+                    except Exception: break
+                scroll_bottom()
+            if len(hist) <= 20:
+                add_range(0)
+            else:
+                pending_render["flush"] = flush_pending
+                try: self.after(1, lambda: add_range(0))
+                except Exception: pending_render["flush"] = None; add_range(0)
             if not hist:
                 hint = tk.Label(inner, text=self.t("ai_hint", "有什么想问的, 在下面打字, 按回车发送。"), background=CHAT_BG,
                                 foreground=TXT_MUTED, font=self._ui_font(10))
@@ -8533,6 +8643,10 @@ try {
                     self.status.set(f"图片保存失败: {e}")
                     return
             inp.delete("1.0", "end")
+            f = pending_render.get("flush")
+            if f is not None:  # 长对话还没铺完就发了消息: 先把旧消息补完, 保证新气泡在最下面
+                try: f()
+                except Exception: pending_render["flush"] = None
             if rows and not self._ai_chat_history:
                 for r in rows: r.destroy()
                 rows.clear()
