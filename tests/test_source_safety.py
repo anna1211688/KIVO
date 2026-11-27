@@ -415,5 +415,33 @@ class GptAuditBatch1Tests(unittest.TestCase):
         self.assertIn('"max_filesize"', method_text("_build_dl_panel"))
 
 
+# ---- 2026-11-27 AI 助手第一批整改 (侧栏/气泡自适应/输入区/品牌色) 的守卫 ----
+
+class AiPanelBatch1Tests(unittest.TestCase):
+    def test_brand_accent_unified(self):
+        self.assertIn('UI_ACCENT = "#3B82F6"', SOURCE)
+        self.assertIn('UI_ACCENT_HOVER = "#60A5FA"', SOURCE)
+        self.assertIn('UI_ACCENT_PRESS = "#2563EB"', SOURCE)
+        self.assertNotIn('UI_ACCENT = "#287FD1"', SOURCE)
+
+    def test_ai_sidebar_224_blue_gray(self):
+        body = method_text("_build_ai_panel")
+        self.assertIn('SIDE_BG = "#F2F6FB"', body)
+        self.assertIn("width=224", body)
+
+    def test_bubble_width_adaptive(self):
+        body = method_text("_build_ai_panel")
+        self.assertIn("def _bubble_wrap_w", body)
+        self.assertIn("max(348, min(680", body)          # 折行宽夹在 [348, 680], 随聊天区宽度走
+        self.assertIn("wrap_px(text, _bubble_wrap_w())", body)
+        self.assertNotIn("wrap_px(text, 348)", body)     # 旧写死值不许回来
+
+    def test_input_area_taller(self):
+        body = method_text("_build_ai_panel")
+        self.assertIn("height=76", body)                 # 输入区画布 62 -> 76
+        self.assertIn("height=58", body)                 # 输入框窗口 44 -> 58
+        self.assertNotIn('inbox = tk.Canvas(brow, height=62', body)
+
+
 if __name__ == "__main__":
     unittest.main()
