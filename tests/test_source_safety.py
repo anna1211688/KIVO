@@ -464,7 +464,7 @@ class AiPanelBatch1Tests(unittest.TestCase):
 
     def test_ai_sidebar_224_blue_gray(self):
         body = method_text("_build_ai_panel")
-        self.assertIn('SIDE_BG = "#F2F6FB"', body)
+        self.assertIn('SIDE_BG = "#F7F9FD"', body)   # 2026-11-28: 会话列底色并入令牌, 与主内容底分层
         self.assertIn("width=224", body)
 
     def test_bubble_width_adaptive(self):
@@ -998,6 +998,41 @@ class UiRedesignPhase1Tests(unittest.TestCase):
     def test_list_rows_taller_and_softer_stripes(self):
         self.assertIn("rowheight=34", SOURCE)
         self.assertIn('UI_STRIPE = "#FAFBFE"', SOURCE)
+
+
+class UiRedesignPhase15Tests(unittest.TestCase):
+    """2026-11-28 全面统一 (P1.5): 行状态、空状态、旧色值清零"""
+
+    def test_list_rows_have_locked_and_hover_states(self):
+        body = method_text("build_ui")
+        self.assertIn('tag_configure("locked", foreground=self.UI_MUTED_2)', body)
+        self.assertIn('tag_configure("hover", background=self.UI_ACCENT_TINT)', body)
+        self.assertIn("self._bind_list_hover()", body)
+
+    def test_row_tags_helper_used_everywhere(self):
+        self.assertNotIn('tags=("odd",) if row % 2 else ()', SOURCE)   # 三处插入点都必须走 helper
+        self.assertIn("def _row_tags(self, row, locked):", SOURCE)
+        self.assertEqual(SOURCE.count("tags=self._row_tags("), 3)
+
+    def test_hover_does_not_touch_selection(self):
+        seg = SOURCE[SOURCE.find("def _bind_list_hover"):SOURCE.find("def _update_empty_state")]
+        self.assertIn('self.listbox.bind("<Motion>"', seg)
+        self.assertIn('t != "hover"', seg)          # 只摘 hover, 不动 odd/locked
+        self.assertNotIn("selection_set", seg)
+
+    def test_empty_state_created_and_toggled(self):
+        self.assertIn("self._empty_state = tk.Frame(mid, background=W)", method_text("build_ui"))
+        self.assertIn('empty_rec_title', SOURCE)
+        body = method_text("refresh_list")
+        self.assertEqual(body.count("self._update_empty_state()"), 2)   # 隐藏分支 + 正常分支都要刷新
+
+    def test_old_palette_literals_gone(self):
+        for legacy in ('"#5B6B7C"', '"#1C2634"', '"#1E90FF"', '"#0B3556"', '"#2F4B73"'):
+            self.assertNotIn(legacy, SOURCE, legacy)
+
+    def test_check_indicator_uses_brand_blue(self):
+        self.assertIn("(59, 130, 246, 255)", SOURCE)   # 勾选圆点 = 品牌蓝, 不再是绿色第二主色
+        self.assertNotIn("(34, 181, 115, 255)", SOURCE)
 
 
 if __name__ == "__main__":
