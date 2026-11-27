@@ -1458,3 +1458,36 @@ class QuickPanelTests(unittest.TestCase):
         self.assertIn('"QuickPanelKey"', SOURCE)
         self.assertIn('"QuickPanelKey": "F12"', SOURCE)
         self.assertIn("def open_quick_panel", SOURCE)
+
+
+class SelectAiTests(unittest.TestCase):
+    """v1.6.2 划词 AI: 提示词构造、动作集与热键注册。"""
+
+    @classmethod
+    def setUpClass(cls):
+        app_node = next(n for n in TREE.body if isinstance(n, ast.ClassDef) and n.name == "App")
+        cls.ns = {}
+        for name in ("_select_ai_prompt", "select_ai_hotkey", "_select_ai_capture",
+                     "_select_ai_show", "_select_ai_run"):
+            node = next(n for n in app_node.body if isinstance(n, ast.FunctionDef) and n.name == name)
+            exec(ast.get_source_segment(SOURCE, node), cls.ns)
+
+    def test_prompts(self):
+        f = self.ns["_select_ai_prompt"]
+        p_zh = f(object(), "trans", "你好世界")
+        self.assertIn("英文", p_zh); self.assertIn("你好世界", p_zh)
+        p_en = f(object(), "trans", "hello world")
+        self.assertIn("中文", p_en)
+        for action in ("polish", "summary", "explain", "tone"):
+            p = f(object(), action, "测试内容")
+            self.assertIn("测试内容", p)
+
+    def test_actions_and_hotkey(self):
+        self.assertEqual(len(AppStub()._SELECT_AI_ACTIONS), 5)
+        self.assertIn('"SelectAiKey": "ctrl+alt+a"', SOURCE)
+        self.assertIn("def select_ai_hotkey", SOURCE)
+
+
+class AppStub:
+    _SELECT_AI_ACTIONS = (("trans", "翻译"), ("polish", "润色"), ("summary", "总结"),
+                          ("explain", "解释"), ("tone", "换语气"))

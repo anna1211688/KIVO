@@ -1128,7 +1128,7 @@ class App(tk.Tk):
         hk_defaults = {f"HotKey{i}": "无" for i in range(13)}; hk_defaults.update(DEFAULT_HOTKEYS)
         defaults_dict = {"Config": {"SleepTime": "80", "WaveSet": "0", "AutoRun": "0", "Language": "Chinese", "PasteEnter": "0", "PasteRemove": "1",
                                     "MiniFormTime": "5", "MiniFormSet": "0", "AddChar": "1", "LetterSet": "0", "ShowHotKey": "F2",
-                                    "QuickPanelKey": "F12"},
+                                    "QuickPanelKey": "F12", "SelectAiKey": "ctrl+alt+a"},
                          "HotKey": hk_defaults, "Snip": dict(DEFAULT_SNIP_KEYS),
                          "OCHotKey": {"HotKey": "无", "OCAutoSet": "0"}}
         def _fresh():
@@ -3295,6 +3295,7 @@ class App(tk.Tk):
         # (section, key, 显示名, 动作)
         return [("Config", "ShowHotKey", self.t("hk_show_main", "唤出主窗口"), self.toggle_main_window),
                 ("Config", "QuickPanelKey", self.t("hk_quick_panel", "快捷面板"), self.open_quick_panel),
+                ("Config", "SelectAiKey", self.t("hk_select_ai", "划词 AI"), self.select_ai_hotkey),
                 ("HotKey", "HotKey1", self.t("hk_select_all", "全选"), self.act_select_all),
                 ("HotKey", "HotKey2", self.t("hk_cut", "剪切"), self.act_cut),
                 ("HotKey", "HotKey3", self.t("hk_copy", "复制"), self.act_copy),
@@ -10087,6 +10088,112 @@ try {
                 self._send_combo(0x56)  # 模拟 Ctrl+V 粘到当前前台窗口
             except Exception: pass
         self.after(150, do_paste)
+
+    # ---------- 划词 AI (v1.6.2): 全局热键捕获选中文字, 光标处浮窗, 翻译/润色/总结/解释/换语气 ----------
+    _SELECT_AI_ACTIONS = (
+        ("trans", "翻译"), ("polish", "润色"), ("summary", "总结"),
+        ("explain", "解释"), ("tone", "换语气"))
+    def _select_ai_prompt(self, action, text):
+        if action == "trans":
+            cjk = sum(1 for ch in text if "\u4e00" <= ch <= "\u9fff")
+            target = "英文" if cjk else "中文"
+            return f"把下面的内容翻译成{target}, 只输出译文, 不要解释:\n\n{text}"
+        if action == "polish":
+            return "请润色下面的内容, 保持原语言和原意, 只输出润色后的文字:\n\n" + text
+        if action == "summary":
+            return "请用简短的几句话总结下面内容的要点, 保持原语言:\n\n" + text
+        if action == "explain":
+            return "请用通俗易懂的方式解释下面的内容, 保持原语言:\n\n" + text
+        return "请把下面的内容改写得更自然、更友好, 保持原意和原语言, 只输出改写后的文字:\n\n" + text
+    def select_ai_hotkey(self):
+        if getattr(self, "_select_ai_busy", False): return
+        self._select_ai_busy = True
+        def work():
+            text = self._select_ai_capture()
+            self._ui_queue.put(lambda: self._select_ai_show(text))
+        threading.Thread(target=work, daemon=True).start()
+    def _select_ai_capture(self):
+        """后台: 记住原剪贴板, 发 Ctrl+C 捕获选区, 读完后还原原剪贴板, 不破坏用户剪贴板内容。"""
+        previous = self.clip_get()
+        if not self._foreground_is_self():
+            before_seq = self._clip_sequence()
+            self._send_combo(0x43)
+            deadline = time.time() + 0.8
+            while time.time() < deadline:
+                seq = self._clip_sequence()
+                if seq is not None and before_seq is not None and seq != before_seq: break
+                if self.clip_get() != previous: break
+                time.sleep(0.02)
+        text = self.clip_get() or ""
+        if previous and previous != text:
+            self._mark_self_clip(previous)
+            self.clip_set(previous)  # 还原用户原剪贴板
+        return text.strip()
+    def _cursor_xy(self):
+        if sys.platform != "win32": return 200, 200
+        try:
+            class PT(ctypes.Structure):
+                _fields_ = [("x", ctypes.c_long), ("y", ctypes.c_long)]
+            p = PT()
+            ctypes.windll.user32.GetCursorPos(ctypes.byref(p))
+            return p.x, p.y
+        except Exception:
+            return 200, 200
+    def _select_ai_show(self, text):
+        self._select_ai_busy = False
+        if not text:
+            self.toast(self.t("select_ai_empty", "先选中文字再使用划词 AI"), ms=1800); return
+        win = tk.Toplevel(self)
+        win.overrideredirect(True); win.attributes("-topmost", True)
+        win.configure(background=self.UI_BORDER_STRONG)
+        card = tk.Frame(win, bg=self.UI_SURFACE); card.pack(fill="both", expand=True, padx=1, pady=1)
+        cx, cy = self._cursor_xy()
+        sw, sh = win.winfo_screenwidth(), win.winfo_screenheight()
+        w, h = 360, 200
+        x = min(max(10, cx + 12), sw - w - 10); y = min(max(10, cy + 12), sh - h - 10)
+        win.geometry(f"{w}x{h}+{x}+{y}")
+        tk.Label(card, text=self.t("select_ai_title", "划词 AI"), font=self._ui_font(10, True),
+                 bg=self.UI_SURFACE, fg=self.UI_TEXT).pack(anchor="w", padx=12, pady=(10, 4))
+        brow = tk.Frame(card, bg=self.UI_SURFACE); brow.pack(fill="x", padx=10)
+        state = {"text": text, "busy": False}
+        for action, label in self._SELECT_AI_ACTIONS:
+            ttk.Button(brow, text=label, style="Small.TButton",
+                       command=lambda a=action: self._select_ai_run(win, state, a)).pack(
+                           side="left", padx=3, pady=2)
+        body = tk.Frame(card, bg=self.UI_SURFACE); body.pack(fill="both", expand=True, padx=12, pady=8)
+        state["body"] = body
+        res_lb = tk.Label(body, text=text[:120], font=self._ui_font(10), bg=self.UI_SURFACE,
+                          fg=self.UI_MUTED, justify="left", wraplength=320)
+        res_lb.pack(anchor="w")
+        state["res_lb"] = res_lb
+        win.bind("<Escape>", lambda e: win.destroy())
+        win.bind("<FocusOut>", lambda e: win.destroy())
+        win.focus_set()
+    def _select_ai_run(self, win, state, action):
+        if state["busy"]: return
+        state["busy"] = True
+        state["res_lb"].configure(text=self.t("select_ai_working", "AI 处理中…"), fg=self.UI_MUTED)
+        prompt = self._select_ai_prompt(action, state["text"])
+        def work():
+            try:
+                answer = self._ai_chat_messages(
+                    [{"role": "user", "content": prompt}], temperature=0.3, max_tokens=800, timeout=30)
+                def done():
+                    state["busy"] = False
+                    state["res_lb"].configure(text=answer, fg=self.UI_TEXT)
+                    self._select_ai_add_copy(win, state["body"], answer)
+            except Exception as e:
+                err = str(e)
+                def done():
+                    state["busy"] = False
+                    state["res_lb"].configure(text=err, fg=self.UI_DANGER)
+            self._ui_queue.put(done)
+        threading.Thread(target=work, daemon=True).start()
+    def _select_ai_add_copy(self, win, parent, text):
+        if getattr(parent, "_copy_btn", None) is not None: return
+        btn = ttk.Button(parent, text=self.t("select_ai_copy", "复制结果"), style="Small.TButton",
+                         command=lambda: (self.clip_set(text), win.destroy()))
+        btn.pack(anchor="w", pady=(6, 0)); parent._copy_btn = btn
 
     def _show_main(self):
         self.deiconify(); self.lift()
