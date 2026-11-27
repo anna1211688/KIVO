@@ -2017,3 +2017,48 @@ class ContinueAfterStopTests(unittest.TestCase):
         text = ast.get_source_segment(SOURCE, node)
         self.assertNotIn("self._ai_chat_history.pop()", text)
         self.assertIn('msg["content"] = base', text)
+
+
+class ChatSearchAndTitleTests(unittest.TestCase):
+    """v1.6.3 AI-7: 跨对话搜索与自动标题。"""
+
+    def setUp(self):
+        self.chats = [
+            {"id": 1, "title": "项目排期", "messages": [
+                {"role": "user", "content": "下周的里程碑怎么安排"},
+                {"role": "assistant", "content": "建议先对齐需求"}]},
+            {"id": 2, "title": "Python 报错", "messages": [
+                {"role": "user", "content": "ImportError 怎么解决"},
+                {"role": "assistant", "content": "检查依赖路径"}]},
+            {"id": 3, "title": "周末计划", "messages": [
+                {"role": "user", "content": "去爬山还是看电影"}]}]
+
+    def test_search_by_title(self):
+        f = load_function("_search_chats")
+        self.assertEqual([c["id"] for c in f(self.chats, "python")], [2])  # 大小写不敏感
+        self.assertEqual([c["id"] for c in f(self.chats, "排期")], [1])
+
+    def test_search_by_content(self):
+        f = load_function("_search_chats")
+        self.assertEqual([c["id"] for c in f(self.chats, "Importerror")], [2])
+        self.assertEqual([c["id"] for c in f(self.chats, "爬山")], [3])
+
+    def test_empty_query_returns_all(self):
+        f = load_function("_search_chats")
+        self.assertEqual(len(f(self.chats, "")), 3)
+        self.assertEqual(len(f(self.chats, "   ")), 3)
+
+    def test_no_match(self):
+        f = load_function("_search_chats")
+        self.assertEqual(f(self.chats, "量子计算"), [])
+
+    def test_auto_title_default_on_and_wiring(self):
+        self.assertIn("def _auto_title_on", SOURCE)
+        self.assertIn('"AutoTitle", fallback="1"', SOURCE)
+        self.assertIn("def _generate_chat_title", SOURCE)
+        self.assertIn("def _maybe_auto_title", SOURCE)
+        self.assertIn('entry["auto_titled"] = 1', SOURCE)
+        self.assertIn("return title[:12]", SOURCE)
+        # 搜索框接线
+        self.assertIn("ai_chat_search", SOURCE)
+        self.assertIn("def _search_chats", SOURCE)
