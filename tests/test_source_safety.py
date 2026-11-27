@@ -301,7 +301,9 @@ class HardeningTests(unittest.TestCase):
         self.assertIn('os.path.getsize(candidate) <= 8 * 1024 * 1024', restore)
 
     def test_regenerate_uses_saved_image_history(self):
-        body = SOURCE[SOURCE.index("        def regenerate():", SOURCE.index("def ai_chat")):SOURCE.index("        def clear():", SOURCE.index("        def regenerate():", SOURCE.index("def ai_chat")))]
+        start = SOURCE.index("        def regenerate():")
+        end = SOURCE.index("        def clear():", start)
+        body = SOURCE[start:end]
         self.assertIn("request_reply()", body)
         self.assertNotIn("request_reply(img=", body)
 
