@@ -1669,3 +1669,29 @@ class PomodoroTests(unittest.TestCase):
         self.assertIn("def open_pomodoro", SOURCE)
         self.assertIn("self.open_pomodoro", SOURCE)
         self.assertIn("def _pomo_advance", SOURCE)
+
+
+class WindowManagerTests(unittest.TestCase):
+    """v1.6.2 窗口管理: 方法完整性、Win32 常量与导航接线。"""
+
+    def test_methods_present(self):
+        app_node = next(n for n in TREE.body if isinstance(n, ast.ClassDef) and n.name == "App")
+        names = {n.name for n in app_node.body if isinstance(n, ast.FunctionDef)}
+        for name in ("_win_foreground_hwnd", "_win_toggle_topmost", "_win_set_opacity",
+                     "_win_work_area", "_win_snap", "open_window_manager",
+                     "_show_winman_panel", "_winman_track"):
+            self.assertIn(name, names)
+
+    def test_win32_constants(self):
+        # 置顶/分层/工作区等关键常量写对
+        self.assertIn("HWND_TOPMOST, HWND_NOTOPMOST = -1, -2", SOURCE)
+        self.assertIn("GWL_EXSTYLE, WS_EX_LAYERED = -20, 0x80000", SOURCE)
+        self.assertIn("0x0030", SOURCE)  # SPI_GETWORKAREA
+        self.assertIn("SetLayeredWindowAttributes", SOURCE)
+
+    def test_nav_and_tracker(self):
+        self.assertIn("self.open_window_manager", SOURCE)
+        self.assertIn("def _winman_track", SOURCE)
+        self.assertIn('self._winman_track(True)', SOURCE)
+        # 非 Windows 平台必须安全降级
+        self.assertIn('if sys.platform != "win32": return None', SOURCE)

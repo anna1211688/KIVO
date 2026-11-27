@@ -1508,6 +1508,7 @@ class App(tk.Tk):
         _nav("dl", self.t("media_dl", "无水印下载"), "download", self.open_media_dl)
         _nav("dev", self.t("dev_title", "开发者工具箱"), "star", self.open_dev_tools)
         _nav("pomo", self.t("pomo_title", "番茄钟"), "clock", self.open_pomodoro)
+        _nav("winman", self.t("wm_title", "窗口管理"), "gear", self.open_window_manager)
         # 边栏底部: 版本 (最底) + 设置 + 分隔线 (side=bottom 先包的贴最底)
         tk.Label(side, text=f"v{VERSION} · © KIVO", font=self._ui_font(8), background=SIDE, foreground=self.UI_MUTED).pack(side="bottom", anchor="w", padx=18, pady=(0, 10))
         _set_it = _NavItem(side, text=self.t("system_settings", "设置"), command=self.open_system_settings, font=self._ui_font(10), bg=SIDE, image=self._nav_icon("gear"), palette=_nav_pal)
@@ -1877,7 +1878,7 @@ class App(tk.Tk):
             self._build_settings_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -2279,7 +2280,7 @@ class App(tk.Tk):
             self._build_selfcheck_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -2544,7 +2545,7 @@ class App(tk.Tk):
             self._build_phrases_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_dev_panel", "_pomo_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_dev_panel", "_pomo_panel", "_winman_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -6819,7 +6820,7 @@ try {
             self._build_calc_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_phrases_panel", "_clock_panel", "_dl_panel", "_dev_panel", "_pomo_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_phrases_panel", "_clock_panel", "_dl_panel", "_dev_panel", "_pomo_panel", "_winman_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -7142,7 +7143,7 @@ try {
             self._build_clock_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_dl_panel", "_dev_panel", "_pomo_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_dl_panel", "_dev_panel", "_pomo_panel", "_winman_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -7408,7 +7409,7 @@ try {
             self._build_clockset_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -7819,7 +7820,7 @@ try {
             self._build_texttrans_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_clock_panel", "_dl_panel", "_dev_panel", "_pomo_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_clock_panel", "_dl_panel", "_dev_panel", "_pomo_panel", "_winman_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -8143,7 +8144,7 @@ try {
             self._build_dl_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_clock_panel", "_dev_panel", "_pomo_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_clock_panel", "_dev_panel", "_pomo_panel", "_winman_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -9856,7 +9857,7 @@ try {
             self._build_gallery_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -10631,7 +10632,7 @@ try {
             self._build_pomo_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -10728,6 +10729,139 @@ try {
         if not p["running"]:
             self._pomo_reset()
         self.toast(self.t("pomo_saved", "已应用"), ms=1500)
+
+    # ---------- 窗口管理 (v1.6.2): 前台窗口置顶/半透明/左右分屏/居中 (Win32 ctypes) ----------
+    def _win_foreground_hwnd(self):
+        if sys.platform != "win32": return None
+        try:
+            hwnd = ctypes.windll.user32.GetForegroundWindow()
+            return hwnd or None
+        except Exception:
+            return None
+    def _target_manage_hwnd(self):
+        """操作目标: 优先当前前台窗口; 前台是自己时用最近记录的外部窗口。"""
+        hwnd = self._win_foreground_hwnd()
+        if hwnd and not self._foreground_is_self(): return hwnd
+        return getattr(self, "_last_foreign_hwnd", None)
+    def _win_toggle_topmost(self, hwnd):
+        u32 = ctypes.windll.user32
+        GWL_EXSTYLE, WS_EX_TOPMOST = -20, 0x8
+        ex = u32.GetWindowLongW(hwnd, GWL_EXSTYLE)
+        on = not (ex & WS_EX_TOPMOST)
+        HWND_TOPMOST, HWND_NOTOPMOST = -1, -2
+        SWP = 0x0001 | 0x0002 | 0x0010 | 0x0040  # NOSIZE/NOMOVE/SHOWWINDOW/NOACTIVATE
+        u32.SetWindowPos(hwnd, HWND_TOPMOST if on else HWND_NOTOPMOST, 0, 0, 0, 0, SWP)
+        return on
+    def _win_set_opacity(self, hwnd, alpha):
+        """alpha 0-255; 255 = 完全不透明 (摘掉 layered 样式)。"""
+        u32 = ctypes.windll.user32
+        GWL_EXSTYLE, WS_EX_LAYERED = -20, 0x80000
+        ex = u32.GetWindowLongW(hwnd, GWL_EXSTYLE)
+        if alpha >= 255:
+            u32.SetWindowLongW(hwnd, GWL_EXSTYLE, ex & ~WS_EX_LAYERED)
+            return
+        if not (ex & WS_EX_LAYERED):
+            u32.SetWindowLongW(hwnd, GWL_EXSTYLE, ex | WS_EX_LAYERED)
+        u32.SetLayeredWindowAttributes(hwnd, 0, int(alpha), 0x2)  # LWA_ALPHA
+    def _win_work_area(self, hwnd):
+        """返回 hwnd 所在显示器的工作区 (x0,y0,x1,y1); 取不到时用主显示器 SPI_GETWORKAREX。"""
+        class RECT(ctypes.Structure):
+            _fields_ = [("left", ctypes.c_long), ("top", ctypes.c_long),
+                        ("right", ctypes.c_long), ("bottom", ctypes.c_long)]
+        u32 = ctypes.windll.user32
+        try:
+            MONITOR_DEFAULTTONEAREST = 2
+            class MONINFO(ctypes.Structure):
+                _fields_ = [("cbSize", ctypes.c_ulong), ("rcMonitor", RECT),
+                            ("rcWork", RECT), ("dwFlags", ctypes.c_ulong)]
+            mon = u32.MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST)
+            mi = MONINFO(); mi.cbSize = ctypes.sizeof(MONINFO)
+            u32.GetMonitorInfoW(mon, ctypes.byref(mi))
+            r = mi.rcWork
+            return r.left, r.top, r.right, r.bottom
+        except Exception:
+            r = RECT()
+            u32.SystemParametersInfoW(0x0030, 0, ctypes.byref(r), 0)  # SPI_GETWORKAREA
+            return r.left, r.top, r.right, r.bottom
+    def _win_move(self, hwnd, x, y, w, h):
+        SWP_SHOW = 0x0040
+        ctypes.windll.user32.SetWindowPos(hwnd, 0, int(x), int(y), int(w), int(h), SWP_SHOW)
+    def _win_snap(self, hwnd, side):
+        x0, y0, x1, y1 = self._win_work_area(hwnd)
+        full_w, full_h = x1 - x0, y1 - y0
+        half_w = full_w // 2
+        if side == "left":
+            self._win_move(hwnd, x0, y0, full_w - half_w, full_h)
+        elif side == "right":
+            self._win_move(hwnd, x0 + half_w, y0, full_w - half_w, full_h)
+        else:  # center
+            self._win_move(hwnd, x0 + half_w // 2, y0 + full_h // 4, half_w, full_h // 2)
+    def open_window_manager(self):
+        self._nav_show("winman")
+        self._show_winman_panel()
+    def _show_winman_panel(self):
+        self._texttrans_on_hide()
+        if getattr(self, "_winman_panel", None) is None:
+            self._build_winman_panel()
+        try: self._body.pack_forget()
+        except Exception: pass
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel",
+                     "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel"):
+            p = getattr(self, attr, None)
+            if p is not None:
+                try: p.pack_forget()
+                except Exception: pass
+        self._ai_view_on = False
+        self._forget_aux_panels()
+        self._winman_panel.pack(fill="both", expand=True, before=self._status_sep)
+        self._winman_track(True)
+    def _build_winman_panel(self):
+        panel = tk.Frame(self._content, background=self.UI_BG); self._winman_panel = panel
+        head = tk.Frame(panel, background=self.UI_BG); head.pack(fill="x", padx=14, pady=(10, 4))
+        self._panel_title(head, self.t("wm_title", "窗口管理"), "gear")
+        back = tk.Label(head, text=self.t("cmn_back", "返回"), font=self._ui_font(9),
+                        background=self.UI_BG, foreground=self.UI_MUTED, cursor="hand2")
+        back.pack(side="right"); back.bind("<Button-1>", lambda e: (self._winman_track(False), self._show_main_view()))
+        self._last_foreign_hwnd = None
+        hint = tk.Label(panel, text=self.t("wm_hint", "先点一下要管理的窗口（让它在前台），再回来点下面的按钮；按钮作用于最近使用的外部窗口。"),
+                        bg=self.UI_BG, fg=self.UI_MUTED, font=self._ui_font(10), wraplength=520, justify="left")
+        hint.pack(anchor="w", padx=18, pady=(6, 8))
+        card = tk.Frame(panel, bg=self.UI_BG); self._rounded_backing(card)
+        card.pack(fill="x", padx=18, pady=(0, 16))
+        def act(fn):
+            def go():
+                hwnd = self._target_manage_hwnd()
+                if not hwnd:
+                    self.toast(self.t("wm_no_target", "没有可管理的窗口"), ms=1800); return
+                try: fn(hwnd)
+                except Exception:
+                    self.toast(self.t("wm_fail", "操作失败"), ms=1800)
+            return go
+        rows = [
+            [(self.t("wm_topmost", "置顶切换"), act(lambda h: self._win_toggle_topmost(h))),
+             (self.t("wm_op80", "半透明 80%"), act(lambda h: self._win_set_opacity(h, 204))),
+             (self.t("wm_op60", "半透明 60%"), act(lambda h: self._win_set_opacity(h, 153))),
+             (self.t("wm_opaque", "恢复不透明"), act(lambda h: self._win_set_opacity(h, 255)))],
+            [(self.t("wm_left", "左半屏"), act(lambda h: self._win_snap(h, "left"))),
+             (self.t("wm_right", "右半屏"), act(lambda h: self._win_snap(h, "right"))),
+             (self.t("wm_center", "居中"), act(lambda h: self._win_snap(h, "center")))]]
+        for r in rows:
+            fr = tk.Frame(card, bg=self.UI_SURFACE); fr.pack(fill="x", padx=14, pady=8)
+            for txt, cmd in r:
+                ttk.Button(fr, text=txt, style="Small.TButton", command=cmd).pack(side="left", padx=5)
+    def _winman_track(self, on):
+        """面板打开时轮询记录最近的外部前台窗口, 按钮才有目标。"""
+        if getattr(self, "_wm_track_after", None):
+            try: self.after_cancel(self._wm_track_after)
+            except Exception: pass
+            self._wm_track_after = None
+        if not on: return
+        def poll():
+            hwnd = self._win_foreground_hwnd()
+            if hwnd and not self._foreground_is_self():
+                self._last_foreign_hwnd = hwnd
+            self._wm_track_after = self.after(1200, poll)
+        poll()
 
     def _show_main(self):
         self.deiconify(); self.lift()
