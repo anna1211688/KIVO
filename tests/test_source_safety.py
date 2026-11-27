@@ -465,5 +465,70 @@ class ModelCenterFixTests(unittest.TestCase):
         self.assertIn("Bearer ***", body)
 
 
+# ---- 2026-11-27 AI 第二批: 长期记忆 + PDF/Word/Excel 附件解析 ----
+
+class AiMemoryAndFilesTests(unittest.TestCase):
+    def test_memory_system_text(self):
+        fn = load_function("_memory_system_text")
+        self.assertEqual(fn([], "HEAD"), "")
+        self.assertEqual(fn([{"text": "喜欢简洁回复"}], "HEAD"), "HEAD\n- 喜欢简洁回复")
+        big = fn([{"text": "x" * 600}] * 20, "HEAD")
+        self.assertLessEqual(len(big), 4000)
+
+    def test_memory_wiring(self):
+        self.assertIn('"ai_memory.json"', SOURCE)                       # 进备份清单
+        panel = method_text("_build_ai_panel")
+        self.assertIn("_memory_system_text", panel)                     # 聊天时注入
+        self.assertIn('"role": "system"', panel)
+        self.assertIn("_open_ai_memory_window", panel)                  # 顶栏有管理入口
+
+    def test_pdf_extract(self):
+        import zlib
+        fn = load_module_function("_extract_pdf_text")
+        fn.__globals__["_pdf_decode_text"] = load_module_function("_pdf_decode_text")
+        fn.__globals__["_pdf_unescape_literal"] = load_module_function("_pdf_unescape_literal")
+        content = b"BT /F1 12 Tf (Hello KIVO) Tj ET\n<FEFF4F60> Tj"
+        pdf = b"%PDF-1.4\nstream\n" + zlib.compress(content) + b"\nendstream\n%%EOF"
+        text = fn(pdf)
+        self.assertIn("Hello KIVO", text)
+        self.assertIn("你", text)                                       # UTF-16BE 十六进制串
+        self.assertEqual(fn(b"not a pdf at all"), "")
+
+    def test_docx_extract(self):
+        import io, zipfile
+        fn = load_module_function("_extract_docx_text")
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w") as z:
+            z.writestr("word/document.xml",
+                       '<w:document><w:body>'
+                       '<w:p><w:r><w:t>第一段</w:t></w:r></w:p>'
+                       '<w:p><w:r><w:t>Second &amp; para</w:t></w:r></w:p>'
+                       '</w:body></w:document>')
+        text = fn(buf.getvalue())
+        self.assertIn("第一段", text)
+        self.assertIn("Second & para", text)
+
+    def test_xlsx_extract(self):
+        import io, zipfile
+        fn = load_module_function("_extract_xlsx_text")
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w") as z:
+            z.writestr("xl/sharedStrings.xml",
+                       '<sst><si><t>名称</t></si><si><t>数量</t></si></sst>')
+            z.writestr("xl/worksheets/sheet1.xml",
+                       '<worksheet><sheetData><row>'
+                       '<c t="s"><v>0</v></c><c t="s"><v>1</v></c><c><v>42</v></c>'
+                       '</row></sheetData></worksheet>')
+        text = fn(buf.getvalue())
+        self.assertIn("名称\t数量\t42", text)
+
+    def test_attach_dispatch(self):
+        body = method_text("_read_attach_text")
+        self.assertIn("_extract_pdf_text", body)
+        self.assertIn("_extract_docx_text", body)
+        self.assertIn("_extract_xlsx_text", body)
+        self.assertIn("12 * 1024 * 1024", body)
+
+
 if __name__ == "__main__":
     unittest.main()

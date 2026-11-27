@@ -465,6 +465,7 @@ RECORDS_PATH = os.path.join(BASE, "records.json")
 PHRASES_PATH = os.path.join(BASE, "phrases.json")
 # 常用语库: 与临时队列分开存, 不被删全部/去重/上限清理影响
 AI_CHATS_PATH = os.path.join(BASE, "ai_chats.json")  # AI 最近对话: 多个对话存档, 与常用语库同款存法
+AI_MEMORY_PATH = os.path.join(BASE, "ai_memory.json")  # AI 长期记忆: 用户主动保存的条目, 聊天时作为 system 上下文带上
 
 CRASH_LOG_PATH = os.path.join(BASE, "crash.log")
 _crash_seen = {}
@@ -522,6 +523,97 @@ def _atomic_write(path, text):
         try: os.fsync(dfd)
         finally: os.close(dfd)
     except Exception: pass
+def _pdf_unescape_literal(b):
+    """PDF 字面字符串的转义还原: \\( \\) \\\\ \\n 与八进制转义"""
+    out = bytearray(); i = 0
+    while i < len(b):
+        c = b[i]
+        if c == 0x5C and i + 1 < len(b):  # backslash
+            n = b[i + 1]
+            if n in b"nrtbf": out.append({0x6E: 10, 0x72: 13, 0x74: 9, 0x62: 8, 0x66: 12}[n]); i += 2; continue
+            if n in b"()\\": out.append(n); i += 2; continue
+            if 0x30 <= n <= 0x37:  # 八进制最多 3 位
+                j = i + 1; octd = b""
+                while j < len(b) and j < i + 4 and 0x30 <= b[j] <= 0x37: octd += bytes([b[j]]); j += 1
+                out.append(int(octd, 8) & 0xFF); i = j; continue
+            out.append(n); i += 2; continue
+        out.append(c); i += 1
+    return bytes(out)
+
+def _pdf_decode_text(b):
+    """PDF 文本字节解码: 带 BOM 按 UTF-16BE (CJK 字体常用), 否则先 UTF-8 再 Latin-1 兜底"""
+    if b[:2] == b"\xfe\xff":
+        try: return b[2:].decode("utf-16-be", "ignore")
+        except Exception: return ""
+    try: return b.decode("utf-8")
+    except Exception: return b.decode("latin-1", "ignore")
+
+def _extract_pdf_text(data):
+    """纯标准库提取 PDF 文字层 (不引第三方库): 解开 FlateDecode 内容流, 抓 Tj/TJ 算子里的字面/十六进制字符串。
+    只对带文字层的 PDF 有效; 扫描版返回空串 (调用方提示改走图片提问)。"""
+    import re as _re, zlib as _zlib
+    chunks = []
+    for m in _re.finditer(rb"stream\r?\n(.*?)endstream", data, _re.S):
+        raw = m.group(1)
+        try: raw = _zlib.decompress(raw)
+        except Exception: pass
+        if b"Tj" not in raw and b"TJ" not in raw: continue
+        for tm in _re.finditer(rb"\((?:\\.|[^\\()])*\)\s*Tj|\[(?:\\.|[^\[\]])*\]\s*TJ|<([0-9A-Fa-f\s]+)>\s*Tj", raw):
+            seg = tm.group(0)
+            if tm.group(1) is not None:
+                try: chunks.append(_pdf_decode_text(bytes.fromhex(_re.sub(rb"\s", b"", tm.group(1)).decode("ascii"))))
+                except Exception: pass
+                chunks.append("\n"); continue
+            for pm in _re.finditer(rb"\((?:\\.|[^\\()])*\)|<([0-9A-Fa-f\s]+)>", seg):
+                if pm.group(1) is not None:
+                    try: chunks.append(_pdf_decode_text(bytes.fromhex(_re.sub(rb"\s", b"", pm.group(1)).decode("ascii"))))
+                    except Exception: pass
+                else:
+                    chunks.append(_pdf_decode_text(_pdf_unescape_literal(pm.group(0)[1:-1])))
+            chunks.append("\n")
+    return "".join(chunks).strip()
+
+def _extract_docx_text(data):
+    """纯标准库提取 .docx 正文: 解包 word/document.xml, 段落变行、标签剥掉。"""
+    import html as _html, io as _io, re as _re, zipfile as _zf
+    with _zf.ZipFile(_io.BytesIO(data)) as z:
+        xml = z.read("word/document.xml").decode("utf-8", "ignore")
+    xml = _re.sub(r"<w:tab[^>]*/>", "\t", xml)
+    xml = _re.sub(r"</w:p>", "\n", xml)
+    xml = _re.sub(r"<[^>]+>", "", xml)
+    return _html.unescape(xml).strip()
+
+def _extract_xlsx_text(data):
+    """纯标准库提取 .xlsx 单元格文字: sharedStrings + 前 8 个工作表, 每行拼成制表符分隔的文本给 AI 读。"""
+    import html as _html, io as _io, re as _re, zipfile as _zf
+    def _clean(s): return _html.unescape(_re.sub(r"<[^>]+>", "", s)).strip()
+    with _zf.ZipFile(_io.BytesIO(data)) as z:
+        names = set(z.namelist())
+        shared = []
+        if "xl/sharedStrings.xml" in names:
+            sx = z.read("xl/sharedStrings.xml").decode("utf-8", "ignore")
+            shared = [_clean(si) for si in _re.findall(r"<si>(.*?)</si>", sx, _re.S)]
+        out = []
+        sheets = sorted(n for n in names if n.startswith("xl/worksheets/sheet") and n.endswith(".xml"))[:8]
+        for sn in sheets:
+            sx = z.read(sn).decode("utf-8", "ignore")
+            for row in _re.findall(r"<row[^>]*>(.*?)</row>", sx, _re.S):
+                cells = []
+                for cm in _re.finditer(r"<c[^>]*?(?:\st=\"(\w+)\")?[^>]*>(.*?)</c>", row, _re.S):
+                    t, inner = cm.group(1), cm.group(2)
+                    vm = _re.search(r"<v>(.*?)</v>", inner, _re.S)
+                    if vm is not None:
+                        val = _html.unescape(vm.group(1)).strip()
+                        if t == "s":
+                            try: val = shared[int(val)]
+                            except Exception: pass
+                        cells.append(val)
+                    else:
+                        tm2 = _re.search(r"<t[^>]*>(.*?)</t>", inner, _re.S)
+                        cells.append(_clean(tm2.group(1)) if tm2 is not None else "")
+                if any(cells): out.append("\t".join(cells))
+    return "\n".join(out).strip()
+
 def _ini_scalar(v):
     """配置值收成一行: 换行/制表/连续空白全压成单个空格。值里混进换行会把 Config.ini 写坏 —
     值中的一行 "Evil=1" 下次读取就变成一个真键 (注入/损坏双防), 所有落盘值先过这里。"""
@@ -1868,7 +1960,7 @@ class App(tk.Tk):
         threading.Thread(target=work, daemon=True).start()
     # ---------- 数据备份/恢复 ----------
     _BACKUP_FILES = ["Config.ini", "records.json", "records.json.bak", "phrases.json", "phrases.json.bak",
-                     "ai_chats.json"]
+                     "ai_chats.json", "ai_memory.json"]
     def _export_backup(self, path):
         import zipfile
         tmp = path + ".tmp"  # 先写临时再换名: 旧版直接在目标路径建 zip, 中途失败会把原有的一份好备份截断销毁 (审查发现)
@@ -5278,6 +5370,105 @@ try {
             except Exception: pass
         except Exception: pass
 
+    def _load_ai_memory(self):
+        """读 AI 长期记忆 (ai_memory.json, 带 .bak 兜底): 每条 {text, ts}; 最多 100 条、单条截 500 字; 坏档返回空表不抛错"""
+        for p in (AI_MEMORY_PATH, AI_MEMORY_PATH + ".bak"):
+            try:
+                if os.path.exists(p):
+                    data = json.loads(open(p, encoding="utf-8").read())
+                    if isinstance(data, list):
+                        out = []
+                        for it in data:
+                            tx = it.get("text") if isinstance(it, dict) else None
+                            if isinstance(tx, str) and tx.strip():
+                                out.append({"text": tx.strip()[:500], "ts": it.get("ts") or 0})
+                        return out[:100]
+            except Exception: continue
+        return []
+
+    def _store_ai_memory(self):
+        try:
+            text = json.dumps(getattr(self, "_ai_memory", []), ensure_ascii=False)
+            _atomic_write(AI_MEMORY_PATH, text)
+            try: _atomic_write(AI_MEMORY_PATH + ".bak", text)
+            except Exception: pass
+        except Exception: pass
+
+    @staticmethod
+    def _memory_system_text(mems, head):
+        """把记忆条目拼成 system 上下文 (总长封顶 4000 字, 防挤爆上下文窗口); 无记忆返回空串"""
+        lines = [m.get("text", "") for m in (mems or []) if isinstance(m, dict) and m.get("text")]
+        if not lines: return ""
+        return (head + "\n" + "\n".join("- " + x for x in lines))[:4000]
+
+    def _read_attach_text(self, path):
+        """读附件文件为纯文本, 返回 (text, err): 文本直读 (utf-8/gbk), PDF/Word/Excel 纯本地提取 (无第三方库);
+        上限 12MB; 旧版 Office 格式与读不出的文件返回人话 err。"""
+        import os as _os
+        ext = _os.path.splitext(path)[1].lower()
+        fail = self.t("ai_file_fail", "文件读不了 (只支持文本文件)")
+        try: size = _os.path.getsize(path)
+        except Exception: return "", fail
+        if size > 12 * 1024 * 1024: return "", self.t("ai_file_too_big", "文件超过 12MB, 请拆分后再附加")
+        if ext in (".doc", ".xls", ".ppt", ".pptx", ".rtf"):
+            return "", self.t("ai_file_old_format", "暂不支持这种格式, 请转成 .docx/.xlsx/.pdf 或文本后再试")
+        try: data = open(path, "rb").read()
+        except Exception: return "", fail
+        try:
+            if ext == ".pdf": text = _extract_pdf_text(data)
+            elif ext == ".docx": text = _extract_docx_text(data)
+            elif ext == ".xlsx": text = _extract_xlsx_text(data)
+            else:
+                text = None
+                for enc in ("utf-8-sig", "gbk"):
+                    try: text = data.decode(enc); break
+                    except Exception: text = None
+                if text is None: return "", fail
+        except Exception: return "", fail
+        text = (text or "").strip()
+        if not text: return "", self.t("ai_file_no_text", "没能从文件里提取到文字 (扫描版 PDF 请截图后用图片提问)")
+        return text, ""
+
+    def _open_ai_memory_window(self):
+        """AI 长期记忆管理窗: 列表 + 添加/删除/清空; 存 ai_memory.json, 聊天时自动作为 system 上下文带上"""
+        if getattr(self, "_ai_memory", None) is None: self._ai_memory = self._load_ai_memory()
+        win = tk.Toplevel(self); win.title(self.t("ai_mem_title", "AI 长期记忆")); win.geometry("520x420")
+        win.configure(background=self.UI_BG)
+        try: win.transient(self)
+        except Exception: pass
+        tk.Label(win, text=self.t("ai_mem_hint", "保存希望 AI 长期记住的信息 (偏好、背景、常用资料)。每次聊天时会自动带上, 与当前问题无关的条目 AI 会自行忽略。"),
+                 font=self._ui_font(9), background=self.UI_BG, foreground=self.UI_MUTED, wraplength=480, justify="left").pack(anchor="w", padx=12, pady=(10, 6))
+        mid = tk.Frame(win, background=self.UI_BG); mid.pack(fill="both", expand=True, padx=12)
+        lb = tk.Listbox(mid, font=self._ui_font(10), activestyle="none")
+        sb = ttk.Scrollbar(mid, orient="vertical", command=lb.yview); lb.configure(yscrollcommand=sb.set)
+        lb.pack(side="left", fill="both", expand=True); sb.pack(side="right", fill="y")
+        def refresh():
+            lb.delete(0, "end")
+            for m in self._ai_memory: lb.insert("end", m["text"])
+        refresh()
+        ent = tk.Entry(win, font=self._ui_font(10)); ent.pack(fill="x", padx=12, pady=(8, 4))
+        btns = tk.Frame(win, background=self.UI_BG); btns.pack(fill="x", padx=12, pady=(0, 10))
+        def do_add():
+            tx = ent.get().strip()[:500]
+            if not tx: self.status.set(self.t("ai_mem_empty_input", "先输入要记住的内容")); return
+            if len(self._ai_memory) >= 100: self.status.set(self.t("ai_mem_full", "记忆已满 (最多 100 条), 请先删除旧的")); return
+            self._ai_memory.append({"text": tx, "ts": time.time()}); self._store_ai_memory()
+            ent.delete(0, "end"); refresh(); self.status.set(self.t("ai_mem_saved_status", "已保存到长期记忆"))
+        def do_del():
+            sel = lb.curselection()
+            if not sel: return
+            del self._ai_memory[sel[0]]; self._store_ai_memory(); refresh()
+        def do_clear():
+            if not self._ai_memory: return
+            if not messagebox.askyesno(self.t("ai_mem_title", "AI 长期记忆"), self.t("ai_mem_confirm_clear", "确定要清空全部记忆吗?"), parent=win): return
+            self._ai_memory = []; self._store_ai_memory(); refresh()
+        ttk.Button(btns, text=self.t("ai_mem_add", "添加"), command=do_add).pack(side="left")
+        ttk.Button(btns, text=self.t("ai_mem_delete", "删除选中"), command=do_del).pack(side="left", padx=6)
+        ttk.Button(btns, text=self.t("ai_mem_clear", "清空全部"), command=do_clear).pack(side="left")
+        ttk.Button(btns, text=self.t("cmn_close", "关闭"), command=win.destroy).pack(side="right")
+        ent.bind("<Return>", lambda e: do_add())
+        ent.focus_set()
+
     def _persist_chat(self, hist, cid):
         """把一段对话历史写入存档并落盘, 返回它的 id (新建时生成)。当前对话和「已切走的对话」都走这里, 不会串话"""
         if not hist: return cid
@@ -7680,6 +7871,11 @@ try {
             set_send_enabled(False)
             show_typing()
             msgs = list(self._ai_chat_history[-20:])
+            if img is None:  # 长期记忆只进文字聊天: 作为 system 上下文放在最前面 (看图通道是单条消息, 不带)
+                mems = getattr(self, "_ai_memory", None)
+                if mems is None: mems = self._ai_memory = self._load_ai_memory()
+                sys_text = self._memory_system_text(mems, self.t("ai_mem_system_head", "以下是用户主动保存的长期记忆, 回答时请参考 (与当前问题无关的条目请忽略):"))
+                if sys_text: msgs = [{"role": "system", "content": sys_text}] + msgs
             hist_ref = self._ai_chat_history  # 记住这条回复属于哪个对话: 等回复期间切到别的对话, 回复不能串过去
             cid_ref = getattr(self, "_ai_chat_id", None)
             streamed = {"text": ""}
@@ -7775,6 +7971,7 @@ try {
                 self._store_ai_chats()
             self._ai_chat_history = []
             render_all(); refresh_recent()
+        link(head, self.t("ai_mem_open", "记忆"), lambda: self._open_ai_memory_window()).pack(side="right", padx=(0, 14))
         link(head, self.t("ai_clear", "清空对话"), clear).pack(side="right")
         link(head, self.t("cmn_back", "返回"), lambda: self._show_main_view()).pack(side="right", padx=(0, 14))
         # ---- 附件条 (仿 GPT): 截图/选图/文本文件先挂在这里, 发送时跟问题一起走; 平时藏着 ----
@@ -7813,17 +8010,11 @@ try {
                 self.status.set(f"{self.t('ai_img_fail', '图片打开失败')}: {e}"); return
             attach_image(img); self.after(60, lambda: inp.focus_force())  # 挂上附件把焦点送回输入框 (延迟一下: 弹窗销毁的焦点回退会把同步 focus_set 冲掉)
         def attach_file_dialog():
-            path = filedialog.askopenfilename(filetypes=[(self.t("ai_filetypes", "文本文件"), "*.txt *.md *.csv *.json *.log"), (self.t("ai_all_files", "所有文件"), "*.*")])
+            path = filedialog.askopenfilename(filetypes=[(self.t("ai_filetypes2", "文本与文档文件"), "*.txt *.md *.csv *.json *.log *.pdf *.docx *.xlsx"), (self.t("ai_all_files", "所有文件"), "*.*")])
             if not path: return
-            raw = None
-            for enc in ("utf-8-sig", "gbk"):
-                try:
-                    with open(path, "r", encoding=enc) as f: raw = f.read()
-                    break
-                except Exception: raw = None
-            if raw is None:
-                self.status.set(self.t("ai_file_fail", "文件读不了 (只支持文本文件)")); return
-            if len(raw) > 60000: raw = raw[:60000] + "\n……(文件太长, 已截断)"
+            raw, err = self._read_attach_text(path)
+            if err: self.status.set(err); return
+            if len(raw) > 60000: raw = raw[:60000] + "\n" + self.t("ai_file_truncated", "……(文件太长, 已截断)")
             import os as _os
             attach.update(kind="file", img=None, name=_os.path.basename(path), text=raw); refresh_attach()
             self.after(60, lambda: inp.focus_force())  # 同上: 附件挂好焦点回输入框
