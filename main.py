@@ -1881,7 +1881,7 @@ class App(tk.Tk):
                 image_dir = os.path.join(BASE, "ai_chat_images")
                 if os.path.isdir(image_dir):
                     for filename in os.listdir(image_dir):
-                        if re.fullmatch(r"[0-9a-f]{32}\\.jpg", filename):
+                        if re.fullmatch(r"[0-9a-f]{32}\.jpg", filename):
                             image_path = os.path.join(image_dir, filename)
                             if os.path.isfile(image_path) and os.path.getsize(image_path) <= 8 * 1024 * 1024:
                                 z.write(image_path, "ai_chat_images/" + filename)
@@ -1904,7 +1904,7 @@ class App(tk.Tk):
             names = list(self._BACKUP_FILES)
             image_names = [n for n in z.namelist()
                            if n.startswith("ai_chat_images/") and
-                           re.fullmatch(r"ai_chat_images/[0-9a-f]{32}\\.jpg", n)]
+                           re.fullmatch(r"ai_chat_images/[0-9a-f]{32}\.jpg", n)]
             if len(image_names) > 500:
                 raise ValueError("too many chat images in backup")
             names.extend(image_names)
