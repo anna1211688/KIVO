@@ -795,11 +795,11 @@ def _rrect_pts(w, h, r):
 class _PillButton(tk.Canvas):
     """圆角胶囊按钮 (画布绘制): primary=品牌蓝实心白字 / soft=浅灰底深字 / outline=白底蓝字浅蓝边。
     支持 config(text=) 改字并自动改宽 (主窗口截图按钮的热键标注刷新靠它), 也支持 cget("text")"""
-    _VARIANTS = {
-        "primary": ("#3B82F6", "#3B82F6", "#FFFFFF", "#60A5FA"),
-        "soft": ("#EAF0F8", "#EAF0F8", "#2A3440", "#DCE8F7"),
-        "outline": ("#FFFFFF", "#BCD6FF", "#1F6AB3", "#EBF2FF"),
-        "tool": ("#FFFFFF", "#E1E7F0", "#2A3440", "#EDF3FF"),
+    _VARIANTS = {  # Apple HIG 配色 (2026-11-28 Sonoma): (fill, outline, fg, hover)
+        "primary": ("#007AFF", "#007AFF", "#FFFFFF", "#409CFF"),
+        "soft": ("#EFEFF4", "#EFEFF4", "#000000", "#E5E5EA"),
+        "outline": ("#FFFFFF", "#99C2FF", "#007AFF", "#E9F2FF"),
+        "tool": ("#FFFFFF", "#E5E5EA", "#000000", "#F5F5F7"),
     }
 
     def __init__(self, parent, text="", command=None, variant="soft", font=None, bg="#FFFFFF", height=30, pad_x=14, image=None, radius=None):
@@ -858,28 +858,27 @@ class _PillButton(tk.Canvas):
 
 
 class _NavItem(tk.Canvas):
-    """左侧边栏导航项: 圆角胶囊高亮 + 糖果图标 + 文字 (Jane 2026-11-27 边栏版;
-    2026-11-27 UI 第一批改深色边栏配色: 选中品牌蓝胶囊白字/悬停深蓝灰/未选浅灰蓝字, 与 #172235 栏底配套)"""
-    def __init__(self, parent, text="", command=None, font=None, bg="#FFFFFF", image=None):
+    """左侧边栏导航项 (Apple HIG 浅色侧栏): 选中=中性灰圆角矩形, 悬停=更浅灰, 文字与图标单色;
+    配色由 App 传入 palette, 类内不写死颜色。"""
+    def __init__(self, parent, text="", command=None, font=None, bg="#FFFFFF", image=None, palette=None):
         super().__init__(parent, width=188, height=40, background=bg, highlightthickness=0, bd=0, cursor="hand2")
         self._text = text; self._command = command; self._font = font; self._image = image
+        self._pal = palette or {"active": "#D1D1D6", "hover": "#E8E8ED", "text": "#3C3C43", "text_active": "#000000"}
         self._selected = False; self._hover = False
         self.bind("<Button-1>", lambda _e: self.invoke())
         self.bind("<Enter>", lambda _e: self._set_hover(True))
         self.bind("<Leave>", lambda _e: self._set_hover(False))
         self._draw()
     def _draw(self):
-        """选中态不再用整块品牌蓝: 实心蓝是「主按钮」的语义, 边栏整条蓝会和页面里的主按钮抢注意力;
-        改成深色 tint 底 + 左侧 3px 品牌蓝指示条 (2026-11-28 重设计)。"""
+        """苹果侧栏选中是中性灰圆角块 (不是蓝色, 蓝色留给页面主按钮); 无指示条, 靠底色区分。"""
         self.delete("all")
         if self._selected:
-            self.create_polygon(_rrect_pts(188, 40, 10), fill="#1C2C45", outline="", smooth=True)
-            self.create_rectangle(0, 10, 3, 30, fill="#3B82F6", outline="")
+            self.create_polygon(_rrect_pts(188, 40, 8), fill=self._pal["active"], outline="", smooth=True)
         elif self._hover:
-            self.create_polygon(_rrect_pts(188, 40, 10), fill="#18263C", outline="", smooth=True)
+            self.create_polygon(_rrect_pts(188, 40, 8), fill=self._pal["hover"], outline="", smooth=True)
         if self._image is not None: self.create_image(14, 20, image=self._image, anchor="w")
         self.create_text(52, 21, text=self._text, anchor="w", font=self._font,
-                         fill="#FFFFFF" if self._selected else "#C9D6E8")
+                         fill=self._pal["text_active"] if self._selected else self._pal["text"])
     def _set_hover(self, on):
         self._hover = bool(on); self._draw()
     def set_selected(self, on):
@@ -974,10 +973,10 @@ class App(tk.Tk):
                 img = tk.PhotoImage(data=_ICON_PNG_B64).subsample(3, 3)
                 lb = tk.Label(card, image=img, background="#FFFFFF"); lb.image = img; lb.pack(padx=64, pady=(26, 6))
             except Exception: pass
-            tk.Label(card, text="KIVO", font=self._ui_font(20, True), background="#FFFFFF", foreground="#0F172A").pack()
-            tk.Label(card, text=self.t("splash_sub", "启沃智能工作台"), font=self._ui_font(10), background="#FFFFFF", foreground="#64748B").pack(pady=(2, 0))
+            tk.Label(card, text="KIVO", font=self._ui_font(20, True), background="#FFFFFF", foreground=self.UI_TEXT).pack()
+            tk.Label(card, text=self.t("splash_sub", "启沃智能工作台"), font=self._ui_font(10), background="#FFFFFF", foreground=self.UI_MUTED).pack(pady=(2, 0))
             tk.Label(card, text=self.t("about_slogan", "让效率, 自然发生 · Make Work Flow"), font=self._ui_font(9), background="#FFFFFF", foreground=self.UI_ACCENT).pack(pady=(10, 2))
-            tk.Label(card, text=self.t("splash_loading", "正在启动…"), font=self._ui_font(9), background="#FFFFFF", foreground="#64748B").pack(pady=(0, 22))
+            tk.Label(card, text=self.t("splash_loading", "正在启动…"), font=self._ui_font(9), background="#FFFFFF", foreground=self.UI_MUTED).pack(pady=(0, 22))
             sp.update_idletasks()
             w, h = sp.winfo_reqwidth(), sp.winfo_reqheight()
             sp.geometry(f"+{(sp.winfo_screenwidth() - w) // 2}+{(sp.winfo_screenheight() - h) // 2}")
@@ -1167,34 +1166,35 @@ class App(tk.Tk):
     # ---------- 界面主题 (v1.4.17 美化: 全软件统一一套视觉语言, 与 KIVO 图标同系的品牌蓝) ----------
     # ---- 颜色令牌 (2026-11-28 UI 重设计 P1): 只在这里定义一次, 控件一律引用, 不再散落字面色值。
     # 中性色按 50→900 收窄到 6 档, 层次比旧版更分明: 一屏上深浅不超过 4 档灰, 才不会显得花。
-    UI_BG = "#F6F8FB"        # 底 (L0): 页面背景
-    UI_SURFACE = "#FFFFFF"   # 面 (L1): 卡片/输入框/列表
-    UI_BORDER = "#E7ECF3"    # 描边: 比底深一档, 白卡才有边
-    UI_BORDER_STRONG = "#D7DFEA"  # 强描边: 浮层/聚焦容器
-    UI_TEXT = "#0F172A"      # 主文字 900
-    UI_TEXT_2 = "#475569"    # 次文字 600
-    UI_MUTED = "#64748B"     # 辅助文字 500
-    UI_MUTED_2 = "#94A3B8"   # 三级文字/占位 400
-    UI_ACCENT = "#3B82F6"    # 品牌蓝 (2026-11-27 UI 第一批统一: 与主按钮/边栏同色, 旧值 #287FD1 在 AI 气泡/发送键/焦点边框上残留会同屏色差)
-    UI_ACCENT_HOVER = "#60A5FA"
-    UI_ACCENT_PRESS = "#2563EB"
-    UI_ACCENT_TINT = "#EFF6FF"   # 主色浅底: 选中/hover/标签底
-    UI_ACCENT_LINE = "#BFDBFE"   # 主色描边: 次级按钮轮廓
-    UI_SEL_BG = "#E8F1FE"    # 列表选中行底色
-    UI_HEAD_BG = "#F3F6FB"   # 表头底色
-    UI_STRIPE = "#FAFBFE"    # 列表斑马纹 (奇数行): 只差 2% 明度, 长列表不花
-    UI_SOFT = "#F3F6FB"      # 胶囊按钮/搜索框的浅灰底
-    UI_DANGER = "#DC2626"    # 危险文字 (删除类)
-    UI_DANGER_BG = "#FEF2F2" # 危险浅底
-    UI_DANGER_LINE = "#FCA5A5"  # 危险描边 (P3: 删除类按钮轮廓)
-    UI_DANGER_HOVER = "#FEE2E2"  # 危险悬停
-    UI_DANGER_PRESS = "#FECACA"  # 危险按下
-    UI_HOVER = "#E8F1FE"     # 中性控件悬停底 (P3 统一, 原 #E3EEFF)
-    UI_PRESS = "#DBEAFE"     # 中性控件按下底 (P3 统一, 原 #CFE2FF)
-    UI_SUCCESS = "#16A34A"
-    UI_SIDE = "#111C2E"      # 边栏底 (比旧 #172235 更深: 与内容区的明度差拉大, 边界不再靠一条线)
-    UI_SIDE_TEXT = "#8FA3BE"  # 边栏未选中文字
-    UI_SIDE_ACTIVE_BG = "#1C2C45"  # 边栏选中底 (深色版 tint)
+    # Apple HIG (macOS Sonoma) 调色板: 冷调浅色, 系统蓝 #007AFF, 中性灰阶, 分隔线缩进
+    UI_BG = "#F2F2F7"        # 分组页面底 (systemGroupedBackground)
+    UI_SURFACE = "#FFFFFF"   # 卡片/输入框 (secondarySystemGroupedBackground)
+    UI_BORDER = "#E5E5EA"    # 细分割线 (separator 浅色版)
+    UI_BORDER_STRONG = "#D1D1D6"  # 侧栏选中/强分隔
+    UI_TEXT = "#000000"      # label
+    UI_TEXT_2 = "#3C3C43"    # secondaryLabel
+    UI_MUTED = "#8E8E93"     # 辅助文字
+    UI_MUTED_2 = "#AEAEB2"   # 占位/三级文字
+    UI_ACCENT = "#007AFF"    # 系统蓝 (systemBlue)
+    UI_ACCENT_HOVER = "#409CFF"
+    UI_ACCENT_PRESS = "#0062CC"
+    UI_ACCENT_TINT = "#E9F2FF"   # 主色浅底
+    UI_ACCENT_LINE = "#99C2FF"   # 主色描边
+    UI_SEL_BG = "#D6E6FF"    # 列表选中行 (蓝 tint)
+    UI_HEAD_BG = "#F5F5F7"   # 表头/侧栏底
+    UI_STRIPE = "#FAFAFC"    # 斑马纹
+    UI_SOFT = "#EFEFF4"      # 胶囊/搜索浅灰底
+    UI_DANGER = "#FF3B30"    # 系统红 (systemRed)
+    UI_DANGER_BG = "#FFEBE9"
+    UI_DANGER_LINE = "#FFB4B0"
+    UI_DANGER_HOVER = "#FFDCD9"
+    UI_DANGER_PRESS = "#FFC9C5"
+    UI_HOVER = "#E5F0FF"     # 控件悬停 (蓝 tint)
+    UI_PRESS = "#CCE4FF"     # 控件按下
+    UI_SUCCESS = "#34C759"   # 系统绿 (systemGreen)
+    UI_SIDE = "#F5F5F7"      # 浅色磨砂侧栏 (sidebar)
+    UI_SIDE_TEXT = "#3C3C43"  # 侧栏文字
+    UI_SIDE_ACTIVE_BG = "#D1D1D6"  # 侧栏选中 (中性灰, 苹果侧栏不用蓝色)
     # ---- 间距: 只用 4 的倍数, 杜绝 3/5/7 这类随手值 ----
     SP_1, SP_2, SP_3, SP_4, SP_5, SP_6 = 4, 8, 12, 16, 24, 32
     # ---- 圆角: 卡片 12 / 按钮 8 / 输入 8 / 药丸 999 ----
@@ -1241,6 +1241,25 @@ class App(tk.Tk):
         if img is None: img = self._btn_icon(name)
         cache[name] = img
         return img
+    def _nav_icon(self, name):
+        """侧栏单色图标 (2026-11-28 Sonoma): 复用同一套 glyph 素材, 只染成 UI_SIDE_TEXT、透明底、不加糖果方块,
+        贴近 SF Symbols。失败回退 _tool_icon, 导航照常可用。"""
+        cache = getattr(self, "_nav_icon_cache", None)
+        if cache is None: cache = self._nav_icon_cache = {}
+        if name in cache: return cache[name]
+        img = None
+        try:
+            import base64, io
+            from PIL import Image as _PI, ImageTk as _PT
+            raw = _PI.open(io.BytesIO(base64.b64decode(_BTN_ICONS_B64[name]))).convert("RGBA")
+            glyph = _PI.new("RGBA", raw.size, self.UI_SIDE_TEXT)
+            glyph.putalpha(raw.getchannel("A"))
+            img = _PT.PhotoImage(glyph.resize((22, 22), _PI.LANCZOS))
+        except Exception:
+            img = None
+        if img is None: img = self._tool_icon(name)
+        cache[name] = img
+        return img
 
     def _apply_theme(self):
         """统一主题: ttk 以 clam 为底重配色 + 统一字体; 所有对话框都是同一解释器的 Toplevel, 会自动跟着变。
@@ -1255,7 +1274,7 @@ class App(tk.Tk):
             st.configure("TLabel", background=bg, foreground=tx)
             st.configure("Muted.TLabel", background=bg, foreground=self.UI_MUTED, font=self._ui_font(9))
             st.configure("TLabelframe", background=bg, bordercolor=bd, relief="solid", borderwidth=1, padding=(10, 6))
-            st.configure("TLabelframe.Label", background=bg, foreground="#475569", font=fb)
+            st.configure("TLabelframe.Label", background=bg, foreground=self.UI_TEXT_2, font=fb)
             st.configure("TButton", background=self.UI_SURFACE, foreground=tx, bordercolor=bd,
                          padding=(12, 6), relief="solid", borderwidth=1, focusthickness=0)  # 统一 12/6 内边距, 按钮不再忽胖忽瘦
             st.map("TButton", background=[("active", self.UI_HOVER), ("pressed", self.UI_PRESS)],
@@ -1350,6 +1369,7 @@ class App(tk.Tk):
         # ---------- 左侧边栏导航 (Jane 2026-11-27 拍板边栏版; 排序按她定: AI 助手第一, 翻译第二, 世界时钟与货币汇率分开不合并) ----------
         side = tk.Frame(self, background=SIDE, width=216, highlightthickness=0)  # 204→216: 导航行左右留白够, 不再贴边; 去 1px 描边改用色差分隔
         side.pack(side="left", fill="y"); side.pack_propagate(False)
+        tk.Frame(self, background=self.UI_BORDER, width=1).pack(side="left", fill="y")
         self._content = tk.Frame(self, background=self.UI_BG); self._content.pack(side="left", fill="both", expand=True)
         brand = tk.Frame(side, background=SIDE); brand.pack(fill="x", padx=16, pady=(14, 2))
         try:
@@ -1357,11 +1377,11 @@ class App(tk.Tk):
             tk.Label(brand, image=_icon, background=SIDE).pack(side="left")
             self._head_icon = _icon  # 留引用防被回收
         except Exception: pass
-        tk.Label(brand, text="KIVO", font=self._ui_font(15, True), background=SIDE, foreground="#FFFFFF").pack(side="left", padx=(8, 4))
+        tk.Label(brand, text="KIVO", font=self._ui_font(15, True), background=SIDE, foreground=self.UI_TEXT).pack(side="left", padx=(8, 4))
         if self.lang != "English":  # 品牌中文名只在中文模式陪衬 (英文模式界面不留中文, en_walk 零残留纪律)
-            tk.Label(brand, text="启沃", font=self._ui_font(10), background=SIDE, foreground="#8FA3BE").pack(side="left", pady=(3, 0))
-        tk.Label(side, text=("Make Work Flow." if self.lang == "English" else "让效率, 自然发生"), font=self._ui_font(8), background=SIDE, foreground="#8FA3BE").pack(anchor="w", padx=17, pady=(0, 8))
-        tk.Frame(side, background="#243348", height=1).pack(fill="x", padx=14, pady=(0, 6))
+            tk.Label(brand, text="启沃", font=self._ui_font(10), background=SIDE, foreground=self.UI_MUTED).pack(side="left", pady=(3, 0))
+        tk.Label(side, text=("Make Work Flow." if self.lang == "English" else "让效率, 自然发生"), font=self._ui_font(8), background=SIDE, foreground=self.UI_MUTED).pack(anchor="w", padx=17, pady=(0, 8))
+        tk.Frame(side, background=self.UI_BORDER, height=1).pack(fill="x", padx=14, pady=(0, 6))
         # 内容区顶栏: 当前页标题 (随导航切换) + 右侧定位语
         topbar = tk.Frame(self._content, background=self.UI_BG); topbar.pack(fill="x", padx=16, pady=(12, 2))
         self._page_title = tk.Label(topbar, text="", font=self._ui_font(15, True), background=self.UI_BG, foreground=self.UI_TEXT)
@@ -1372,12 +1392,15 @@ class App(tk.Tk):
         # 导航项 (顺序: Jane 2026-11-27 定)
         self._nav_items = {}
         self._nav_titles = {}
+        _nav_pal = {"active": self.UI_SIDE_ACTIVE_BG, "hover": "#E8E8ED",
+                    "text": self.UI_SIDE_TEXT, "text_active": self.UI_TEXT}
         def _nav(key, text, icn, cmd):
-            _it = _NavItem(side, text=text, command=cmd, font=self._ui_font(10), bg=SIDE, image=self._tool_icon(icn))
+            _it = _NavItem(side, text=text, command=cmd, font=self._ui_font(10), bg=SIDE,
+                           image=self._nav_icon(icn), palette=_nav_pal)
             _it.pack(padx=8, pady=2)
             self._nav_items[key] = _it; self._nav_titles[key] = text
         def _nav_group(text):
-            tk.Label(side, text=text, font=self._ui_font(9, True), background=SIDE, foreground="#8FA3BE").pack(anchor="w", padx=18, pady=(10, 3))
+            tk.Label(side, text=text, font=self._ui_font(9, True), background=SIDE, foreground=self.UI_MUTED).pack(anchor="w", padx=18, pady=(10, 3))
         _nav("ai", self.t("ai_chat", "AI 助手"), "ai", self.open_ai_chat)
         _nav("trans", self.t("nav_trans", "翻译中心"), "translate", self._show_texttrans_panel)
         _nav("clip", self.t("copy_paste", "剪贴板"), "copy", self._show_main_view)
@@ -1388,11 +1411,11 @@ class App(tk.Tk):
         _nav("calc", self.t("calculator", "计算器"), "calc", self.open_calc)
         _nav("dl", self.t("media_dl", "无水印下载"), "download", self.open_media_dl)
         # 边栏底部: 版本 (最底) + 设置 + 分隔线 (side=bottom 先包的贴最底)
-        tk.Label(side, text=f"v{VERSION} · © KIVO", font=self._ui_font(8), background=SIDE, foreground="#8FA3BE").pack(side="bottom", anchor="w", padx=18, pady=(0, 10))
-        _set_it = _NavItem(side, text=self.t("system_settings", "设置"), command=self.open_system_settings, font=self._ui_font(10), bg=SIDE, image=self._tool_icon("gear"))
+        tk.Label(side, text=f"v{VERSION} · © KIVO", font=self._ui_font(8), background=SIDE, foreground=self.UI_MUTED).pack(side="bottom", anchor="w", padx=18, pady=(0, 10))
+        _set_it = _NavItem(side, text=self.t("system_settings", "设置"), command=self.open_system_settings, font=self._ui_font(10), bg=SIDE, image=self._nav_icon("gear"), palette=_nav_pal)
         _set_it.pack(side="bottom", padx=8, pady=1)
         self._nav_items["settings"] = _set_it; self._nav_titles["settings"] = self.t("system_settings", "设置")
-        tk.Frame(side, background="#243348", height=1).pack(side="bottom", fill="x", padx=14, pady=(0, 6))
+        tk.Frame(side, background=self.UI_BORDER, height=1).pack(side="bottom", fill="x", padx=14, pady=(0, 6))
         self._toolbar_btns = []  # 旧顶栏工具条已被边栏导航取代, 留空列表兼容旧引用
         self._nav_show("clip")
         # 下半区容器: 记录卡/操作行/各设置卡都装在这里; 点「AI 功能」时整块被聊天面板盖住 (Jane 要求不弹新窗)
@@ -1540,7 +1563,7 @@ class App(tk.Tk):
                          (self.t("ocr_selected", "OCR 选中截图"), self.ocr_selected_shot), (self.t("open_shots_dir", "打开截图文件夹"), self.open_shots_dir)]:
             ttk.Button(snip_more, text=txt, command=cmd, style="Small.TButton").pack(side="left", padx=2)
         self.shots_list = tk.Listbox(snip_more, height=3, font=self._ui_font(9), bg=W, fg=self.UI_TEXT,
-                                     selectbackground=self.UI_SEL_BG, selectforeground="#2563EB", activestyle="none",
+                                     selectbackground=self.UI_SEL_BG, selectforeground=self.UI_ACCENT, activestyle="none",
                                      relief="solid", bd=1, highlightthickness=1,
                                      highlightbackground=self.UI_BORDER, highlightcolor=self.UI_ACCENT)
         self.shots_list.pack(side="left", fill="x", expand=True, padx=6)
@@ -1769,11 +1792,11 @@ class App(tk.Tk):
         panel = tk.Frame(self._content, background=self.UI_BG); self._settings_panel = panel
         head = tk.Frame(panel, background=self.UI_BG); head.pack(fill="x", padx=14, pady=(10, 4))
         self._panel_title(head, self.t("system_settings", "设置"), "gear")
-        back = tk.Label(head, text=self.t("cmn_back", "返回"), font=self._ui_font(9), background=self.UI_BG, foreground="#64748B", cursor="hand2")
+        back = tk.Label(head, text=self.t("cmn_back", "返回"), font=self._ui_font(9), background=self.UI_BG, foreground=self.UI_MUTED, cursor="hand2")
         back.pack(side="right")
         back.bind("<Button-1>", lambda e: self._show_main_view())
         back.bind("<Enter>", lambda e: back.configure(foreground=self.UI_ACCENT))
-        back.bind("<Leave>", lambda e: back.configure(foreground="#64748B"))
+        back.bind("<Leave>", lambda e: back.configure(foreground=self.UI_MUTED))
         outer = ttk.Frame(panel); outer.pack(fill="both", expand=True)
         cv = tk.Canvas(outer, highlightthickness=0); self._settings_cv = cv
         sb = ttk.Scrollbar(outer, orient="vertical", command=cv.yview)
@@ -1869,7 +1892,7 @@ class App(tk.Tk):
         acol = ttk.Frame(arow); acol.pack(side="left", fill="x")
         tk.Label(acol, text=self.t("about_brand", "KIVO 启沃 · 智能效率平台"), font=self._ui_font(11, True), background=self.UI_BG, foreground=self.UI_TEXT).pack(anchor="w")
         tk.Label(acol, text=self.t("about_slogan", "让效率, 自然发生 · Make Work Flow"), background=self.UI_BG, foreground=self.UI_ACCENT).pack(anchor="w")
-        tk.Label(abfrm, text=self.t("about_text", "KIVO (启沃) 是一款面向现代工作与生活场景的智能效率平台, 将 AI 智能、多语言翻译、信息管理、屏幕截图及多种实用工具整合在一个统一的工作空间中, 帮助你简化操作流程, 提高信息处理效率。"), background=self.UI_BG, foreground="#64748B", wraplength=560, justify="left").pack(anchor="w", padx=6, pady=(2, 2))
+        tk.Label(abfrm, text=self.t("about_text", "KIVO (启沃) 是一款面向现代工作与生活场景的智能效率平台, 将 AI 智能、多语言翻译、信息管理、屏幕截图及多种实用工具整合在一个统一的工作空间中, 帮助你简化操作流程, 提高信息处理效率。"), background=self.UI_BG, foreground=self.UI_MUTED, wraplength=560, justify="left").pack(anchor="w", padx=6, pady=(2, 2))
         tk.Label(abfrm, text=f"v{VERSION} · © KIVO", background=self.UI_BG, foreground=self.UI_MUTED).pack(anchor="w", padx=6, pady=(0, 6))
     # ---------- 检查更新 ----------
     _RELEASE_API = "https://api.github.com/repos/anna1211688/KIVO/releases/latest"
@@ -1946,7 +1969,7 @@ class App(tk.Tk):
         for w in (self._upd_open, self._upd_now):
             try: w.pack_forget()
             except Exception: pass
-        self._upd_status.configure(text=self.t("upd_checking", "正在检查更新…"), foreground="#64748B")
+        self._upd_status.configure(text=self.t("upd_checking", "正在检查更新…"), foreground=self.UI_MUTED)
         def work():
             try: res = ("ok",) + self._fetch_latest_release()
             except Exception as e: res = ("err", str(e), "")
@@ -1956,7 +1979,7 @@ class App(tk.Tk):
     def _upd_done(self, res):
         self._upd_busy = False
         if res[0] != "ok":
-            self._upd_status.configure(text=self.t("upd_fail", "检查失败, 请检查网络后重试"), foreground="#C0392B"); return
+            self._upd_status.configure(text=self.t("upd_fail", "检查失败, 请检查网络后重试"), foreground=self.UI_DANGER); return
         tag, url = res[1], res[2]
         self._upd_url = url or self._RELEASE_PAGE
         self._upd_setup = (res[3], res[4]) if len(res) > 4 else ("", "")
@@ -1967,7 +1990,7 @@ class App(tk.Tk):
             if self._upd_setup[0]: self._upd_now.pack(side="left", padx=(2, 0))
             self._upd_open.pack(side="left", padx=(8, 0))
         else:
-            self._upd_status.configure(text=self.t("upd_latest", "已是最新版本"), foreground="#64748B")
+            self._upd_status.configure(text=self.t("upd_latest", "已是最新版本"), foreground=self.UI_MUTED)
 
     def _upd_install(self):
         """一键更新 (Jane 2026-11-27 问能否点这里直接更新): 后台下载安装包到临时目录, 下完启动安装向导,
@@ -2030,7 +2053,7 @@ class App(tk.Tk):
     def _upd_progress(self, pct, done):
         if pct >= 0: txt = f"{self.t('upd_downloading', '正在下载更新')}… {pct}%"
         else: txt = f"{self.t('upd_downloading', '正在下载更新')}… {max(1, done // 1048576)} MB"
-        self._upd_status.configure(text=txt, foreground="#64748B")
+        self._upd_status.configure(text=txt, foreground=self.UI_MUTED)
 
     def _launch_installer(self, path):
         if sys.platform == "win32": os.startfile(path)  # noqa: S606
@@ -2053,7 +2076,7 @@ class App(tk.Tk):
         self._upd_busy = False
         try: self._upd_now.configure(state="normal")
         except Exception: pass
-        self._upd_status.configure(text=self.t("upd_dl_fail", "下载失败, 请到发布页手动下载"), foreground="#C0392B")
+        self._upd_status.configure(text=self.t("upd_dl_fail", "下载失败, 请到发布页手动下载"), foreground=self.UI_DANGER)
         try: self._upd_open.pack(side="left", padx=(8, 0))
         except Exception: pass
 
@@ -2061,7 +2084,7 @@ class App(tk.Tk):
         self._upd_busy = False
         try: self._upd_now.configure(state="normal")
         except Exception: pass
-        self._upd_status.configure(text=self.t("upd_verify_fail", "更新包验证失败, 已停止安装 (可到发布页手动下载)"), foreground="#C0392B")
+        self._upd_status.configure(text=self.t("upd_verify_fail", "更新包验证失败, 已停止安装 (可到发布页手动下载)"), foreground=self.UI_DANGER)
         try: self._upd_open.pack(side="left", padx=(8, 0))
         except Exception: pass
 
@@ -2099,11 +2122,11 @@ class App(tk.Tk):
         panel = tk.Frame(self._content, background=self.UI_BG); self._selfcheck_panel = panel
         head = tk.Frame(panel, background=self.UI_BG); head.pack(fill="x", padx=14, pady=(10, 4))
         self._panel_title(head, self.t("chk_title", "软件自检"), "star")
-        back = tk.Label(head, text=self.t("cmn_back", "返回"), font=self._ui_font(9), background=self.UI_BG, foreground="#64748B", cursor="hand2")
+        back = tk.Label(head, text=self.t("cmn_back", "返回"), font=self._ui_font(9), background=self.UI_BG, foreground=self.UI_MUTED, cursor="hand2")
         back.pack(side="right")
         back.bind("<Button-1>", lambda e: self._show_settings_panel())
         back.bind("<Enter>", lambda e: back.configure(foreground=self.UI_ACCENT))
-        back.bind("<Leave>", lambda e: back.configure(foreground="#64748B"))
+        back.bind("<Leave>", lambda e: back.configure(foreground=self.UI_MUTED))
         card = tk.Frame(panel, background=self.UI_BG)
         self._rounded_backing(card)
         card.pack(fill="x", padx=12, pady=(6, 10))
@@ -2364,11 +2387,11 @@ class App(tk.Tk):
         W = "#FFFFFF"
         head = tk.Frame(panel, background=self.UI_BG); head.pack(fill="x", padx=14, pady=(10, 4))
         self._panel_title(head, self.t("phrase_library", "常用语"), "phrases")
-        back = tk.Label(head, text=self.t("cmn_back", "返回"), font=self._ui_font(9), background=self.UI_BG, foreground="#64748B", cursor="hand2")
+        back = tk.Label(head, text=self.t("cmn_back", "返回"), font=self._ui_font(9), background=self.UI_BG, foreground=self.UI_MUTED, cursor="hand2")
         back.pack(side="right")
         back.bind("<Button-1>", lambda e: self._show_main_view())
         back.bind("<Enter>", lambda e: back.configure(foreground=self.UI_ACCENT))
-        back.bind("<Leave>", lambda e: back.configure(foreground="#64748B"))
+        back.bind("<Leave>", lambda e: back.configure(foreground=self.UI_MUTED))
         card = tk.Frame(panel, background=self.UI_BG)
         self._rounded_backing(card)
         card.pack(fill="both", expand=True, padx=12, pady=(6, 10))
@@ -5065,7 +5088,7 @@ try {
         svc_var.trace_add("write", on_svc)
         ttk.Label(parent, text=self.t("tr_note", "百度/有道到各自开放平台免费申请 APP ID 和密钥; 谷歌在 Google Cloud 开通翻译 API 后创建 API 密钥 (只需填密钥栏)。\n密钥只保存在本机, 不上传别处; 没填或接口出错时自动用免费接口翻译。"), foreground=self.UI_MUTED, wraplength=440, justify="left").grid(row=3, column=0, columnspan=2, padx=8, pady=4, sticky="w")
         test_var = tk.StringVar()
-        ttk.Label(parent, textvariable=test_var, foreground="#2563EB", wraplength=440).grid(row=4, column=0, columnspan=2, padx=8, sticky="w")
+        ttk.Label(parent, textvariable=test_var, foreground=self.UI_ACCENT, wraplength=440).grid(row=4, column=0, columnspan=2, padx=8, sticky="w")
         btns = ttk.Frame(parent); btns.grid(row=5, column=0, columnspan=2, pady=10)
         def do_test():
             creds[cur["service"]] = [id_var.get().strip(), key_var.get().strip()]
@@ -6292,7 +6315,7 @@ try {
         self._rounded_backing(outer, radius=10, fill=self.UI_BG)
         _trow = tk.Frame(outer, background=self.UI_BG); _trow.pack(anchor="w", fill="x", padx=12, pady=(8, 2))
         tk.Frame(_trow, background=self.UI_ACCENT, width=4, height=14).pack(side="left", pady=1)
-        tk.Label(_trow, text=title, font=self._ui_font(10, True), background=self.UI_BG, foreground="#475569").pack(side="left", padx=(6, 0))
+        tk.Label(_trow, text=title, font=self._ui_font(10, True), background=self.UI_BG, foreground=self.UI_TEXT_2).pack(side="left", padx=(6, 0))
         inner = tk.Frame(outer, background=self.UI_BG)
         inner.pack(fill="x", padx=12, pady=(0, 10))
         return inner
@@ -6423,11 +6446,11 @@ try {
         self._panel_title(head, self.t("fx_rates", "汇率换算"), "fx")
         upd_var = tk.StringVar()
         tk.Label(head, textvariable=upd_var, font=self._ui_font(9), background=self.UI_BG, foreground=self.UI_MUTED).pack(side="left", padx=8)
-        back = tk.Label(head, text=self.t("cmn_back", "返回"), font=self._ui_font(9), background=self.UI_BG, foreground="#64748B", cursor="hand2")
+        back = tk.Label(head, text=self.t("cmn_back", "返回"), font=self._ui_font(9), background=self.UI_BG, foreground=self.UI_MUTED, cursor="hand2")
         back.pack(side="right")
         back.bind("<Button-1>", lambda e: self._show_main_view())
         back.bind("<Enter>", lambda e: back.configure(foreground=self.UI_ACCENT))
-        back.bind("<Leave>", lambda e: back.configure(foreground="#64748B"))
+        back.bind("<Leave>", lambda e: back.configure(foreground=self.UI_MUTED))
         refresh_btn = ttk.Button(head, text=self.t("fx_refresh", "刷新"), command=lambda: reload())
         refresh_btn.pack(side="right", padx=(0, 10))
         status_var = tk.StringVar(value=self.t("fx_fetching", "正在获取最新汇率…"))
@@ -6585,11 +6608,11 @@ try {
         W = "#FFFFFF"
         head = tk.Frame(panel, background=self.UI_BG); head.pack(fill="x", padx=14, pady=(10, 4))
         self._panel_title(head, self.t("calculator", "计算器"), "calc")
-        back = tk.Label(head, text=self.t("cmn_back", "返回"), font=self._ui_font(9), background=self.UI_BG, foreground="#64748B", cursor="hand2")
+        back = tk.Label(head, text=self.t("cmn_back", "返回"), font=self._ui_font(9), background=self.UI_BG, foreground=self.UI_MUTED, cursor="hand2")
         back.pack(side="right")
         back.bind("<Button-1>", lambda e: self._show_main_view())
         back.bind("<Enter>", lambda e: back.configure(foreground=self.UI_ACCENT))
-        back.bind("<Leave>", lambda e: back.configure(foreground="#64748B"))
+        back.bind("<Leave>", lambda e: back.configure(foreground=self.UI_MUTED))
         body = tk.Frame(panel, background=self.UI_BG); body.pack(fill="both", expand=True)
         card = tk.Frame(body, background=self.UI_BG)
         self._rounded_backing(card)
@@ -6689,7 +6712,7 @@ try {
         tk.Frame(card, background=self.UI_BORDER, height=1).pack(fill="x", padx=14, pady=(2, 0))
         hhead = tk.Frame(card, background=W); hhead.pack(fill="x", padx=16, pady=(8, 2))
         tk.Label(hhead, text=self.t("calc_history", "计算历史"), font=self._ui_font(11, True), background=W, foreground=self.UI_TEXT).pack(side="left")
-        clr = tk.Label(hhead, text=self.t("calc_clear_history", "清空"), font=self._ui_font(10), background=W, foreground="#64748B", cursor="hand2")
+        clr = tk.Label(hhead, text=self.t("calc_clear_history", "清空"), font=self._ui_font(10), background=W, foreground=self.UI_MUTED, cursor="hand2")
         clr.pack(side="right")
         hwrap = tk.Frame(card, background=W); hwrap.pack(fill="x", padx=12, pady=(0, 12))
         hlist = tk.Listbox(hwrap, height=5, font=self._ui_font(11), background=W, foreground=self.UI_TEXT,
@@ -6957,24 +6980,24 @@ try {
         W = "#FFFFFF"
         head = tk.Frame(panel, background=self.UI_BG); head.pack(fill="x", padx=14, pady=(10, 4))
         self._panel_title(head, self.t("world_clock", "世界时钟"), "clock")
-        back = tk.Label(head, text=self.t("cmn_back", "返回"), font=self._ui_font(9), background=self.UI_BG, foreground="#64748B", cursor="hand2")
+        back = tk.Label(head, text=self.t("cmn_back", "返回"), font=self._ui_font(9), background=self.UI_BG, foreground=self.UI_MUTED, cursor="hand2")
         back.pack(side="right")
         back.bind("<Button-1>", lambda e: self._show_main_view())
         back.bind("<Enter>", lambda e: back.configure(foreground=self.UI_ACCENT))
-        back.bind("<Leave>", lambda e: back.configure(foreground="#64748B"))
-        refr = tk.Label(head, text=self.t("fx_refresh", "刷新"), font=self._ui_font(9), background=self.UI_BG, foreground="#64748B", cursor="hand2")
+        back.bind("<Leave>", lambda e: back.configure(foreground=self.UI_MUTED))
+        refr = tk.Label(head, text=self.t("fx_refresh", "刷新"), font=self._ui_font(9), background=self.UI_BG, foreground=self.UI_MUTED, cursor="hand2")
         refr.pack(side="right", padx=(0, 12))
         refr.bind("<Button-1>", lambda e: self._clock_refresh())
         refr.bind("<Enter>", lambda e: refr.configure(foreground=self.UI_ACCENT))
-        refr.bind("<Leave>", lambda e: refr.configure(foreground="#64748B"))
-        edit = tk.Label(head, text=self.t("clk_edit", "编辑城市"), font=self._ui_font(9), background=self.UI_BG, foreground="#64748B", cursor="hand2")
+        refr.bind("<Leave>", lambda e: refr.configure(foreground=self.UI_MUTED))
+        edit = tk.Label(head, text=self.t("clk_edit", "编辑城市"), font=self._ui_font(9), background=self.UI_BG, foreground=self.UI_MUTED, cursor="hand2")
         edit.pack(side="right", padx=(0, 12))
         edit.bind("<Button-1>", lambda e: self.open_clock_settings())
         edit.bind("<Enter>", lambda e: edit.configure(foreground=self.UI_ACCENT))
-        edit.bind("<Leave>", lambda e: edit.configure(foreground="#64748B"))
+        edit.bind("<Leave>", lambda e: edit.configure(foreground=self.UI_MUTED))
         conv = tk.Frame(panel, background=self.UI_BG); conv.pack(side="bottom", fill="x", padx=10, pady=(2, 10))
         self._rounded_backing(conv, radius=10, fill="#FFFFFF")
-        tk.Label(conv, text=self.t("clk_conv", "约时间换算"), font=self._ui_font(10, True), background="#FFFFFF", foreground="#475569").pack(anchor="w", padx=12, pady=(8, 2))
+        tk.Label(conv, text=self.t("clk_conv", "约时间换算"), font=self._ui_font(10, True), background="#FFFFFF", foreground=self.UI_TEXT_2).pack(anchor="w", padx=12, pady=(8, 2))
         crow = tk.Frame(conv, background="#FFFFFF"); crow.pack(fill="x", padx=12, pady=(0, 2))
         tk.Label(crow, text=self.t("clk_conv_city", "对方城市:"), font=self._ui_font(9), background="#FFFFFF", foreground=self.UI_TEXT).pack(side="left")
         conv_cities = list(self._clock_selected())
@@ -7039,10 +7062,10 @@ try {
             ccv.bind("<Configure>", draw_card_round)
             trow2 = tk.Frame(card, background=W); trow2.pack(fill="x", padx=12, pady=(10, 0))
             tk.Label(trow2, text=name, font=self._ui_font(11, True), background=W, foreground=self.UI_ACCENT if idx == 0 else self.UI_TEXT).pack(side="left")
-            sh = tk.Label(trow2, text=self.t("clk_share", "分享"), font=self._ui_font(9), background=W, foreground="#64748B", cursor="hand2")
+            sh = tk.Label(trow2, text=self.t("clk_share", "分享"), font=self._ui_font(9), background=W, foreground=self.UI_MUTED, cursor="hand2")
             sh.pack(side="right")
             sh.bind("<Enter>", lambda e, w=sh: w.configure(foreground=self.UI_ACCENT))
-            sh.bind("<Leave>", lambda e, w=sh: w.configure(foreground="#64748B"))
+            sh.bind("<Leave>", lambda e, w=sh: w.configure(foreground=self.UI_MUTED))
             tl = tk.Label(card, text="--:--:--", font=self._ui_font(19, True), background=W, foreground=self.UI_TEXT)
             tl.pack(anchor="w", padx=12)
             dl = tk.Label(card, text="", font=self._ui_font(9), background=W, foreground=self.UI_MUTED)
@@ -7177,11 +7200,11 @@ try {
         panel = tk.Frame(self._content, background=self.UI_BG); self._clockset_panel = panel
         head = tk.Frame(panel, background=self.UI_BG); head.pack(fill="x", padx=14, pady=(10, 4))
         self._panel_title(head, self.t("clk_pick_title", "选择世界时间城市"), "clock")
-        back = tk.Label(head, text=self.t("cmn_back", "返回"), font=self._ui_font(9), background=self.UI_BG, foreground="#64748B", cursor="hand2")
+        back = tk.Label(head, text=self.t("cmn_back", "返回"), font=self._ui_font(9), background=self.UI_BG, foreground=self.UI_MUTED, cursor="hand2")
         back.pack(side="right")
         back.bind("<Button-1>", lambda e: self._show_clock_panel())
         back.bind("<Enter>", lambda e: back.configure(foreground=self.UI_ACCENT))
-        back.bind("<Leave>", lambda e: back.configure(foreground="#64748B"))
+        back.bind("<Leave>", lambda e: back.configure(foreground=self.UI_MUTED))
         tk.Label(panel, text=self.t("clk_pick_hint", "勾选要显示的城市（本地永远在第一张）"), font=self._ui_font(9), background=self.UI_BG, foreground=self.UI_MUTED).pack(anchor="w", padx=14, pady=(2, 0))
         self._clockset_cnt = tk.Label(panel, text="", font=self._ui_font(9, True), background=self.UI_BG, foreground=self.UI_ACCENT)
         self._clockset_cnt.pack(anchor="w", padx=14)
@@ -7505,11 +7528,11 @@ try {
         self._panel_title(head, self.t("text_translate", "文本翻译"), "translate")
         self._tt_status = tk.StringVar(value="")
         tk.Label(head, textvariable=self._tt_status, font=self._ui_font(9), background=self.UI_BG, foreground=self.UI_MUTED).pack(side="left", padx=8)
-        back = tk.Label(head, text=self.t("cmn_back", "返回"), font=self._ui_font(9), background=self.UI_BG, foreground="#64748B", cursor="hand2")
+        back = tk.Label(head, text=self.t("cmn_back", "返回"), font=self._ui_font(9), background=self.UI_BG, foreground=self.UI_MUTED, cursor="hand2")
         back.pack(side="right")
         back.bind("<Button-1>", lambda e: self._show_main_view())
         back.bind("<Enter>", lambda e: back.configure(foreground=self.UI_ACCENT))
-        back.bind("<Leave>", lambda e: back.configure(foreground="#64748B"))
+        back.bind("<Leave>", lambda e: back.configure(foreground=self.UI_MUTED))
         ctrl = tk.Frame(panel, background=self.UI_BG); ctrl.pack(fill="x", padx=14, pady=(0, 6))
         tk.Label(ctrl, text=self.t("tt_src_label", "源语言"), font=self._ui_font(10), background=self.UI_BG, foreground=self.UI_TEXT).pack(side="left")
         self._tt_source_var = tk.StringVar(value=self.t("tr_auto", "自动检测"))
@@ -7924,11 +7947,11 @@ try {
         W = "#FFFFFF"
         head = tk.Frame(panel, background=self.UI_BG); head.pack(fill="x", padx=14, pady=(10, 4))
         self._panel_title(head, self.t("media_dl", "无水印下载"), "download")
-        back = tk.Label(head, text=self.t("cmn_back", "返回"), font=self._ui_font(9), background=self.UI_BG, foreground="#64748B", cursor="hand2")
+        back = tk.Label(head, text=self.t("cmn_back", "返回"), font=self._ui_font(9), background=self.UI_BG, foreground=self.UI_MUTED, cursor="hand2")
         back.pack(side="right")
         back.bind("<Button-1>", lambda e: self._show_main_view())
         back.bind("<Enter>", lambda e: back.configure(foreground=self.UI_ACCENT))
-        back.bind("<Leave>", lambda e: back.configure(foreground="#64748B"))
+        back.bind("<Leave>", lambda e: back.configure(foreground=self.UI_MUTED))
         card = tk.Frame(panel, background=self.UI_BG)
         self._rounded_backing(card)
         card.pack(fill="both", expand=True, padx=12, pady=(6, 10))
@@ -8164,12 +8187,12 @@ try {
         if not hasattr(self, "_ai_chat_history"): self._ai_chat_history = []  # [{role, content}...], 切走切回不丢
         from tkinter import font as tkfont
         panel = tk.Frame(self._content, background="#FFFFFF"); self._ai_panel = panel
-        CHAT_BG, BUB_AI, TXT_MUTED = "#FFFFFF", "#F1F5FB", "#64748B"
+        CHAT_BG, BUB_AI, TXT_MUTED = "#FFFFFF", "#F1F5FB", self.UI_MUTED
         chat_font = tkfont.Font(font=self._ui_font(11))
         self._ai_chats = self._load_ai_chats()
         self._ai_chat_id = None
         # ---- 左侧边栏: 新对话 + 最近对话 (侧边的功能入口按钮已按 Jane 要求去掉, 功能本身保留: AI 设置在系统设置里, 看图翻译在截图工具栏/贴图菜单, 智能回复 Shift+F4) ----
-        SIDE_BG = "#F7F9FD"
+        SIDE_BG = "#F5F5F7"
         side = tk.Frame(panel, background=SIDE_BG, width=224); side.pack(side="left", fill="y"); side.pack_propagate(False)
         tk.Frame(panel, background=self.UI_BORDER, width=1).pack(side="left", fill="y")
         chatcol = tk.Frame(panel, background=CHAT_BG); chatcol.pack(side="left", fill="both", expand=True)
@@ -8284,14 +8307,14 @@ try {
         def _chip_icon(draw_fn, on=False):
             # 豆包式小方片: 浅蓝圆角方底 + 蓝图标; 激活态 (点赞/点踩选中) 蓝底白图标
             from PIL import ImageDraw as _ID2
-            chip_bg = "#3B82F6" if on else "#E9F2FD"
+            chip_bg = "#007AFF" if on else "#E9F2FD"
             big = Image.new("RGBA", (84, 84), (0, 0, 0, 0))
             _ID2.Draw(big).rounded_rectangle([2, 2, 82, 82], radius=24, fill=chip_bg)
             g = Image.new("RGBA", (48, 48), (0, 0, 0, 0))
             if draw_fn is _draw_copy:
-                draw_fn(_ID2.Draw(g), "#FFFFFF" if on else "#3B82F6", fill=chip_bg)
+                draw_fn(_ID2.Draw(g), "#FFFFFF" if on else "#007AFF", fill=chip_bg)
             else:
-                draw_fn(_ID2.Draw(g), "#FFFFFF" if on else "#3B82F6")
+                draw_fn(_ID2.Draw(g), "#FFFFFF" if on else "#007AFF")
             big.alpha_composite(g.resize((52, 52), Image.LANCZOS), (16, 16))
             return ImageTk.PhotoImage(big.resize((28, 28), Image.LANCZOS))
         self._ai_chip_icons = {"copy": _chip_icon(_draw_copy), "speak": _chip_icon(_draw_speak),
@@ -8350,7 +8373,7 @@ try {
                  "icon": self._ai_menu_icons["pin"], "command": lambda: pin_chat(cid)},
                 {"label": self.t("ai_rename", "重命名"), "icon": self._ai_menu_icons["pencil"], "command": lambda: rename_chat(cid)},
                 {"sep": True},
-                {"label": self.t("ai_delete", "删除"), "icon": self._ai_menu_icons["trash"], "color": "#D9534F", "command": lambda: del_chat(cid)},
+                {"label": self.t("ai_delete", "删除"), "icon": self._ai_menu_icons["trash"], "color": self.UI_DANGER, "command": lambda: del_chat(cid)},
             ]
             self._popup_menu(e.x_root, e.y_root, items)
         self._ai_chat_menu_popup = popup_chat_menu
@@ -8435,10 +8458,10 @@ try {
         self._ai_think_var = tk.BooleanVar(value=(self.cfg.get("AI", "Thinking", fallback="0") or "0").strip() == "1")  # 深度思考开关: 挂在输入框 + 菜单里 (仿 GPT), 保存见 _save_ai_thinking
         busy = {"on": False}
         def link(parent, text, cmd):
-            lb = tk.Label(parent, text=text, font=self._ui_font(9), background=CHAT_BG, foreground="#64748B", cursor="hand2")
+            lb = tk.Label(parent, text=text, font=self._ui_font(9), background=CHAT_BG, foreground=self.UI_MUTED, cursor="hand2")
             lb.bind("<Button-1>", lambda e: cmd())
             lb.bind("<Enter>", lambda e: lb.configure(foreground=self.UI_ACCENT))
-            lb.bind("<Leave>", lambda e: lb.configure(foreground="#64748B"))
+            lb.bind("<Leave>", lambda e: lb.configure(foreground=self.UI_MUTED))
             return lb
         # ---- 气泡区: 可滚动白底画布 ----
         wrap = tk.Frame(chatcol, background=CHAT_BG); wrap.pack(fill="both", expand=True)
@@ -8594,11 +8617,11 @@ try {
                 hint.pack(pady=16); rows.append(hint)
                 sug = tk.Frame(inner, background=CHAT_BG); sug.pack(); rows.append(sug)  # GPT 式建议行: 空对话时给两个最常用的起手动作
                 def sug_row(text, cmd):
-                    lb = tk.Label(sug, text=text, font=self._ui_font(10), background=CHAT_BG, foreground="#64748B", cursor="hand2")
+                    lb = tk.Label(sug, text=text, font=self._ui_font(10), background=CHAT_BG, foreground=self.UI_MUTED, cursor="hand2")
                     lb.pack(anchor="w", pady=5)
                     lb.bind("<Button-1>", lambda e: cmd())
                     lb.bind("<Enter>", lambda e: lb.configure(foreground=self.UI_ACCENT))
-                    lb.bind("<Leave>", lambda e: lb.configure(foreground="#64748B"))
+                    lb.bind("<Leave>", lambda e: lb.configure(foreground=self.UI_MUTED))
                 sug_row("🖼  " + self.t("ai_sug_image", "看图提问 — 截图或选一张图问 AI"), lambda: pick_image_dialog())
                 sug_row("✍  " + self.t("ai_sug_write", "撰写或编辑 — 让 AI 帮你写、帮你改"), lambda: (inp.insert("1.0", self.t("ai_write_prefix", "帮我写: ")), inp.focus_set()))
         def show_typing():
@@ -8742,7 +8765,7 @@ try {
         attach_bar = tk.Frame(chatcol, background=CHAT_BG)
         attach_thumb = tk.Label(attach_bar, background=CHAT_BG); attach_thumb.pack(side="left", padx=(14, 6))
         attach_name = tk.Label(attach_bar, background=CHAT_BG, foreground=TXT_MUTED, font=self._ui_font(9)); attach_name.pack(side="left")
-        attach_x = tk.Label(attach_bar, text="✕", background=CHAT_BG, foreground="#64748B", cursor="hand2", font=self._ui_font(10, True)); attach_x.pack(side="left", padx=6)
+        attach_x = tk.Label(attach_bar, text="✕", background=CHAT_BG, foreground=self.UI_MUTED, cursor="hand2", font=self._ui_font(10, True)); attach_x.pack(side="left", padx=6)
         def refresh_attach():
             if attach["kind"] is None:
                 attach_bar.pack_forget(); return
@@ -9302,7 +9325,7 @@ try {
         tgt_combo.pack(side="left")
         compare_var = tk.BooleanVar(value=(self.cfg.get("Snip", "TransCompare", fallback="1") or "1") != "0")
         ttk.Checkbutton(head, text=self.t("tr_compare", "对照翻译"), variable=compare_var).pack(side="left", padx=10)
-        busy_var = tk.StringVar(); ttk.Label(head, textvariable=busy_var, foreground="#2563EB").pack(side="left", padx=4)
+        busy_var = tk.StringVar(); ttk.Label(head, textvariable=busy_var, foreground=self.UI_ACCENT).pack(side="left", padx=4)
         bar = ttk.Frame(win); bar.pack(side="bottom", fill="x", padx=8, pady=6)
         reply_box = ttk.Frame(win); reply_box.pack(side="bottom", fill="x")  # AI 智能回复的结果显示在按钮行下方 (先占位, 空着不占高度)
         btn_row = ttk.Frame(win); btn_row.pack(side="bottom", fill="x", pady=(4, 0))
@@ -9428,9 +9451,9 @@ try {
         orig_card.pack_propagate(False)
         tran_hold = tk.Frame(root, bg=RBG, width=sel_w, height=th * 24 + 12)
         tran_hold.pack_propagate(False)
-        self._rounded_backing(tran_hold, radius=10, fill=self.UI_SURFACE, bg=RBG, border="#C9D6E8")
+        self._rounded_backing(tran_hold, radius=10, fill=self.UI_SURFACE, bg=RBG, border=self.UI_BORDER)
         strip = tk.Frame(root, bg=RBG)
-        self._rounded_backing(strip, radius=8, fill=self.UI_BG, bg=RBG, border="#C9D6E8")
+        self._rounded_backing(strip, radius=8, fill=self.UI_BG, bg=RBG, border=self.UI_BORDER)
         def _gap():
             tk.Frame(root, bg=RBG, height=6).pack(side="top", fill="x")
         if flip:  # 译文翻到选区上方: [工具条][译文框][原文框], 原文框仍对准选区
@@ -9619,11 +9642,11 @@ try {
         self._panel_title(head, self.t("gal_title", "截图历史"), "star")
         self._gallery_count_var = tk.StringVar()
         tk.Label(head, textvariable=self._gallery_count_var, font=self._ui_font(9), background=self.UI_BG, foreground=self.UI_MUTED).pack(side="left", padx=8)
-        back = tk.Label(head, text=self.t("cmn_back", "返回"), font=self._ui_font(9), background=self.UI_BG, foreground="#64748B", cursor="hand2")
+        back = tk.Label(head, text=self.t("cmn_back", "返回"), font=self._ui_font(9), background=self.UI_BG, foreground=self.UI_MUTED, cursor="hand2")
         back.pack(side="right")
         back.bind("<Button-1>", lambda e: self._show_main_view())
         back.bind("<Enter>", lambda e: back.configure(foreground=self.UI_ACCENT))
-        back.bind("<Leave>", lambda e: back.configure(foreground="#64748B"))
+        back.bind("<Leave>", lambda e: back.configure(foreground=self.UI_MUTED))
         ttk.Button(head, text=self.t("gal_delall", "删除全部"), command=self._gallery_delete_all).pack(side="right", padx=(0, 10))
         outer = ttk.Frame(panel); outer.pack(fill="both", expand=True, padx=10, pady=(2, 10))
         canvas = tk.Canvas(outer, highlightthickness=0, background=self.UI_BG); self._gallery_cv = canvas

@@ -455,14 +455,14 @@ class GptAuditBatch1Tests(unittest.TestCase):
 
 class AiPanelBatch1Tests(unittest.TestCase):
     def test_brand_accent_unified(self):
-        self.assertIn('UI_ACCENT = "#3B82F6"', SOURCE)
-        self.assertIn('UI_ACCENT_HOVER = "#60A5FA"', SOURCE)
-        self.assertIn('UI_ACCENT_PRESS = "#2563EB"', SOURCE)
+        self.assertIn('UI_ACCENT = "#007AFF"', SOURCE)
+        self.assertIn('UI_ACCENT_HOVER = "#409CFF"', SOURCE)
+        self.assertIn('UI_ACCENT_PRESS = "#0062CC"', SOURCE)
         self.assertNotIn('UI_ACCENT = "#287FD1"', SOURCE)
 
     def test_ai_sidebar_224_blue_gray(self):
         body = method_text("_build_ai_panel")
-        self.assertIn('SIDE_BG = "#F7F9FD"', body)   # 2026-11-28: 会话列底色并入令牌, 与主内容底分层
+        self.assertIn('SIDE_BG = "#F5F5F7"', body)   # Sonoma: 会话列用苹果灰, 与主内容底分层
         self.assertIn("width=224", body)
 
     def test_bubble_width_adaptive(self):
@@ -485,7 +485,7 @@ class UiPhase1Tests(unittest.TestCase):
     def test_sidebar_dark_palette_is_consistent(self):
         body = method_text("build_ui")
         self.assertIn("SIDE = self.UI_SIDE", body)          # 2026-11-28: 边栏底色收敛到令牌
-        self.assertIn('UI_SIDE = "#111C2E"', SOURCE)
+        self.assertIn('UI_SIDE = "#F5F5F7"', SOURCE)
         self.assertIn("side = tk.Frame(self, background=SIDE", body)   # 外框必须同色 (PR #6 漏改处)
         self.assertIn("brand = tk.Frame(side, background=SIDE)", body)  # 品牌区框架必须同色 (PR #6 漏改处)
         seg_start = body.find("side = tk.Frame")
@@ -493,14 +493,14 @@ class UiPhase1Tests(unittest.TestCase):
         self.assertNotIn("background=W", seg)  # 边栏内不许再留白色底子元素
         self.assertNotIn("bg=W", seg)
 
-    def test_nav_item_dark_text_colors(self):
+    def test_nav_item_light_palette(self):
         seg = SOURCE[SOURCE.find("class _NavItem"):SOURCE.find("class App")]
-        self.assertIn('"#3B82F6"', seg)   # 选中胶囊品牌蓝
-        self.assertIn('"#C9D6E8"', seg)   # 未选浅灰蓝字 (旧值 #1C2634 在深底上不可读)
-        self.assertNotIn('"#1C2634"', seg)
+        self.assertIn('"#D1D1D6"', seg)   # 选中=中性灰圆角块
+        self.assertIn('"#E8E8ED"', seg)   # 悬停浅灰
+        self.assertNotIn('"#C9D6E8"', seg)  # 旧深栏配色不许回来
 
     def test_primary_button_brand_color(self):
-        self.assertIn('"primary": ("#3B82F6", "#3B82F6", "#FFFFFF", "#60A5FA")', SOURCE)
+        self.assertIn('"primary": ("#007AFF", "#007AFF", "#FFFFFF", "#409CFF")', SOURCE)
 
 
 
@@ -973,11 +973,11 @@ class UiRedesignPhase1Tests(unittest.TestCase):
     def test_type_scale_is_single_source(self):
         self.assertIn('TYPE = {"brand": 18, "page": 15, "card": 11, "body": 10, "caption": 9, "micro": 8}', SOURCE)
 
-    def test_sidebar_selection_uses_tint_not_solid_blue(self):
+    def test_sidebar_selection_uses_neutral_gray(self):
         seg = SOURCE[SOURCE.find("class _NavItem"):SOURCE.find("class App")]
-        self.assertIn('fill="#1C2C45"', seg)          # 选中=深色 tint 底
-        self.assertIn('create_rectangle(0, 10, 3, 30, fill="#3B82F6"', seg)  # 左侧 3px 指示条
-        self.assertNotIn('fill = "#3B82F6" if self._selected', seg)          # 不再是整块实心蓝
+        self.assertIn('fill=self._pal["active"]', seg)   # 选中=中性灰圆角块 (苹果侧栏)
+        self.assertNotIn('create_rectangle(0, 10, 3, 30', seg)  # 旧深色栏的蓝色指示条已移除
+        self.assertNotIn('fill = "#3B82F6" if self._selected', seg)
 
     def test_records_header_has_one_menu_for_destructive_actions(self):
         body = method_text("build_ui")
@@ -995,7 +995,7 @@ class UiRedesignPhase1Tests(unittest.TestCase):
 
     def test_list_rows_taller_and_softer_stripes(self):
         self.assertIn("rowheight=34", SOURCE)
-        self.assertIn('UI_STRIPE = "#FAFBFE"', SOURCE)
+        self.assertIn('UI_STRIPE = "#FAFAFC"', SOURCE)
 
 
 class UiRedesignPhase15Tests(unittest.TestCase):
@@ -1080,7 +1080,7 @@ class UiPhase2Tests(unittest.TestCase):
         self.assertIn("else: _phr_empty.place(relx=0.5, rely=0.34, anchor=\"center\")", self.src)
 
     def test_ui_tokens_for_p2(self):
-        self.assertIn('UI_ACCENT_LINE = "#BFDBFE"', self.src)
+        self.assertIn('UI_ACCENT_LINE = "#99C2FF"', self.src)
         self.assertIn("R_CARD", self.src)
 
 
@@ -1092,8 +1092,8 @@ class UiPhase3Tests(unittest.TestCase):
         cls.src = open(os.path.join(ROOT, "main.py"), encoding="utf-8").read()
 
     def test_interaction_tokens_defined(self):
-        for tok, val in (("UI_HOVER", "#E8F1FE"), ("UI_PRESS", "#DBEAFE"),
-                         ("UI_DANGER_LINE", "#FCA5A5"), ("UI_DANGER_HOVER", "#FEE2E2"), ("UI_DANGER_PRESS", "#FECACA")):
+        for tok, val in (("UI_HOVER", "#E5F0FF"), ("UI_PRESS", "#CCE4FF"),
+                         ("UI_DANGER_LINE", "#FFB4B0"), ("UI_DANGER_HOVER", "#FFDCD9"), ("UI_DANGER_PRESS", "#FFC9C5")):
             self.assertIn(f'{tok} = "{val}"', self.src)
 
     def test_theme_maps_use_tokens_not_old_tints(self):
