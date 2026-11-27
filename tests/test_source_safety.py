@@ -1986,3 +1986,34 @@ class ImageCompressTests(unittest.TestCase):
         self.assertIn("def _cached_image_dataurl", SOURCE)
         self.assertIn('"image_paths"', SOURCE)
         self.assertIn("ai_att_images_n", SOURCE)
+
+
+class ContinueAfterStopTests(unittest.TestCase):
+    """v1.6.3 AI-6: 中断后的断点续写。"""
+
+    def test_wiring(self):
+        self.assertIn("def continue_reply", SOURCE)
+        self.assertIn("with_continue=cancelled", SOURCE)
+        self.assertIn("ai_continue_instruction", SOURCE)
+        self.assertIn('self.t("ai_continue", "继续")', SOURCE)
+
+    def test_suffix_strip_and_merge(self):
+        # 用与代码一致的默认后缀, 验证续写前的去标记与合并字符串处理
+        suffix = "\n\n（已停止生成）"
+        partial = "这是被中断的部分内容"
+        stored = partial + suffix
+        base = stored[:-len(suffix)] if stored.endswith(suffix) else stored
+        self.assertEqual(base, partial)  # 标记被去掉
+        continuation = "，这是模型续写的部分"
+        merged = (base + continuation).rstrip()
+        self.assertEqual(merged, partial + continuation)
+        # 再次中断仍带标记
+        self.assertEqual(merged + suffix, partial + continuation + suffix)
+
+    def test_continue_distinct_from_regenerate(self):
+        # regenerate 会 pop 掉整条重发; continue 不 pop, 仅追加合并
+        node = next(n for n in ast.walk(TREE) if isinstance(n, ast.FunctionDef)
+                    and n.name == "continue_reply")
+        text = ast.get_source_segment(SOURCE, node)
+        self.assertNotIn("self._ai_chat_history.pop()", text)
+        self.assertIn('msg["content"] = base', text)

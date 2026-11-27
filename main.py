@@ -9044,7 +9044,7 @@ try {
         def scroll_bottom():
             panel.update_idletasks(); cv.yview_moveto(1.0)
         if not hasattr(self, "_ai_fb"): self._ai_fb = {}  # 点赞/点踩状态 {id(消息dict): 1|-1}: 只记本次运行, 不进存档不发给 AI
-        def add_bubble(role, text, with_regen=False, msg_ref=None):
+        def add_bubble(role, text, with_regen=False, msg_ref=None, with_continue=False):
             row = tk.Frame(inner, background=CHAT_BG); row.pack(fill="x", pady=(10, 0), padx=14)
             if role == "user":
                 display_text = ("🖼 " + text) if msg_ref and msg_ref.get("image_path") else text
@@ -9081,6 +9081,11 @@ try {
                     self.clip_set((f"问: {q}\n\n答: {t}" if q else t))
                     self.status.set(self.t("ai_share_copied", "已复制问答到剪贴板, 可粘贴分享"))
                 chip("share", lambda e: do_share())
+                if with_continue:
+                    cl = tk.Label(acts, text=self.t("ai_continue", "继续"), background=BUB_AI,
+                                  foreground=self.UI_ACCENT, font=self._ui_font(10, True), cursor="hand2")
+                    cl.pack(side="right", padx=(6, 0))
+                    cl.bind("<Button-1>", lambda e: continue_reply())
                 if with_regen:
                     last_regen["lbl"] = chip("regen", lambda e: regenerate(), side="right")
             rows.append(row)
@@ -9241,7 +9246,8 @@ try {
                             if not panel.winfo_exists(): return
                             self._save_current_chat()
                             set_send_enabled(True); hide_typing(); strip_last_regen()
-                            if r: add_bubble("assistant", r, with_regen=not cancelled, msg_ref=self._ai_chat_history[-1])
+                            if r: add_bubble("assistant", r, with_regen=not cancelled,
+                                             with_continue=cancelled, msg_ref=self._ai_chat_history[-1])
                             elif cancelled: self.status.set(self.t("ai_stopped", "已停止生成"))
                         else:  # 已切到别的对话: 存回它自己的存档, 当前界面不动
                             if r: hist_ref.append({"role": "assistant", "content": r})
@@ -9283,6 +9289,90 @@ try {
                 except Exception: pass
             last_regen["lbl"] = None
             request_reply()
+        def continue_reply():
+            """中断后的断点续写 (区别于 regenerate 整段重生成): 去掉「已停止」标记, 让模型接着往下写, 再合并回同一条回复。"""
+            import threading
+            if busy["on"]: return
+            if not self._ai_chat_history or self._ai_chat_history[-1]["role"] != "assistant": return
+            msg = self._ai_chat_history[-1]
+            suffix = "\n\n" + self.t("ai_stopped_suffix", "（已停止生成）")
+            base = msg["content"]
+            if base.endswith(suffix): base = base[:-len(suffix)]
+            msg["content"] = base
+            if rows:
+                r0 = rows.pop()
+                try: r0.destroy()
+                except Exception: pass
+            busy["on"] = True
+            cancel_event = threading.Event()
+            send_ui["cancel_event"] = cancel_event
+            set_send_enabled(False); show_typing()
+            hist_ref = self._ai_chat_history
+            streamed = {"text": ""}; last_paint = [0.0]
+            def on_token(piece):
+                streamed["text"] += piece
+                now = time.time()
+                if now - last_paint[0] < 0.05: return
+                last_paint[0] = now
+                snapshot = base + streamed["text"]
+                def paint():
+                    if not panel.winfo_exists() or self._ai_chat_history is not hist_ref: return
+                    if typing["row"] is not None: hide_typing()
+                    label = send_ui.get("stream_label")
+                    if label is None or not label.winfo_exists():
+                        label = tk.Label(inner, text=snapshot, background=BUB_AI, foreground=self.UI_TEXT,
+                                         font=chat_font, justify="left", anchor="w",
+                                         wraplength=self._bubble_wrap_w(), padx=13, pady=9)
+                        label.pack(anchor="w", padx=14, pady=(10, 0)); send_ui["stream_label"] = label
+                    else: label.configure(text=snapshot)
+                    scroll_bottom()
+                self._ui_queue.put(paint)
+            def work():
+                try:
+                    kept, dropped = self._select_context(hist_ref, self._context_budget())
+                    msgs = [self._restore_payload(it) for it in kept]
+                    ap = getattr(self, "_active_prompt", None)
+                    if ap and ap.get("prompt"):
+                        msgs = [{"role": "system", "content": ap["prompt"]}] + msgs
+                    if dropped and self._auto_summary_on():
+                        summary = self._summarize_dropped(dropped)
+                        if summary:
+                            msgs = [{"role": "system", "content": self.t(
+                                "ai_summary_head", "以下是早期对话的摘要, 供参考:") + "\n" + summary}] + msgs
+                    msgs.append({"role": "user", "content": self.t(
+                        "ai_continue_instruction",
+                        "请从上面中断的位置直接继续输出, 不要重复或概括已经写过的内容, 也不要寒暄。")})
+                    r = self._ai_chat_messages(msgs, max_tokens=2048, route="chat",
+                                               stream_callback=on_token, cancel_event=cancel_event)
+                    def done():
+                        busy["on"] = False; send_ui["cancel_event"] = None
+                        if send_ui.get("stream_label") is not None:
+                            try: send_ui["stream_label"].destroy()
+                            except Exception: pass
+                            send_ui["stream_label"] = None
+                        if self._ai_chat_history is hist_ref:
+                            merged = (base + (r or "")).rstrip()
+                            if cancel_event.is_set():
+                                merged = merged + suffix
+                            msg["content"] = merged
+                            if not panel.winfo_exists(): return
+                            self._save_current_chat()
+                            set_send_enabled(True); hide_typing()
+                            add_bubble("assistant", merged, with_regen=not cancel_event.is_set(),
+                                       with_continue=cancel_event.is_set(), msg_ref=msg)
+                    self._ui_queue.put(done)
+                except Exception as e:
+                    em = str(e)
+                    def fail():
+                        busy["on"] = False; send_ui["cancel_event"] = None
+                        if self._ai_chat_history is hist_ref:
+                            msg["content"] = base + suffix
+                            if panel.winfo_exists():
+                                set_send_enabled(True); hide_typing()
+                                add_bubble("assistant", msg["content"], with_continue=True, msg_ref=msg)
+                                self.status.set(em)
+                    self._ui_queue.put(fail)
+            threading.Thread(target=work, daemon=True).start()
         def clear():
             if busy["on"]: return
             cid = getattr(self, "_ai_chat_id", None)
