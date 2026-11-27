@@ -996,6 +996,8 @@ class App(tk.Tk):
         self._mini_win = None; self._mini_after = None
         self._tk_sequences = []    # 窗口内绑定的序列, 改热键时解绑旧的
         self.cfg = self.load_config()
+        if self.cfg.get("Config", "Theme", fallback="light") == "dark":
+            self._apply_dark_tokens()
         self._load_lang()
         self._apply_proxy_config()
         self._apply_theme()
@@ -1274,6 +1276,21 @@ class App(tk.Tk):
     UI_SIDE = "#F5F5F7"      # 浅色磨砂侧栏 (sidebar)
     UI_SIDE_TEXT = "#3C3C43"  # 侧栏文字
     UI_SIDE_ACTIVE_BG = "#D1D1D6"  # 侧栏选中 (中性灰, 苹果侧栏不用蓝色)
+    # ---- 深色模式令牌 (v1.6.2, 苹果深色系统色): 重启时按 [Config] Theme 覆盖上面的浅色值 ----
+    THEME_DARK = {
+        "UI_BG": "#1C1C1E", "UI_SURFACE": "#2C2C2E", "UI_BORDER": "#38383A",
+        "UI_BORDER_STRONG": "#48484A", "UI_TEXT": "#FFFFFF", "UI_TEXT_2": "#EBEBF5",
+        "UI_MUTED": "#98989F", "UI_MUTED_2": "#8E8E93", "UI_ACCENT": "#0A84FF",
+        "UI_ACCENT_HOVER": "#5AAEFF", "UI_ACCENT_PRESS": "#0066D6",
+        "UI_ACCENT_TINT": "#1E3A5F", "UI_ACCENT_LINE": "#2A6BB0", "UI_SEL_BG": "#3A5A80",
+        "UI_HEAD_BG": "#2C2C2E", "UI_STRIPE": "#242426", "UI_SOFT": "#3A3A3C",
+        "UI_DANGER": "#FF453A", "UI_DANGER_BG": "#5B211F", "UI_DANGER_LINE": "#8A332E",
+        "UI_DANGER_HOVER": "#6E2A27", "UI_DANGER_PRESS": "#7A2F2C", "UI_HOVER": "#33415C",
+        "UI_PRESS": "#2C3E57", "UI_SUCCESS": "#30D158", "UI_SIDE": "#161617",
+        "UI_SIDE_TEXT": "#EBEBF5", "UI_SIDE_ACTIVE_BG": "#3A3A3C"}
+    def _apply_dark_tokens(self):
+        for _k, _v in self.THEME_DARK.items():
+            setattr(type(self), _k, _v)
     # ---- 间距: 只用 4 的倍数, 杜绝 3/5/7 这类随手值 ----
     SP_1, SP_2, SP_3, SP_4, SP_5, SP_6 = 4, 8, 12, 16, 24, 32
     # ---- 圆角: 卡片 12 / 按钮 8 / 输入 8 / 药丸 999 ----
@@ -1443,7 +1460,7 @@ class App(tk.Tk):
     # ---------- UI ----------
     def build_ui(self):
         # ===== 设计: 深色边栏 + 浅色工作区 + 圆角胶囊按钮 + 白色卡片分区 (2026-11-27 UI 第一批: 边栏深色化, 修 GPT PR #6 只改子元素漏改外框/品牌区/导航文字色的三处) =====
-        W = "#FFFFFF"
+        W = self.UI_SURFACE
         SIDE = self.UI_SIDE  # 边栏底 (令牌): 外框/品牌区/导航项必须同色, 漏一处就深一块白一块
         # ---------- 左侧边栏导航 (Jane 2026-11-27 拍板边栏版; 排序按她定: AI 助手第一, 翻译第二, 世界时钟与货币汇率分开不合并) ----------
         side = tk.Frame(self, background=SIDE, width=216, highlightthickness=0)  # 204→216: 导航行左右留白够, 不再贴边; 去 1px 描边改用色差分隔
@@ -1897,6 +1914,13 @@ class App(tk.Tk):
         lang_box = ttk.Combobox(lrow, textvariable=self.lang_var, width=9, state="readonly", values=["Chinese", "English"])
         lang_box.pack(side="left", padx=4); lang_box.bind("<<ComboboxSelected>>", self._switch_language)
         ttk.Label(lrow, text=self.t("lang_restart_hint", "(重启后生效)"), foreground=self.UI_MUTED).pack(side="left")
+        trow = ttk.Frame(frm); trow.pack(fill="x", pady=3)
+        ttk.Label(trow, text=self.t("theme_label", "外观:")).pack(side="left")
+        self._theme_var = tk.StringVar(value=self.cfg.get("Config", "Theme", fallback="light"))
+        for txt, val in [(self.t("theme_light", "浅色"), "light"), (self.t("theme_dark", "深色"), "dark")]:
+            ttk.Radiobutton(trow, text=txt, variable=self._theme_var, value=val,
+                            command=self._switch_theme).pack(side="left", padx=4)
+        ttk.Label(trow, text=self.t("lang_restart_hint", "(重启后生效)"), foreground=self.UI_MUTED).pack(side="left")
         ttk.Checkbutton(frm, text=self.t("wave_sound", "提示音 (复制/粘贴成功时响一声)"), variable=self.wave_var, command=self._toggle_wave).pack(anchor="w", pady=3)
         mfrm = self._set_section(frm, self.t("mini_frame", "迷你窗口 (复制/粘贴时自动悬浮)"))
         mrow = ttk.Frame(mfrm); mrow.pack(fill="x", pady=4, padx=4)
@@ -2534,7 +2558,7 @@ class App(tk.Tk):
         """常用语库面板: 双击一条 = 切回主界面并把主窗口藏回托盘, 焦点回到刚才的软件后直接粘贴进去;
         也可以复制到剪贴板慢慢用。新增/编辑/删除/排序改完即存, 重启不丢, 队列的删除全部不影响它。"""
         panel = tk.Frame(self._content, background=self.UI_BG); self._phrases_panel = panel
-        W = "#FFFFFF"
+        W = self.UI_SURFACE
         head = tk.Frame(panel, background=self.UI_BG); head.pack(fill="x", padx=14, pady=(10, 4))
         self._panel_title(head, self.t("phrase_library", "常用语"), "phrases")
         back = tk.Label(head, text=self.t("cmn_back", "返回"), font=self._ui_font(9), background=self.UI_BG, foreground=self.UI_MUTED, cursor="hand2")
@@ -2639,6 +2663,12 @@ class App(tk.Tk):
         if not self.cfg.has_section("Config"): self.cfg.add_section("Config")
         self.cfg.set("Config", "Language", new); self.save_config()
         messagebox.showinfo(self.t("lang_label", "语言:"), self.t("lang_applied", "语言设置已保存, 重启软件后生效"))
+    def _switch_theme(self):
+        new = self._theme_var.get().strip()
+        if new == self.cfg.get("Config", "Theme", fallback="light"): return
+        if not self.cfg.has_section("Config"): self.cfg.add_section("Config")
+        self.cfg.set("Config", "Theme", new); self.save_config()
+        messagebox.showinfo(self.t("theme_label", "外观:"), self.t("theme_applied", "外观设置已保存, 重启软件后生效"))
 
     # ---------- records ----------
     def _schedule_search_refresh(self):
@@ -6636,7 +6666,7 @@ try {
         return photo
     def _build_fx_panel(self):
         panel = tk.Frame(self._content, background=self.UI_BG); self._fx_panel = panel
-        W = "#FFFFFF"
+        W = self.UI_SURFACE
         state = {"loading": False}
         head = tk.Frame(panel, background=self.UI_BG); head.pack(fill="x", padx=14, pady=(10, 4))
         self._panel_title(head, self.t("fx_rates", "汇率换算"), "fx")
@@ -6801,7 +6831,7 @@ try {
 
     def _build_calc_panel(self):
         panel = tk.Frame(self._content, background=self.UI_BG); self._calc_panel = panel
-        W = "#FFFFFF"
+        W = self.UI_SURFACE
         head = tk.Frame(panel, background=self.UI_BG); head.pack(fill="x", padx=14, pady=(10, 4))
         self._panel_title(head, self.t("calculator", "计算器"), "calc")
         back = tk.Label(head, text=self.t("cmn_back", "返回"), font=self._ui_font(9), background=self.UI_BG, foreground=self.UI_MUTED, cursor="hand2")
@@ -7174,7 +7204,7 @@ try {
 
     def _build_clock_panel(self):
         panel = tk.Frame(self._content, background=self.UI_BG); self._clock_panel = panel
-        W = "#FFFFFF"
+        W = self.UI_SURFACE
         head = tk.Frame(panel, background=self.UI_BG); head.pack(fill="x", padx=14, pady=(10, 4))
         self._panel_title(head, self.t("world_clock", "世界时钟"), "clock")
         back = tk.Label(head, text=self.t("cmn_back", "返回"), font=self._ui_font(9), background=self.UI_BG, foreground=self.UI_MUTED, cursor="hand2")
@@ -8148,7 +8178,7 @@ try {
 
     def _build_dl_panel(self):
         panel = tk.Frame(self._content, background=self.UI_BG); self._dl_panel = panel
-        W = "#FFFFFF"
+        W = self.UI_SURFACE
         head = tk.Frame(panel, background=self.UI_BG); head.pack(fill="x", padx=14, pady=(10, 4))
         self._panel_title(head, self.t("media_dl", "无水印下载"), "download")
         back = tk.Label(head, text=self.t("cmn_back", "返回"), font=self._ui_font(9), background=self.UI_BG, foreground=self.UI_MUTED, cursor="hand2")

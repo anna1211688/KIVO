@@ -1605,3 +1605,37 @@ class DevToolsTests(unittest.TestCase):
         self.assertIsInstance(back, int)
         self.assertIn('self.open_dev_tools', SOURCE)
         self.assertIn("def open_dev_tools", SOURCE)
+
+
+class DarkModeTests(unittest.TestCase):
+    """v1.6.2 深色模式: 令牌完整性、接线与硬编码白底清理。"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.app_node = next(n for n in TREE.body if isinstance(n, ast.ClassDef) and n.name == "App")
+        cls.light = {}
+        for n in cls.app_node.body:
+            if isinstance(n, ast.Assign) and len(n.targets) == 1 and isinstance(n.targets[0], ast.Name):
+                name = n.targets[0].id
+                if name.startswith("UI_") and isinstance(n.value, ast.Constant):
+                    cls.light[name] = n.value.value
+        dark_node = next(n for n in cls.app_node.body if isinstance(n, ast.Assign)
+                         and getattr(n.targets[0], "id", None) == "THEME_DARK")
+        cls.dark = eval(compile(ast.Expression(dark_node.value), "<dark>", "eval"), {"__builtins__": {}})
+
+    def test_dark_covers_every_token(self):
+        self.assertEqual(set(self.dark), set(self.light))
+
+    def test_dark_values_valid_hex(self):
+        for k, v in self.dark.items():
+            self.assertTrue(re.fullmatch(r"#[0-9A-Fa-f]{6}", v), f"{k}={v}")
+
+    def test_dark_tokens_differ(self):
+        for k in self.dark:
+            self.assertNotEqual(self.dark[k].upper(), self.light[k].upper(), k)
+
+    def test_wiring(self):
+        self.assertIn("def _apply_dark_tokens", SOURCE)
+        self.assertIn('"Theme", fallback="light") == "dark"', SOURCE)
+        self.assertIn("def _switch_theme", SOURCE)
+        self.assertNotIn('W = "#FFFFFF"', SOURCE)
