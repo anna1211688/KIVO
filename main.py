@@ -485,6 +485,7 @@ def _log_crash(where, exc_type, exc, tb):
         key = (where, text.strip().splitlines()[-1] if text.strip() else "")
         now = time.time()
         if now - _crash_seen.get(key, 0) < 60: return
+        if len(_crash_seen) > 500: _crash_seen.clear()  # 长期运行下不同错误签名会慢慢堆积, 封顶防无界增长
         _crash_seen[key] = now
         try:
             if os.path.exists(CRASH_LOG_PATH) and os.path.getsize(CRASH_LOG_PATH) > 1_000_000:
@@ -1018,13 +1019,15 @@ class App(tk.Tk):
     def report_callback_exception(self, exc, val, tb):
         _log_crash("tk-callback", exc, val, tb)  # 只记录不弹窗: 回调异常不该把软件带崩, 但必须留痕可查
     def _poll_ui_queue(self):
+        n = 0
         try:
-            while True:
-                fn = self._ui_queue.get_nowait()
+            # 单轮最多 200 条: 热键连按/下载进度刷屏时不让队列把这一帧吃干 (旧版 while True 全清, 积压上千条时界面会顿好几帧)
+            while n < 200:
+                fn = self._ui_queue.get_nowait(); n += 1
                 try: fn()
                 except Exception as e: _log_crash("ui-queue", type(e), e, e.__traceback__)
         except queue.Empty: pass
-        try: self.after(15, self._poll_ui_queue)
+        try: self.after(1 if not self._ui_queue.empty() else 15, self._poll_ui_queue)  # 还有积压就提前下一轮
         except tk.TclError: pass
 
     def _on_main_map(self, e=None):
@@ -2434,9 +2437,12 @@ class App(tk.Tk):
             except Exception: pass
         except Exception:  # 与 save_phrases/save_config 对齐 (2026-11-27 审查): 主写失败要留痕并重新置脏, 下次保存时重试, 别静默丢队列变更
             _log_crash("save-records", *sys.exc_info()); self._records_dirty = True
+    _RECORD_MAX_CHARS = 200000  # 单条记录上限: 几十 MB 的日志整段进来会把列表渲染和 records.json 一起拖垮
     def add_record(self, text, dedupe=True, save=True):
         text = text.strip("\r\n")
         if not text: return
+        if len(text) > self._RECORD_MAX_CHARS:
+            text = text[:self._RECORD_MAX_CHARS] + "\n……(单条记录超长, 已截断)"
         if self.case_var.get() in ("转大写", "UPPERCASE"): text = text.upper()
         if self.case_var.get() in ("转小写", "lowercase"): text = text.lower()
         if dedupe and any(r["text"] == text for r in self.records): return
@@ -2587,23 +2593,36 @@ class App(tk.Tk):
         return None
     def multi_cut(self): self.multi_copy(cut=True)  # 多次剪切: 与多次复制成对 (原版 HotKey7)
     def multi_copy(self, cut=False):
-        before_seq, before_text = self._clip_sequence(), None
-        if not self._foreground_is_self():
-            before_text = self.clip_get()
-            self._send_combo(0x58 if cut else 0x43)  # 替用户在当前软件里按 Ctrl+X / Ctrl+C
-            deadline = time.time() + max(0.3, self.sleep_ms / 1000 * 6)  # 等剪贴板真的变了再读, 最多约 0.5 秒
-            while time.time() < deadline:
-                seq = self._clip_sequence()
-                if seq is not None and before_seq is not None:
-                    if seq != before_seq: break
-                elif self.clip_get() != before_text: break
-                time.sleep(0.015)
+        def grab():
+            # 替用户按 Ctrl+C 后要等剪贴板真的变了 (最多约 0.5 秒轮询): 旧版在主线程这么等,
+            # 每次 F6 界面都僵最多半秒, 连按两三次像无响应; Win32 调用本身不依赖 Tk, 可以整段搬到后台线程
+            try:
+                before_seq = self._clip_sequence(); before_text = None
+                if not self._foreground_is_self():
+                    before_text = self.clip_get()
+                    self._send_combo(0x58 if cut else 0x43)  # 替用户在当前软件里按 Ctrl+X / Ctrl+C
+                    deadline = time.time() + max(0.3, self.sleep_ms / 1000 * 6)  # 等剪贴板真的变了再读, 最多约 0.5 秒
+                    while time.time() < deadline:
+                        seq = self._clip_sequence()
+                        if seq is not None and before_seq is not None:
+                            if seq != before_seq: break
+                        elif self.clip_get() != before_text: break
+                        time.sleep(0.015)
+                return self.clip_get() or ""
+            except Exception:
+                return ""
+        def work():
+            text = grab()
+            self._ui_queue.put(lambda t=text: self._multi_copy_apply(t))
+        try: threading.Thread(target=work, daemon=True).start()
+        except Exception: self._multi_copy_apply(grab())
+    def _multi_copy_apply(self, text):
+        """F6 第 2 段 (主线程): 把抓到的文本按行拆条入队"""
         n = len(self.records)
-        text = self.clip_get()
-        lines = [ln for ln in text.splitlines() if ln.strip()]
+        lines = [ln for ln in (text or "").splitlines() if ln.strip()]
         if len(lines) > 1:
-            for ln in lines: self.add_record(ln, save=False)  # v1.3.4: WPS 表格/列表整块复制时按行自动拆成多条; 批量加只在最后存一次盘
-            self.save_records()
+            # v1.3.4: WPS 表格/列表整块复制时按行自动拆成多条; 批量走集合去重 (逐条 add_record 是 O(n²), 复制上千行会卡)
+            self._merge_import_lines(lines); self.save_records()
         else:
             self.add_record(text)
         if len(self.records) > n:
@@ -2633,7 +2652,9 @@ class App(tk.Tk):
     _WPS_PROCS = ("et.exe", "wps.exe", "wpp.exe")
     def _paste_text(self, text, enter=False):
         """把文本粘进当前前台窗口, 返回是否真的粘出去了: 前台是本软件自己的窗口 (压根没往外粘)
-        或注入失败都算没粘成 — F7 消费模式靠这个返回值决定删不删记录, 粘失败就删等于白丢一条。"""
+        或注入失败都算没粘成 — F7 消费模式靠这个返回值决定删不删记录, 粘失败就删等于白丢一条。
+        注意: 里面有 30ms + 150ms 的固定等待 (等热键松手 / 等目标程序处理完粘贴), 调用方必须在后台线程调,
+        否则每次 F7 都会把界面按住 0.2 秒 (旧版就是主线程直接调)。"""
         self.clip_set(text)
         if self._foreground_is_self(): return False
         time.sleep(0.03)
@@ -2647,9 +2668,27 @@ class App(tk.Tk):
         return pasted
     def paste_next(self):
         if not self.records: return
+        if getattr(self, "_paste_busy", False): return  # 上一次粘贴还在等目标程序 (约 0.2s): 连按不叠加, 否则两条线程抢剪贴板会串字
         if self.paste_index >= len(self.records): self.paste_index = 0
-        rec = self.records[self.paste_index]
-        ok = self._paste_text(rec["text"], enter=self.paste_enter_var.get())
+        idx = self.paste_index
+        rec = self.records[idx]
+        enter = bool(self.paste_enter_var.get())
+        self._paste_busy = True
+        def work():
+            try: ok = self._paste_text(rec["text"], enter=enter)
+            except Exception:
+                _log_crash("paste-next", *sys.exc_info()); ok = False
+            self._ui_queue.put(lambda p=ok: self._paste_next_apply(idx, p))
+        try: threading.Thread(target=work, daemon=True).start()
+        except Exception:
+            self._paste_busy = False
+            self._paste_next_apply(idx, self._paste_text(rec["text"], enter=enter))
+    def _paste_next_apply(self, idx, ok):
+        """F7 第 2 段 (主线程): 按粘贴结果更新进度/消费模式/迷你窗"""
+        self._paste_busy = False
+        if idx >= len(self.records) or self.paste_index != idx:
+            self.refresh_list(); self.show_mini(); return  # 粘贴期间记录被删/进度被改: 不按旧下标删, 只刷界面
+        rec = self.records[idx]
         if ok and self.paste_remove_var.get() and not rec["locked"]:
             # 粘完即删 (消费模式): 删掉刚粘的这条, 下一条自动顶到当前位置, 序号不用前进
             del self.records[self.paste_index]
@@ -2660,12 +2699,33 @@ class App(tk.Tk):
         self.refresh_list(); self.show_mini()
     def paste_all(self):
         if not self.records: return
-        self._paste_text(self.separator().join(r["text"] for r in self.records)); self.show_mini()
+        if getattr(self, "_paste_busy", False): return
+        text = self.separator().join(r["text"] for r in self.records)
+        self._paste_busy = True
+        def work():
+            try: self._paste_text(text)
+            except Exception: _log_crash("paste-all", *sys.exc_info())
+            self._ui_queue.put(self._paste_all_done)
+        try: threading.Thread(target=work, daemon=True).start()
+        except Exception:
+            self._paste_busy = False; self._paste_text(text); self.show_mini()
+    def _paste_all_done(self):
+        self._paste_busy = False; self.show_mini()
     def paste_selected(self):
         i = self.selected_idx()
-        if i >= 0:
-            time.sleep(self.sleep_ms / 1000); self.clip_set(self.records[i]["text"]); self.beep()
-            if not self._foreground_is_self(): self._type_text(self.records[i]["text"])  # 强力粘贴: 逐字打进目标窗口
+        if i < 0: return
+        txt = self.records[i]["text"]
+        def _do():
+            try: self.clip_set(txt); self.beep()
+            except Exception as e: _log_crash("paste-selected", type(e), e, e.__traceback__)
+            if not self._foreground_is_self(): self._type_text(txt)  # 强力粘贴: 逐字打进目标窗口
+        # 旧版在这里同步 sleep(sleep_ms): 设置里填 300ms 时每次粘贴界面就冻 0.3 秒, 连按几次像卡死;
+        # 语义不变 (等热键松手再写剪贴板), 只是改成定时器, 等待期间界面照常刷新
+        delay = max(0, int(self.sleep_ms or 0))
+        try:
+            if delay: self.after(delay, _do)
+            else: _do()
+        except tk.TclError: _do()
     # ---------- 原版基础热键组 (HotKey1-5) 与强力粘贴 ----------
     def act_select_all(self):
         if not self._foreground_is_self(): self._send_combo(0x41)  # Ctrl+A
@@ -2740,21 +2800,62 @@ class App(tk.Tk):
             except Exception: pass
 
     # ---------- import/export/config ----------
+    _IMPORT_MAX_BYTES = 20 * 1024 * 1024  # 导入文件上限: 旧版 read() 不设限, 误选一个几百 MB 的日志会把内存顶爆
+    _IMPORT_MAX_LINES = 20000
+    def _merge_import_lines(self, lines):
+        """批量合并文本导入: 返回新增条数。
+        旧版逐行调 add_record, 每行都为去重扫一遍全表 (2000 条时是 400 万次比较, 选中大文件导入期间窗口像卡死);
+        这里用集合做到 O(n), 大小写转换与上限裁剪规则与 add_record 保持一致。"""
+        case = self.case_var.get()
+        upper = case in ("转大写", "UPPERCASE")
+        lower = case in ("转小写", "lowercase")
+        seen = {r["text"] for r in self.records}
+        added = 0
+        for ln in lines:
+            text = (ln or "").strip("\r\n")
+            if not text.strip(): continue  # 纯空白行不入队 (导入时常见: 表格导出的隔行)
+            if len(text) > self._RECORD_MAX_CHARS: text = text[:self._RECORD_MAX_CHARS] + "\n……(单条记录超长, 已截断)"
+            if upper: text = text.upper()
+            elif lower: text = text.lower()
+            if text in seen: continue
+            seen.add(text)
+            self.records.append({"text": text, "locked": False}); added += 1
+        if added:
+            while len(self.records) > MAX_RECORDS:  # 与 add_record 同一套上限规则: 丢最旧的未锁定记录
+                idx = next((i for i, r in enumerate(self.records[:-1]) if not r["locked"]), None)
+                if idx is None: self.records.pop(); break
+                del self.records[idx]
+                if idx < self.paste_index: self.paste_index -= 1
+        return added
     def import_txt(self):
         p = filedialog.askopenfilename(filetypes=[("文本/INI", "*.txt *.ini"), ("全部", "*.*")])
-        if p:
-            raw = open(p, "rb").read(); lines = []
-            encs = ("utf-16",) if raw[:2] in (b"\xff\xfe", b"\xfe\xff") else ("utf-8-sig", "gbk", "utf-16")  # Excel 导出的「Unicode 文本」是 UTF-16: 旧版只试 utf-8/gbk, \x00 在 utf-8 里合法会「成功」解成满屏乱码还报导入成功 (审查发现)
-            for enc in encs:
-                try:
-                    dec = raw.decode(enc)
-                    if "\x00" in dec: continue  # 解出来带 NUL = 编码不对, 换下一种
-                    lines = dec.splitlines(); break
-                except Exception: lines = []
-            n0 = len(self.records)
-            for ln in lines: self.add_record(ln, save=False)
-            self.save_records(); self.refresh_list()
-            if len(self.records) == n0: self.status.set(self.t("import_fail", "导入文本: 没读到可导入的内容 (文件编码无法识别或内容为空/全是重复)"))
+        if not p: return
+        try:
+            truncated = os.path.getsize(p) > self._IMPORT_MAX_BYTES
+            with open(p, "rb") as _f: raw = _f.read(self._IMPORT_MAX_BYTES + 1)
+        except Exception as e:
+            self.status.set(f"{self.t('import_fail', '导入文本失败')}: {e}"); return
+        if len(raw) > self._IMPORT_MAX_BYTES:
+            truncated = True; raw = raw[:self._IMPORT_MAX_BYTES]
+            cut = raw.rfind(b"\n")  # 截在行边界, 别把最后一行劈成半个 UTF-8 字符
+            if cut > 0: raw = raw[:cut]
+        encs = ("utf-16",) if raw[:2] in (b"\xff\xfe", b"\xfe\xff") else ("utf-8-sig", "gbk", "utf-16")  # Excel 导出的「Unicode 文本」是 UTF-16: 旧版只试 utf-8/gbk, \x00 在 utf-8 里合法会「成功」解成满屏乱码还报导入成功 (审查发现)
+        lines = []
+        for enc in encs:
+            try:
+                dec = raw.decode(enc)
+                if "\x00" in dec: continue  # 解出来带 NUL = 编码不对, 换下一种
+                lines = dec.splitlines(); break
+            except Exception: lines = []
+        if len(lines) > self._IMPORT_MAX_LINES: lines = lines[:self._IMPORT_MAX_LINES]; truncated = True
+        added = self._merge_import_lines(lines)
+        if added: self.save_records(); self.refresh_list()
+        if not added:
+            self.status.set(self.t("import_fail", "导入文本: 没读到可导入的内容 (文件编码无法识别或内容为空/全是重复)"))
+        else:
+            msg = f"{self.t('import_ok', '已导入')} {added}"
+            if truncated: msg += "  " + self.t("import_trunc", "(文件过大, 只导入前一部分)")
+            self.status.set(msg)
     def export_txt(self):
         p = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("文本", "*.txt")])
         if p:
@@ -3205,7 +3306,9 @@ class App(tk.Tk):
             messagebox.showerror(self.t("no_pillow", "缺少 Pillow"), self.t("no_pillow_msg", "截图功能需要 Pillow: pip install Pillow")); return
         self._snip_was_visible = self.winfo_viewable() == 1  # 截图前主窗口的状态, 结束时按原样恢复 (见 _restore_main_after_snip)
         self._snip_was_foreground = self._foreground_is_self()
-        self.withdraw(); self.update(); time.sleep(0.12)  # 等自家窗口从屏幕上消失再抓屏; 旧值 300ms 纯是干等 (真机反馈迟钝)
+        self.withdraw()
+        if self._snip_was_visible:  # 只有主窗口真的在屏幕上才需要等它消失; 从托盘按 F4 时窗口本就不可见, 旧版白等 120ms
+            self.update(); time.sleep(0.12)
         try:
             try: full = ImageGrab.grab(all_screens=True)  # 多显示器抓虚拟桌面 (旧 Pillow 无此参数时回退)
             except TypeError: full = ImageGrab.grab()
@@ -4270,7 +4373,7 @@ class App(tk.Tk):
                     if getattr(self, "_uia_proc", None): self._uia_proc.kill()
                 except Exception: pass
                 self._uia_proc = None
-            try: self._ui_queue.put(lambda: cb(rect))
+            try: self._ui_queue.put(lambda r=rect, f=cb: f(r))  # 绑定当前值: 不等 UI 线程执行就进下一轮, 闭包会读到更新后的 rect/cb
             except Exception: pass
     def _uia_readline(self, proc, timeout=2.5):
         """带超时地读桥一行: 个别应用的无障碍树会让 UIA 查询一直挂起, 无超时的 readline 会把桥工作线程
@@ -4637,9 +4740,9 @@ try {
                 "youdao_id": g("YoudaoAppId"), "youdao_secret": g("YoudaoSecret"),
                 "google_key": g("GoogleKey")}
     def _baidu_translate(self, q, target, appid, key, source=None):
-        _open = globals().get("_open_url") or urllib.request.urlopen
         """百度翻译开放平台: sign = md5(appid+q+salt+密钥), 成功返回译文, 出错抛异常 (带错误码)。"""
         import urllib.request, urllib.parse, json as _json, hashlib, random
+        _open = globals().get("_open_url") or urllib.request.urlopen  # 模块级同主机跳转防护; 脱离模块上下文时退回原生
         salt = str(random.randint(10000, 99999))
         sign = hashlib.md5((appid + q + salt + key).encode("utf-8")).hexdigest()
         url = "https://fanyi-api.baidu.com/api/trans/vip/translate?" + urllib.parse.urlencode(
@@ -4651,9 +4754,9 @@ try {
         if d.get("error_code"): raise RuntimeError(f"{self.t('tr_err_baidu', '百度翻译错误')} {d.get('error_code')}: {d.get('error_msg', '')}")
         return "\n".join(seg.get("dst", "") for seg in d.get("trans_result") or [])
     def _youdao_translate(self, q, target, appkey, secret, source=None):
-        _open = globals().get("_open_url") or urllib.request.urlopen
         """有道翻译 (网易智云) v3 签名: sha256(appKey+input+salt+curtime+密钥), 成功返回译文, 出错抛异常。"""
         import urllib.request, urllib.parse, json as _json, hashlib, time as _time, uuid
+        _open = globals().get("_open_url") or urllib.request.urlopen  # 同主机跳转防护
         salt = str(uuid.uuid4()); curtime = str(int(_time.time()))
         inp = q if len(q) <= 20 else q[:10] + str(len(q)) + q[-10:]  # v3 规则: 长句取首尾各 10 字 + 总长
         sign = hashlib.sha256((appkey + inp + salt + curtime + secret).encode("utf-8")).hexdigest()
@@ -4667,9 +4770,9 @@ try {
         if str(d.get("errorCode", "0")) != "0": raise RuntimeError(f"{self.t('tr_err_youdao', '有道翻译错误码')} {d.get('errorCode')}")
         return "\n".join(d.get("translation") or [])
     def _google_translate(self, q, target, apikey, source=None):
-        _open = globals().get("_open_url") or urllib.request.urlopen
         """谷歌云翻译 API v2 (只需 API 密钥): 成功返回译文 (HTML 实体已还原), 出错抛异常。"""
         import urllib.request, urllib.parse, json as _json, html as _html
+        _open = globals().get("_open_url") or urllib.request.urlopen  # 同主机跳转防护
         url = "https://translation.googleapis.com/language/translate/v2?key=" + urllib.parse.quote(apikey)
         _params = {"q": q, "target": target, "format": "text"}
         if source: _params["source"] = source
@@ -5656,13 +5759,37 @@ try {
                 continue
         return []
 
-    def _store_ai_chats(self):
-        try:
-            text = json.dumps(self._ai_chats, ensure_ascii=False)
-            _atomic_write(AI_CHATS_PATH, text)
-            try: _atomic_write(AI_CHATS_PATH + ".bak", text)
+    def _store_ai_chats(self, immediate=False):
+        """会话落盘: 默认合并写 (800ms 内的多次改动只写一次)。
+        一轮对话几十条消息, 每来一条就同步序列化+写主文件+写备份, 聊天记录多时是 MB 级写盘,
+        正好压在流式输出结束那一刻, 界面会明显顿一下; 真正的写在 _ai_chats_write 的后台线程。"""
+        if immediate:
+            self._ai_chats_dirty = False
+            self._ai_chats_write(); return
+        self._ai_chats_dirty = True
+        if not getattr(self, "_ai_chats_flush_pending", False):
+            self._ai_chats_flush_pending = True
+            try: self.after(800, self._flush_ai_chats)
+            except Exception:  # 事件循环不可用 (启动早期/已销毁): 直接写, 绝不能丢
+                self._ai_chats_flush_pending = False; self._ai_chats_dirty = False; self._ai_chats_write()
+    def _flush_ai_chats(self):
+        self._ai_chats_flush_pending = False
+        if getattr(self, "_ai_chats_dirty", False):
+            self._ai_chats_dirty = False
+            self._ai_chats_write()
+    def _ai_chats_write(self):
+        try: text = json.dumps(self._ai_chats, ensure_ascii=False)
+        except Exception: return
+        def work():
+            try:
+                _atomic_write(AI_CHATS_PATH, text)
+                try: _atomic_write(AI_CHATS_PATH + ".bak", text)
+                except Exception: pass
+            except Exception: _log_crash("store-ai-chats", *sys.exc_info())
+        try: threading.Thread(target=work, daemon=True).start()
+        except Exception:  # 线程起不来 (极端情况): 退回同步写, 保住数据
+            try: _atomic_write(AI_CHATS_PATH, text)
             except Exception: pass
-        except Exception: pass
 
     def _load_ai_memory(self):
         """读 AI 长期记忆 (ai_memory.json, 带 .bak 兜底): 每条 {text, ts}; 最多 100 条、单条截 500 字; 坏档返回空表不抛错"""
@@ -6631,8 +6758,8 @@ try {
             tk.Label(trow2, text=name, font=self._ui_font(11, True), background=W, foreground=self.UI_ACCENT if idx == 0 else self.UI_TEXT).pack(side="left")
             sh = tk.Label(trow2, text=self.t("clk_share", "分享"), font=self._ui_font(9), background=W, foreground="#5B6B7C", cursor="hand2")
             sh.pack(side="right")
-            sh.bind("<Enter>", lambda e: sh.configure(foreground=self.UI_ACCENT))
-            sh.bind("<Leave>", lambda e: sh.configure(foreground="#5B6B7C"))
+            sh.bind("<Enter>", lambda e, w=sh: w.configure(foreground=self.UI_ACCENT))
+            sh.bind("<Leave>", lambda e, w=sh: w.configure(foreground="#5B6B7C"))
             tl = tk.Label(card, text="--:--:--", font=self._ui_font(19, True), background=W, foreground=self.UI_TEXT)
             tl.pack(anchor="w", padx=12)
             dl = tk.Label(card, text="", font=self._ui_font(9), background=W, foreground=self.UI_MUTED)
@@ -7374,22 +7501,30 @@ try {
         引擎跟随文本翻译 (「启用AI翻译」开着就走 AI, 与迷你翻译同一规矩);
         与迷你翻译互相独立: 迷你翻译关着也能用, 文本翻译面板里有独立开关"""
         if (self.cfg.get("Translate", "CopyTrans", fallback="1") or "1") == "0": return
-        text = ""
-        try:
-            if not self._foreground_is_self():
-                before_seq = self._clip_sequence(); before_text = self.clip_get()
-                self._send_combo(0x43)  # Ctrl+C 抓选区
-                deadline = time.time() + 0.45
-                while time.time() < deadline:
-                    seq = self._clip_sequence()
-                    if seq is not None and before_seq is not None:
-                        if seq != before_seq: break
-                    elif self.clip_get() != before_text: break
-                    time.sleep(0.015)
-                text = (self.clip_get() or "").strip()
-        except Exception: pass
+        try: px, py = self.winfo_pointerxy()  # 取按下瞬间的光标位置 (Tk 调用必须留在主线程)
+        except Exception: px = py = 0
+        def grab():
+            # 抓选区要等 Ctrl+C 落地 (最长 450ms), 旧版在 UI 线程里 while+sleep 死等, 每次复制即译都冻住界面近半秒
+            text = ""
+            try:
+                if not self._foreground_is_self():
+                    before_seq = self._clip_sequence(); before_text = self.clip_get()
+                    self._send_combo(0x43)  # Ctrl+C 抓选区
+                    deadline = time.time() + 0.45
+                    while time.time() < deadline:
+                        seq = self._clip_sequence()
+                        if seq is not None and before_seq is not None:
+                            if seq != before_seq: break
+                        elif self.clip_get() != before_text: break
+                        time.sleep(0.015)
+                    text = (self.clip_get() or "").strip()
+            except Exception: pass
+            self._ui_queue.put(lambda t=text: self._copy_trans_start(t, px, py))
+        import threading
+        threading.Thread(target=grab, daemon=True).start()
+    def _copy_trans_start(self, text, px, py):
+        """复制即译第 2 段 (主线程): 弹出结果卡并启动翻译线程"""
         if not text: return
-        px, py = self.winfo_pointerxy()
         self._show_copy_trans_card(text, px, py)
         target = self.trans_target()
         use_ai = (self.cfg.get("Translate", "TTUseAI", fallback="1") or "1") != "0"
@@ -7982,7 +8117,7 @@ try {
             for svc_key in self._AI_PRESETS:
                 cfg = self._ai_cfg(svc_key)
                 if not cfg.get("key"): continue
-                rows = profiles = []
+                rows = []
                 try:
                     raw = json.loads(self.cfg.get("AI", "ModelProfiles", fallback="{}") or "{}")
                     rows = raw.get(svc_key, []) if isinstance(raw, dict) else []
@@ -8176,8 +8311,14 @@ try {
             hist_ref = self._ai_chat_history  # 记住这条回复属于哪个对话: 等回复期间切到别的对话, 回复不能串过去
             cid_ref = getattr(self, "_ai_chat_id", None)
             streamed = {"text": ""}
+            last_paint = [0.0]
             def on_token(piece):
                 streamed["text"] += piece
+                # 限帧: 旧版每个 token 都往 UI 队列丢一次重绘, 快模型 100+ token/秒时 Label 重排把界面拖到掉帧;
+                # 收到的正文一个字不丢 (streamed 全量累积), 只是界面最多 20fps 刷一次, 结束后 done() 还会按全文重画一遍
+                now = time.time()
+                if now - last_paint[0] < 0.05: return
+                last_paint[0] = now
                 snapshot = streamed["text"]
                 def paint():
                     if not panel.winfo_exists() or self._ai_chat_history is not hist_ref: return
@@ -8304,21 +8445,40 @@ try {
         def pick_image_dialog():
             path = filedialog.askopenfilename(filetypes=[(self.t("ai_imgtypes", "图片"), "*.png *.jpg *.jpeg *.bmp *.gif *.webp")])
             if not path: return
-            try:
-                with Image.open(path) as im:
-                    img = im.convert("RGB")
-            except Exception as e:
-                self.status.set(f"{self.t('ai_img_fail', '图片打开失败')}: {e}"); return
-            attach_image(img); self.after(60, lambda: inp.focus_force())  # 挂上附件把焦点送回输入框 (延迟一下: 弹窗销毁的焦点回退会把同步 focus_set 冲掉)
+            self.status.set(self.t("ai_img_loading", "图片解码中…"))
+            def work():
+                # 手机上拍的 4000x3000 原图 convert 一次要 100-300ms, 主线程做就是"点了没反应"; 顺手限长边省内存
+                try:
+                    with Image.open(path) as im:
+                        img = im.convert("RGB")
+                        if max(img.size) > 2400: img.thumbnail((2400, 2400), Image.LANCZOS)
+                except Exception as e:
+                    msg = str(e)
+                    self._ui_queue.put(lambda m=msg: self.status.set(f"{self.t('ai_img_fail', '图片打开失败')}: {m}"))
+                    return
+                self._ui_queue.put(lambda i=img: (attach_image(i), self.after(60, inp.focus_force)))
+            threading.Thread(target=work, daemon=True).start()  # 挂上附件把焦点送回输入框 (延迟一下: 弹窗销毁的焦点回退会把同步 focus_set 冲掉)
         def attach_file_dialog():
             path = filedialog.askopenfilename(filetypes=[(self.t("ai_filetypes2", "文本与文档文件"), "*.txt *.md *.csv *.json *.log *.pdf *.docx *.xlsx"), (self.t("ai_all_files", "所有文件"), "*.*")])
             if not path: return
-            raw, err = self._read_attach_text(path)
-            if err: self.status.set(err); return
-            if len(raw) > 60000: raw = raw[:60000] + "\n" + self.t("ai_file_truncated", "……(文件太长, 已截断)")
             import os as _os
-            attach.update(kind="file", img=None, name=_os.path.basename(path), text=raw); refresh_attach()
-            self.after(60, lambda: inp.focus_force())  # 同上: 附件挂好焦点回输入框
+            name = _os.path.basename(path)
+            # 解析 12MB 的 PDF/docx 要 0.3-3s (解压+XML/流解析), 旧版在 UI 线程做, 选完文件整个窗口僵住; 改后台 + 代次守卫
+            gen = getattr(self, "_attach_gen", 0) + 1
+            self._attach_gen = gen
+            self.status.set(f"{self.t('ai_att_parsing', '正在解析附件')}: {name} …")
+            def work():
+                raw, err = self._read_attach_text(path)
+                def done(r=raw, e=err):
+                    if getattr(self, "_attach_gen", 0) != gen: return  # 解析期间用户又选了别的文件
+                    if e: self.status.set(e); return
+                    text = r
+                    if len(text) > 60000: text = text[:60000] + "\n" + self.t("ai_file_truncated", "……(文件太长, 已截断)")
+                    attach.update(kind="file", img=None, name=name, text=text); refresh_attach()
+                    self.status.set(f"{self.t('ai_att_ready', '附件已挂上')}: {name}")
+                    self.after(60, lambda: inp.focus_force())  # 同上: 附件挂好焦点回输入框
+                self._ui_queue.put(done)
+            threading.Thread(target=work, daemon=True).start()
         # ---- 底部输入区: 圆角输入框 (画布圆角底 + 内嵌文本) + 圆角药丸发送键 ----
         brow = tk.Frame(chatcol, background=CHAT_BG); brow.pack(fill="x", padx=14, pady=(12, 14))
         plus_cv = tk.Canvas(brow, width=42, height=42, highlightthickness=0, background=CHAT_BG, cursor="hand2")
@@ -9276,6 +9436,8 @@ try {
             if _sv.isdigit(): self.cfg.set("Config", "SleepTime", _sv)
         except Exception: pass
         self.save_config(); self.save_records(immediate=True)
+        try: self._store_ai_chats(immediate=True)
+        except Exception: pass
         self.withdraw()
         if not self._tray_notified:
             self._tray_notified = True
@@ -9289,6 +9451,8 @@ try {
             if _sv.isdigit(): self.cfg.set("Config", "SleepTime", _sv)
         except Exception: pass
         self.save_config(); self.save_records(immediate=True)
+        try: self._store_ai_chats(immediate=True)
+        except Exception: pass
         if self._tray is not None:
             try: self._tray.stop()
             except Exception: pass

@@ -33,7 +33,7 @@ def method_text(name):
 # 纯函数依赖 (不联网): 附件解析的上限常量/异常/读条目封装, 供被单独 exec 的函数使用
 PURE_MODULE_HELPERS = (
     "_ATTACH_INFLATE_LIMIT", "_ATTACH_TEXT_LIMIT", "_ATTACH_ENTRY_LIMIT",
-    "_AttachLimit", "_zip_read_bytes",
+    "_AttachLimit", "_zip_read_bytes", "MAX_RECORDS",
 )
 
 
@@ -81,10 +81,13 @@ class SafetyRegressionTests(unittest.TestCase):
         compile(SOURCE, str(ROOT / "main.py"), "exec")
 
     def test_paste_queue_only_consumes_after_success(self):
+        # 粘贴本身有 30ms+150ms 固定等待, 已移到后台线程: 判定"粘成功才消费"的不变量在 _paste_next_apply 里
         body = method_text("paste_next")
         self.assertIn("ok = self._paste_text(", body)
-        self.assertIn("if ok and self.paste_remove_var.get()", body)
-        self.assertLess(body.index("ok = self._paste_text("), body.index("del self.records"))
+        self.assertIn("_paste_next_apply(", body)
+        apply_body = method_text("_paste_next_apply")
+        self.assertIn("if ok and self.paste_remove_var.get()", apply_body)
+        self.assertLess(apply_body.index("if ok and self.paste_remove_var.get()"), apply_body.index("del self.records"))
 
     def test_paste_reports_failure_for_self_window_and_failed_input(self):
         body = method_text("_paste_text")
@@ -95,7 +98,8 @@ class SafetyRegressionTests(unittest.TestCase):
         self.assertIn("return pasted", body)
 
     def test_copy_requires_command_and_clipboard_change(self):
-        body = method_text("multi_copy")
+        # 抓取等待已移到后台线程, 入队部分在 _multi_copy_apply 里
+        body = method_text("multi_copy") + method_text("_multi_copy_apply")
         self.assertIn("self._send_combo(0x58 if cut else 0x43)", body)
         self.assertIn("if seq != before_seq: break", body)
         self.assertIn("if len(self.records) > n:", body)
@@ -812,6 +816,58 @@ class AiMemoryAndFilesTests(unittest.TestCase):
         guard = module_text("_open_url")
         self.assertIn("HTTPRedirectHandler", guard)
         self.assertIn("hostname", guard)
+
+
+class RecordQueueTests(unittest.TestCase):
+    """记录队列: 批量导入与单条上限 (v1.5.1 去 O(n²) + 防超长条)"""
+
+    class _Case:
+        def __init__(self, v=""): self.v = v
+        def get(self): return self.v
+
+    def _app(self, n=0, case=""):
+        class Stub: pass
+        s = Stub()
+        s.records = [{"text": f"旧记录 {i}", "locked": False} for i in range(n)]
+        s.case_var = self._Case(case); s.paste_index = 0
+        s.save_records = lambda *a, **k: None
+        s._RECORD_MAX_CHARS = 200000
+        return s
+
+    def test_bulk_import_matches_add_record_rules(self):
+        fn = load_function("_merge_import_lines")
+        s = self._app(3)
+        self.assertEqual(fn(s, ["旧记录 0", "", "   ", "新条目", "新条目"]), 1)
+        self.assertEqual(s.records[-1]["text"], "新条目")
+        self.assertEqual(len(s.records), 4)
+
+    def test_bulk_import_respects_case_switch(self):
+        fn = load_function("_merge_import_lines")
+        s = self._app(0, "转大写")
+        fn(s, ["abc"])
+        self.assertEqual(s.records[-1]["text"], "ABC")
+        self.assertEqual(fn(s, ["ABC"]), 0)  # 转大写后与已有重复, 不重复入队
+
+    def test_bulk_import_caps_total_records(self):
+        fn = load_function("_merge_import_lines")
+        s = self._app(1990)
+        fn(s, [f"新 {i}" for i in range(50)])
+        self.assertEqual(len(s.records), 2000)
+
+    def test_record_length_capped(self):
+        fn = load_function("add_record")
+        s = self._app(0)
+        fn(s, "长" * 300000)
+        self.assertLessEqual(len(s.records[-1]["text"]), 200000 + 20)
+        self.assertIn("已截断", s.records[-1]["text"])
+
+    def test_bulk_import_keeps_locked_records(self):
+        fn = load_function("_merge_import_lines")
+        s = self._app(0)
+        s.records = [{"text": f"锁 {i}", "locked": True} for i in range(2000)]
+        fn(s, ["新的一条"])
+        self.assertEqual(len(s.records), 2000)  # 全锁定: 上限是硬线, 新条不入队
+        self.assertTrue(all(r["locked"] for r in s.records))
 
 
 if __name__ == "__main__":
