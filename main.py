@@ -1901,6 +1901,13 @@ class App(tk.Tk):
                 for name in self._BACKUP_FILES:
                     p = os.path.join(BASE, name)
                     if os.path.exists(p): z.write(p, name)
+                image_dir = os.path.join(BASE, "ai_chat_images")
+                if os.path.isdir(image_dir):
+                    for filename in os.listdir(image_dir):
+                        if re.fullmatch(r"[0-9a-f]{32}\.jpg", filename):
+                            image_path = os.path.join(image_dir, filename)
+                            if os.path.isfile(image_path) and os.path.getsize(image_path) <= 8 * 1024 * 1024:
+                                z.write(image_path, "ai_chat_images/" + filename)
             os.replace(tmp, path)
         except Exception:
             try: os.remove(tmp)
@@ -1917,13 +1924,32 @@ class App(tk.Tk):
             except ValueError: raise
             except Exception: raise ValueError("not a KIVO backup")
             payload = {}
-            for name in self._BACKUP_FILES:
+            names = list(self._BACKUP_FILES)
+            image_names = [n for n in z.namelist()
+                           if n.startswith("ai_chat_images/") and
+                           re.fullmatch(r"ai_chat_images/[0-9a-f]{32}\.jpg", n)]
+            if len(image_names) > 500:
+                raise ValueError("too many chat images in backup")
+            names.extend(image_names)
+            total_image_bytes = 0
+            for name in names:
                 if name in z.namelist():
                     declared = z.getinfo(name).file_size
-                    if declared > 64 * 1024 * 1024: raise ValueError("backup entry too large")  # 先查声明大小再读 (2026-11-27 审查): 读完才查, 解压炸弹在 read 那一步就把内存打爆了
+                    limit = 8 * 1024 * 1024 if name.startswith("ai_chat_images/") else 64 * 1024 * 1024
+                    if declared > limit: raise ValueError("backup entry too large")
+                    if name.startswith("ai_chat_images/"):
+                        total_image_bytes += declared
+                        if total_image_bytes > 128 * 1024 * 1024:
+                            raise ValueError("chat images in backup too large")
                     data = z.read(name)
-                    if len(data) > 64 * 1024 * 1024: raise ValueError("backup entry too large")  # 解压后单文件封顶 64MB: 正常备份远到不了, 防构造的压缩包把内存撑爆
-                    if ".json" in name: json.loads(data.decode("utf-8"))  # 先验货再覆盖: JSON 已损坏的备份整包拒绝, 不拿坏数据顶掉现有好数据
+                    if len(data) > limit: raise ValueError("backup entry too large")
+                    if name.startswith("ai_chat_images/"):
+                        try:
+                            from io import BytesIO
+                            with Image.open(BytesIO(data)) as _image: _image.verify()
+                        except Exception as exc:
+                            raise ValueError("invalid chat image in backup") from exc
+                    if ".json" in name: json.loads(data.decode("utf-8"))
                     if name == "Config.ini":  # Config.ini 同样先验货: 旧版只验 JSON, 坏 ini 落盘后下次启动静默回退默认 = 设置/密钥全丢还报导入成功 (审查发现)
                         import io
                         ok_ini = False
@@ -1937,9 +1963,13 @@ class App(tk.Tk):
             staged = []  # 两阶段落盘 (2026-11-27 审查): 先把所有文件都写成 .tmp, 再统一 replace; 中途失败不会留下新旧混合状态
             try:
                 for name, data in payload.items():
-                    tmp = os.path.join(BASE, name + ".tmp")
+                    destination = os.path.abspath(os.path.join(BASE, name))
+                    if os.path.commonpath((os.path.abspath(BASE), destination)) != os.path.abspath(BASE):
+                        raise ValueError("invalid backup path")
+                    os.makedirs(os.path.dirname(destination), exist_ok=True)
+                    tmp = destination + ".tmp"
                     with open(tmp, "wb") as f: f.write(data)
-                    staged.append((tmp, os.path.join(BASE, name)))
+                    staged.append((tmp, destination))
                 for tmp, dst in staged: os.replace(tmp, dst)
             except Exception:
                 for tmp, _dst in staged:
@@ -4577,6 +4607,52 @@ try {
         if m > 1600: im = im.resize((max(1, round(w * 1600 / m)), max(1, round(h * 1600 / m))), Image.LANCZOS)
         buf = io.BytesIO(); im.save(buf, "JPEG", quality=82)
         return "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode("ascii")
+    def _save_ai_chat_image(self, img):
+        """Persist a chat image as a bounded JPEG and return a BASE-relative path."""
+        import uuid
+        folder = os.path.join(BASE, "ai_chat_images")
+        os.makedirs(folder, exist_ok=True)
+        im = img.convert("RGB")
+        width, height = im.size
+        longest = max(width, height)
+        if longest > 1600:
+            im = im.resize((max(1, round(width * 1600 / longest)),
+                            max(1, round(height * 1600 / longest))), Image.LANCZOS)
+        name = uuid.uuid4().hex + ".jpg"
+        path = os.path.join(folder, name)
+        im.save(path, "JPEG", quality=82, optimize=True)
+        return os.path.relpath(path, BASE).replace(os.sep, "/")
+
+    def _ai_chat_history_messages(self, history):
+        """Build recent API messages, restoring locally persisted images when available."""
+        messages = []
+        image_root = os.path.abspath(os.path.join(BASE, "ai_chat_images"))
+        for item in history[-20:]:
+            if not isinstance(item, dict) or item.get("role") not in ("user", "assistant"):
+                continue
+            content = item.get("content")
+            if not isinstance(content, str):
+                continue
+            payload_content = content
+            relative = item.get("image_path")
+            if item.get("role") == "user" and isinstance(relative, str):
+                try:
+                    normalized = os.path.normpath(relative.replace("/", os.sep))
+                    candidate = os.path.abspath(os.path.join(BASE, normalized))
+                    if (normalized.startswith("ai_chat_images" + os.sep)
+                            and os.path.commonpath((image_root, candidate)) == image_root
+                            and os.path.isfile(candidate) and os.path.getsize(candidate) <= 8 * 1024 * 1024):
+                        with Image.open(candidate) as source:
+                            image = source.convert("RGB")
+                        payload_content = [
+                            {"type": "text", "text": content},
+                            {"type": "image_url", "image_url": {"url": self._ai_image_dataurl(image)}},
+                        ]
+                except (OSError, ValueError):
+                    pass
+            messages.append({"role": item["role"], "content": payload_content})
+        return messages
+
     def _ai_chat_image(self, img, prompt, cfg=None, temperature=0.7, timeout=90, route=None):
         """把图+提示词发给视觉模型, 返回模型回复的纯文本; 配置缺失/接口出错抛 RuntimeError (带人话原因)。
         只用标准库 urllib, 不加新依赖; 调用方必须在后台线程里调 (网络往返几秒起)。
@@ -4938,7 +5014,10 @@ try {
                                 if (isinstance(m, dict) and m.get("role") in ("user", "assistant")
                                         and isinstance(m.get("content"), str)
                                         and len(m["content"]) <= max_message_chars):
-                                    msgs.append({"role": m["role"], "content": m["content"]})
+                                    item = {"role": m["role"], "content": m["content"]}
+                                    if isinstance(m.get("image_path"), str):
+                                        item["image_path"] = m["image_path"]
+                                    msgs.append(item)
                             if msgs:
                                 out.append({"id": c.get("id"), "title": str(c.get("title") or "新对话")[:200],
                                             "updated": c.get("updated") or 0, "pin": 1 if c.get("pin") else 0,
@@ -7227,7 +7306,8 @@ try {
         def add_bubble(role, text, with_regen=False, msg_ref=None):
             row = tk.Frame(inner, background=CHAT_BG); row.pack(fill="x", pady=(10, 0), padx=14)
             if role == "user":
-                bubble(row, text, self.UI_ACCENT, "#FFFFFF").pack(anchor="e")
+                display_text = ("🖼 " + text) if msg_ref and msg_ref.get("image_path") else text
+                bubble(row, display_text, self.UI_ACCENT, "#FFFFFF").pack(anchor="e")
             else:
                 # 豆包式 (Jane 2026-11-27 改主意, 照豆包截图): 图标行在气泡内部、文字下方一条细线隔开;
                 # 蓝色小方片依次 复制/朗读/点赞/点踩/分享, 重新生成是右端一个刷新方片 (只有最新一条回复有)
@@ -7306,19 +7386,16 @@ try {
             if send_ui["cv"] is not None:
                 fill = self.UI_ACCENT if on else "#B9C2CE"
                 send_ui["cv"].itemconfigure("pill", fill=fill, outline=fill)
-        def request_reply(img=None, img_prompt=None):
+        def request_reply():
             busy["on"] = True; set_send_enabled(False)
             show_typing()
             import threading
-            msgs = list(self._ai_chat_history[-20:])
             hist_ref = self._ai_chat_history  # 记住这条回复属于哪个对话: 等回复期间切到别的对话, 回复不能串过去
             cid_ref = getattr(self, "_ai_chat_id", None)
             def work():
                 try:
-                    if img is not None:  # 带图提问: 这一轮走看图通道 (聊天分工), 图不进历史, 追问按纯文本继续
-                        r = self._ai_chat_image(img, img_prompt or "", route="chat")
-                    else:
-                        r = self._ai_chat_messages(msgs, max_tokens=2048, route="chat")
+                    msgs = self._ai_chat_history_messages(hist_ref)
+                    r = self._ai_chat_messages(msgs, max_tokens=2048, route="chat")
                     def done():
                         busy["on"] = False
                         if self._ai_chat_history is hist_ref:
@@ -7459,11 +7536,18 @@ try {
             text = inp.get("1.0", "end").strip()
             if busy["on"]: return
             if not text and attach["kind"] is None: return  # 没打字也没附件: 不发空消息; 有附件没打字也能发 (图/文件本身就是问题)
+            img = attach["img"] if attach["kind"] == "image" else None
+            image_path = None
+            if img is not None:
+                try:
+                    image_path = self._save_ai_chat_image(img)
+                except Exception as e:
+                    self.status.set(f"图片保存失败: {e}")
+                    return
             inp.delete("1.0", "end")
             if rows and not self._ai_chat_history:
                 for r in rows: r.destroy()
                 rows.clear()
-            img = attach["img"] if attach["kind"] == "image" else None
             if attach["kind"] == "image":
                 disp = ("🖼 " + text) if text else self.t("ai_img_look", "看看这张图")
                 hist_text = text or "请描述这张图的内容。"
@@ -7472,11 +7556,14 @@ try {
                 hist_text = f"【附件文件 {attach['name']} 内容】\n{attach['text']}\n【附件结束】\n" + (text or "请看看这个文件, 总结要点。")
             else:
                 disp = text; hist_text = text
-            self._ai_chat_history.append({"role": "user", "content": hist_text})
+            user_message = {"role": "user", "content": hist_text}
+            if image_path:
+                user_message["image_path"] = image_path
+            self._ai_chat_history.append(user_message)
             add_bubble("user", disp)
             self._save_current_chat()
             clear_attach()
-            request_reply(img=img, img_prompt=hist_text if img is not None else None)
+            request_reply()
         send_cv.bind("<Button-1>", lambda e: send_ui["enabled"] and send())
         def on_enter(e):
             if e.state & 0x1: return None  # Shift+回车: 换行

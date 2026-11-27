@@ -284,6 +284,43 @@ class HardeningTests(unittest.TestCase):
         self.assertIn("file_size", imp)  # 读之前先查声明大小
         self.assertIn("dt.astimezone()", SOURCE)  # 约时间换算按目标日期取时区偏移
 
+    def test_chat_image_history_is_persisted_and_restored_for_followups(self):
+        save = method_text("_save_ai_chat_image")
+        restore = method_text("_ai_chat_history_messages")
+        loader = method_text("_load_ai_chats")
+        self.assertIn('return os.path.relpath(path, BASE).replace(os.sep, "/")', save)
+        self.assertIn('item.get("image_path")', restore)
+        self.assertIn('"image_url"', restore)
+        self.assertIn('item["image_path"] = m["image_path"]', loader)
+        self.assertIn("self._ai_chat_messages(msgs, max_tokens=2048, route=\"chat\")", SOURCE)
+
+    def test_chat_image_restore_rejects_paths_outside_attachment_folder(self):
+        restore = method_text("_ai_chat_history_messages")
+        self.assertIn('normalized.startswith("ai_chat_images" + os.sep)', restore)
+        self.assertIn('os.path.commonpath((image_root, candidate)) == image_root', restore)
+        self.assertIn('os.path.getsize(candidate) <= 8 * 1024 * 1024', restore)
+
+    def test_regenerate_uses_saved_image_history(self):
+        start = SOURCE.index("        def regenerate():")
+        end = SOURCE.index("        def clear():", start)
+        body = SOURCE[start:end]
+        self.assertIn("request_reply()", body)
+        self.assertNotIn("request_reply(img=", body)
+ 
+    def test_chat_images_are_included_in_backup_export_and_import(self):
+        export = method_text("_export_backup")
+        restore = method_text("_import_backup")
+        self.assertIn('"ai_chat_images/" + filename', export)
+        self.assertIn('r"ai_chat_images/[0-9a-f]{32}\.jpg"', restore)
+        self.assertIn("total_image_bytes > 128 * 1024 * 1024", restore)
+        self.assertIn("with Image.open(BytesIO(data)) as _image: _image.verify()", restore)
+        self.assertIn("os.makedirs(os.path.dirname(destination), exist_ok=True)", restore)
+
+    def test_chat_image_backup_rejects_unexpected_names_and_excess_count(self):
+        restore = method_text("_import_backup")
+        self.assertIn('n.startswith("ai_chat_images/")', restore)
+        self.assertIn("len(image_names) > 500", restore)
+
     def test_attachment_reader_rejects_oversized_before_reading(self):
         read_attachment = _load_with_ns("_read_text_attachment", {})
         with tempfile.TemporaryDirectory() as td:
