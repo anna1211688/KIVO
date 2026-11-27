@@ -1553,3 +1553,55 @@ class ColorToolsTests(unittest.TestCase):
         with open(os.path.join(os.path.dirname(__file__), "..", "requirements.txt")) as f:
             reqs = f.read()
         self.assertIn("qrcode==8.2", reqs)
+
+
+class DevToolsTests(unittest.TestCase):
+    """v1.6.2 开发者工具箱: 五个子工具的纯逻辑与导航注册。"""
+
+    @classmethod
+    def setUpClass(cls):
+        app_node = next(n for n in TREE.body if isinstance(n, ast.ClassDef) and n.name == "App")
+        cls.ns = {"re": re, "json": json}
+        import base64, datetime
+        cls.ns = {"re": re, "json": json, "base64": base64, "datetime": datetime}
+        for name in ("_ts_to_date", "_date_to_ts", "_json_pretty", "_json_minify",
+                     "_regex_find", "_b64_encode", "_b64_decode", "_unit_convert"):
+            node = next(n for n in app_node.body if isinstance(n, ast.FunctionDef) and n.name == name)
+            exec(ast.get_source_segment(SOURCE, node), cls.ns)
+
+    def test_json(self):
+        s = '{"b":1,"a":"x"}'
+        pretty = self.ns["_json_pretty"](s)
+        self.assertIn("\n", pretty)
+        self.assertEqual(self.ns["_json_minify"](s), '{"b":1,"a":"x"}')
+        with self.assertRaises(Exception):
+            self.ns["_json_pretty"]("{bad}")
+
+    def test_regex(self):
+        hits = self.ns["_regex_find"](r"\d+", "a1 b22 c333")
+        self.assertEqual(hits, ["1", "22", "333"])
+        self.assertEqual(self.ns["_regex_find"]("abc", "ABC abc", True), ["ABC", "abc"])
+
+    def test_base64(self):
+        enc = self.ns["_b64_encode"]("你好")
+        self.assertEqual(self.ns["_b64_decode"](enc), "你好")
+
+    def test_units(self):
+        app_node = next(n for n in TREE.body if isinstance(n, ast.ClassDef) and n.name == "App")
+        uf_node = next(n for n in app_node.body if isinstance(n, ast.Assign)
+                       and any(getattr(t, "id", None) == "_UNIT_FACTORS" for t in n.targets))
+        factors = eval(compile(ast.Expression(uf_node.value), "<uf>", "eval"), {"__builtins__": {}})
+        class Stub:
+            _UNIT_FACTORS = factors
+        f = self.ns["_unit_convert"]
+        self.assertAlmostEqual(f(Stub(), 1, "length", "km", "m"), 1000)
+        self.assertAlmostEqual(f(Stub(), 1, "data", "KB", "B"), 1024)
+        self.assertAlmostEqual(f(Stub(), 1, "weight", "kg", "g"), 1000)
+
+    def test_timestamp_and_nav(self):
+        d = self.ns["_ts_to_date"](0)
+        self.assertEqual(len(d), 19)
+        back = self.ns["_date_to_ts"]("2020-01-01 00:00:00")
+        self.assertIsInstance(back, int)
+        self.assertIn('self.open_dev_tools', SOURCE)
+        self.assertIn("def open_dev_tools", SOURCE)

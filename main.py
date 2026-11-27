@@ -1489,6 +1489,7 @@ class App(tk.Tk):
         _nav("clock", self.t("world_clock", "世界时钟"), "clock", self.open_world_clock)
         _nav("calc", self.t("calculator", "计算器"), "calc", self.open_calc)
         _nav("dl", self.t("media_dl", "无水印下载"), "download", self.open_media_dl)
+        _nav("dev", self.t("dev_title", "开发者工具箱"), "star", self.open_dev_tools)
         # 边栏底部: 版本 (最底) + 设置 + 分隔线 (side=bottom 先包的贴最底)
         tk.Label(side, text=f"v{VERSION} · © KIVO", font=self._ui_font(8), background=SIDE, foreground=self.UI_MUTED).pack(side="bottom", anchor="w", padx=18, pady=(0, 10))
         _set_it = _NavItem(side, text=self.t("system_settings", "设置"), command=self.open_system_settings, font=self._ui_font(10), bg=SIDE, image=self._nav_icon("gear"), palette=_nav_pal)
@@ -1858,7 +1859,7 @@ class App(tk.Tk):
             self._build_settings_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -2253,7 +2254,7 @@ class App(tk.Tk):
             self._build_selfcheck_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -2518,7 +2519,7 @@ class App(tk.Tk):
             self._build_phrases_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_dev_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -6787,7 +6788,7 @@ try {
             self._build_calc_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_phrases_panel", "_clock_panel", "_dl_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_phrases_panel", "_clock_panel", "_dl_panel", "_dev_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -7110,7 +7111,7 @@ try {
             self._build_clock_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_dl_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_dl_panel", "_dev_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -7376,7 +7377,7 @@ try {
             self._build_clockset_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -7787,7 +7788,7 @@ try {
             self._build_texttrans_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_clock_panel", "_dl_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_clock_panel", "_dl_panel", "_dev_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -8111,7 +8112,7 @@ try {
             self._build_dl_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_clock_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_clock_panel", "_dev_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -9824,7 +9825,7 @@ try {
             self._build_gallery_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -10408,6 +10409,179 @@ try {
                                             filetypes=[("PNG", "*.png")], parent=self)
         if path:
             img.save(path); self.toast(self.t("qr_saved", "已保存"), ms=1500)
+
+    # ---------- 开发者工具箱 (v1.6.2): 时间戳/JSON/正则/Base64/单位换算, 纯标准库 ----------
+    @staticmethod
+    def _ts_to_date(ts):
+        return datetime.datetime.fromtimestamp(int(ts)).strftime("%Y-%m-%d %H:%M:%S")
+    @staticmethod
+    def _date_to_ts(s):
+        for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M", "%Y-%m-%d"):
+            try: return int(datetime.datetime.strptime(s.strip(), fmt).timestamp())
+            except Exception: pass
+        raise ValueError("bad date format")
+    @staticmethod
+    def _json_pretty(s):
+        return json.dumps(json.loads(s), ensure_ascii=False, indent=2)
+    @staticmethod
+    def _json_minify(s):
+        return json.dumps(json.loads(s), ensure_ascii=False, separators=(",", ":"))
+    @staticmethod
+    def _regex_find(pattern, text, ignore_case=False):
+        rx = re.compile(pattern, re.IGNORECASE if ignore_case else 0)
+        return [m.group(0) for m in rx.finditer(text)]
+    @staticmethod
+    def _b64_encode(s):
+        return base64.b64encode(s.encode("utf-8")).decode("ascii")
+    @staticmethod
+    def _b64_decode(s):
+        return base64.b64decode(s.encode("ascii")).decode("utf-8")
+    _UNIT_FACTORS = {
+        "length": {"mm": 1.0, "cm": 10.0, "m": 1000.0, "km": 1_000_000.0,
+                   "in": 25.4, "ft": 304.8, "mile": 1_609_344.0},
+        "weight": {"g": 1.0, "kg": 1000.0, "t": 1_000_000.0,
+                   "lb": 453.59237, "oz": 28.349523125},
+        "data": {"B": 1.0, "KB": 1024.0, "MB": 1024.0 ** 2,
+                 "GB": 1024.0 ** 3, "TB": 1024.0 ** 4}}
+    def _unit_convert(self, value, category, frm, to):
+        factors = self._UNIT_FACTORS[category]
+        return float(value) * factors[frm] / factors[to]
+    def open_dev_tools(self):
+        self._nav_show("dev")
+        self._show_dev_panel()
+    def _show_dev_panel(self):
+        self._texttrans_on_hide()
+        if getattr(self, "_dev_panel", None) is None:
+            self._build_dev_panel()
+        try: self._body.pack_forget()
+        except Exception: pass
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel"):
+            p = getattr(self, attr, None)
+            if p is not None:
+                try: p.pack_forget()
+                except Exception: pass
+        self._ai_view_on = False
+        self._forget_aux_panels()
+        self._dev_panel.pack(fill="both", expand=True, before=self._status_sep)
+    def _build_dev_panel(self):
+        panel = tk.Frame(self._content, background=self.UI_BG); self._dev_panel = panel
+        head = tk.Frame(panel, background=self.UI_BG); head.pack(fill="x", padx=14, pady=(10, 4))
+        self._panel_title(head, self.t("dev_title", "开发者工具箱"), "star")
+        back = tk.Label(head, text=self.t("cmn_back", "返回"), font=self._ui_font(9),
+                        background=self.UI_BG, foreground=self.UI_MUTED, cursor="hand2")
+        back.pack(side="right"); back.bind("<Button-1>", lambda e: self._show_main_view())
+        nb = ttk.Notebook(panel); nb.pack(fill="both", expand=True, padx=14, pady=(0, 12))
+        # ① 时间戳
+        t1 = tk.Frame(nb, bg=self.UI_BG); nb.add(t1, text=self.t("dev_ts", "时间戳"))
+        now_var = tk.StringVar(value=str(int(time.time())))
+        r = tk.Frame(t1, bg=self.UI_BG); r.pack(anchor="w", padx=12, pady=10)
+        tk.Label(r, textvariable=now_var, font=self._ui_font(12, True), bg=self.UI_BG,
+                 fg=self.UI_ACCENT).pack(side="left")
+        ttk.Button(r, text=self.t("dev_refresh", "刷新"), style="Small.TButton",
+                   command=lambda: now_var.set(str(int(time.time())))).pack(side="left", padx=8)
+        ttk.Button(r, text=self.t("dev_copy", "复制"), style="Small.TButton",
+                   command=lambda: self.clip_set(now_var.get())).pack(side="left")
+        r2 = tk.Frame(t1, bg=self.UI_BG); r2.pack(anchor="w", padx=12, pady=4)
+        ts_e = tk.Entry(r2, width=16); ts_e.pack(side="left")
+        ts_out = tk.StringVar()
+        def ts_go():
+            try: ts_out.set(self._ts_to_date(ts_e.get()))
+            except Exception: ts_out.set(self.t("dev_bad", "输入有误"))
+        ttk.Button(r2, text=self.t("dev_ts2date", "时间戳→日期"), style="Small.TButton",
+                   command=ts_go).pack(side="left", padx=6)
+        tk.Label(r2, textvariable=ts_out, bg=self.UI_BG, fg=self.UI_TEXT,
+                 font=self._ui_font(10)).pack(side="left")
+        r3 = tk.Frame(t1, bg=self.UI_BG); r3.pack(anchor="w", padx=12, pady=4)
+        d_e = tk.Entry(r3, width=22); d_e.pack(side="left")
+        d_out = tk.StringVar()
+        def d_go():
+            try: d_out.set(str(self._date_to_ts(d_e.get())))
+            except Exception: d_out.set(self.t("dev_bad", "输入有误"))
+        ttk.Button(r3, text=self.t("dev_date2ts", "日期→时间戳"), style="Small.TButton",
+                   command=d_go).pack(side="left", padx=6)
+        tk.Label(r3, textvariable=d_out, bg=self.UI_BG, fg=self.UI_TEXT,
+                 font=self._ui_font(10)).pack(side="left")
+        # ② JSON
+        t2 = tk.Frame(nb, bg=self.UI_BG); nb.add(t2, text="JSON")
+        j_in = tk.Text(t2, height=8, font=self._ui_font(10), relief="solid", bd=1)
+        j_in.pack(fill="x", padx=12, pady=8)
+        j_out = tk.Text(t2, height=10, font=self._ui_font(10), relief="solid", bd=1)
+        j_out.pack(fill="both", expand=True, padx=12, pady=(0, 8))
+        jb = tk.Frame(t2, bg=self.UI_BG); jb.pack(padx=12)
+        def j_run(f):
+            try:
+                res = f(j_in.get("1.0", "end"))
+                j_out.delete("1.0", "end"); j_out.insert("1.0", res)
+            except Exception as e:
+                j_out.delete("1.0", "end"); j_out.insert("1.0", str(e))
+        ttk.Button(jb, text=self.t("dev_pretty", "格式化"), style="Small.TButton",
+                   command=lambda: j_run(self._json_pretty)).pack(side="left", padx=4)
+        ttk.Button(jb, text=self.t("dev_minify", "压缩"), style="Small.TButton",
+                   command=lambda: j_run(self._json_minify)).pack(side="left", padx=4)
+        # ③ 正则
+        t3 = tk.Frame(nb, bg=self.UI_BG); nb.add(t3, text=self.t("dev_regex", "正则测试"))
+        r = tk.Frame(t3, bg=self.UI_BG); r.pack(fill="x", padx=12, pady=8)
+        p_e = tk.Entry(r, width=30); p_e.pack(side="left")
+        ic = tk.BooleanVar(value=False)
+        ttk.Checkbutton(r, text="ignore case", variable=ic).pack(side="left", padx=6)
+        x_in = tk.Text(t3, height=6, font=self._ui_font(10), relief="solid", bd=1)
+        x_in.pack(fill="x", padx=12)
+        x_out = tk.StringVar()
+        def re_go():
+            try:
+                hits = self._regex_find(p_e.get(), x_in.get("1.0", "end"), ic.get())
+                x_out.set(f"{len(hits)} 处匹配: " + " | ".join(hits[:20]))
+            except Exception as e:
+                x_out.set(str(e))
+        ttk.Button(t3, text=self.t("dev_match", "测试匹配"), style="Small.TButton",
+                   command=re_go).pack(anchor="w", padx=12, pady=6)
+        tk.Label(t3, textvariable=x_out, bg=self.UI_BG, fg=self.UI_TEXT, wraplength=560,
+                 justify="left", font=self._ui_font(10)).pack(anchor="w", padx=12, pady=(0, 8))
+        # ④ Base64
+        t4 = tk.Frame(nb, bg=self.UI_BG); nb.add(t4, text="Base64")
+        b_in = tk.Text(t4, height=6, font=self._ui_font(10), relief="solid", bd=1)
+        b_in.pack(fill="x", padx=12, pady=8)
+        b_out = tk.Text(t4, height=6, font=self._ui_font(10), relief="solid", bd=1)
+        b_out.pack(fill="both", expand=True, padx=12, pady=(0, 8))
+        bb = tk.Frame(t4, bg=self.UI_BG); bb.pack(padx=12, pady=(0, 8))
+        def b_go(enc):
+            try:
+                res = self._b64_encode(b_in.get("1.0", "end").strip()) if enc \
+                    else self._b64_decode(b_in.get("1.0", "end").strip())
+                b_out.delete("1.0", "end"); b_out.insert("1.0", res)
+            except Exception as e:
+                b_out.delete("1.0", "end"); b_out.insert("1.0", str(e))
+        ttk.Button(bb, text=self.t("dev_encode", "编码"), style="Small.TButton",
+                   command=lambda: b_go(True)).pack(side="left", padx=4)
+        ttk.Button(bb, text=self.t("dev_decode", "解码"), style="Small.TButton",
+                   command=lambda: b_go(False)).pack(side="left", padx=4)
+        # ⑤ 单位换算
+        t5 = tk.Frame(nb, bg=self.UI_BG); nb.add(t5, text=self.t("dev_unit", "单位换算"))
+        cat_var = tk.StringVar(value="length")
+        r = tk.Frame(t5, bg=self.UI_BG); r.pack(anchor="w", padx=12, pady=10)
+        ttk.Combobox(r, textvariable=cat_var, values=list(self._UNIT_FACTORS), width=8,
+                     state="readonly").pack(side="left")
+        v_e = tk.Entry(r, width=10); v_e.pack(side="left", padx=6)
+        f_var = tk.StringVar(); t_var = tk.StringVar()
+        f_cb = ttk.Combobox(r, textvariable=f_var, width=6, state="readonly"); f_cb.pack(side="left")
+        tk.Label(r, text="→", bg=self.UI_BG, fg=self.UI_MUTED).pack(side="left", padx=4)
+        t_cb = ttk.Combobox(r, textvariable=t_var, width=6, state="readonly"); t_cb.pack(side="left")
+        u_out = tk.StringVar()
+        def sync_units(*_):
+            units = list(self._UNIT_FACTORS[cat_var.get()])
+            f_cb.configure(values=units); t_cb.configure(values=units)
+            f_var.set(units[0]); t_var.set(units[min(1, len(units) - 1)])
+        cat_var.trace_add("write", sync_units); sync_units()
+        def u_go():
+            try:
+                res = self._unit_convert(v_e.get(), cat_var.get(), f_var.get(), t_var.get())
+                u_out.set(f"{res:g} {t_var.get()}")
+            except Exception:
+                u_out.set(self.t("dev_bad", "输入有误"))
+        ttk.Button(r, text=self.t("dev_convert", "换算"), style="Small.TButton",
+                   command=u_go).pack(side="left", padx=6)
+        tk.Label(t5, textvariable=u_out, bg=self.UI_BG, fg=self.UI_ACCENT,
+                 font=self._ui_font(12, True)).pack(anchor="w", padx=12)
 
     def _show_main(self):
         self.deiconify(); self.lift()
