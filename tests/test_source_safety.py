@@ -315,7 +315,7 @@ class HardeningTests(unittest.TestCase):
 
     def test_backup_import_validates_chat_image_paths_and_content(self):
         body = method_text("_import_backup")
-        self.assertIn('r"ai_chat_images/[0-9a-f]{32}\\.jpg"', body)
+        self.assertIn('r"ai_chat_images/[0-9a-f]{32}\.jpg"', body)
         self.assertIn("info.file_size > 8 * 1024 * 1024", body)
         self.assertIn("image.verify()", body)
         self.assertIn("os.makedirs(os.path.dirname(tmp), exist_ok=True)", body)
