@@ -5685,6 +5685,20 @@ try {
         return self._ai_chat_messages([{"role": "user", "content": [
             {"type": "text", "text": prompt},
             {"type": "image_url", "image_url": {"url": self._ai_image_dataurl(img)}}]}], cfg=cfg, temperature=temperature, timeout=timeout, route=route)
+    @staticmethod
+    def _parse_retry_after(value):
+        """解析 Retry-After 头: 数字秒 (接受 0-30) 或 HTTP 日期; 无法解析/超范围返回 None。"""
+        if not value: return None
+        value = value.strip()
+        if value.isdigit():
+            v = int(value)
+            return float(v) if 0 <= v <= 30 else None
+        try:
+            import email.utils
+            dt = email.utils.parsedate_to_datetime(value)
+            return max(0.0, (dt - datetime.datetime.now(dt.tzinfo)).total_seconds())
+        except Exception:
+            return None
     def _ai_chat_messages(self, messages, cfg=None, temperature=0.7, max_tokens=1024, timeout=90, route=None, stream_callback=None, cancel_event=None):
         """把一组 OpenAI 格式消息发给当前 AI 服务, 返回回复纯文本 (看图/纯文本会话共用); 配置缺失/出错抛 RuntimeError。
         只用标准库 urllib; 调用方必须在后台线程里调。cfg 显式传入时用传入值 (设置窗测试用), 不碰 self.cfg。"""
@@ -5704,7 +5718,7 @@ try {
                 try: think = (self.cfg.get("AI", "Thinking", fallback="0") or "0").strip() == "1"
                 except Exception: think = False
             payload["chat_template_kwargs"] = {"enable_thinking": think}  # Dots 的深度思考默认开着, 必须显式传开关 (文档支持此参数)
-        def _send(pl):
+        def _send(pl, _rate_retried=False):
             req_payload = dict(pl)
             if stream_callback is not None:
                 req_payload["stream"] = True
@@ -5760,6 +5774,17 @@ try {
                         raise RuntimeError("AI 响应超过 2 MiB，已中止")
                     return _json.loads(raw.decode("utf-8"))
             except urllib.error.HTTPError as e:
+                # 429 限流: 按 Retry-After 等待后重试一次 (最多等 10 秒), 避免高峰期误判模型故障
+                if e.code == 429 and not _rate_retried:
+                    wait_s = self._parse_retry_after(e.headers.get("Retry-After"))
+                    if wait_s is not None:
+                        capped = min(10.0, wait_s)
+                        if cancel_event is not None:
+                            if cancel_event.wait(capped):
+                                raise RuntimeError("stopped")
+                        else:
+                            time.sleep(capped)
+                        return _send(pl, True)
                 # Never surface raw server diagnostics: they may echo credentials or request data.
                 try: detail = e.read(2048).decode("utf-8", "ignore")[:200]
                 except Exception: detail = ""

@@ -4,6 +4,7 @@ These tests intentionally avoid importing the Tk application so they can run on
 CI hosts without a desktop session or the optional Windows dependencies.
 """
 import ast
+import datetime
 import json
 import os
 import re
@@ -1875,3 +1876,27 @@ class MemoryRelevanceTests(unittest.TestCase):
     def test_wiring(self):
         self.assertIn("def _relevant_memories", SOURCE)
         self.assertIn('"MemoryTopN"', SOURCE)
+
+
+class RateLimitTests(unittest.TestCase):
+    """v1.6.3 AI-3: Retry-After 解析与 429 重试接线。"""
+
+    @classmethod
+    def setUpClass(cls):
+        app_node = next(n for n in TREE.body if isinstance(n, ast.ClassDef) and n.name == "App")
+        node = next(n for n in app_node.body if isinstance(n, ast.FunctionDef)
+                    and n.name == "_parse_retry_after")
+        cls.ns = {"datetime": datetime}
+        exec(ast.get_source_segment(SOURCE, node), cls.ns)
+
+    def test_parse_seconds(self):
+        f = self.ns["_parse_retry_after"]
+        self.assertEqual(f("5"), 5.0)
+        self.assertEqual(f("0"), 0.0)  # 立即重试也合法
+        self.assertIsNone(f("120"))  # 超 30 拒绝
+        self.assertIsNone(f(""))
+        self.assertIsNone(f("not-a-header"))
+
+    def test_wiring(self):
+        self.assertIn("e.code == 429 and not _rate_retried", SOURCE)
+        self.assertIn("return _send(pl, True)", SOURCE)
