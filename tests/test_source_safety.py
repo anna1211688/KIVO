@@ -4,7 +4,10 @@ These tests intentionally avoid importing the Tk application so they can run on
 CI hosts without a desktop session or the optional Windows dependencies.
 """
 import ast
+import json
 import os
+import re
+import time
 import pathlib
 import tempfile
 import unittest
@@ -30,9 +33,40 @@ def method_text(name):
     return ast.get_source_segment(SOURCE, app_method(name))
 
 
+# 纯函数依赖 (不联网): 附件解析的上限常量/异常/读条目封装, 供被单独 exec 的函数使用
+PURE_MODULE_HELPERS = (
+    "_ATTACH_INFLATE_LIMIT", "_ATTACH_TEXT_LIMIT", "_ATTACH_ENTRY_LIMIT",
+    "_AttachLimit", "_zip_read_bytes", "MAX_RECORDS",
+)
+
+
+def _helper_nodes():
+    out = []
+    for node in TREE.body:
+        if isinstance(node, (ast.FunctionDef, ast.ClassDef)) and node.name in PURE_MODULE_HELPERS:
+            out.append(node)
+        elif isinstance(node, ast.Assign):
+            for target in node.targets:
+                if isinstance(target, ast.Name) and target.id in PURE_MODULE_HELPERS:
+                    out.append(node)
+    return out
+
+
+def _base_ns():
+    ns = {"os": os, "re": re, "json": json, "time": time}
+    for node in _helper_nodes():
+        exec(ast.get_source_segment(SOURCE, node), ns)
+    return ns
+
+
+def module_text(name):
+    node = next(n for n in TREE.body if isinstance(n, ast.FunctionDef) and n.name == name)
+    return ast.get_source_segment(SOURCE, node)
+
+
 def load_function(name):
     node = app_method(name)
-    ns = {"os": os}
+    ns = _base_ns()
     exec(ast.get_source_segment(SOURCE, node), ns)
     fn = ns[name]
     return fn.__func__ if isinstance(fn, staticmethod) else fn
@@ -40,7 +74,7 @@ def load_function(name):
 
 def load_module_function(name):
     node = next(n for n in TREE.body if isinstance(n, ast.FunctionDef) and n.name == name)
-    ns = {"os": os}
+    ns = _base_ns()
     exec(ast.get_source_segment(SOURCE, node), ns)
     return ns[name]
 
@@ -50,10 +84,13 @@ class SafetyRegressionTests(unittest.TestCase):
         compile(SOURCE, str(ROOT / "main.py"), "exec")
 
     def test_paste_queue_only_consumes_after_success(self):
+        # 粘贴本身有 30ms+150ms 固定等待, 已移到后台线程: 判定"粘成功才消费"的不变量在 _paste_next_apply 里
         body = method_text("paste_next")
         self.assertIn("ok = self._paste_text(", body)
-        self.assertIn("if ok and self.paste_remove_var.get()", body)
-        self.assertLess(body.index("ok = self._paste_text("), body.index("del self.records"))
+        self.assertIn("_paste_next_apply(", body)
+        apply_body = method_text("_paste_next_apply")
+        self.assertIn("if ok and self.paste_remove_var.get()", apply_body)
+        self.assertLess(apply_body.index("if ok and self.paste_remove_var.get()"), apply_body.index("del self.records"))
 
     def test_paste_reports_failure_for_self_window_and_failed_input(self):
         body = method_text("_paste_text")
@@ -64,7 +101,8 @@ class SafetyRegressionTests(unittest.TestCase):
         self.assertIn("return pasted", body)
 
     def test_copy_requires_command_and_clipboard_change(self):
-        body = method_text("multi_copy")
+        # 抓取等待已移到后台线程, 入队部分在 _multi_copy_apply 里
+        body = method_text("multi_copy") + method_text("_multi_copy_apply")
         self.assertIn("self._send_combo(0x58 if cut else 0x43)", body)
         self.assertIn("if seq != before_seq: break", body)
         self.assertIn("if len(self.records) > n:", body)
@@ -746,6 +784,179 @@ class AiMemoryAndFilesTests(unittest.TestCase):
         self.assertIn("_extract_docx_text", body)
         self.assertIn("_extract_xlsx_text", body)
         self.assertIn("12 * 1024 * 1024", body)
+
+    def test_docx_zip_bomb_rejected(self):
+        """0.5MB 的 docx 能解出几百 MB: 必须在解压前用元数据拦下 (v1.5.1)"""
+        import io, zipfile
+        fn = load_module_function("_extract_docx_text")
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+            z.writestr("word/document.xml", "<w:p>" + "<w:t>x</w:t>" * (9 * 1024 * 1024 // 12) + "</w:p>")
+        self.assertLess(len(buf.getvalue()), 1024 * 1024)  # 压缩后很小, 走"元数据拦截"路径
+        with self.assertRaises(fn.__globals__["_AttachLimit"]):
+            fn(buf.getvalue())
+
+    def test_zip_entry_bomb_rejected(self):
+        import io, zipfile
+        fn = load_module_function("_extract_docx_text")
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w") as z:
+            for i in range(2100):
+                z.writestr(f"junk{i}.bin", "")
+            z.writestr("word/document.xml", "<w:p><w:t>x</w:t></w:p>")
+        with self.assertRaises(fn.__globals__["_AttachLimit"]):
+            fn(buf.getvalue())
+
+    def test_pdf_stream_limit(self):
+        body = module_text("_extract_pdf_text")
+        self.assertIn("decompressobj()", body)
+        self.assertIn("_ATTACH_INFLATE_LIMIT", body)
+
+    def test_redirect_guard_on_ai_paths(self):
+        """302 到别的域名时 urllib 会把 Authorization 一起带过去: AI 请求必须走同主机校验的封装"""
+        for name in ("_ai_chat_messages", "_ai_fetch_models", "_baidu_translate", "_google_translate"):
+            self.assertIn('globals().get("_open_url")', method_text(name), name)
+        guard = module_text("_open_url")
+        self.assertIn("HTTPRedirectHandler", guard)
+        self.assertIn("hostname", guard)
+
+
+class RecordQueueTests(unittest.TestCase):
+    """记录队列: 批量导入与单条上限 (v1.5.1 去 O(n²) + 防超长条)"""
+
+    class _Case:
+        def __init__(self, v=""): self.v = v
+        def get(self): return self.v
+
+    def _app(self, n=0, case=""):
+        class Stub: pass
+        s = Stub()
+        s.records = [{"text": f"旧记录 {i}", "locked": False} for i in range(n)]
+        s.case_var = self._Case(case); s.paste_index = 0
+        s.save_records = lambda *a, **k: None
+        s._RECORD_MAX_CHARS = 200000
+        return s
+
+    def test_bulk_import_matches_add_record_rules(self):
+        fn = load_function("_merge_import_lines")
+        s = self._app(3)
+        self.assertEqual(fn(s, ["旧记录 0", "", "   ", "新条目", "新条目"]), 1)
+        self.assertEqual(s.records[-1]["text"], "新条目")
+        self.assertEqual(len(s.records), 4)
+
+    def test_bulk_import_respects_case_switch(self):
+        fn = load_function("_merge_import_lines")
+        s = self._app(0, "转大写")
+        fn(s, ["abc"])
+        self.assertEqual(s.records[-1]["text"], "ABC")
+        self.assertEqual(fn(s, ["ABC"]), 0)  # 转大写后与已有重复, 不重复入队
+
+    def test_bulk_import_caps_total_records(self):
+        fn = load_function("_merge_import_lines")
+        s = self._app(1990)
+        fn(s, [f"新 {i}" for i in range(50)])
+        self.assertEqual(len(s.records), 2000)
+
+    def test_record_length_capped(self):
+        fn = load_function("add_record")
+        s = self._app(0)
+        fn(s, "长" * 300000)
+        self.assertLessEqual(len(s.records[-1]["text"]), 200000 + 20)
+        self.assertIn("已截断", s.records[-1]["text"])
+
+    def test_bulk_import_keeps_locked_records(self):
+        fn = load_function("_merge_import_lines")
+        s = self._app(0)
+        s.records = [{"text": f"锁 {i}", "locked": True} for i in range(2000)]
+        fn(s, ["新的一条"])
+        self.assertEqual(len(s.records), 2000)  # 全锁定: 上限是硬线, 新条不入队
+        self.assertTrue(all(r["locked"] for r in s.records))
+
+
+class RoundThreePolishTests(unittest.TestCase):
+    """第三轮 (2026-11-28): 版本号比较、备份导出非阻塞、截图目录自愈、长对话分帧"""
+
+    def test_patch_release_beats_base(self):
+        f = load_function("_ver_tuple")
+        self.assertGreater(f("1.5.0.1"), f("1.5.0"))          # 旧版 [:3] 截断会把补丁版判成相等 -> 不提示更新
+        self.assertGreater(f("v1.5.1"), f("1.5.0"))
+        self.assertGreater(f("1.10.0"), f("1.9.9"))           # 字符串比较会错, 逐位数字比较才对
+        self.assertEqual(f("1.5.0"), f("v1.5.0"))
+        self.assertEqual(f("1.5"), f("1.5.0"))
+
+    def test_prerelease_sorts_before_release(self):
+        f = load_function("_ver_tuple")
+        self.assertLess(f("1.5.0-beta1"), f("1.5.0"))
+        self.assertGreater(f("1.6.0"), f("1.5.0-beta9"))
+
+    def test_version_compare_used_by_update_check(self):
+        self.assertIn("self._ver_tuple(tag) > self._ver_tuple(VERSION)", SOURCE)
+
+    def test_backup_export_is_off_main_thread(self):
+        text = method_text("_backup_export_dialog")
+        self.assertIn("threading.Thread", text)
+        self.assertIn("_bak_busy", text)
+        self.assertIn("save_records(immediate=True)", text)   # 打包前仍要把最新数据刷盘
+
+    def test_backup_import_guards_and_prepaints(self):
+        text = method_text("_backup_import_dialog")
+        self.assertIn("update_idletasks()", text)
+        self.assertIn("_bak_busy", text)
+        self.assertEqual(text.count("askyesno"), 1)           # 只问一次
+
+    def test_refresh_shots_recreates_missing_dir(self):
+        text = method_text("refresh_shots")
+        self.assertIn("FileNotFoundError", text)
+        self.assertIn("makedirs", text)
+
+    def test_prune_shots_tolerates_vanished_files(self):
+        self.assertIn("getmtime", method_text("_prune_shots"))
+        self.assertIn("def _mtime", method_text("_prune_shots"))
+
+    def test_chat_history_renders_in_frames(self):
+        text = SOURCE.split("def render_all():", 1)[1][:2600]   # 嵌套在 AI 面板里, 不是 App 的直接方法
+        self.assertIn("_chat_render_gen", text)               # 代次守卫: 切对话时丢弃上一轮
+        self.assertIn("self.after(1", text)
+        self.assertIn("len(hist) <= 20", text)                 # 短对话仍同步一次画完
+        self.assertIn("pending_render", text)                  # 发送新消息前先冲刷, 保证气泡顺序
+
+
+class ChatImageGcTests(unittest.TestCase):
+    """孤儿聊天图片清理: 只删本程序命名、24 小时前、无对话引用的 jpg"""
+
+    def _run(self, refs, files):
+        fn = load_function("_gc_chat_images")
+        td = tempfile.mkdtemp()
+        self.addCleanup(lambda: __import__("shutil").rmtree(td, ignore_errors=True))
+        folder = os.path.join(td, "ai_chat_images"); os.makedirs(folder)
+        chats = os.path.join(td, "ai_chats.json")
+        with open(chats, "w", encoding="utf-8") as f:
+            json.dump(refs, f)
+        old = time.time() - 30 * 3600
+        for name, age in files.items():
+            p = os.path.join(folder, name)
+            with open(p, "wb") as f: f.write(b"x")
+            os.utime(p, (time.time() - age, time.time() - age))
+        fn.__globals__["BASE"] = td
+        fn.__globals__["AI_CHATS_PATH"] = chats
+        removed = fn(None)  # 方法里没用到 self: 传 None 即可
+        return removed, sorted(os.listdir(folder))
+
+    def test_orphan_old_image_removed(self):
+        kept, orphan = "a" * 32 + ".jpg", "b" * 32 + ".jpg"
+        n, left = self._run([{"messages": [{"image_path": "ai_chat_images/" + kept}]}],
+                            {kept: 30 * 3600, orphan: 30 * 3600})
+        self.assertEqual(n, 1)
+        self.assertEqual(left, [kept])
+
+    def test_recent_orphan_kept_as_grace(self):
+        orphan = "c" * 32 + ".jpg"
+        n, left = self._run([], {orphan: 60})
+        self.assertEqual((n, left), (0, [orphan]))
+
+    def test_foreign_files_untouched(self):
+        n, left = self._run([], {"note.txt": 30 * 3600, "README": 30 * 3600})
+        self.assertEqual((n, left), (0, ["README", "note.txt"]))
 
 
 if __name__ == "__main__":
