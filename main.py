@@ -429,7 +429,8 @@ _BTN_ICONS_B64 = {
     "gear": "iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAD5klEQVR4nLWUT4jVVRTHv+fce3/vvRnGHExpoj+LIOGBM8ErsSJ+o0VjOeXqB4ENisZr0yaGVlnDMIhItiiIYFCzhbaYwcVo5bgoZxGE+iCHHF1WJkOaZaH2fr977zkt5k9jTY4EneXhns+559+XcGdGaTpgAGBiYjDcYcz/Y7SYM8syM1KtanoSPDExGNZu3LIs59ZXEeLPZ0/s/wgApWlquru7ZWpqikZGRuIdgRfa6he3t5UKOp6UWp5QACG/+d7Dbb/3Lwa7HZgAoKtn+5vWlTfkzZt7nePL7Cqnfd5sMrMTifnk+P1tXRsvbWbrXhOff3l2/MCu2XidA/HC8gFoZ8+Ona7SOqSQ9TZJPpVIa3zR/I6ZS8RsQDjf+eyl5421Rwi6wVVahzp7duwEoLOMW8Ej1epcthckhBiKIocKQPohVFepikoIEUAXsYzF4DX4IpfgBUS9f2Ms+PHUFCHLDBHtBtSQ4ZKKKJhLRNTCbJitMwSyABEAEJFTVYLqHgCUnvyL94/hrVuXVW4ua0nZJKOq2gIVZZdw9MV5IrrGbB4XEUA1srVGYtF37Q8Z/X7i4+YiwxtgDACdX1/aayxvkxi+VaXHiJAY4zhqeMv+xHsajWHf+dwrvUw0qiIJQFDIaSZ+CKAzxlx/uXHsk6sAwGmaWmBQuk79uDUpl18XkXY2yVNEKDMbDuKnzn62b1ejMexrtbqb/HzfMRE9bGxCqiLGuLWqWGGTck/wlb0AFGlq+Pr11TP9EtwDACqSqwSoqhAzoPgNgNbqdedcq51ZKr1MRABBRSJUJVeJUOJ7F7aCAMWaTVuWm9hy1LjkSV/kV0DaTiBmNhQlbp48vv8oANR66w+EqGcIuFtVAOAXY90KEZkWCZsmjx/4ZgADRAsSaK1Wd9KBR6MPXcT8LlTLABEReVE5zMAVJdpGRCslSjTWmhh8vzP2qxvxxg8Xxg9Nz7Hm1kPTdMA2GsM+FvEuY5P3oagAIFUVVUmsS7axK71BmIESgSUGMdbt9iG2Xxg/NF2r1d3c9c3v3UQ3BAARY4gIRlUKADDWGYAQfB6CbwZVUWOtmU3qicgRYwhQavR2zOvHrQcCqCrG2Do2LimxsSTR9ynklDHOErFVxdUYfD8Rw7pSia0jVYwBpLOMRQ9kXoTYldZHX3wwOb7/SOfGHb8yuE00BuOSkhb5I0p0n3Xl/uCbXywmQkvK5oPp1vLyij3qyi3PSIyIobgSYqidO3Hw4u3i7GLOLMtMtVrVkzNC31z1dN9LnvkdEK9UlbfPnTh4sVaru0ZvR8z+Rej/qy1Z6ZIP5t5lWcbArDQODspSAX8Cm0TtanseiCAAAAAASUVORK5CYII=",
     "star": "iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAACeUlEQVR4nNWUQUhUURSG/3PfffNmTGdMxRQ3ErhoxsVkkW0EayEEtRxo0SIiWhRCRfvnrFyVqNUqaNUiWhpEKyMS2pQtzAgXtQkRLH0zOE/fu++cFk8Tx4EZI5DO6t7Lf7/733PPucDhhxBE6LBdNBKxy/Zr71ra7nztiZfqO1d1uYVYY5pbb5jIuACAMVj1ttXPmSsKANJrXz6CcDylg+6V+/mN+CYkjYPdWQ0Mx+NfSxbafkTp1a48OfZ7UtoiU7m4lll5je+9Gr29Jha+AYrnzMEcA2i9/fkp7OarEAaHlZelydylenu2wfG1Wm4ttquEvgMQi9kypEgBcCB0F4oSAEE48okwCWBLWJi0owFRHJiJ8qPszx3WrmNXFJY/WOlU6rrSqceUzEDCDYA0ZNMDsJ1OIpCTAcSA7COQTQ9s/Jsl33+C7lMRisQ1UhGflhn9dBKJ9CsCjklYCUHK3ivjkOwmW4AVBKUL3nR+vvoxq8qNBK5obzo/z+H6kEg0RzqpIcK7UGHSSS0SzXG4PuRN5+fhiq6ukP11XCSDwkKiPDWwpAJ/HNohEARABEgEQKAdUoE/Xp4aWEJhIYEimWpM7QbJ5hiuq1jrkdiJGLJTFjlpKz6AhLUegesqZHNcC1EbPIYIizkCR2chTJQ86nDgv5Wt8jNymhMgIjAPYjFHGEPUIFgUiKSjp7+T7KYzwpHHQWW0tHzivDeZvcJRcFnM5jLs1GBHT38niASQfZz94EJcKYHwsJCaEd44XZroe4gXYBTEKj3oex76qwMQmglku0ULjTUaAKDp3reuPxN3Vtca79EcLIR2PqG9y0I73+nfQf+J5n+J39QzDLg7vrq5AAAAAElFTkSuQmCC",
 }  # 按钮小图标 (22px, PIL 手绘线条风: 图标+文字并排, 与常见软件一致)
-VERSION = "1.5.0"  # v1.4.22: ①去掉内置浏览器整套 (Jane 真机定版不好用: 面板/书签/历史/菜单/pywebview 子进程全删, 工具栏回 8 按钮, 自检减为六项, 打包去 pywebview) ②世界时间加「刷新」(绕过天气 15 分钟节流立即重拉) ③文本翻译框自适应高度 (默认 8 行, 随内容长高至 24 行封顶, 按钮行跟随) ④系统设置/软件自检/历史截图/城市选择全部改为主窗口内面板 (Jane 定版「能收的都收」, 不再弹独立窗口, 重复开窗问题从结构上消除) ⑤启动时清理浏览器残留文件 (bookmarks/browser_history/browser_profile) ⑥工具栏改一行 8 按钮 ⑦截图翻译学有道: F4 出无边框浮动条 (原文区透明盖选区透出真实截图对照/译文框在选区下方、不够翻上方/大小随内容/源语言可选/条内复制原文·译文·AI 智能回复), 完整结果窗保留给无选区入口; v1.4.23: ①修真 bug: 配置解析关 % 插值 (分隔符/路径/接口地址带 % 不再抛错) ②备份导入加固 (JSON 先验货后落盘, 坏备份整包拒绝) + 备份说明去掉书签残留文案 ③英文模式运行时漏网文案两批全清 (汇率/托盘/取色器/下载提示/识别结果窗/AI 气泡与接口报错/测试连接结果/计算器/截图浮层, 三个翻译助手改实例方法并本地化报错) ④F4 纯数字/符号截图提示「没有可翻译的文字」不再误报失败 ⑤删死代码, 新增边缘测试套件; v1.4.24: 修 AI 聊天真机 400 (Jane 实测): 智谱 glm-4v-flash 的 max_tokens 上限 1024, 聊天面板传 2048 被拒 (code 1210); 已在 _ai_chat_messages 对智谱统一钳制 [1,1024], 别家不受影响, test_edge 扩至 17 项含此用例; v1.4.25: ①F4 截图翻译合并引擎 (Jane 定案): 配了 AI Key 先 AI 看图翻译 (一次读图+翻译, 尝试上限 20 秒), AI 失效/没配 Key 立刻回退 OCR 通道 ②F4 提速: 免费翻译通道黏性 (通的通道 120 秒内优先)、Google 超时 12→8 秒、MyMemory 12→10 秒、逐行兜底改并发 ③文本翻译源语言改下拉可选 (自动检测+13 种, 改选即重译并真传引擎) ④文本翻译接 AI 通道 + 「启用AI翻译」勾选 (默认开: 勾上才优先 AI、失效回退在线; 不勾绝不调 AI; 选择落盘 TTUseAI) ⑤_ai_chat_image/_ai_chat_messages 加 timeout 参数 (默认 90 不变); v1.4.26: ①F4 修 AI 回复把提示词的「第一部分/第二部分」标签回声进正文 (改提示词措辞+解析层剥标签兜底) ②全部勾选/单选改圆点指示 (选中绿点/未选空心圈, PIL 生成 Dot.indicator, 含经典 tk 城市勾选) ③工具栏 8 按钮统一样式 (AI 功能去掉蓝色描边款) ④F4 第二轮提速: OCR 与 AI 并行 (回退零等待, Jane 定案保持并行)、OCR 引擎启动预热、「翻译中…」占位浮签 ⑤马赛克/模糊加强: 强度随区域自适应 (旧版几乎无效), F1 编辑器预览改真效果 ⑥全面审查修复 18 项: 多显示器坐标校正、长截图/F4 后台线程兜底、备份验 Config.ini+导出原子写、迷你窗脏值兜底、天气失败负缓存改 60 秒、画廊/预览句柄泄漏、计算器英文错误态、AI 空白返回、强力粘贴验返回值、GlobalLock 判空、WinOCR 逐行容错、import_txt 支持 UTF-16、复制反馈存活守卫、配置双编码全新 parser、分隔符脏值校验; 两 ini 438 键同集 (新增 long_fail); v1.4.27: 功能与 1.4.26 相同, 首次提供安装版 (Inno Setup: 按用户安装/原地升级/开始菜单与桌面快捷方式/设置里可卸载; 发布页同时附 KIVO.exe 单文件版与 KIVO-Setup 安装包, Jane 2026-11-25 定案); v1.4.28: ①修任务栏恢复闪黑 (列表补刷推迟到窗口画出后, 不再同步重建堵第一帧) ②截图/贴图设置并入系统设置 (截图翻译目标语言/对照翻译/延时秒数/UI 检测, 与主窗口共用同一变量两处同步) ③F4 浮动条重做: 原文框全透明只留 1px 细边、与选区等大, 译文框独立白卡与原文框像素等宽左对齐, 功能条独立成条保持自然宽度 ④F4 截图翻译不使用 UI 检测 (纯自由框选, F1 等不受影响) ⑤UI 检测三招: 悬停常驻 UIA 桥实时查元素、假框过滤 (占整窗 85% 以上的容器矩形不要)、拖拽边缘 8px 磁吸 ⑥AI 分工: AI 聊天/看图翻译/标注栏 AI/智能回复/文本翻译五路可各选一家 (缺省跟随当前服务, 指定的那家没 Key 自动回退当前服务), 预设扩到 14 家 (新增 OpenAI/Gemini/Claude/DeepSeek/Kimi/火山豆包/腾讯混元/百度千帆/Grok/Ollama 本地自建), 修 _ai_cfg 镜像串扰真 bug (读别家配置会串到当前服务的 key/地址/模型, 分工会把请求发错地方) ⑦第五轮审查优化: UIA 桥读行加 2.5 秒超时杀桥 (防挂起应用堵死检测)、历史截图画廊缩略图分批渲染 (打开不冻结)、备份导入单文件 64MB 上限、记录/常用语落盘改紧凑 JSON (文件小三成读写更快); v1.4.29: ①品牌升级为 KIVO 启沃 (新 Logo/配色/功能改名/启动页/关于 KIVO) ②左侧边栏导航 (Jane 定序: AI 助手第一/翻译中心第二, 世界时钟与货币汇率分开) ③Dots.ai 第 15 家预设 + 深度思考开关 (实测: 正文被思考吃空时自动关思考重试一次) ④AI 聊天 GPT/豆包式改造 (+菜单附件/建议行/最近对话置顶重命名删除/圆角弹窗/气泡内豆包式图标行含朗读) ⑤迷你翻译 F10 + 复制即译 F11 (独立开关与热键, 跟随文本翻译的 AI 开关, 复制即译只按热键触发不监听剪贴板) ⑥约时间换算 (含单语复制模式)/对方作息提示/复制双语 ⑦计算器放大居中+计算历史/汇率 30 币种国旗/世界时钟天气图标+温馨提醒+分享 ⑧全局圆角 (主窗口外框直角除外)+KIVO 配色+弹窗美化, 标注默认矩形 ⑨设置内检查更新+一键更新 (下载字节数检/MZ 验头/SHA256+RSA 签名双重验证, 无 .sig 的版本拒装) ⑩第六轮深度审查: 边栏最小高度 600 防裁设置项 v1.4.30: 千问审查整改 — OCR 引擎锁竞态 (锁改为类定义时建好)、F7 消费模式只在粘成功时删记录、F4 碎片合并框并集底边、下载链接剥尾标点、恢复 _ini_scalar/_http_base 护栏、save_config/save_phrases 落盘失败记 crash.log。 v1.5.0: AI 助手全面升级 — 模型中心 (多服务商多模型档案/任务级选模型/连接测试/同服务商故障切换)、聊天流式输出与停止生成、图片上下文与图片备份、长期记忆、PDF/Word/Excel 附件解析、附件与历史读取上限、深色边栏与品牌蓝统一、备份事务回滚、热键冲突提示、AI 报错脱敏加固。
+VERSION = "1.5.1"  # v1.4.22: ①去掉内置浏览器整套 (Jane 真机定版不好用: 面板/书签/历史/菜单/pywebview 子进程全删, 工具栏回 8 按钮, 自检减为六项, 打包去 pywebview) ②世界时间加「刷新」(绕过天气 15 分钟节流立即重拉) ③文本翻译框自适应高度 (默认 8 行, 随内容长高至 24 行封顶, 按钮行跟随) ④系统设置/软件自检/历史截图/城市选择全部改为主窗口内面板 (Jane 定版「能收的都收」, 不再弹独立窗口, 重复开窗问题从结构上消除) ⑤启动时清理浏览器残留文件 (bookmarks/browser_history/browser_profile) ⑥工具栏改一行 8 按钮 ⑦截图翻译学有道: F4 出无边框浮动条 (原文区透明盖选区透出真实截图对照/译文框在选区下方、不够翻上方/大小随内容/源语言可选/条内复制原文·译文·AI 智能回复), 完整结果窗保留给无选区入口; v1.4.23: ①修真 bug: 配置解析关 % 插值 (分隔符/路径/接口地址带 % 不再抛错) ②备份导入加固 (JSON 先验货后落盘, 坏备份整包拒绝) + 备份说明去掉书签残留文案 ③英文模式运行时漏网文案两批全清 (汇率/托盘/取色器/下载提示/识别结果窗/AI 气泡与接口报错/测试连接结果/计算器/截图浮层, 三个翻译助手改实例方法并本地化报错) ④F4 纯数字/符号截图提示「没有可翻译的文字」不再误报失败 ⑤删死代码, 新增边缘测试套件; v1.4.24: 修 AI 聊天真机 400 (Jane 实测): 智谱 glm-4v-flash 的 max_tokens 上限 1024, 聊天面板传 2048 被拒 (code 1210); 已在 _ai_chat_messages 对智谱统一钳制 [1,1024], 别家不受影响, test_edge 扩至 17 项含此用例; v1.4.25: ①F4 截图翻译合并引擎 (Jane 定案): 配了 AI Key 先 AI 看图翻译 (一次读图+翻译, 尝试上限 20 秒), AI 失效/没配 Key 立刻回退 OCR 通道 ②F4 提速: 免费翻译通道黏性 (通的通道 120 秒内优先)、Google 超时 12→8 秒、MyMemory 12→10 秒、逐行兜底改并发 ③文本翻译源语言改下拉可选 (自动检测+13 种, 改选即重译并真传引擎) ④文本翻译接 AI 通道 + 「启用AI翻译」勾选 (默认开: 勾上才优先 AI、失效回退在线; 不勾绝不调 AI; 选择落盘 TTUseAI) ⑤_ai_chat_image/_ai_chat_messages 加 timeout 参数 (默认 90 不变); v1.4.26: ①F4 修 AI 回复把提示词的「第一部分/第二部分」标签回声进正文 (改提示词措辞+解析层剥标签兜底) ②全部勾选/单选改圆点指示 (选中绿点/未选空心圈, PIL 生成 Dot.indicator, 含经典 tk 城市勾选) ③工具栏 8 按钮统一样式 (AI 功能去掉蓝色描边款) ④F4 第二轮提速: OCR 与 AI 并行 (回退零等待, Jane 定案保持并行)、OCR 引擎启动预热、「翻译中…」占位浮签 ⑤马赛克/模糊加强: 强度随区域自适应 (旧版几乎无效), F1 编辑器预览改真效果 ⑥全面审查修复 18 项: 多显示器坐标校正、长截图/F4 后台线程兜底、备份验 Config.ini+导出原子写、迷你窗脏值兜底、天气失败负缓存改 60 秒、画廊/预览句柄泄漏、计算器英文错误态、AI 空白返回、强力粘贴验返回值、GlobalLock 判空、WinOCR 逐行容错、import_txt 支持 UTF-16、复制反馈存活守卫、配置双编码全新 parser、分隔符脏值校验; 两 ini 438 键同集 (新增 long_fail); v1.4.27: 功能与 1.4.26 相同, 首次提供安装版 (Inno Setup: 按用户安装/原地升级/开始菜单与桌面快捷方式/设置里可卸载; 发布页同时附 KIVO.exe 单文件版与 KIVO-Setup 安装包, Jane 2026-11-25 定案); v1.4.28: ①修任务栏恢复闪黑 (列表补刷推迟到窗口画出后, 不再同步重建堵第一帧) ②截图/贴图设置并入系统设置 (截图翻译目标语言/对照翻译/延时秒数/UI 检测, 与主窗口共用同一变量两处同步) ③F4 浮动条重做: 原文框全透明只留 1px 细边、与选区等大, 译文框独立白卡与原文框像素等宽左对齐, 功能条独立成条保持自然宽度 ④F4 截图翻译不使用 UI 检测 (纯自由框选, F1 等不受影响) ⑤UI 检测三招: 悬停常驻 UIA 桥实时查元素、假框过滤 (占整窗 85% 以上的容器矩形不要)、拖拽边缘 8px 磁吸 ⑥AI 分工: AI 聊天/看图翻译/标注栏 AI/智能回复/文本翻译五路可各选一家 (缺省跟随当前服务, 指定的那家没 Key 自动回退当前服务), 预设扩到 14 家 (新增 OpenAI/Gemini/Claude/DeepSeek/Kimi/火山豆包/腾讯混元/百度千帆/Grok/Ollama 本地自建), 修 _ai_cfg 镜像串扰真 bug (读别家配置会串到当前服务的 key/地址/模型, 分工会把请求发错地方) ⑦第五轮审查优化: UIA 桥读行加 2.5 秒超时杀桥 (防挂起应用堵死检测)、历史截图画廊缩略图分批渲染 (打开不冻结)、备份导入单文件 64MB 上限、记录/常用语落盘改紧凑 JSON (文件小三成读写更快); v1.4.29: ①品牌升级为 KIVO 启沃 (新 Logo/配色/功能改名/启动页/关于 KIVO) ②左侧边栏导航 (Jane 定序: AI 助手第一/翻译中心第二, 世界时钟与货币汇率分开) ③Dots.ai 第 15 家预设 + 深度思考开关 (实测: 正文被思考吃空时自动关思考重试一次) ④AI 聊天 GPT/豆包式改造 (+菜单附件/建议行/最近对话置顶重命名删除/圆角弹窗/气泡内豆包式图标行含朗读) ⑤迷你翻译 F10 + 复制即译 F11 (独立开关与热键, 跟随文本翻译的 AI 开关, 复制即译只按热键触发不监听剪贴板) ⑥约时间换算 (含单语复制模式)/对方作息提示/复制双语 ⑦计算器放大居中+计算历史/汇率 30 币种国旗/世界时钟天气图标+温馨提醒+分享 ⑧全局圆角 (主窗口外框直角除外)+KIVO 配色+弹窗美化, 标注默认矩形 ⑨设置内检查更新+一键更新 (下载字节数检/MZ 验头/SHA256+RSA 签名双重验证, 无 .sig 的版本拒装) ⑩第六轮深度审查: 边栏最小高度 600 防裁设置项 v1.4.30: 千问审查整改 — OCR 引擎锁竞态 (锁改为类定义时建好)、F7 消费模式只在粘成功时删记录、F4 碎片合并框并集底边、下载链接剥尾标点、恢复 _ini_scalar/_http_base 护栏、save_config/save_phrases 落盘失败记 crash.log。 v1.5.0: AI 助手全面升级 — 模型中心 (多服务商多模型档案/任务级选模型/连接测试/同服务商故障切换)、聊天流式输出与停止生成、图片上下文与图片备份、长期记忆、PDF/Word/Excel 附件解析、附件与历史读取上限、深色边栏与品牌蓝统一、备份事务回滚、热键冲突提示、AI 报错脱敏加固。
+# v1.5.1: F4 截图历史异步落盘；OCR/视觉 AI 竞速；空 OCR 结果不再重复识别。
 # v1.4.20: 瘦身版, 功能零变化 — 打包侧剔除未用组件 (cv2 视频插件/级联数据、numpy 测试集、onnxruntime 的 transformers/tools/quantization/datasets/backend), 已模拟验证删除后 OCR 中英文识别正常
 # v1.4.19: ①AI 面板侧边栏去掉「AI 功能」快捷入口组 (功能本体全保留) ②修复 v1.4.18 的 F4 截图翻译主流程 (_translate_lines 误标 @staticmethod 致后台线程静默失败) ③记录上限改硬线 (全锁定时不再突破 2000) ④截图翻译目标语言扩到 13 种 ⑤内嵌微型浏览器 (WebView2 子进程收编: 谷歌翻译主页/书签栏前 8+书签管理/浏览历史/清除数据/页面缩放/下载说明) ⑥文本翻译面板 (打字停笔 350ms 自动翻译, 无缓存每次实时译) + 工具栏按序重排为两行并配线条图标 ⑦品牌头重排 (系统设置移左上挨着 KIVO, 副标题「多功能工作台」居中, 右上留空) + 软件图标换 Jane 的樱花小女孩原图 ⑧窗口最小高度解锁 (最大化/缩放恢复正常) ⑨全界面双语化补齐 (约 330 条文案入语言文件, 英文模式复检残留中文 0 条) + 第八轮深查 (线程/网络/浏览器生命周期/热键英文保存往返全过)
 # v1.4.18: ①截图翻译修复 (OCR 碎片合并+整段翻译, 结果窗改纯文本) ②翻译结果窗内嵌 AI 智能回复 ③AI/热键/翻译设置全并入系统设置 ④AI 功能改内嵌面板+豆包式侧边栏+最近对话存档 (圆角气泡) ⑤主窗口简约重设计 (方角) ⑥货币汇率 ⑦计算器 ⑧常用语库面板化+序号 ⑨世界时间 (全球城市自选+当地天气) ⑩无水印下载 (FB/IG/小红书等, 保存位置可每次询问或固定) ⑪历史截图保存设置 (张数/不保存, 含 GIF) ⑫移除网络搜索 ⑬三轮深查整改: AI 回复防串话/时钟计时链/天气失败重试/设置窗滚轮隔离/下载实际文件名/汇率过期刷新/AI 回复增量渲染 (320ms→24ms)/单实例保护/单对话存档封顶 200 条
@@ -849,6 +850,32 @@ def _read_text_attachment(path, max_bytes=2 * 1024 * 1024, max_chars=60000):
     if len(text) > max_chars:
         text = text[:max_chars] + "\n……(文件太长, 已截断)"
     return text
+
+
+def _resolve_screenshot_translation_futures(ocr_future, ai_future, ai_grace=0.65):
+    """Return (AI result, OCR lines); a ready valid AI result wins, otherwise OCR wins after a short AI grace period."""
+    from concurrent.futures import FIRST_COMPLETED, TimeoutError, wait
+    wait((ocr_future, ai_future), return_when=FIRST_COMPLETED)
+    ai_result = None
+    if ai_future.done():
+        try:
+            ai_result = ai_future.result()
+        except Exception:
+            ai_result = None
+        if ai_result is not None:
+            return ai_result, None
+    try:
+        ocr_result = ocr_future.result()
+    except Exception:
+        ocr_result = None
+    if ai_result is None and not ai_future.done() and ai_grace > 0:
+        try:
+            ai_result = ai_future.result(timeout=max(0.0, float(ai_grace)))
+        except TimeoutError:
+            pass
+        except Exception:
+            pass
+    return ai_result, ocr_result
 
 
 class App(tk.Tk):
@@ -2912,14 +2939,41 @@ class App(tk.Tk):
                 except OSError: pass
         except Exception: pass
 
-    def save_shot(self, img):
+    def _save_shot_file(self, img):
+        """只做截图文件 I/O，不触碰 Tk 控件；允许放到后台线程执行。"""
         if self.cfg.get("Snip", "HistorySave", fallback="1").strip() == "0":
-            return None  # 系统设置里选了不保存历史截图: 截图照常用 (复制/贴图/翻译都不受影响), 只是不落盘进历史
-        now = datetime.datetime.now()  # 带毫秒: 旧版只到秒, 1 秒内连截两张会同名互相覆盖
+            return None
+        now = datetime.datetime.now()
         name = now.strftime("shot_%Y%m%d_%H%M%S_") + f"{now.microsecond // 1000:03d}.png"
-        path = os.path.join(self.shots_dir, name); img.save(path)
+        path = os.path.join(self.shots_dir, name)
+        img.save(path)
         self._prune_shots()
-        self.refresh_shots(); return path
+        return path
+
+    def save_shot(self, img):
+        """兼容同步调用；若调用方在后台线程，界面刷新必须排回 Tk 主线程。"""
+        path = self._save_shot_file(img)
+        if path is not None:
+            if threading.current_thread() is threading.main_thread():
+                self.refresh_shots()
+            else:
+                self._ui_queue.put(self.refresh_shots)
+        return path
+
+    def save_shot_async(self, img):
+        """后台保存截图历史，避免大 PNG 压缩占用截图回调的 UI 主线程。"""
+        if self.cfg.get("Snip", "HistorySave", fallback="1").strip() == "0":
+            return
+        def work():
+            try:
+                path = self._save_shot_file(img)
+            except Exception as e:
+                _log_crash("shot-save", type(e), e, e.__traceback__)
+                return
+            if path is not None:
+                try: self._ui_queue.put(self.refresh_shots)
+                except Exception: pass
+        threading.Thread(target=work, name="kivo-shot-save", daemon=True).start()
     def open_shots_dir(self):
         if sys.platform == "win32": os.startfile(self.shots_dir)  # noqa: S606
         else: messagebox.showinfo(self.t("shots_folder", "截图文件夹"), self.shots_dir)
@@ -3293,7 +3347,7 @@ class App(tk.Tk):
                 if finish_mode == "copy":  # 截图并复制: 框选完直接出图进剪贴板, 不停留标注
                     final = full.crop(box); self.save_shot(final); close_overlay(); self._copy_image_to_clipboard(final)
                 elif finish_mode == "translate":  # 截图翻译: 框选完直接 OCR 并翻译到目标语言, 不停留标注
-                    final = full.crop(box); self.save_shot(final); close_overlay(); self.translate_image_inplace(final, self.trans_target(), anchor=box)
+                    final = full.crop(box); close_overlay(); self.save_shot_async(final); self.translate_image_inplace(final, self.trans_target(), anchor=box)
                 elif finish_mode == "reply":  # 智能回复: 框选完直接让 AI 读对话给候选 (聊天截图不存历史, 免得堆一堆隐私图)
                     final = full.crop(box); close_overlay(); self.ai_smart_reply(final)
                 elif finish_mode == "ai":  # 看图翻译 (截图工具栏/贴图菜单入口): 框选完直接让 AI 读图翻译 (不存历史)
@@ -8507,59 +8561,77 @@ try {
             try: w.destroy()
             except Exception: pass
     def translate_image_inplace(self, img, target=None, anchor=None, route="vision"):
-        """有道式截图翻译: OCR 每行文字+位置 -> 逐行翻译 -> 译文绘回原图 -> 弹翻译结果窗 (可切换目标语言/对照开关)。
-        拿不到行坐标时回退到原来的纯文字翻译流程。"""
+        """有道式截图翻译：OCR 与视觉 AI 并行；先完成的可用结果优先，避免慢 AI 挡住已完成的 OCR。"""
         import threading
         self._f4_busy_show(anchor)
         def work():
-            try: work_body()
-            except Exception:  # 后台线程任何未预料异常: 至少撤掉占位并给用户一句提示, 不许静默死亡 (审查发现: _ai_cfg/OCR 引擎等都有 try 外的抛点)
+            try:
+                work_body()
+            except Exception as e:
+                _log_crash("screenshot-translate", type(e), e, e.__traceback__)
                 def _err():
                     self._f4_busy_done()
                     messagebox.showinfo(self.t("snip_trans_title", "截图翻译"), self.t("tr_fail_net2", "翻译失败: 在线翻译接口没连上, 检查网络后重试。"))
                 self._ui_queue.put(_err)
+
         def work_body():
-            import concurrent.futures
-            pool = concurrent.futures.ThreadPoolExecutor(max_workers=1)
-            ocr_fut = pool.submit(self.ocr_lines, img)  # OCR 与 AI 并行先跑: AI 失效时回退零等待 (AI 成功则这份结果不用)
-            ai = self._ai_vision_translate(img, target, route=route)  # 合并引擎: AI 看图优先, 失效 (含没配 Key) 立刻回退下面的 OCR 通道; route 决定用哪家 AI (F4=vision, 标注栏/贴图=annotate)
+            from concurrent.futures import ThreadPoolExecutor
+            pool = ThreadPoolExecutor(max_workers=2, thread_name_prefix="kivo-screenshot")
+            ocr_fut = pool.submit(self.ocr_lines, img)
+            ai_fut = pool.submit(self._ai_vision_translate, img, target, route=route)
+            # AI 已先给出有效结果就立即用；OCR 先完成时只给 AI 一个很短的赶上窗口。
+            # 不再让视觉模型的 20 秒请求超时挡住已经完成的本地 OCR。
+            ai, lines = _resolve_screenshot_translation_futures(ocr_fut, ai_fut, ai_grace=0.65)
+            pool.shutdown(wait=False, cancel_futures=True)
+
             if ai is not None:
-                pool.shutdown(wait=False)
-                lines, translations, tgt = ai
+                ai_lines, translations, tgt = ai
                 def deliver_ai():
                     self._f4_busy_done()
-                    if anchor: self._show_translate_bar(img, lines, tgt, translations, anchor)
-                    else: self.show_translate_compare(img, lines, tgt, translations)
-                self._ui_queue.put(deliver_ai); return
-            try: lines = ocr_fut.result()
-            except Exception: lines = []
-            pool.shutdown(wait=False)
+                    if anchor: self._show_translate_bar(img, ai_lines, tgt, translations, anchor)
+                    else: self.show_translate_compare(img, ai_lines, tgt, translations)
+                self._ui_queue.put(deliver_ai)
+                return
+
             if not lines:
-                # 拿不到行坐标: 在本线程把纯文字 OCR 也做了再交给文字翻译流程,
-                # 旧版直接调 translate_image 会把整套 OCR 再跑一遍 (RapidOCR 一遍好几秒)
+                if lines is not None:
+                    # [] 表示 OCR 已正常运行但没有识别到文字；重复启动纯文本 OCR 不会增加有效结果。
+                    def _no_text():
+                        self._f4_busy_done()
+                        messagebox.showinfo(self.t("snip_trans_title", "截图翻译"), self.t("tr_no_text", "这张图没识别出文字, 换个更清晰的截图试试。"))
+                    self._ui_queue.put(_no_text)
+                    return
+                # None 表示带坐标的 OCR 引擎不可用；纯文本路径仍可尝试 Tesseract 等兜底。
                 self._ui_queue.put(self._f4_busy_done)
-                self.translate_image(img, target, text=self.ocr_image(img), anchor=anchor); return
-            if not any(re.search(r"[A-Za-z\u4e00-\u9fff]", l["t"]) for l in lines):  # 只有数字/符号: 没东西可译, 别误报「翻译失败」
+                self.translate_image(img, target, text=self.ocr_image(img), anchor=anchor)
+                return
+
+            if not any(re.search(r"[A-Za-z\u4e00-\u9fff]", line["t"]) for line in lines):
                 def _only_symbols():
                     self._f4_busy_done()
                     messagebox.showinfo(self.t("snip_trans_title", "截图翻译"), self.t("tr_only_symbols", "识别到的只有数字或符号, 没有可翻译的文字"))
-                self._ui_queue.put(_only_symbols); return
+                self._ui_queue.put(_only_symbols)
+                return
+
             tgt = target
             if tgt is None:
-                joined = "".join(l["t"] for l in lines)
+                joined = "".join(line["t"] for line in lines)
                 tgt = "en" if any("\u4e00" <= ch <= "\u9fff" for ch in joined) else "zh-CN"
             translations, any_ok = self._translate_lines(lines, tgt)
             if not any_ok:
                 def _fail():
                     self._f4_busy_done()
                     messagebox.showinfo(self.t("snip_trans_title", "截图翻译"), self.t("tr_fail_net2", "翻译失败: 在线翻译接口没连上, 检查网络后重试。"))
-                self._ui_queue.put(_fail); return
+                self._ui_queue.put(_fail)
+                return
             def deliver():
                 self._f4_busy_done()
                 if anchor: self._show_translate_bar(img, lines, tgt, translations, anchor)
                 else: self.show_translate_compare(img, lines, tgt, translations)
             self._ui_queue.put(deliver)
-        threading.Thread(target=work, daemon=True).start()
+
+        threading.Thread(target=work, name="kivo-screenshot-translate", daemon=True).start()
+
     def _result_retranslate(self, st, lines, tgt_var, src_var, auto_name, tgt_combo, src_combo, busy_var, on_ok, alive=None):
         """截图翻译结果窗/浮动条共用: 源/目标语言变化时在后台重译; 成功更新 st 并回调 on_ok(trs) 刷新各自显示,
         失败恢复原语言选择并保留当前译文。alive 给定时 done 先验承载窗还在不在 (浮动条/结果窗被关掉后不碰已销毁控件)。"""
