@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 KIVO 启沃 · 智能工作台 - 剪贴板队列、截图翻译、AI 助手、世界时钟、汇率换算
 ================================================
@@ -2011,20 +2010,20 @@ class App(tk.Tk):
                 MAX_BYTES = 300 * 1024 * 1024  # 安装包大小上限: 正常包几十 MB, 超过 300MB 必是异常响应, 别把磁盘写满
                 with urllib.request.urlopen(req, timeout=30) as r, open(part, "wb") as f:
                     total = int(r.headers.get("Content-Length") or 0)
-                    if total > MAX_BYTES: raise IOError("too large")
+                    if total > MAX_BYTES: raise OSError("too large")
                     while True:
                         chunk = r.read(262144)
                         if not chunk: break
                         f.write(chunk); done += len(chunk)
-                        if done > MAX_BYTES: raise IOError("too large")
+                        if done > MAX_BYTES: raise OSError("too large")
                         pct = int(done * 100 / total) if total else -1
                         if pct != last[0]:
                             last[0] = pct
                             self._ui_queue.put(lambda p=pct, d=done: self._upd_progress(p, d))
-                if total and done != total: raise IOError("incomplete download")  # 字节数对不上 = 网络中断下了一半, 残缺安装包不许启动
+                if total and done != total: raise OSError("incomplete download")  # 字节数对不上 = 网络中断下了一半, 残缺安装包不许启动
                 # ---- 哈希 + 签名双重验证 (Jane 2026-11-27 选定): 取同发布的 .sig 清单, 先验签名 (证明清单出自发布私钥) 再比对安装包哈希 ----
                 sig_url = getattr(self, "_upd_sig_url", "")
-                if not sig_url: raise IOError("no signature asset")  # 没有签名文件的版本不给一键安装 (发布页仍可手动下)
+                if not sig_url: raise OSError("no signature asset")  # 没有签名文件的版本不给一键安装 (发布页仍可手动下)
                 sreq = urllib.request.Request(sig_url, headers={"User-Agent": "KIVO/" + VERSION})
                 with urllib.request.urlopen(sreq, timeout=15) as sr:
                     mani = json.loads(sr.read().decode("utf-8", "replace"))
@@ -2037,8 +2036,8 @@ class App(tk.Tk):
                         h.update(b)
                 digest = h.hexdigest()
                 ver = str(getattr(self, "_upd_tag", "") or "").lstrip("v")
-                if str(mani.get("name") or "") != (name or "") or str(mani.get("sha256") or "").lower() != digest: raise IOError("hash mismatch")
-                if not self._verify_update_sig(str(mani.get("name") or ""), str(mani.get("version") or ver), digest, str(mani.get("sig") or "")): raise IOError("bad signature")
+                if str(mani.get("name") or "") != (name or "") or str(mani.get("sha256") or "").lower() != digest: raise OSError("hash mismatch")
+                if not self._verify_update_sig(str(mani.get("name") or ""), str(mani.get("version") or ver), digest, str(mani.get("sig") or "")): raise OSError("bad signature")
                 os.replace(part, dest)  # 全部验证通过, 才把安装包放到正式文件名上
                 self._ui_queue.put(lambda: self._upd_downloaded(dest))
             except Exception as e:
@@ -2056,7 +2055,7 @@ class App(tk.Tk):
         self._upd_status.configure(text=txt, foreground=self.UI_MUTED)
 
     def _launch_installer(self, path):
-        if sys.platform == "win32": os.startfile(path)  # noqa: S606
+        if sys.platform == "win32": os.startfile(path)
         else:
             import subprocess; subprocess.Popen([path])
 
@@ -3337,7 +3336,7 @@ class App(tk.Tk):
         try: self.refresh_shots()
         except Exception: pass
     def open_shots_dir(self):
-        if sys.platform == "win32": os.startfile(self.shots_dir)  # noqa: S606
+        if sys.platform == "win32": os.startfile(self.shots_dir)
         else: messagebox.showinfo(self.t("shots_folder", "截图文件夹"), self.shots_dir)
     # ---------- 长截图 (滚动拼接) 与 GIF 录制 (参考 PixPin) ----------
     @staticmethod
@@ -3794,7 +3793,7 @@ class App(tk.Tk):
             tb.update_idletasks()
             tw, th = tb.winfo_reqwidth(), tb.winfo_reqheight()  # 用请求尺寸: 窗口未真正映射时 winfo_width 可能只有 1, 工具栏会被放错位 (真机出现过工具栏找不到)
             if tw <= 1 or th <= 1: tw, th = 700, 76
-            x1, y1, x2, y2 = state["box"]
+            x1, y1, _x2, y2 = state["box"]
             tx = min(max(0, x1), max(0, full.width - tw))
             ty = y2 + 8 if y2 + 8 + th <= full.height else (y1 - th - 8 if y1 - th - 8 >= 0 else max(0, full.height - th))
             tb.place(x=tx, y=ty, width=tw, height=th)  # 同窗 Frame: place 到冻结屏画布之上, 坐标就是画布坐标
@@ -3908,7 +3907,7 @@ class App(tk.Tk):
             _tb_sep(r1)
             for cname in ("#FF0000", "#FFD800", "#00B050", "#0070FF", "#000000", "#FFFFFF"):
                 tk.Button(r1, bg=cname, width=2, relief="flat", bd=0, highlightthickness=1,
-                          highlightbackground="#D7DFEA", cursor="hand2",
+                          highlightbackground=self.UI_BORDER_STRONG, cursor="hand2",
                           command=lambda cc=cname: state.update(color=cc)).pack(side="left", padx=1, pady=2)
             def pick_custom():
                 _suspend_esc()  # 取色器打开期间摘掉全局 Esc
@@ -3917,7 +3916,7 @@ class App(tk.Tk):
                 if picked:
                     state.update(color=picked); custom_btn.configure(bg=picked)
             custom_btn = tk.Button(r1, text=self.t("snip_custom", "自定义"), font=self._ui_font(9), relief="flat",
-                                   bd=0, highlightthickness=1, highlightbackground="#D7DFEA", bg="#FFFFFF",
+                                   bd=0, highlightthickness=1, highlightbackground=self.UI_BORDER_STRONG, bg="#FFFFFF",
                                    fg=self.UI_TEXT_2, activebackground=self.UI_ACCENT_TINT, cursor="hand2", padx=6, pady=3,
                                    command=pick_custom)
             custom_btn.pack(side="left", padx=1, pady=1)
@@ -5014,7 +5013,8 @@ try {
         import urllib.request, urllib.parse, json as _json, hashlib, random
         _open = globals().get("_open_url") or urllib.request.urlopen  # 模块级同主机跳转防护; 脱离模块上下文时退回原生
         salt = str(random.randint(10000, 99999))
-        sign = hashlib.md5((appid + q + salt + key).encode("utf-8")).hexdigest()
+        # MD5 是百度翻译 API 强制的签名算法 (非我们自选的安全哈希), 不能换; nosec 说明避免误报
+        sign = hashlib.md5((appid + q + salt + key).encode("utf-8")).hexdigest()  # nosec B324
         url = "https://fanyi-api.baidu.com/api/trans/vip/translate?" + urllib.parse.urlencode(
             {"q": q, "from": ({"zh-CN": "zh", "zh-TW": "cht", "ja": "jp", "ko": "kor", "fr": "fra", "es": "spa", "vi": "vie"}.get(source, source) if source else "auto"), "to": {"zh-CN": "zh", "zh-TW": "cht", "ja": "jp", "ko": "kor", "fr": "fra", "es": "spa", "vi": "vie"}.get(target, target),
              "appid": appid, "salt": salt, "sign": sign})
@@ -5672,7 +5672,7 @@ try {
             for item in model_tree.get_children(): model_tree.delete(item)
             selected_iid = None
             for svc_key in self._AI_PRESETS:
-                key, current_model, base = store[svc_key]
+                key, current_model, _base = store[svc_key]
                 rows = profiles[svc_key] or [{"model": current_model or self.t("ai_mc_unset", "(未设置)"), "enabled": True}]
                 for index, profile in enumerate(rows):
                     model_id = profile["model"]
@@ -5978,11 +5978,6 @@ try {
             s = re.sub(r"^\s*(\d+\s*[.、)）:：]|[-•·])\s*", "", ln).strip()
             if s: out.append(s)
         return out[:3] if out else []
-    def snip_ai_translate(self):
-        """看图翻译 (截图工具栏「AI翻译」/贴图右键菜单入口): 先查 key, 再框选一张图 -> AI 直接读图翻译"""
-        if not self._ai_ready("vision"): return
-        self._snip_finish_mode = "ai"; self.snip_region()
-
     def snip_reply(self):
         """智能回复: 框选聊天区域 -> AI 读懂对话给 3 条候选 -> 点一条直接粘进刚才的聊天窗口"""
         if not self._ai_ready("reply"): return  # 先查 key: 没填就别让用户白框选一趟, 截完才弹窗问
@@ -6624,8 +6619,9 @@ try {
         st = {"acc": None, "op": None, "fresh": True}
         ERR = self.t("calc_error", "错误")  # 错误态判断统一用这份 (显示也是它): 旧版判断写死中文, 英文模式显示 Error 后判断永不成立、状态错乱 (审查发现)
         def fmt(v):
-            if v != v or v in (float("inf"), float("-inf")): return self.t("calc_error", "错误")
-            if abs(v - round(v)) < 1e-12 and abs(v) < 1e16: return str(int(round(v)))
+            if v != v or v in (float("inf"), float("-inf")):
+                return self.t("calc_error", "错误")
+            if abs(v - round(v)) < 1e-12 and abs(v) < 1e16: return str(round(v))
             return f"{v:.10f}".rstrip("0").rstrip(".") or "0"
         def cur():
             try: return float(disp_var.get())
@@ -7416,7 +7412,7 @@ try {
             cc = (d.get("current_condition") or [{}])[0]
             if cc.get("temp_C") is not None:
                 desc = (cc.get("weatherDesc") or [{}])[0].get("value", "")
-                return (int(round(float(cc["temp_C"]))), self._wwo_zh(cc.get("weatherCode"), desc, self.lang == "English"),
+                return (round(float(cc["temp_C"])), self._wwo_zh(cc.get("weatherCode"), desc, self.lang == "English"),
                         self._wwo_cat(cc.get("weatherCode"), desc))
         except Exception: pass
         try:
@@ -7426,7 +7422,7 @@ try {
                 d = json.loads(r.read().decode("utf-8"))
             cur = d.get("current") or {}
             if cur.get("temperature_2m") is not None:
-                return (int(round(float(cur["temperature_2m"]))), self._wmo_zh(cur.get("weather_code"), self.lang == "English"),
+                return (round(float(cur["temperature_2m"])), self._wmo_zh(cur.get("weather_code"), self.lang == "English"),
                         self._wmo_cat(cur.get("weather_code")))
         except Exception: pass
         return None
@@ -8950,7 +8946,7 @@ try {
         if d is None: d = self._trans_dead = {}
         if ok: d[name] = (0, 0); return
         if hard: d[name] = (time.time() + 8, 0); return
-        until, cnt = d.get(name, (0, 0)); cnt += 1
+        _until, cnt = d.get(name, (0, 0)); cnt += 1
         d[name] = (time.time() + 60, 0) if cnt >= 3 else (0, cnt)
     def translate_text_to(self, text, target, source=None, budget=None):
         """把文字翻译到指定目标语言, 源语言自动检测 (一键截图翻译 F4 用)。
@@ -9355,7 +9351,7 @@ try {
                 win.update_idletasks()
                 ww, wh = win.winfo_reqwidth(), win.winfo_reqheight()
                 sw, sh = win.winfo_screenwidth(), win.winfo_screenheight()
-                ax1, ay1, ax2, ay2 = anchor
+                ax1, ay1, _ax2, ay2 = anchor
                 px, py = ax1, ay2 + 8  # 首选: 选区正下方, 左边缘对齐
                 if py + wh > sh - 4: py = ay1 - wh - 8  # 下方放不下 -> 选区上方
                 if py < 4: py = max(4, min(ay2 + 8, sh - wh - 4))  # 上下都放不下 -> 贴下方且不溢出
@@ -9591,7 +9587,7 @@ try {
             try:
                 win.update_idletasks()
                 sw, sh = win.winfo_screenwidth(), win.winfo_screenheight()
-                ax1, ay1, ax2, ay2 = anchor
+                ax1, ay1, _ax2, ay2 = anchor
                 px, py = ax1, ay2 + 8
                 if py + 340 > sh - 4: py = ay1 - 340 - 8
                 if py < 4: py = max(4, min(ay2 + 8, sh - 340 - 4))

@@ -1140,3 +1140,24 @@ class UiPhase4Tests(unittest.TestCase):
         # 复制即译的 1px 描边窗与透明翻译覆盖层是有意设计, 不能被"统一底色"误伤
         self.assertIn("win.configure(background=self.UI_BORDER)", self.src)
         self.assertIn('MAGIC = "#FF00FE"', self.src)
+
+
+class CleanupRoundTests(unittest.TestCase):
+    """2026-11-28 全量审查清理: 死方法移除、冗余转换去除、旧色收口、接口签名标注。"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.src = open(os.path.join(ROOT, "main.py"), encoding="utf-8").read()
+
+    def test_dead_method_removed(self):
+        self.assertNotIn("def snip_ai_translate", self.src)
+
+    def test_redundant_int_casts_removed(self):
+        self.assertNotIn("str(int(round(v)))", self.src)
+        self.assertNotIn('int(round(float(cc["temp_C"])))', self.src)
+
+    def test_baidu_md5_documented(self):
+        self.assertIn("# nosec B324", self.src)
+
+    def test_old_swatch_color_gone(self):
+        self.assertNotIn('"#D7DFEA"', self.src)
