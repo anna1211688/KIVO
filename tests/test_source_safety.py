@@ -311,7 +311,7 @@ class HardeningTests(unittest.TestCase):
         export = method_text("_export_backup")
         restore = method_text("_import_backup")
         self.assertIn('"ai_chat_images/" + filename', export)
-        self.assertIn('r"ai_chat_images/[0-9a-f]{32}\\.jpg"', restore)
+        self.assertIn('r"ai_chat_images/[0-9a-f]{32}\.jpg"', restore)
         self.assertIn("total_image_bytes > 128 * 1024 * 1024", restore)
         self.assertIn("with Image.open(BytesIO(data)) as _image: _image.verify()", restore)
         self.assertIn("os.makedirs(os.path.dirname(destination), exist_ok=True)", restore)
