@@ -1878,6 +1878,13 @@ class App(tk.Tk):
                 for name in self._BACKUP_FILES:
                     p = os.path.join(BASE, name)
                     if os.path.exists(p): z.write(p, name)
+                image_dir = os.path.join(BASE, "ai_chat_images")
+                if os.path.isdir(image_dir):
+                    for filename in os.listdir(image_dir):
+                        if re.fullmatch(r"[0-9a-f]{32}\\.jpg", filename):
+                            image_path = os.path.join(image_dir, filename)
+                            if os.path.isfile(image_path) and os.path.getsize(image_path) <= 8 * 1024 * 1024:
+                                z.write(image_path, "ai_chat_images/" + filename)
             os.replace(tmp, path)
         except Exception:
             try: os.remove(tmp)
@@ -1894,13 +1901,32 @@ class App(tk.Tk):
             except ValueError: raise
             except Exception: raise ValueError("not a KIVO backup")
             payload = {}
-            for name in self._BACKUP_FILES:
+            names = list(self._BACKUP_FILES)
+            image_names = [n for n in z.namelist()
+                           if n.startswith("ai_chat_images/") and
+                           re.fullmatch(r"ai_chat_images/[0-9a-f]{32}\\.jpg", n)]
+            if len(image_names) > 500:
+                raise ValueError("too many chat images in backup")
+            names.extend(image_names)
+            total_image_bytes = 0
+            for name in names:
                 if name in z.namelist():
                     declared = z.getinfo(name).file_size
-                    if declared > 64 * 1024 * 1024: raise ValueError("backup entry too large")  # 先查声明大小再读 (2026-11-27 审查): 读完才查, 解压炸弹在 read 那一步就把内存打爆了
+                    limit = 8 * 1024 * 1024 if name.startswith("ai_chat_images/") else 64 * 1024 * 1024
+                    if declared > limit: raise ValueError("backup entry too large")
+                    if name.startswith("ai_chat_images/"):
+                        total_image_bytes += declared
+                        if total_image_bytes > 128 * 1024 * 1024:
+                            raise ValueError("chat images in backup too large")
                     data = z.read(name)
-                    if len(data) > 64 * 1024 * 1024: raise ValueError("backup entry too large")  # 解压后单文件封顶 64MB: 正常备份远到不了, 防构造的压缩包把内存撑爆
-                    if ".json" in name: json.loads(data.decode("utf-8"))  # 先验货再覆盖: JSON 已损坏的备份整包拒绝, 不拿坏数据顶掉现有好数据
+                    if len(data) > limit: raise ValueError("backup entry too large")
+                    if name.startswith("ai_chat_images/"):
+                        try:
+                            from io import BytesIO
+                            with Image.open(BytesIO(data)) as _image: _image.verify()
+                        except Exception as exc:
+                            raise ValueError("invalid chat image in backup") from exc
+                    if ".json" in name: json.loads(data.decode("utf-8"))
                     if name == "Config.ini":  # Config.ini 同样先验货: 旧版只验 JSON, 坏 ini 落盘后下次启动静默回退默认 = 设置/密钥全丢还报导入成功 (审查发现)
                         import io
                         ok_ini = False
@@ -1914,9 +1940,13 @@ class App(tk.Tk):
             staged = []  # 两阶段落盘 (2026-11-27 审查): 先把所有文件都写成 .tmp, 再统一 replace; 中途失败不会留下新旧混合状态
             try:
                 for name, data in payload.items():
-                    tmp = os.path.join(BASE, name + ".tmp")
+                    destination = os.path.abspath(os.path.join(BASE, name))
+                    if os.path.commonpath((os.path.abspath(BASE), destination)) != os.path.abspath(BASE):
+                        raise ValueError("invalid backup path")
+                    os.makedirs(os.path.dirname(destination), exist_ok=True)
+                    tmp = destination + ".tmp"
                     with open(tmp, "wb") as f: f.write(data)
-                    staged.append((tmp, os.path.join(BASE, name)))
+                    staged.append((tmp, destination))
                 for tmp, dst in staged: os.replace(tmp, dst)
             except Exception:
                 for tmp, _dst in staged:
