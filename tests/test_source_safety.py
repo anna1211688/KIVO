@@ -328,6 +328,12 @@ class AiModelCatalogTests(unittest.TestCase):
         self.assertIn("items[:500]", body)
         self.assertIn("2 * 1024 * 1024 + 1", body)
 
+    def test_chat_model_switch_only_changes_chat_route(self):
+        body = method_text("_build_ai_panel")
+        self.assertIn('self.cfg.set("AI", "RouteChat", svc_key)', body)
+        self.assertIn("self._ai_cfg_for(\"chat\")", body)
+        self.assertIn("chat_model_box.bind(\"<<ComboboxSelected>>\", switch_chat_model)", body)
+
 
 if __name__ == "__main__":
     unittest.main()
