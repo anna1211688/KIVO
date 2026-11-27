@@ -1641,6 +1641,11 @@ class App(tk.Tk):
         for txt, cmd in [(self.t("pin_selected", "钉住选中截图"), self.pin_selected_shot), (self.t("gallery", "截图历史"), self.open_gallery),
                          (self.t("ocr_selected", "OCR 选中截图"), self.ocr_selected_shot), (self.t("open_shots_dir", "打开截图文件夹"), self.open_shots_dir)]:
             ttk.Button(snip_more, text=txt, command=cmd, style="Small.TButton").pack(side="left", padx=2)
+        snip_tools = tk.Frame(snip, background=W); snip_tools.pack(fill="x", pady=(7, 0))
+        for txt, cmd in [(self.t("cp_title", "取色器"), self.open_color_picker),
+                         (self.t("ruler_title", "屏幕标尺"), self.open_ruler),
+                         (self.t("qr_title", "二维码生成"), self.open_qr_maker)]:
+            ttk.Button(snip_tools, text=txt, command=cmd, style="Small.TButton").pack(side="left", padx=2)
         self.shots_list = tk.Listbox(snip_more, height=3, font=self._ui_font(9), bg=W, fg=self.UI_TEXT,
                                      selectbackground=self.UI_SEL_BG, selectforeground=self.UI_ACCENT, activestyle="none",
                                      relief="solid", bd=1, highlightthickness=1,
@@ -3872,6 +3877,7 @@ class App(tk.Tk):
             if e.keysym in ("minus", "KP_Subtract"): state["zoom"] = max(2, state.get("zoom", 6) - 1); return
             if e.keysym.lower() == "c" and state.get("hex") and not (e.state & 0x0004):
                 self.clip_set(state["hex"])
+                self._add_color_history(state["hex"])
                 canvas.delete("copied")
                 canvas.create_text(e.x + 14, e.y - 14, anchor="w", tags="copied", fill="#00FF88",
                                    font=("Consolas", 12, "bold"), text=f"{self.t('loupe_copied', '已复制')} {state['hex']}")
@@ -10194,6 +10200,214 @@ try {
         btn = ttk.Button(parent, text=self.t("select_ai_copy", "复制结果"), style="Small.TButton",
                          command=lambda: (self.clip_set(text), win.destroy()))
         btn.pack(anchor="w", pady=(6, 0)); parent._copy_btn = btn
+
+    # ---------- 取色器增强 (v1.6.2): 历史色板 + HEX/RGB/HSL 复制 + 独立屏幕取色 ----------
+    _COLOR_HISTORY_MAX = 24
+    @staticmethod
+    def _hex_to_rgb(h):
+        h = (h or "").lstrip("#")
+        if len(h) == 3: h = "".join(ch * 2 for ch in h)
+        if not re.fullmatch(r"[0-9A-Fa-f]{6}", h): return None
+        return tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
+    @staticmethod
+    def _rgb_to_hsl(r, g, b):
+        r, g, b = r / 255.0, g / 255.0, b / 255.0
+        mx, mn = max(r, g, b), min(r, g, b)
+        l = (mx + mn) / 2
+        if mx == mn: hh = ss = 0
+        else:
+            d = mx - mn
+            ss = d / (2 - mx - mn) if l > 0.5 else d / (mx + mn)
+            if mx == r: hh = (g - b) / d + (6 if g < b else 0)
+            elif mx == g: hh = (b - r) / d + 2
+            else: hh = (r - g) / d + 4
+            hh /= 6
+        return round(hh * 360), round(ss * 100), round(l * 100)
+    def _color_formats(self, hexv):
+        rgb = self._hex_to_rgb(hexv)
+        if rgb is None: return None
+        hh, ss, ll = self._rgb_to_hsl(*rgb)
+        return {"hex": "#" + hexv.lstrip("#").upper(),
+                "rgb": "rgb(%d, %d, %d)" % rgb,
+                "hsl": "hsl(%d, %d%%, %d%%)" % (hh, ss, ll)}
+    def _load_color_history(self):
+        raw = self.cfg.get("Config", "ColorHistory", fallback="")
+        try:
+            data = json.loads(raw) if raw else []
+            out = [("#" + h.lstrip("#")).upper() for h in data if self._hex_to_rgb(h)]
+            return out[:self._COLOR_HISTORY_MAX]
+        except Exception:
+            return []
+    def _add_color_history(self, hexv):
+        hexv = ("#" + hexv.lstrip("#")).upper()
+        if self._hex_to_rgb(hexv) is None: return
+        hist = self._load_color_history()
+        if hexv in hist: hist.remove(hexv)
+        hist.insert(0, hexv)
+        self.cfg.set("Config", "ColorHistory", json.dumps(hist[:self._COLOR_HISTORY_MAX]))
+        self.save_config()
+    def open_color_picker(self):
+        win = tk.Toplevel(self)
+        win.title(self.t("cp_title", "取色器"))
+        win.configure(background=self.UI_BG)
+        win.geometry("440x360")
+        win.transient(self)
+        top = tk.Frame(win, bg=self.UI_BG); top.pack(fill="x", padx=12, pady=10)
+        ttk.Button(top, text=self.t("cp_pick_screen", "屏幕取色"), style="Accent.TButton",
+                   command=lambda: (win.destroy(), self._pick_screen_color())).pack(side="left")
+        grid = tk.Frame(win, bg=self.UI_BG); grid.pack(fill="both", expand=True, padx=12)
+        detail = tk.Frame(win, bg=self.UI_BG); detail.pack(fill="x", padx=12, pady=(0, 12))
+        detail_lbs = {}
+        def show_detail(hexv):
+            fmts = self._color_formats(hexv)
+            for w in detail.winfo_children(): w.destroy()
+            if not fmts: return
+            sw = tk.Frame(detail, bg=hexv, width=44, height=44, highlightbackground=self.UI_BORDER_STRONG,
+                          highlightthickness=1); sw.pack(side="left", padx=(0, 10))
+            col = tk.Frame(detail, bg=self.UI_BG); col.pack(side="left", fill="both", expand=True)
+            for key in ("hex", "rgb", "hsl"):
+                row = tk.Frame(col, bg=self.UI_BG); row.pack(fill="x", pady=1)
+                tk.Label(row, text=fmts[key], font=self._ui_font(10), bg=self.UI_BG,
+                         fg=self.UI_TEXT, width=22, anchor="w").pack(side="left")
+                ttk.Button(row, text=self.t("cp_copy", "复制"), style="Small.TButton",
+                           command=lambda v=fmts[key]: self.clip_set(v)).pack(side="left")
+        def render():
+            for w in grid.winfo_children(): w.destroy()
+            hist = self._load_color_history()
+            if not hist:
+                tk.Label(grid, text=self.t("cp_empty", "还没有历史颜色，点「屏幕取色」开始"),
+                         bg=self.UI_BG, fg=self.UI_MUTED, font=self._ui_font(10)).pack(pady=30)
+            for i, hexv in enumerate(hist):
+                b = tk.Button(grid, bg=hexv, width=4, height=2, relief="flat", bd=0,
+                              highlightthickness=1, highlightbackground=self.UI_BORDER_STRONG,
+                              cursor="hand2", command=lambda h=hexv: show_detail(h))
+                b.grid(row=i // 8, column=i % 8, padx=3, pady=3)
+        render()
+    def _pick_screen_color(self):
+        shot = ImageGrab.grab(all_screens=True)
+        win = tk.Toplevel(self)
+        win.overrideredirect(True); win.attributes("-topmost", True)
+        sw, sh = win.winfo_screenwidth(), win.winfo_screenheight()
+        win.geometry(f"{sw}x{sh}+0+0")
+        canvas = tk.Canvas(win, highlightthickness=0, cursor="crosshair")
+        canvas.pack(fill="both", expand=True)
+        ph = ImageTk.PhotoImage(shot)
+        canvas.img = ph
+        canvas.create_image(0, 0, anchor="nw", image=ph)
+        tip = canvas.create_text(20, 20, anchor="nw", fill="#00FF88",
+                                 font=("Consolas", 14, "bold"), text="")
+        def move(e):
+            if 0 <= e.x < shot.width and 0 <= e.y < shot.height:
+                r, g, b = shot.getpixel((e.x, e.y))[:3]
+                canvas.itemconfigure(tip, text=f"#{r:02X}{g:02X}{b:02X}  (单击确认, Esc 取消)")
+        def click(e):
+            if 0 <= e.x < shot.width and 0 <= e.y < shot.height:
+                r, g, b = shot.getpixel((e.x, e.y))[:3]
+                hexv = f"#{r:02X}{g:02X}{b:02X}"
+                win.destroy()
+                self._add_color_history(hexv)
+                self.open_color_picker()
+        canvas.bind("<Motion>", move); canvas.bind("<Button-1>", click)
+        win.bind("<Escape>", lambda e: win.destroy())
+        canvas.focus_set()
+
+    # ---------- 屏幕标尺 (v1.6.2): 可拖动/换向/调长度的半透明标尺, 像素刻度 ----------
+    def open_ruler(self):
+        win = tk.Toplevel(self)
+        win.overrideredirect(True); win.attributes("-topmost", True)
+        try: win.attributes("-alpha", 0.82)
+        except Exception: pass
+        state = {"vertical": False, "length": 600}
+        cv = tk.Canvas(win, bg="#FFF3C4", highlightthickness=1, highlightbackground="#C9A227")
+        cv.pack()
+        def draw():
+            vertical = state["vertical"]; length = state["length"]; thick = 34
+            if vertical: win.geometry(f"{thick}x{length}+{win.winfo_x()}+{win.winfo_y()}")
+            else: win.geometry(f"{length}x{thick}+{win.winfo_x()}+{win.winfo_y()}")
+            cv.configure(width=thick if vertical else length, height=length if vertical else thick)
+            cv.delete("all")
+            for i in range(0, length + 1, 10):
+                major = i % 100 == 0; mid = i % 50 == 0
+                tick = thick - 4 if major else (thick - 10 if mid else thick - 16)
+                if vertical:
+                    cv.create_line(0, i, tick, i, fill="#5B4A00")
+                    if major: cv.create_text(thick - 2, i + 6, text=str(i), angle=90,
+                                             anchor="e", font=("Consolas", 8), fill="#5B4A00")
+                else:
+                    cv.create_line(i, 0, i, tick, fill="#5B4A00")
+                    if major: cv.create_text(i + 2, thick - 2, text=str(i), anchor="e",
+                                             font=("Consolas", 8), fill="#5B4A00")
+            close_pos = thick - 14
+            if vertical:
+                cv.create_text(thick // 2, 12, text="×", fill="#B00020", font=("Segoe UI", 12, "bold"))
+                cv.create_text(thick // 2, 28, text="⇄", fill="#5B4A00", font=("Segoe UI", 10))
+            else:
+                cv.create_text(10, thick // 2, text="×", fill="#B00020", font=("Segoe UI", 12, "bold"))
+                cv.create_text(26, thick // 2, text="⇄", fill="#5B4A00", font=("Segoe UI", 10))
+        def start_drag(e): state["dx"], state["dy"] = e.x, e.y
+        def drag(e):
+            win.geometry(f"+{win.winfo_x() + e.x - state['dx']}+{win.winfo_y() + e.y - state['dy']}")
+        def on_click(e):
+            if e.x <= 18 and e.y <= 18: win.destroy()
+            elif (not state["vertical"] and 18 < e.x <= 34 and e.y <= 20) or \
+                 (state["vertical"] and e.x <= 20 and 18 < e.y <= 34):
+                state["vertical"] = not state["vertical"]; draw()
+        def on_key(e):
+            if e.keysym == "Escape": win.destroy()
+            elif e.keysym in ("plus", "equal", "KP_Add"):
+                state["length"] = min(2000, state["length"] + 50); draw()
+            elif e.keysym in ("minus", "KP_Subtract"):
+                state["length"] = max(100, state["length"] - 50); draw()
+        cv.bind("<Button-1>", on_click)
+        cv.bind("<ButtonPress-1>", start_drag)
+        cv.bind("<B1-Motion>", drag)
+        win.bind("<KeyPress>", on_key); cv.focus_set()
+        win.geometry("+120+120"); draw()
+
+    # ---------- 二维码生成 (v1.6.2): 文本/链接生成 QR, 可复制可保存 (qrcode 库) ----------
+    def _gen_qr_image(self, text):
+        try:
+            import qrcode
+        except Exception:
+            raise RuntimeError(self.t("qr_missing", "缺少 qrcode 库，请先 pip install qrcode"))
+        qr = qrcode.QRCode(version=None, error_correction=qrcode.constants.ERROR_CORRECT_M,
+                           box_size=8, border=2)
+        qr.add_data(text); qr.make(fit=True)
+        return qr.make_image(fill_color="black", back_color="white").convert("RGB")
+    def open_qr_maker(self):
+        win = tk.Toplevel(self)
+        win.title(self.t("qr_title", "二维码生成"))
+        win.configure(background=self.UI_BG); win.geometry("420x480"); win.transient(self)
+        tk.Label(win, text=self.t("qr_input", "输入文本或链接："), bg=self.UI_BG,
+                 fg=self.UI_TEXT, font=self._ui_font(10)).pack(anchor="w", padx=14, pady=(12, 4))
+        entry = tk.Text(win, height=4, relief="solid", bd=1, font=self._ui_font(10),
+                        bg=self.UI_SURFACE, fg=self.UI_TEXT)
+        entry.pack(fill="x", padx=14)
+        preview = tk.Label(win, bg=self.UI_BG); preview.pack(pady=10)
+        state = {"img": None}
+        def make():
+            text = entry.get("1.0", "end").strip()
+            if not text: return
+            try:
+                img = self._gen_qr_image(text)
+            except Exception as e:
+                self.toast(str(e), ms=2500); return
+            state["img"] = img
+            ph = ImageTk.PhotoImage(img)
+            preview.configure(image=ph); preview.image = ph
+        brow = tk.Frame(win, bg=self.UI_BG); brow.pack(pady=4)
+        ttk.Button(brow, text=self.t("qr_make", "生成二维码"), style="Accent.TButton",
+                   command=make).pack(side="left", padx=4)
+        ttk.Button(brow, text=self.t("qr_copy", "复制图片"), style="Small.TButton",
+                   command=lambda: state["img"] and self._copy_image_to_clipboard(state["img"])).pack(side="left", padx=4)
+        ttk.Button(brow, text=self.t("qr_save", "保存图片"), style="Small.TButton",
+                   command=lambda: state["img"] and self._save_qr(state["img"])).pack(side="left", padx=4)
+        win.bind("<Escape>", lambda e: win.destroy())
+    def _save_qr(self, img):
+        path = filedialog.asksaveasfilename(defaultextension=".png",
+                                            filetypes=[("PNG", "*.png")], parent=self)
+        if path:
+            img.save(path); self.toast(self.t("qr_saved", "已保存"), ms=1500)
 
     def _show_main(self):
         self.deiconify(); self.lift()

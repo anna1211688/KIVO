@@ -1491,3 +1491,65 @@ class SelectAiTests(unittest.TestCase):
 class AppStub:
     _SELECT_AI_ACTIONS = (("trans", "翻译"), ("polish", "润色"), ("summary", "总结"),
                           ("explain", "解释"), ("tone", "换语气"))
+
+
+class ColorToolsTests(unittest.TestCase):
+    """v1.6.2 取色器: 颜色换算、历史色板存取与接线。"""
+
+    @classmethod
+    def setUpClass(cls):
+        app_node = next(n for n in TREE.body if isinstance(n, ast.ClassDef) and n.name == "App")
+        cls.ns = {"re": re, "json": json}
+        for name in ("_hex_to_rgb", "_rgb_to_hsl", "_color_formats",
+                     "_load_color_history", "_add_color_history"):
+            node = next(n for n in app_node.body if isinstance(n, ast.FunctionDef) and n.name == name)
+            exec(ast.get_source_segment(SOURCE, node), cls.ns)
+
+    def test_hex_rgb(self):
+        f = self.ns["_hex_to_rgb"]
+        self.assertEqual(f("#FF0000"), (255, 0, 0))
+        self.assertEqual(f("#fff"), (255, 255, 255))
+        self.assertIsNone(f("#GG0011"))
+        self.assertIsNone(f("12345"))
+
+    def test_hsl(self):
+        f = self.ns["_rgb_to_hsl"]
+        self.assertEqual(f(255, 0, 0), (0, 100, 50))
+        self.assertEqual(f(0, 0, 0), (0, 0, 0))
+        self.assertEqual(f(255, 255, 255), (0, 0, 100))
+
+    def test_formats(self):
+        class Stub:
+            _hex_to_rgb = staticmethod(self.ns["_hex_to_rgb"])
+            _rgb_to_hsl = staticmethod(self.ns["_rgb_to_hsl"])
+        fmts = self.ns["_color_formats"](Stub(), "#007AFF")
+        self.assertEqual(fmts["hex"], "#007AFF")
+        self.assertTrue(fmts["rgb"].startswith("rgb("))
+        self.assertTrue(fmts["hsl"].startswith("hsl("))
+
+    def test_history_roundtrip(self):
+        import configparser
+        class Stub:
+            _COLOR_HISTORY_MAX = 24
+            cfg = configparser.RawConfigParser()
+            cfg.add_section("Config")
+            saved = []
+            def save_config(self): self.saved.append(1)
+        Stub._hex_to_rgb = staticmethod(self.ns["_hex_to_rgb"])
+        Stub._load_color_history = self.ns["_load_color_history"]
+        s = Stub()
+        self.assertEqual(self.ns["_load_color_history"](s), [])
+        self.ns["_add_color_history"](s, "#FF0000")
+        self.ns["_add_color_history"](s, "00ff00")
+        self.ns["_add_color_history"](s, "#FF0000")  # 重复项置顶不重复
+        hist = self.ns["_load_color_history"](s)
+        self.assertEqual(hist, ["#FF0000", "#00FF00"])
+
+    def test_wiring(self):
+        self.assertIn("def open_color_picker", SOURCE)
+        self.assertIn("def open_ruler", SOURCE)
+        self.assertIn("def open_qr_maker", SOURCE)
+        self.assertIn("self._add_color_history(state[\"hex\"])", SOURCE)
+        with open(os.path.join(os.path.dirname(__file__), "..", "requirements.txt")) as f:
+            reqs = f.read()
+        self.assertIn("qrcode==8.2", reqs)
