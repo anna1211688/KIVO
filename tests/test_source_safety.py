@@ -307,6 +307,19 @@ class HardeningTests(unittest.TestCase):
         self.assertIn("request_reply()", body)
         self.assertNotIn("request_reply(img=", body)
 
+    def test_backup_exports_chat_image_attachments_with_total_cap(self):
+        body = method_text("_export_backup")
+        self.assertIn('os.path.join(BASE, "ai_chat_images")', body)
+        self.assertIn('z.write(image_path, "ai_chat_images/" + filename)', body)
+        self.assertIn("image_total > 64 * 1024 * 1024", body)
+
+    def test_backup_import_validates_chat_image_paths_and_content(self):
+        body = method_text("_import_backup")
+        self.assertIn('r"ai_chat_images/[0-9a-f]{32}\\.jpg"', body)
+        self.assertIn("info.file_size > 8 * 1024 * 1024", body)
+        self.assertIn("image.verify()", body)
+        self.assertIn("os.makedirs(os.path.dirname(tmp), exist_ok=True)", body)
+
 
 if __name__ == "__main__":
     unittest.main()
