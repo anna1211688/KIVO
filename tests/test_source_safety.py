@@ -346,5 +346,74 @@ class HardeningTests(unittest.TestCase):
         self.assertIn('len(m["content"]) <= max_message_chars', body)
 
 
+# ---- 2026-11-27 GPT 审计第一批整改的回归测试 ----
+
+class GptAuditBatch1Tests(unittest.TestCase):
+    def test_redact_secrets(self):
+        redact = _load_with_ns("_redact_secrets", {"re": re})
+        self.assertEqual(redact("Authorization: Bearer abcDEF123-._~+/="), "Authorization: Bearer ***")
+        self.assertIn("key=***", redact("https://x.test/v2?key=AIzaSy123456&q=hi"))
+        self.assertIn("sk-***", redact("token is sk-abcdefgh12345678 ok"))
+        self.assertNotIn("AIzaSy123456", redact("https://x.test/v2?key=AIzaSy123456"))
+        self.assertEqual(redact("普通报错: 连接超时"), "普通报错: 连接超时")
+
+    def test_hotkey_conflicts_detected(self):
+        find = _load_with_ns("_find_hotkey_conflicts", {})
+        out = find([("F7", "粘贴下一条"), ("f7", "删除"), ("F2", "唤出主窗"), ("ctrl+alt+k", "截图"), ("Ctrl+Alt+K", "翻译")])
+        self.assertEqual(set(out), {"f7", "ctrl+alt+k"})
+        self.assertEqual(find([("F7", "a"), ("F2", "b")]), {})
+
+    def test_gif_fit_caps_both_dimensions(self):
+        fit = _load_with_ns("_gif_fit", {})
+        self.assertEqual(fit(900, 4000), (162, 720))   # 竖长选区: 旧版只卡宽会留 900x4000
+        self.assertEqual(fit(1920, 1080), (960, 540))
+        self.assertEqual(fit(800, 600), (800, 600))     # 小图不动
+        w, h = fit(3840, 2160)
+        self.assertLessEqual(w, 960); self.assertLessEqual(h, 720)
+
+    def test_backup_import_rolls_back_on_replace_failure(self):
+        import glob, time as _time, types
+        with tempfile.TemporaryDirectory() as td:
+            with open(os.path.join(td, "records.json"), "w", encoding="utf-8") as f: f.write('[{"text": "old-r"}]')
+            with open(os.path.join(td, "phrases.json"), "w", encoding="utf-8") as f: f.write('[{"text": "old-p"}]')
+            zp = os.path.join(td, "in.zip")
+            with zipfile.ZipFile(zp, "w") as z:
+                z.writestr("kivo_backup.json", json.dumps({"app": "KIVO", "version": "1"}))
+                z.writestr("records.json", '[{"text": "new-r"}]')
+                z.writestr("phrases.json", '[{"text": "new-p"}]')
+            ns = {"json": json, "time": _time, "BASE": td, "VERSION": "1.4.30"}
+            export = _load_with_ns("_export_backup", ns)
+            imp = _load_with_ns("_import_backup", ns)
+            fake = types.SimpleNamespace(_BACKUP_FILES=["records.json", "phrases.json"])
+            fake._export_backup = lambda p: export(fake, p)
+            real_replace = os.replace
+            calls = {"n": 0}
+            def flaky_replace(a, b):
+                calls["n"] += 1
+                if calls["n"] == 3: raise OSError("simulated replace failure")  # 1=导入前备份, 2=records, 3=phrases(失败)
+                return real_replace(a, b)
+            os.replace = flaky_replace
+            try:
+                with self.assertRaises(OSError):
+                    imp(fake, zp)
+            finally:
+                os.replace = real_replace
+            with open(os.path.join(td, "records.json"), encoding="utf-8") as f: self.assertEqual(f.read(), '[{"text": "old-r"}]')
+            with open(os.path.join(td, "phrases.json"), encoding="utf-8") as f: self.assertEqual(f.read(), '[{"text": "old-p"}]')
+            self.assertTrue(glob.glob(os.path.join(td, "kivo_pre_import_*.zip")), "导入前应留一份自动备份")
+
+    def test_ai_chat_history_caps_stay(self):
+        body = method_text("_persist_chat")
+        self.assertIn("del self._ai_chats[30:]", body)   # 对话总数封顶 (比 GPT 建议的 100 还严)
+        self.assertIn("[-200:]", body)                  # 单对话消息封顶
+
+    def test_ocr_inference_is_serialized(self):
+        body = method_text("_ocr_rapid_lines")
+        self.assertIn("with cls._ocr_infer_lock", body)
+
+    def test_download_has_filesize_cap(self):
+        self.assertIn('"max_filesize"', method_text("_build_dl_panel"))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -522,6 +522,16 @@ def _atomic_write(path, text):
         try: os.fsync(dfd)
         finally: os.close(dfd)
     except Exception: pass
+def _redact_secrets(text):
+    """把文本里的密钥类内容抹掉再显示/记录 (2026-11-27 GPT 审计 P1-06): 接口报错可能回显请求头、
+    谷歌翻译的报错 URL 里直接带着 key, 这些文本会进弹窗和日志, 必须先脱敏。"""
+    s = str(text or "")
+    s = re.sub(r"(?i)bearer\s+[A-Za-z0-9\-._~+/]+={0,2}", "Bearer ***", s)
+    s = re.sub(r"(?i)([?&]key=)[^&\s]+", r"\1***", s)
+    s = re.sub(r"(?i)((?:api[-_]?key|secret|sign|token)[\"']?\s*[:=]\s*[\"']?)[^\"'\s,}]+", r"\1***", s)
+    s = re.sub(r"sk-[A-Za-z0-9\-_]{8,}", "sk-***", s)
+    return s
+
 def _ini_scalar(v):
     """配置值收成一行: 换行/制表/连续空白全压成单个空格。值里混进换行会把 Config.ini 写坏 —
     值中的一行 "Evil=1" 下次读取就变成一个真键 (注入/损坏双防), 所有落盘值先过这里。"""
@@ -1960,7 +1970,19 @@ class App(tk.Tk):
                             except Exception: continue
                         if not ok_ini: raise ValueError("bad Config.ini in backup")
                     payload[name] = data
-            staged = []  # 两阶段落盘 (2026-11-27 审查): 先把所有文件都写成 .tmp, 再统一 replace; 中途失败不会留下新旧混合状态
+            # 事务式落盘 (2026-11-27 两轮审查): ①先把当前数据整包备份一份 (导入后悔/出事可恢复)
+            # ②替换前把将被覆盖的旧文件内容读进内存 ③全部写 .tmp 后统一 replace, 中途失败用内存快照回滚, 不留新旧混合状态
+            try: self._export_backup(os.path.join(BASE, "kivo_pre_import_" + time.strftime("%Y%m%d_%H%M%S") + ".zip"))
+            except Exception: pass  # 导入前备份尽力而为, 失败不挡导入 (内存快照回滚还在)
+            old_snapshot = {}
+            for name in payload:
+                p = os.path.join(BASE, name)
+                try:
+                    if os.path.exists(p):
+                        with open(p, "rb") as f: old_snapshot[name] = f.read()
+                    else: old_snapshot[name] = None
+                except Exception: old_snapshot[name] = None
+            staged = []
             try:
                 for name, data in payload.items():
                     destination = os.path.abspath(os.path.join(BASE, name))
@@ -1974,6 +1996,14 @@ class App(tk.Tk):
             except Exception:
                 for tmp, _dst in staged:
                     try: os.remove(tmp)
+                    except Exception: pass
+                for name, old in old_snapshot.items():  # 回滚: 旧内容写回, 导入前不存在的文件删掉
+                    p = os.path.join(BASE, name)
+                    try:
+                        if old is None:
+                            if os.path.exists(p): os.remove(p)
+                        else:
+                            with open(p, "wb") as f: f.write(old)
                     except Exception: pass
                 raise
     def _backup_export_dialog(self):
@@ -2615,6 +2645,16 @@ class App(tk.Tk):
                 hk = self.cfg.get("Snip", cfg_key, fallback=DEFAULT_SNIP_KEYS.get(cfg_key, "无")).strip()
                 btn.config(text=base if hk in ("", "无") else f"{base} ({hk})")
             except Exception: pass
+    @staticmethod
+    def _find_hotkey_conflicts(pairs):
+        """pairs=[(热键, 功能名)...] -> {热键: [功能名...]} 只含被两个以上功能共用的热键。
+        同一热键配给两个功能时 keyboard 只会触发其中一部分且无任何提示 (2026-11-27 GPT 审计 P1-02), 必须检出并告知用户。"""
+        seen = {}
+        for hk, label in pairs:
+            key = str(hk or "").strip().lower()
+            if key: seen.setdefault(key, []).append(label)
+        return {k: v for k, v in seen.items() if len(v) > 1}
+
     def apply_hotkeys(self):
         # 注销旧的全局热键和窗口绑定
         try:
@@ -2634,10 +2674,11 @@ class App(tk.Tk):
         self._tk_sequences = []
         # 按当前配置重新注册
         labels, global_ok = [], False
+        hk_pairs = []
         for section, cfg_key, label, fn in self.hotkey_actions():
             hk = self.normalize_hotkey(self.cfg.get(section, cfg_key, fallback="无"))
             if not hk: continue
-            labels.append(f"{hk.upper()} {label}")
+            labels.append(f"{hk.upper()} {label}"); hk_pairs.append((hk, label))
             seq = self.tk_sequence(hk)
             if seq:
                 try: self.bind(seq, lambda e, f=fn: None if (self._focus_in_input() and self._is_text_key(e)) else f()); self._tk_sequences.append(seq)
@@ -2655,6 +2696,13 @@ class App(tk.Tk):
         # 全局切换热键 (原版 [OCHotKey]): 单独注册, 不归 toggle 管, 这样关掉后还能按它恢复
         self._oc_handle = None
         oc = self.normalize_hotkey(self.cfg.get("OCHotKey", "HotKey", fallback="无"))
+        if oc: hk_pairs.append((oc, self.t("hk_toggle", "全局切换")))
+        conflicts = self._find_hotkey_conflicts(hk_pairs)
+        if conflicts:  # 热键冲突必须留痕并让用户看见 (2026-11-27 GPT 审计 P1-02): 冲突键只会响一部分功能, 静默就是坑
+            desc = "; ".join(f"{k.upper()}: {'/'.join(v)}" for k, v in conflicts.items())
+            _log_crash("hotkey-conflict", ValueError, ValueError(desc), None)
+            try: self.status.set(self.status.get() + f"  ⚠ {self.t('hk_conflict_status', '热键冲突')}: {desc}")
+            except Exception: pass
         if oc and keyboard is not None:
             try: self._oc_handle = keyboard.add_hotkey(oc, lambda: self._ui_queue.put(self.toggle_hotkeys), suppress=True)
             except Exception:
@@ -2827,6 +2875,12 @@ class App(tk.Tk):
                 self.open_editor(img)
             self._ui_queue.put(done)
         threading.Thread(target=work, daemon=True).start()
+    @staticmethod
+    def _gif_fit(w, h, max_w=960, max_h=720):
+        """GIF 帧尺寸封顶 (2026-11-27 GPT 审计 P1-09): 同时卡宽和高 — 旧版只卡宽, 900x4000 的竖长选区一帧就 10MB+, 200 帧能吃 2GB 内存。"""
+        scale = min(1.0, max_w / max(1, w), max_h / max(1, h))
+        return max(1, int(w * scale)), max(1, int(h * scale))
+
     def _run_gif_record(self, box, max_seconds=30, fps=8):
         """录制选区为 GIF 动图: 非阻塞逐帧抓取, 屏幕角落有小控制窗 (计时+停止), 结束自动存进截图文件夹。"""
         if not HAS_PIL: return
@@ -2836,7 +2890,7 @@ class App(tk.Tk):
             self.status.set(self.t("gif_gate_status", "已设置为不保存历史, GIF 不录制 (到 系统设置 → 历史截图 打开保存)"))
             messagebox.showinfo(self.t("gif_gate_title", "GIF 录制"), self.t("gif_gate_msg", "当前「历史截图」设置为不保存, GIF 也不会保存。\n要录 GIF 请先到 系统设置 → 历史截图 勾选「保存历史截图」。"), parent=self)
             return
-        rec = {"stop": False, "frames": [], "t0": time.time()}
+        rec = {"stop": False, "frames": [], "t0": time.time(), "est_bytes": 0}
         ctrl = tk.Toplevel(self); ctrl.overrideredirect(True); ctrl.attributes("-topmost", True)
         lab = tk.Label(ctrl, text=f"{self.t('gif_rec', '● GIF 录制中')} 0s", bg="#1F2430", fg="#FF7B7B", font=("Microsoft YaHei", 10, "bold"))
         lab.pack(side="left", padx=6, pady=4)
@@ -2857,11 +2911,12 @@ class App(tk.Tk):
                 messagebox.showinfo(self.t("gif_done_title", "GIF 录制完成"), f"{self.t('gif_saved_to', '已保存到')}:\n{path}\n{len(frames)} {self.t('gif_frames', '帧')}", parent=self)
             except Exception as e: messagebox.showerror(self.t("gif_fail_title", "GIF 保存失败"), str(e), parent=self)
         def tick():
-            if rec["stop"] or time.time() - rec["t0"] > max_seconds or len(rec["frames"]) >= 200: finish(); return  # 帧数封顶 200: 全攒内存里, 大选区长录会吃掉近 1GB
+            if rec["stop"] or time.time() - rec["t0"] > max_seconds or len(rec["frames"]) >= 200 or rec["est_bytes"] > 256 * 1024 * 1024: finish(); return  # 帧数封顶 200 + 总内存预算 256MB: 全攒内存里, 大选区长录会吃掉近 GB
             try:
                 fr = ImageGrab.grab(bbox=box, all_screens=True)
-                if fr.width > 960: fr = fr.resize((960, max(1, int(fr.height * 960 / fr.width))))
-                rec["frames"].append(fr.convert("RGB"))
+                nw, nh = self._gif_fit(fr.width, fr.height)
+                if (nw, nh) != (fr.width, fr.height): fr = fr.resize((nw, nh))
+                rec["frames"].append(fr.convert("RGB")); rec["est_bytes"] += nw * nh * 3
                 lab.config(text=f"{self.t('gif_rec', '● GIF 录制中')} {time.time() - rec['t0']:.0f}s · {len(rec['frames'])} {self.t('gif_frames', '帧')}")
             except Exception: pass
             ctrl.after(int(1000 / fps), tick)
@@ -4044,6 +4099,7 @@ class App(tk.Tk):
     _ocr_engine = None  # RapidOCR 实例缓存: 旧版每次识别都重建引擎、重加载模型 (数秒), 只建一次
     _ocr_engine_broken = False  # RapidOCR 加载失败过就不再重试: 坏的安装每次重试都要白等几秒
     _ocr_engine_lock = threading.Lock()  # 引擎懒加载锁: 必须在类定义时就建好 — 锁本身若也懒创建, 两个线程能各建一把锁、各进临界区、各建一次引擎 (千问 2026-11-27 用指令级复现证实, 窗口极窄但真实)
+    _ocr_infer_lock = threading.Lock()  # 引擎推理锁 (2026-11-27 GPT 审计 P1-10): 同一引擎实例的并发调用串行化, 防多线程同时喂图把 RapidOCR 内部状态打乱
     _rapid_fail_count = 0  # RapidOCR 运行期连续异常计数: 偶发一次不判死刑, 连续 3 次才停用引擎走兜底
     _RAPID_MIN_SCORE = 0.45  # RapidOCR 行置信度下限: 再低多半是把纹理/边框认成了字, 丢弃免得污染译文
     # Windows 内置 OCR 脚本 (与 Snipaste 同款引擎 Windows.Media.Ocr, 零依赖, EXE 里也能用)
@@ -4249,7 +4305,7 @@ try {
         try:
             import numpy as np
             prep, scale = cls._ocr_prepare(img)
-            result, _ = eng(np.array(prep))
+            with cls._ocr_infer_lock: result, _ = eng(np.array(prep))
             out = []
             for box, text, score in (result or []):
                 text = (text or "").strip()
@@ -4425,8 +4481,11 @@ try {
         data = urllib.parse.urlencode(_params).encode("utf-8")
         req = urllib.request.Request(url, data=data,
                                      headers={"Content-Type": "application/x-www-form-urlencoded", "User-Agent": "KIVO"})
-        with urllib.request.urlopen(req, timeout=12) as r:
-            d = _json.loads(r.read().decode("utf-8"))
+        try:
+            with urllib.request.urlopen(req, timeout=12) as r:
+                d = _json.loads(r.read().decode("utf-8"))
+        except Exception as e:  # 异常文本里带着含 key 的 URL, 脱敏后再往上抛 (2026-11-27 GPT 审计 P1-06)
+            raise RuntimeError(_redact_secrets(str(e))) from None
         if d.get("error"): raise RuntimeError(f"{self.t('tr_err_google', '谷歌翻译错误')} {d['error'].get('code')}: {d['error'].get('message', '')}")
         trs = (d.get("data") or {}).get("translations") or []
         return _html.unescape(trs[0].get("translatedText", "")) if trs else ""
@@ -4686,11 +4745,11 @@ try {
                 with urllib.request.urlopen(req, timeout=timeout) as r:
                     return _json.loads(r.read().decode("utf-8"))
             except urllib.error.HTTPError as e:
-                try: detail = e.read().decode("utf-8", "ignore")[:200]
+                try: detail = _redact_secrets(e.read().decode("utf-8", "ignore")[:200])
                 except Exception: detail = ""
                 raise RuntimeError(self.t("ai_err_http", "AI 接口返回 {code} 错误。{detail}").replace("{code}", str(e.code)).replace("{detail}", detail))
             except Exception as e:
-                raise RuntimeError(self.t("ai_err_conn", "AI 接口连不上 ({e}), 检查网络后重试。").replace("{e}", str(e)))
+                raise RuntimeError(self.t("ai_err_conn", "AI 接口连不上 ({e}), 检查网络后重试。").replace("{e}", _redact_secrets(str(e))))
         def _extract(d):
             try: msg = d["choices"][0]["message"]
             except Exception: raise RuntimeError("AI 接口返回的格式看不懂, 换个模型或检查接口地址。")
@@ -6870,6 +6929,7 @@ try {
             try: os.makedirs(outdir, exist_ok=True)
             except Exception: pass
             opts = {"quiet": True, "no_warnings": True, "noplaylist": True, "socket_timeout": 20, "retries": 3,
+                    "max_filesize": 4 * 1024 * 1024 * 1024,  # 单文件 4GiB 上限 (2026-11-27 GPT 审计 P1-04): 防异常/恶意链接把磁盘写满
                     "outtmpl": os.path.join(outdir, "%(title).80s [%(id)s].%(ext)s"),
                     "format": "best/bv*+ba/bestvideo+bestaudio",
                     "progress_hooks": [hook]}
