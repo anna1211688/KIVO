@@ -4803,24 +4803,101 @@ try {
         except Exception as e:
             self.status.set(f"{self.t('ai_tts_fail', '朗读失败')}: {e}")
     def _build_ai_form(self, parent):
-        """AI 服务设置表单 (嵌在「系统设置」窗口里, 用户要求归类): 选服务 (智谱免费/百炼 Qwen-VL/硅基流动/自定义)
-        + 填 API Key + 模型名, 带测试; 四家各存各的槽, 切来切去互不丢失; 存 Config.ini [AI] 段"""
+        """统一 AI 模型中心: 顶部横向标签页集中管理全部服务商、模型、任务分工和连接测试。"""
         cur = {"service": self._ai_cfg()["service"]}
         store = self._ai_store()
         names = {k: self._ai_preset_name(k) for k in self._AI_PRESETS}
-        ttk.Label(parent, text=self.t("ai_service_label", "AI 服务:")).grid(row=0, column=0, sticky="e", padx=8, pady=6)
+        inv_names = {v: k for k, v in names.items()}
+        notebook = ttk.Notebook(parent)
+        notebook.pack(fill="both", expand=True, padx=6, pady=6)
+        model_tab = ttk.Frame(notebook, padding=8)
+        provider_tab = ttk.Frame(notebook, padding=8)
+        route_tab = ttk.Frame(notebook, padding=8)
+        test_tab = ttk.Frame(notebook, padding=8)
+        notebook.add(model_tab, text="模型列表")
+        notebook.add(provider_tab, text="服务商配置")
+        notebook.add(route_tab, text="任务分配")
+        notebook.add(test_tab, text="连接测试")
+
+        # ---- 模型列表: 所有内置服务商始终显示, 可直观看到配置状态和当前模型 ----
+        ttk.Label(model_tab, text="统一查看和管理 KIVO 支持的全部 AI 服务商与模型。",
+                  style="Muted.TLabel").pack(anchor="w", pady=(0, 6))
+        list_wrap = ttk.Frame(model_tab)
+        list_wrap.pack(fill="both", expand=True)
+        columns = ("provider", "model", "status")
+        model_tree = ttk.Treeview(list_wrap, columns=columns, show="headings", height=9, selectmode="browse")
+        model_tree.heading("provider", text="服务商")
+        model_tree.heading("model", text="当前模型")
+        model_tree.heading("status", text="配置状态")
+        model_tree.column("provider", width=190, minwidth=130)
+        model_tree.column("model", width=250, minwidth=150)
+        model_tree.column("status", width=90, minwidth=80, anchor="center")
+        tree_scroll = ttk.Scrollbar(list_wrap, orient="vertical", command=model_tree.yview)
+        model_tree.configure(yscrollcommand=tree_scroll.set)
+        model_tree.pack(side="left", fill="both", expand=True)
+        tree_scroll.pack(side="right", fill="y")
+        def refresh_model_list(select_service=None):
+            for item in model_tree.get_children(): model_tree.delete(item)
+            for svc_key in self._AI_PRESETS:
+                key, model, base = store[svc_key]
+                state = "已配置" if key else "待配置"
+                item = model_tree.insert("", "end", iid=svc_key,
+                                         values=(names[svc_key], model or "(未设置)", state))
+                if svc_key == (select_service or cur["service"]):
+                    model_tree.selection_set(item)
+                    model_tree.focus(item)
+            selected = select_service or cur["service"]
+            if selected in self._AI_PRESETS:
+                model_tree.see(selected)
+        def open_selected_provider(_event=None):
+            selected = model_tree.selection()
+            if not selected: return
+            svc_var.set(names[selected[0]])
+            notebook.select(provider_tab)
+        model_tree.bind("<Double-1>", open_selected_provider)
+        model_buttons = ttk.Frame(model_tab)
+        model_buttons.pack(fill="x", pady=(7, 0))
+        ttk.Button(model_buttons, text="配置所选服务商", command=open_selected_provider).pack(side="left")
+        ttk.Button(model_buttons, text="刷新列表", command=lambda: (stash(), refresh_model_list())).pack(side="left", padx=6)
+        ttk.Label(model_tab, text="提示：未配置 API Key 的服务商也会保留在列表中；双击即可进入配置。",
+                  foreground="#888888", wraplength=560).pack(anchor="w", pady=(7, 0))
+
+        # ---- 服务商配置: 各服务商的 Key / 模型 / Base URL 独立保存 ----
+        ttk.Label(provider_tab, text="选择任意服务商，分别维护它的 API Key、模型名称和接口地址。",
+                  style="Muted.TLabel").grid(row=0, column=0, columnspan=3, sticky="w", pady=(0, 8))
+        ttk.Label(provider_tab, text="服务商:").grid(row=1, column=0, sticky="e", padx=8, pady=6)
         svc_var = tk.StringVar(value=names[cur["service"]])
         key_var, model_var, base_var = tk.StringVar(), tk.StringVar(), tk.StringVar()
-        svc = ttk.Combobox(parent, textvariable=svc_var, values=list(names.values()), width=30, state="readonly")
-        svc.grid(row=0, column=1, sticky="w", pady=6)
-        ttk.Label(parent, text="API Key:").grid(row=1, column=0, sticky="e", padx=8, pady=4)
-        ttk.Entry(parent, textvariable=key_var, width=40, show="*").grid(row=1, column=1, sticky="w", pady=4)
-        ttk.Label(parent, text=self.t("ai_model", "模型:")).grid(row=2, column=0, sticky="e", padx=8, pady=4)
-        model_box = ttk.Combobox(parent, textvariable=model_var, width=36, state="normal")
-        model_box.grid(row=2, column=1, sticky="w", pady=4)
+        svc = ttk.Combobox(provider_tab, textvariable=svc_var, values=list(names.values()), width=34, state="readonly")
+        svc.grid(row=1, column=1, sticky="w", pady=6)
+        ttk.Label(provider_tab, text="API Key:").grid(row=2, column=0, sticky="e", padx=8, pady=4)
+        ttk.Entry(provider_tab, textvariable=key_var, width=42, show="*").grid(row=2, column=1, sticky="w", pady=4)
+        ttk.Label(provider_tab, text="模型:").grid(row=3, column=0, sticky="e", padx=8, pady=4)
+        model_box = ttk.Combobox(provider_tab, textvariable=model_var, width=38, state="normal")
+        model_box.grid(row=3, column=1, sticky="w", pady=4)
+        ttk.Label(provider_tab, text="接口地址:").grid(row=4, column=0, sticky="e", padx=8, pady=4)
+        ttk.Entry(provider_tab, textvariable=base_var, width=42).grid(row=4, column=1, sticky="w", pady=4)
+        def load_fields():
+            k, m, b = store[cur["service"]]
+            key_var.set(k); model_var.set(m); base_var.set(b)
+            model_box.configure(values=())
+        def stash():
+            store[cur["service"]] = [key_var.get().strip(), model_var.get().strip(), base_var.get().strip()]
+            if "model_tree" in locals():
+                refresh_model_list()
+        def on_svc(*_):
+            stash()
+            cur["service"] = inv_names.get(svc_var.get(), cur["service"])
+            load_fields()
+            refresh_model_list(cur["service"])
+        svc_var.trace_add("write", on_svc)
         def fetch_models():
             stash()
             k, m, b = store[cur["service"]]
+            if not k:
+                test_var.set("请先填写当前服务商的 API Key")
+                notebook.select(test_tab)
+                return
             test_var.set("正在获取模型列表…")
             cfg = {"service": cur["service"], "key": k, "model": m, "base": b}
             import threading
@@ -4832,67 +4909,76 @@ try {
                         model_box.configure(values=models)
                         if model_var.get() not in models: model_var.set(models[0])
                         stash()
-                        test_var.set("已获取 %d 个模型，请选择后点击保存" % len(models))
+                        test_var.set("已获取 %d 个模型，请选择后保存" % len(models))
+                        refresh_model_list(cur["service"])
                     self._ui_queue.put(done)
                 except Exception as exc:
                     msg = str(exc)
                     self._ui_queue.put(lambda msg=msg: test_var.set("获取模型失败: " + msg))
             threading.Thread(target=work, daemon=True).start()
-        ttk.Button(parent, text="获取模型", command=fetch_models).grid(row=2, column=2, sticky="w", padx=4, pady=4)
-        ttk.Label(parent, text=self.t("ai_baseurl", "接口地址:")).grid(row=3, column=0, sticky="e", padx=8, pady=4)
-        ttk.Entry(parent, textvariable=base_var, width=40).grid(row=3, column=1, sticky="w", pady=4)
-        def load_fields():
-            k, m, b = store[cur["service"]]
-            key_var.set(k); model_var.set(m); base_var.set(b)
-        def stash():
-            store[cur["service"]] = [key_var.get().strip(), model_var.get().strip(), base_var.get().strip()]
-        def on_svc(*_):
-            stash()
-            cur["service"] = {v: k for k, v in names.items()}[svc_var.get()]
-            load_fields()
-        svc_var.trace_add("write", on_svc)
-        ttk.Label(parent, text=self.t("ai_form_note", "智谱 GLM-4V-Flash 完全免费 (open.bigmodel.cn 注册建 Key); 百炼是通义千问 Qwen-VL (新账号有免费额度); 硅基流动有免费档模型。\nKey 只保存在本机, 截图只发给你选的这家服务。"), foreground="#888888", wraplength=430).grid(row=4, column=0, columnspan=2, padx=8, pady=4, sticky="w")
-        test_var = tk.StringVar()
-        ttk.Label(parent, textvariable=test_var, foreground="#0070FF", wraplength=430).grid(row=5, column=0, columnspan=2, padx=8, sticky="w")
-        btns = ttk.Frame(parent); btns.grid(row=6, column=0, columnspan=2, pady=8)
+        ttk.Button(provider_tab, text="获取模型列表", command=fetch_models).grid(row=3, column=2, sticky="w", padx=5, pady=4)
+        ttk.Label(provider_tab, text="每家服务商独立保存配置；支持 OpenAI 兼容接口的服务可自动获取模型，其他服务可手动填写。",
+                  foreground="#888888", wraplength=540, justify="left").grid(row=5, column=0, columnspan=3, sticky="w", padx=6, pady=(10, 4))
+
+        # ---- 任务分配: 各类 AI 功能可使用不同服务商 ----
+        follow_text = self.t("ai_route_follow", "跟随当前服务")
+        route_defs = [("RouteChat", "ai_route_chat", "AI 聊天"),
+                      ("RouteVision", "ai_route_vision", "看图翻译"),
+                      ("RouteAnnotate", "ai_route_annotate", "标注栏 AI"),
+                      ("RouteReply", "ai_route_reply", "智能回复"),
+                      ("RouteText", "ai_route_text", "文本翻译")]
+        ttk.Label(route_tab, text="为不同任务指定模型服务；选择“跟随当前服务”则使用默认服务商。",
+                  style="Muted.TLabel").pack(anchor="w", pady=(0, 8))
+        route_vars = {}
+        for rk, lk, lz in route_defs:
+            row = ttk.Frame(route_tab)
+            row.pack(fill="x", pady=4)
+            ttk.Label(row, text=self.t(lk, lz) + ":", width=16).pack(side="left")
+            cur_r = (self.cfg.get("AI", rk, fallback="") or "").strip()
+            var = tk.StringVar(value=names.get(cur_r, follow_text))
+            ttk.Combobox(row, textvariable=var, values=[follow_text] + list(names.values()),
+                         width=34, state="readonly").pack(side="left", padx=5)
+            route_vars[rk] = var
+
+        # ---- 连接测试: 测试当前服务商 API Key / 模型是否可用 ----
+        test_var = tk.StringVar(value="选择服务商并填写 API Key、模型后，可在这里测试连接。")
+        ttk.Label(test_tab, text="使用当前选中的服务商发送一张测试图片，验证接口、密钥和模型是否可用。",
+                  style="Muted.TLabel", wraplength=550).pack(anchor="w", pady=(0, 8))
+        ttk.Label(test_tab, textvariable=test_var, foreground="#1673D1",
+                  wraplength=550, justify="left").pack(anchor="w", pady=6)
         def do_test():
-            stash(); test_var.set(self.t("ai_testing_img", "测试中 (发一张小图让模型读字)..."))
+            stash()
+            test_var.set("测试中（向模型发送测试图片）…")
             import threading
             test_img = Image.new("RGB", (240, 90), "white")
             ImageDraw.Draw(test_img).text((12, 30), "你好 KIVO 2026", fill="black", font=self._font(24))
             k, m, b = store[cur["service"]]
-            test_cfg = {"service": cur["service"], "key": k, "model": m, "base": b}  # 直接传窗里的值, 不碰 self.cfg (见 _ai_chat_image 说明)
+            test_cfg = {"service": cur["service"], "key": k, "model": m, "base": b}
             def work():
                 try:
-                    r = self._ai_chat_image(test_img, "只输出图片中的文字, 不要解释。", cfg=test_cfg)
-                    msg = f"{self.t('tst_ok', '测试成功')}: {self.t('ai_test_read', '模型读出了')}「{r[:40]}」" if r else f"{self.t('tst_fail', '测试失败')}: {self.t('ai_test_none', '模型没返回内容')}"
-                except Exception as e:
-                    msg = f"{self.t('tst_fail', '测试失败')}: {e}"
-                self._ui_queue.put(lambda: test_var.set(msg))
+                    r = self._ai_chat_image(test_img, "只输出图片中的文字，不要解释。", cfg=test_cfg)
+                    msg = "测试成功：模型返回「%s」" % (r[:80] if r else "空内容")
+                except Exception as exc:
+                    msg = "测试失败：" + str(exc)
+                self._ui_queue.put(lambda msg=msg: test_var.set(msg))
             threading.Thread(target=work, daemon=True).start()
-        ttk.Button(btns, text=self.t("cmn_test", "测试"), command=do_test).pack(side="left", padx=4)
+        ttk.Button(test_tab, text="测试当前服务商", command=do_test).pack(anchor="w", pady=6)
+
+        # ---- 统一保存入口 ----
+        footer = ttk.Frame(parent)
+        footer.pack(fill="x", padx=8, pady=(0, 8))
         def do_save():
             stash()
-            routes = {rk: ("" if var.get() == follow_text else inv_names.get(var.get(), "")) for rk, var in route_vars.items()}
+            routes = {rk: ("" if var.get() == follow_text else inv_names.get(var.get(), ""))
+                      for rk, var in route_vars.items()}
             self._save_ai_settings(cur["service"], store, routes)
-            self.status.set(f"{self.t('ai_saved2', 'AI 服务已保存')}: {names[cur['service']]} / {store[cur['service']][1]}")
-            test_var.set(self.t("cmn_saved", "已保存 ✓"))
-        ttk.Button(btns, text=self.t("cmn_save", "保存"), command=do_save).pack(side="left", padx=4)
-        follow_text = self.t("ai_route_follow", "跟随当前服务")
-        inv_names = {v: k for k, v in names.items()}
-        route_defs = [("RouteChat", "ai_route_chat", "AI 聊天"), ("RouteVision", "ai_route_vision", "看图翻译"),
-                      ("RouteAnnotate", "ai_route_annotate", "标注栏 AI"), ("RouteReply", "ai_route_reply", "智能回复"),
-                      ("RouteText", "ai_route_text", "文本翻译")]
-        rframe = ttk.LabelFrame(parent, text=self.t("ai_route_frame", "分工 (哪个功能用哪个 AI)"))
-        rframe.grid(row=7, column=0, columnspan=2, padx=8, pady=(2, 8), sticky="w")
-        route_vars = {}
-        for i, (rk, lk, lz) in enumerate(route_defs):
-            ttk.Label(rframe, text=self.t(lk, lz) + ":").grid(row=i, column=0, sticky="e", padx=6, pady=3)
-            cur_r = (self.cfg.get("AI", rk, fallback="") or "").strip()
-            var = tk.StringVar(value=names.get(cur_r, follow_text))
-            ttk.Combobox(rframe, textvariable=var, values=[follow_text] + list(names.values()), width=30, state="readonly").grid(row=i, column=1, sticky="w", pady=3)
-            route_vars[rk] = var
+            refresh_model_list(cur["service"])
+            self.status.set("AI 模型中心已保存")
+            test_var.set("配置已保存 ✓")
+        ttk.Button(footer, text=self.t("cmn_save", "保存全部设置"),
+                   style="Accent.TButton", command=do_save).pack(side="right")
         load_fields()
+        refresh_model_list(cur["service"])
     # ---------- AI 功能: 看图翻译 / 智能回复 ----------
     def ai_translate_image(self, img, route="vision"):
         """AI 看图翻译: 视觉模型直接看整张图翻译 (理解版面和上下文, 艺术字/复杂排版比 OCR 逐行翻得准); 后台线程跑"""
