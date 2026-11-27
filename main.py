@@ -434,7 +434,7 @@ _BTN_ICONS_B64 = {
     "gear": "iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAD5klEQVR4nLWUT4jVVRTHv+fce3/vvRnGHExpoj+LIOGBM8ErsSJ+o0VjOeXqB4ENisZr0yaGVlnDMIhItiiIYFCzhbaYwcVo5bgoZxGE+iCHHF1WJkOaZaH2fr977zkt5k9jTY4EneXhns+559+XcGdGaTpgAGBiYjDcYcz/Y7SYM8syM1KtanoSPDExGNZu3LIs59ZXEeLPZ0/s/wgApWlquru7ZWpqikZGRuIdgRfa6he3t5UKOp6UWp5QACG/+d7Dbb/3Lwa7HZgAoKtn+5vWlTfkzZt7nePL7Cqnfd5sMrMTifnk+P1tXRsvbWbrXhOff3l2/MCu2XidA/HC8gFoZ8+Ona7SOqSQ9TZJPpVIa3zR/I6ZS8RsQDjf+eyl5421Rwi6wVVahzp7duwEoLOMW8Ej1epcthckhBiKIocKQPohVFepikoIEUAXsYzF4DX4IpfgBUS9f2Ms+PHUFCHLDBHtBtSQ4ZKKKJhLRNTCbJitMwSyABEAEJFTVYLqHgCUnvyL94/hrVuXVW4ua0nZJKOq2gIVZZdw9MV5IrrGbB4XEUA1srVGYtF37Q8Z/X7i4+YiwxtgDACdX1/aayxvkxi+VaXHiJAY4zhqeMv+xHsajWHf+dwrvUw0qiIJQFDIaSZ+CKAzxlx/uXHsk6sAwGmaWmBQuk79uDUpl18XkXY2yVNEKDMbDuKnzn62b1ejMexrtbqb/HzfMRE9bGxCqiLGuLWqWGGTck/wlb0AFGlq+Pr11TP9EtwDACqSqwSoqhAzoPgNgNbqdedcq51ZKr1MRABBRSJUJVeJUOJ7F7aCAMWaTVuWm9hy1LjkSV/kV0DaTiBmNhQlbp48vv8oANR66w+EqGcIuFtVAOAXY90KEZkWCZsmjx/4ZgADRAsSaK1Wd9KBR6MPXcT8LlTLABEReVE5zMAVJdpGRCslSjTWmhh8vzP2qxvxxg8Xxg9Nz7Hm1kPTdMA2GsM+FvEuY5P3oagAIFUVVUmsS7axK71BmIESgSUGMdbt9iG2Xxg/NF2r1d3c9c3v3UQ3BAARY4gIRlUKADDWGYAQfB6CbwZVUWOtmU3qicgRYwhQavR2zOvHrQcCqCrG2Do2LimxsSTR9ynklDHOErFVxdUYfD8Rw7pSia0jVYwBpLOMRQ9kXoTYldZHX3wwOb7/SOfGHb8yuE00BuOSkhb5I0p0n3Xl/uCbXywmQkvK5oPp1vLyij3qyi3PSIyIobgSYqidO3Hw4u3i7GLOLMtMtVrVkzNC31z1dN9LnvkdEK9UlbfPnTh4sVaru0ZvR8z+Rej/qy1Z6ZIP5t5lWcbArDQODspSAX8Cm0TtanseiCAAAAAASUVORK5CYII=",
     "star": "iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAACeUlEQVR4nNWUQUhUURSG/3PfffNmTGdMxRQ3ErhoxsVkkW0EayEEtRxo0SIiWhRCRfvnrFyVqNUqaNUiWhpEKyMS2pQtzAgXtQkRLH0zOE/fu++cFk8Tx4EZI5DO6t7Lf7/733PPucDhhxBE6LBdNBKxy/Zr71ra7nztiZfqO1d1uYVYY5pbb5jIuACAMVj1ttXPmSsKANJrXz6CcDylg+6V+/mN+CYkjYPdWQ0Mx+NfSxbafkTp1a48OfZ7UtoiU7m4lll5je+9Gr29Jha+AYrnzMEcA2i9/fkp7OarEAaHlZelydylenu2wfG1Wm4ttquEvgMQi9kypEgBcCB0F4oSAEE48okwCWBLWJi0owFRHJiJ8qPszx3WrmNXFJY/WOlU6rrSqceUzEDCDYA0ZNMDsJ1OIpCTAcSA7COQTQ9s/Jsl33+C7lMRisQ1UhGflhn9dBKJ9CsCjklYCUHK3ivjkOwmW4AVBKUL3nR+vvoxq8qNBK5obzo/z+H6kEg0RzqpIcK7UGHSSS0SzXG4PuRN5+fhiq6ukP11XCSDwkKiPDWwpAJ/HNohEARABEgEQKAdUoE/Xp4aWEJhIYEimWpM7QbJ5hiuq1jrkdiJGLJTFjlpKz6AhLUegesqZHNcC1EbPIYIizkCR2chTJQ86nDgv5Wt8jNymhMgIjAPYjFHGEPUIFgUiKSjp7+T7KYzwpHHQWW0tHzivDeZvcJRcFnM5jLs1GBHT38niASQfZz94EJcKYHwsJCaEd44XZroe4gXYBTEKj3oex76qwMQmglku0ULjTUaAKDp3reuPxN3Vtca79EcLIR2PqG9y0I73+nfQf+J5n+J39QzDLg7vrq5AAAAAElFTkSuQmCC",
 }  # 按钮小图标 (22px, PIL 手绘线条风: 图标+文字并排, 与常见软件一致)
-VERSION = "1.6.1"  # v1.4.22: ①去掉内置浏览器整套 (Jane 真机定版不好用: 面板/书签/历史/菜单/pywebview 子进程全删, 工具栏回 8 按钮, 自检减为六项, 打包去 pywebview) ②世界时间加「刷新」(绕过天气 15 分钟节流立即重拉) ③文本翻译框自适应高度 (默认 8 行, 随内容长高至 24 行封顶, 按钮行跟随) ④系统设置/软件自检/历史截图/城市选择全部改为主窗口内面板 (Jane 定版「能收的都收」, 不再弹独立窗口, 重复开窗问题从结构上消除) ⑤启动时清理浏览器残留文件 (bookmarks/browser_history/browser_profile) ⑥工具栏改一行 8 按钮 ⑦截图翻译学有道: F4 出无边框浮动条 (原文区透明盖选区透出真实截图对照/译文框在选区下方、不够翻上方/大小随内容/源语言可选/条内复制原文·译文·AI 智能回复), 完整结果窗保留给无选区入口; v1.4.23: ①修真 bug: 配置解析关 % 插值 (分隔符/路径/接口地址带 % 不再抛错) ②备份导入加固 (JSON 先验货后落盘, 坏备份整包拒绝) + 备份说明去掉书签残留文案 ③英文模式运行时漏网文案两批全清 (汇率/托盘/取色器/下载提示/识别结果窗/AI 气泡与接口报错/测试连接结果/计算器/截图浮层, 三个翻译助手改实例方法并本地化报错) ④F4 纯数字/符号截图提示「没有可翻译的文字」不再误报失败 ⑤删死代码, 新增边缘测试套件; v1.4.24: 修 AI 聊天真机 400 (Jane 实测): 智谱 glm-4v-flash 的 max_tokens 上限 1024, 聊天面板传 2048 被拒 (code 1210); 已在 _ai_chat_messages 对智谱统一钳制 [1,1024], 别家不受影响, test_edge 扩至 17 项含此用例; v1.4.25: ①F4 截图翻译合并引擎 (Jane 定案): 配了 AI Key 先 AI 看图翻译 (一次读图+翻译, 尝试上限 20 秒), AI 失效/没配 Key 立刻回退 OCR 通道 ②F4 提速: 免费翻译通道黏性 (通的通道 120 秒内优先)、Google 超时 12→8 秒、MyMemory 12→10 秒、逐行兜底改并发 ③文本翻译源语言改下拉可选 (自动检测+13 种, 改选即重译并真传引擎) ④文本翻译接 AI 通道 + 「启用AI翻译」勾选 (默认开: 勾上才优先 AI、失效回退在线; 不勾绝不调 AI; 选择落盘 TTUseAI) ⑤_ai_chat_image/_ai_chat_messages 加 timeout 参数 (默认 90 不变); v1.4.26: ①F4 修 AI 回复把提示词的「第一部分/第二部分」标签回声进正文 (改提示词措辞+解析层剥标签兜底) ②全部勾选/单选改圆点指示 (选中绿点/未选空心圈, PIL 生成 Dot.indicator, 含经典 tk 城市勾选) ③工具栏 8 按钮统一样式 (AI 功能去掉蓝色描边款) ④F4 第二轮提速: OCR 与 AI 并行 (回退零等待, Jane 定案保持并行)、OCR 引擎启动预热、「翻译中…」占位浮签 ⑤马赛克/模糊加强: 强度随区域自适应 (旧版几乎无效), F1 编辑器预览改真效果 ⑥全面审查修复 18 项: 多显示器坐标校正、长截图/F4 后台线程兜底、备份验 Config.ini+导出原子写、迷你窗脏值兜底、天气失败负缓存改 60 秒、画廊/预览句柄泄漏、计算器英文错误态、AI 空白返回、强力粘贴验返回值、GlobalLock 判空、WinOCR 逐行容错、import_txt 支持 UTF-16、复制反馈存活守卫、配置双编码全新 parser、分隔符脏值校验; 两 ini 438 键同集 (新增 long_fail); v1.4.27: 功能与 1.4.26 相同, 首次提供安装版 (Inno Setup: 按用户安装/原地升级/开始菜单与桌面快捷方式/设置里可卸载; 发布页同时附 KIVO.exe 单文件版与 KIVO-Setup 安装包, Jane 2026-11-25 定案); v1.4.28: ①修任务栏恢复闪黑 (列表补刷推迟到窗口画出后, 不再同步重建堵第一帧) ②截图/贴图设置并入系统设置 (截图翻译目标语言/对照翻译/延时秒数/UI 检测, 与主窗口共用同一变量两处同步) ③F4 浮动条重做: 原文框全透明只留 1px 细边、与选区等大, 译文框独立白卡与原文框像素等宽左对齐, 功能条独立成条保持自然宽度 ④F4 截图翻译不使用 UI 检测 (纯自由框选, F1 等不受影响) ⑤UI 检测三招: 悬停常驻 UIA 桥实时查元素、假框过滤 (占整窗 85% 以上的容器矩形不要)、拖拽边缘 8px 磁吸 ⑥AI 分工: AI 聊天/看图翻译/标注栏 AI/智能回复/文本翻译五路可各选一家 (缺省跟随当前服务, 指定的那家没 Key 自动回退当前服务), 预设扩到 14 家 (新增 OpenAI/Gemini/Claude/DeepSeek/Kimi/火山豆包/腾讯混元/百度千帆/Grok/Ollama 本地自建), 修 _ai_cfg 镜像串扰真 bug (读别家配置会串到当前服务的 key/地址/模型, 分工会把请求发错地方) ⑦第五轮审查优化: UIA 桥读行加 2.5 秒超时杀桥 (防挂起应用堵死检测)、历史截图画廊缩略图分批渲染 (打开不冻结)、备份导入单文件 64MB 上限、记录/常用语落盘改紧凑 JSON (文件小三成读写更快); v1.4.29: ①品牌升级为 KIVO 启沃 (新 Logo/配色/功能改名/启动页/关于 KIVO) ②左侧边栏导航 (Jane 定序: AI 助手第一/翻译中心第二, 世界时钟与货币汇率分开) ③Dots.ai 第 15 家预设 + 深度思考开关 (实测: 正文被思考吃空时自动关思考重试一次) ④AI 聊天 GPT/豆包式改造 (+菜单附件/建议行/最近对话置顶重命名删除/圆角弹窗/气泡内豆包式图标行含朗读) ⑤迷你翻译 F10 + 复制即译 F11 (独立开关与热键, 跟随文本翻译的 AI 开关, 复制即译只按热键触发不监听剪贴板) ⑥约时间换算 (含单语复制模式)/对方作息提示/复制双语 ⑦计算器放大居中+计算历史/汇率 30 币种国旗/世界时钟天气图标+温馨提醒+分享 ⑧全局圆角 (主窗口外框直角除外)+KIVO 配色+弹窗美化, 标注默认矩形 ⑨设置内检查更新+一键更新 (下载字节数检/MZ 验头/SHA256+RSA 签名双重验证, 无 .sig 的版本拒装) ⑩第六轮深度审查: 边栏最小高度 600 防裁设置项 v1.4.30: 千问审查整改 — OCR 引擎锁竞态 (锁改为类定义时建好)、F7 消费模式只在粘成功时删记录、F4 碎片合并框并集底边、下载链接剥尾标点、恢复 _ini_scalar/_http_base 护栏、save_config/save_phrases 落盘失败记 crash.log。 v1.5.0: AI 助手全面升级 — 模型中心 (多服务商多模型档案/任务级选模型/连接测试/同服务商故障切换)、聊天流式输出与停止生成、图片上下文与图片备份、长期记忆、PDF/Word/Excel 附件解析、附件与历史读取上限、深色边栏与品牌蓝统一、备份事务回滚、热键冲突提示、AI 报错脱敏加固。
+VERSION = "1.6.2"  # v1.6.2: 九个新功能 — ①全局快捷面板(F12, 搜索记录/常用语/安全算术, 回车即粘贴) ②划词 AI(Ctrl+Alt+A, 光标浮窗: 翻译/润色/总结/解释/换语气, 自动还原剪贴板) ③截图贴图增强(取色器历史色板 HEX/RGB/HSL+屏幕取色、屏幕标尺、二维码生成) ④开发者工具箱(时间戳/JSON/正则/Base64/单位换算, 纯标准库) ⑤深色模式(31 个深色令牌, 重启生效) ⑥番茄钟(25/5, 时长可配) ⑦窗口管理(置顶/半透明/分屏/居中) ⑧更新镜像通道(GitHub 兼容反代, 镜像优先) ⑨图片批量处理(缩放/格式/质量/水印, 后台线程); 测试 170 项。历史: v1.4.22: ①去掉内置浏览器整套 (Jane 真机定版不好用: 面板/书签/历史/菜单/pywebview 子进程全删, 工具栏回 8 按钮, 自检减为六项, 打包去 pywebview) ②世界时间加「刷新」(绕过天气 15 分钟节流立即重拉) ③文本翻译框自适应高度 (默认 8 行, 随内容长高至 24 行封顶, 按钮行跟随) ④系统设置/软件自检/历史截图/城市选择全部改为主窗口内面板 (Jane 定版「能收的都收」, 不再弹独立窗口, 重复开窗问题从结构上消除) ⑤启动时清理浏览器残留文件 (bookmarks/browser_history/browser_profile) ⑥工具栏改一行 8 按钮 ⑦截图翻译学有道: F4 出无边框浮动条 (原文区透明盖选区透出真实截图对照/译文框在选区下方、不够翻上方/大小随内容/源语言可选/条内复制原文·译文·AI 智能回复), 完整结果窗保留给无选区入口; v1.4.23: ①修真 bug: 配置解析关 % 插值 (分隔符/路径/接口地址带 % 不再抛错) ②备份导入加固 (JSON 先验货后落盘, 坏备份整包拒绝) + 备份说明去掉书签残留文案 ③英文模式运行时漏网文案两批全清 (汇率/托盘/取色器/下载提示/识别结果窗/AI 气泡与接口报错/测试连接结果/计算器/截图浮层, 三个翻译助手改实例方法并本地化报错) ④F4 纯数字/符号截图提示「没有可翻译的文字」不再误报失败 ⑤删死代码, 新增边缘测试套件; v1.4.24: 修 AI 聊天真机 400 (Jane 实测): 智谱 glm-4v-flash 的 max_tokens 上限 1024, 聊天面板传 2048 被拒 (code 1210); 已在 _ai_chat_messages 对智谱统一钳制 [1,1024], 别家不受影响, test_edge 扩至 17 项含此用例; v1.4.25: ①F4 截图翻译合并引擎 (Jane 定案): 配了 AI Key 先 AI 看图翻译 (一次读图+翻译, 尝试上限 20 秒), AI 失效/没配 Key 立刻回退 OCR 通道 ②F4 提速: 免费翻译通道黏性 (通的通道 120 秒内优先)、Google 超时 12→8 秒、MyMemory 12→10 秒、逐行兜底改并发 ③文本翻译源语言改下拉可选 (自动检测+13 种, 改选即重译并真传引擎) ④文本翻译接 AI 通道 + 「启用AI翻译」勾选 (默认开: 勾上才优先 AI、失效回退在线; 不勾绝不调 AI; 选择落盘 TTUseAI) ⑤_ai_chat_image/_ai_chat_messages 加 timeout 参数 (默认 90 不变); v1.4.26: ①F4 修 AI 回复把提示词的「第一部分/第二部分」标签回声进正文 (改提示词措辞+解析层剥标签兜底) ②全部勾选/单选改圆点指示 (选中绿点/未选空心圈, PIL 生成 Dot.indicator, 含经典 tk 城市勾选) ③工具栏 8 按钮统一样式 (AI 功能去掉蓝色描边款) ④F4 第二轮提速: OCR 与 AI 并行 (回退零等待, Jane 定案保持并行)、OCR 引擎启动预热、「翻译中…」占位浮签 ⑤马赛克/模糊加强: 强度随区域自适应 (旧版几乎无效), F1 编辑器预览改真效果 ⑥全面审查修复 18 项: 多显示器坐标校正、长截图/F4 后台线程兜底、备份验 Config.ini+导出原子写、迷你窗脏值兜底、天气失败负缓存改 60 秒、画廊/预览句柄泄漏、计算器英文错误态、AI 空白返回、强力粘贴验返回值、GlobalLock 判空、WinOCR 逐行容错、import_txt 支持 UTF-16、复制反馈存活守卫、配置双编码全新 parser、分隔符脏值校验; 两 ini 438 键同集 (新增 long_fail); v1.4.27: 功能与 1.4.26 相同, 首次提供安装版 (Inno Setup: 按用户安装/原地升级/开始菜单与桌面快捷方式/设置里可卸载; 发布页同时附 KIVO.exe 单文件版与 KIVO-Setup 安装包, Jane 2026-11-25 定案); v1.4.28: ①修任务栏恢复闪黑 (列表补刷推迟到窗口画出后, 不再同步重建堵第一帧) ②截图/贴图设置并入系统设置 (截图翻译目标语言/对照翻译/延时秒数/UI 检测, 与主窗口共用同一变量两处同步) ③F4 浮动条重做: 原文框全透明只留 1px 细边、与选区等大, 译文框独立白卡与原文框像素等宽左对齐, 功能条独立成条保持自然宽度 ④F4 截图翻译不使用 UI 检测 (纯自由框选, F1 等不受影响) ⑤UI 检测三招: 悬停常驻 UIA 桥实时查元素、假框过滤 (占整窗 85% 以上的容器矩形不要)、拖拽边缘 8px 磁吸 ⑥AI 分工: AI 聊天/看图翻译/标注栏 AI/智能回复/文本翻译五路可各选一家 (缺省跟随当前服务, 指定的那家没 Key 自动回退当前服务), 预设扩到 14 家 (新增 OpenAI/Gemini/Claude/DeepSeek/Kimi/火山豆包/腾讯混元/百度千帆/Grok/Ollama 本地自建), 修 _ai_cfg 镜像串扰真 bug (读别家配置会串到当前服务的 key/地址/模型, 分工会把请求发错地方) ⑦第五轮审查优化: UIA 桥读行加 2.5 秒超时杀桥 (防挂起应用堵死检测)、历史截图画廊缩略图分批渲染 (打开不冻结)、备份导入单文件 64MB 上限、记录/常用语落盘改紧凑 JSON (文件小三成读写更快); v1.4.29: ①品牌升级为 KIVO 启沃 (新 Logo/配色/功能改名/启动页/关于 KIVO) ②左侧边栏导航 (Jane 定序: AI 助手第一/翻译中心第二, 世界时钟与货币汇率分开) ③Dots.ai 第 15 家预设 + 深度思考开关 (实测: 正文被思考吃空时自动关思考重试一次) ④AI 聊天 GPT/豆包式改造 (+菜单附件/建议行/最近对话置顶重命名删除/圆角弹窗/气泡内豆包式图标行含朗读) ⑤迷你翻译 F10 + 复制即译 F11 (独立开关与热键, 跟随文本翻译的 AI 开关, 复制即译只按热键触发不监听剪贴板) ⑥约时间换算 (含单语复制模式)/对方作息提示/复制双语 ⑦计算器放大居中+计算历史/汇率 30 币种国旗/世界时钟天气图标+温馨提醒+分享 ⑧全局圆角 (主窗口外框直角除外)+KIVO 配色+弹窗美化, 标注默认矩形 ⑨设置内检查更新+一键更新 (下载字节数检/MZ 验头/SHA256+RSA 签名双重验证, 无 .sig 的版本拒装) ⑩第六轮深度审查: 边栏最小高度 600 防裁设置项 v1.4.30: 千问审查整改 — OCR 引擎锁竞态 (锁改为类定义时建好)、F7 消费模式只在粘成功时删记录、F4 碎片合并框并集底边、下载链接剥尾标点、恢复 _ini_scalar/_http_base 护栏、save_config/save_phrases 落盘失败记 crash.log。 v1.5.0: AI 助手全面升级 — 模型中心 (多服务商多模型档案/任务级选模型/连接测试/同服务商故障切换)、聊天流式输出与停止生成、图片上下文与图片备份、长期记忆、PDF/Word/Excel 附件解析、附件与历史读取上限、深色边栏与品牌蓝统一、备份事务回滚、热键冲突提示、AI 报错脱敏加固。
 # v1.4.20: 瘦身版, 功能零变化 — 打包侧剔除未用组件 (cv2 视频插件/级联数据、numpy 测试集、onnxruntime 的 transformers/tools/quantization/datasets/backend), 已模拟验证删除后 OCR 中英文识别正常
 # v1.4.19: ①AI 面板侧边栏去掉「AI 功能」快捷入口组 (功能本体全保留) ②修复 v1.4.18 的 F4 截图翻译主流程 (_translate_lines 误标 @staticmethod 致后台线程静默失败) ③记录上限改硬线 (全锁定时不再突破 2000) ④截图翻译目标语言扩到 13 种 ⑤内嵌微型浏览器 (WebView2 子进程收编: 谷歌翻译主页/书签栏前 8+书签管理/浏览历史/清除数据/页面缩放/下载说明) ⑥文本翻译面板 (打字停笔 350ms 自动翻译, 无缓存每次实时译) + 工具栏按序重排为两行并配线条图标 ⑦品牌头重排 (系统设置移左上挨着 KIVO, 副标题「多功能工作台」居中, 右上留空) + 软件图标换 Jane 的樱花小女孩原图 ⑧窗口最小高度解锁 (最大化/缩放恢复正常) ⑨全界面双语化补齐 (约 330 条文案入语言文件, 英文模式复检残留中文 0 条) + 第八轮深查 (线程/网络/浏览器生命周期/热键英文保存往返全过)
 # v1.4.18: ①截图翻译修复 (OCR 碎片合并+整段翻译, 结果窗改纯文本) ②翻译结果窗内嵌 AI 智能回复 ③AI/热键/翻译设置全并入系统设置 ④AI 功能改内嵌面板+豆包式侧边栏+最近对话存档 (圆角气泡) ⑤主窗口简约重设计 (方角) ⑥货币汇率 ⑦计算器 ⑧常用语库面板化+序号 ⑨世界时间 (全球城市自选+当地天气) ⑩无水印下载 (FB/IG/小红书等, 保存位置可每次询问或固定) ⑪历史截图保存设置 (张数/不保存, 含 GIF) ⑫移除网络搜索 ⑬三轮深查整改: AI 回复防串话/时钟计时链/天气失败重试/设置窗滚轮隔离/下载实际文件名/汇率过期刷新/AI 回复增量渲染 (320ms→24ms)/单实例保护/单对话存档封顶 200 条
@@ -1509,6 +1509,7 @@ class App(tk.Tk):
         _nav("dev", self.t("dev_title", "开发者工具箱"), "star", self.open_dev_tools)
         _nav("pomo", self.t("pomo_title", "番茄钟"), "clock", self.open_pomodoro)
         _nav("winman", self.t("wm_title", "窗口管理"), "gear", self.open_window_manager)
+        _nav("batch", self.t("batch_title", "图片批量处理"), "browser", self.open_batch_images)
         # 边栏底部: 版本 (最底) + 设置 + 分隔线 (side=bottom 先包的贴最底)
         tk.Label(side, text=f"v{VERSION} · © KIVO", font=self._ui_font(8), background=SIDE, foreground=self.UI_MUTED).pack(side="bottom", anchor="w", padx=18, pady=(0, 10))
         _set_it = _NavItem(side, text=self.t("system_settings", "设置"), command=self.open_system_settings, font=self._ui_font(10), bg=SIDE, image=self._nav_icon("gear"), palette=_nav_pal)
@@ -1878,7 +1879,7 @@ class App(tk.Tk):
             self._build_settings_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -2318,7 +2319,7 @@ class App(tk.Tk):
             self._build_selfcheck_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -2583,7 +2584,7 @@ class App(tk.Tk):
             self._build_phrases_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_dev_panel", "_pomo_panel", "_winman_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -6858,7 +6859,7 @@ try {
             self._build_calc_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_phrases_panel", "_clock_panel", "_dl_panel", "_dev_panel", "_pomo_panel", "_winman_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_phrases_panel", "_clock_panel", "_dl_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -7181,7 +7182,7 @@ try {
             self._build_clock_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_dl_panel", "_dev_panel", "_pomo_panel", "_winman_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_dl_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -7447,7 +7448,7 @@ try {
             self._build_clockset_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -7858,7 +7859,7 @@ try {
             self._build_texttrans_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_clock_panel", "_dl_panel", "_dev_panel", "_pomo_panel", "_winman_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_clock_panel", "_dl_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -8182,7 +8183,7 @@ try {
             self._build_dl_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_clock_panel", "_dev_panel", "_pomo_panel", "_winman_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_clock_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -9895,7 +9896,7 @@ try {
             self._build_gallery_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -10670,7 +10671,7 @@ try {
             self._build_pomo_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -10844,7 +10845,7 @@ try {
         try: self._body.pack_forget()
         except Exception: pass
         for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel",
-                     "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel"):
+                     "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -10900,6 +10901,178 @@ try {
                 self._last_foreign_hwnd = hwnd
             self._wm_track_after = self.after(1200, poll)
         poll()
+
+    # ---------- 图片批量处理 (v1.6.2): 批量缩放/格式/质量/文字水印, Pillow 后台线程 ----------
+    @staticmethod
+    def _batch_target_size(w, h, percent=100, max_side=0):
+        """先按百分比缩放, max_side>0 时再把最长边限制到该像素; 至少 1px。"""
+        nw = max(1, int(round(w * percent / 100.0)))
+        nh = max(1, int(round(h * percent / 100.0)))
+        if max_side and max(nw, nh) > max_side:
+            scale = max_side / float(max(nw, nh))
+            nw, nh = max(1, int(nw * scale)), max(1, int(nh * scale))
+        return nw, nh
+    @staticmethod
+    def _batch_output_path(src, out_dir, forced_fmt, used):
+        stem = os.path.splitext(os.path.basename(src))[0]
+        if forced_fmt:
+            ext = {"jpg": ".jpg", "png": ".png", "webp": ".webp"}[forced_fmt]
+        else:
+            ext = os.path.splitext(src)[1] or ".jpg"
+        candidate = os.path.join(out_dir, stem + ext); i = 1
+        while candidate.lower() in used or os.path.exists(candidate):
+            candidate = os.path.join(out_dir, f"{stem}_{i}{ext}"); i += 1
+        used.add(candidate.lower())
+        return candidate
+    def _process_one_image(self, src, opts, out_dir, used):
+        with Image.open(src) as im:
+            im.load()
+            nw, nh = self._batch_target_size(im.width, im.height, opts["percent"], opts["max_side"])
+            out = im.resize((nw, nh), Image.LANCZOS)
+            if opts.get("watermark"):
+                ImageDraw.Draw(out).text((8, max(1, nh - 14)), opts["watermark"],
+                                         fill=opts.get("wm_color", "#FF0000"),
+                                         font=ImageFont.load_default())
+            path = self._batch_output_path(src, out_dir, opts["format"], used)
+            save_kwargs = {}
+            if path.lower().endswith((".jpg", ".jpeg")):
+                if out.mode != "RGB":  # JPG 不支持透明, 白底合成
+                    bg = Image.new("RGB", out.size, (255, 255, 255))
+                    if out.mode in ("RGBA", "LA"):
+                        bg.paste(out, mask=out.split()[-1])
+                    else:
+                        bg.paste(out.convert("RGB"))
+                    out = bg
+                save_kwargs["quality"] = opts["quality"]
+            elif path.lower().endswith(".webp"):
+                save_kwargs["quality"] = opts["quality"]
+            out.save(path, **save_kwargs)
+            return path
+    def open_batch_images(self):
+        self._nav_show("batch")
+        self._show_batch_panel()
+    def _show_batch_panel(self):
+        self._texttrans_on_hide()
+        if getattr(self, "_batch_panel", None) is None:
+            self._build_batch_panel()
+        try: self._body.pack_forget()
+        except Exception: pass
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel",
+                     "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel"):
+            p = getattr(self, attr, None)
+            if p is not None:
+                try: p.pack_forget()
+                except Exception: pass
+        self._ai_view_on = False
+        self._forget_aux_panels()
+        self._batch_panel.pack(fill="both", expand=True, before=self._status_sep)
+    def _build_batch_panel(self):
+        panel = tk.Frame(self._content, background=self.UI_BG); self._batch_panel = panel
+        head = tk.Frame(panel, background=self.UI_BG); head.pack(fill="x", padx=14, pady=(10, 4))
+        self._panel_title(head, self.t("batch_title", "图片批量处理"), "browser")
+        back = tk.Label(head, text=self.t("cmn_back", "返回"), font=self._ui_font(9),
+                        background=self.UI_BG, foreground=self.UI_MUTED, cursor="hand2")
+        back.pack(side="right"); back.bind("<Button-1>", lambda e: self._show_main_view())
+        self._batch_files = []
+        list_card = tk.Frame(panel, bg=self.UI_BG); self._rounded_backing(list_card)
+        list_card.pack(fill="x", padx=16, pady=8)
+        self._batch_lb = tk.Listbox(list_card, height=5, font=self._ui_font(9), bg=self.UI_SURFACE,
+                                    fg=self.UI_TEXT, selectbackground=self.UI_SEL_BG,
+                                    selectforeground=self.UI_ACCENT, relief="flat", bd=0)
+        self._batch_lb.pack(fill="x", padx=10, pady=10)
+        fb = tk.Frame(panel, bg=self.UI_BG); fb.pack(fill="x", padx=16)
+        def add_files():
+            paths = filedialog.askopenfilenames(
+                filetypes=[("图片", "*.jpg *.jpeg *.png *.webp *.bmp *.gif *.tiff")])
+            for p in paths:
+                if p not in self._batch_files:
+                    self._batch_files.append(p); self._batch_lb.insert("end", os.path.basename(p))
+        def remove_sel():
+            for i in reversed(self._batch_lb.curselection()):
+                self._batch_lb.delete(i); del self._batch_files[i]
+        ttk.Button(fb, text=self.t("batch_add", "添加图片"), style="Small.TButton",
+                   command=add_files).pack(side="left", padx=3)
+        ttk.Button(fb, text=self.t("batch_remove", "移除选中"), style="Small.TButton",
+                   command=remove_sel).pack(side="left", padx=3)
+        opt_card = tk.Frame(panel, bg=self.UI_BG); self._rounded_backing(opt_card)
+        opt_card.pack(fill="x", padx=16, pady=8)
+        opts = tk.Frame(opt_card, bg=self.UI_SURFACE); opts.pack(fill="x", padx=12, pady=10)
+        r1 = tk.Frame(opts, bg=self.UI_SURFACE); r1.pack(fill="x", pady=3)
+        tk.Label(r1, text=self.t("batch_percent", "缩放百分比:"), bg=self.UI_SURFACE,
+                 fg=self.UI_TEXT_2, font=self._ui_font(10)).pack(side="left")
+        self._batch_percent = tk.Entry(r1, width=6); self._batch_percent.insert(0, "100")
+        self._batch_percent.pack(side="left", padx=4)
+        tk.Label(r1, text=self.t("batch_maxside", "最长边(0=不限):"), bg=self.UI_SURFACE,
+                 fg=self.UI_TEXT_2, font=self._ui_font(10)).pack(side="left", padx=(10, 0))
+        self._batch_maxside = tk.Entry(r1, width=7); self._batch_maxside.insert(0, "0")
+        self._batch_maxside.pack(side="left", padx=4)
+        r2 = tk.Frame(opts, bg=self.UI_SURFACE); r2.pack(fill="x", pady=3)
+        tk.Label(r2, text=self.t("batch_format", "输出格式:"), bg=self.UI_SURFACE,
+                 fg=self.UI_TEXT_2, font=self._ui_font(10)).pack(side="left")
+        self._batch_format = tk.StringVar(value="")
+        for txt, val in [(self.t("batch_keep", "保持原格式"), ""),
+                         ("JPG", "jpg"), ("PNG", "png"), ("WEBP", "webp")]:
+            ttk.Radiobutton(r2, text=txt, variable=self._batch_format, value=val).pack(side="left", padx=4)
+        r3 = tk.Frame(opts, bg=self.UI_SURFACE); r3.pack(fill="x", pady=3)
+        tk.Label(r3, text=self.t("batch_quality", "JPG/WEBP 质量:"), bg=self.UI_SURFACE,
+                 fg=self.UI_TEXT_2, font=self._ui_font(10)).pack(side="left")
+        self._batch_quality = tk.Entry(r3, width=6); self._batch_quality.insert(0, "88")
+        self._batch_quality.pack(side="left", padx=4)
+        r4 = tk.Frame(opts, bg=self.UI_SURFACE); r4.pack(fill="x", pady=3)
+        tk.Label(r4, text=self.t("batch_wm", "文字水印(留空不加):"), bg=self.UI_SURFACE,
+                 fg=self.UI_TEXT_2, font=self._ui_font(10)).pack(side="left")
+        self._batch_wm = tk.Entry(r4, width=24); self._batch_wm.pack(side="left", padx=4)
+        r5 = tk.Frame(panel, bg=self.UI_BG); r5.pack(fill="x", padx=16, pady=(0, 6))
+        tk.Label(r5, text=self.t("batch_outdir", "输出文件夹:"), bg=self.UI_BG,
+                 fg=self.UI_TEXT_2, font=self._ui_font(10)).pack(side="left")
+        self._batch_outdir = tk.StringVar(value="")
+        tk.Label(r5, textvariable=self._batch_outdir, bg=self.UI_BG, fg=self.UI_MUTED,
+                 font=self._ui_font(9), width=28, anchor="w").pack(side="left", padx=4)
+        ttk.Button(r5, text=self.t("batch_pick_dir", "选择"), style="Small.TButton",
+                   command=lambda: self._batch_outdir.set(
+                       filedialog.askdirectory() or self._batch_outdir.get())).pack(side="left")
+        self._batch_progress = tk.StringVar(value="")
+        tk.Label(panel, textvariable=self._batch_progress, bg=self.UI_BG, fg=self.UI_MUTED,
+                 font=self._ui_font(10)).pack(anchor="w", padx=18)
+        ttk.Button(panel, text=self.t("batch_run", "开始批量处理"), style="Accent.TButton",
+                   command=self._batch_run).pack(anchor="w", padx=18, pady=8)
+    def _batch_run(self):
+        if not self._batch_files:
+            self.toast(self.t("batch_none", "请先添加图片"), ms=1800); return
+        try:
+            percent = int(self._batch_percent.get()); max_side = int(self._batch_maxside.get())
+            quality = min(100, max(1, int(self._batch_quality.get())))
+            if not (1 <= percent <= 500) or max_side < 0: raise ValueError
+        except Exception:
+            self.toast(self.t("batch_bad_opts", "缩放或质量参数有误"), ms=2000); return
+        out_dir = self._batch_outdir.get().strip()
+        if not out_dir:
+            out_dir = os.path.join(os.path.dirname(self._batch_files[0]) or ".", "kivo_batch")
+            self._batch_outdir.set(out_dir)
+        try: os.makedirs(out_dir, exist_ok=True)
+        except Exception:
+            self.toast(self.t("batch_bad_dir", "输出文件夹不可用"), ms=2000); return
+        opts = {"percent": percent, "max_side": max_side, "quality": quality,
+                "format": self._batch_format.get(), "watermark": self._batch_wm.get().strip()}
+        files = list(self._batch_files)
+        def work():
+            ok, errors = 0, []
+            used = set()
+            total = len(files)
+            for i, src in enumerate(files, 1):
+                try:
+                    self._process_one_image(src, opts, out_dir, used); ok += 1
+                except Exception as e:
+                    errors.append(f"{os.path.basename(src)}: {e}")
+                self._ui_queue.put(lambda i=i, t=total: self._batch_progress.set(
+                    self.t("batch_progress_t", "处理中 {i}/{t}").format(i=i, t=t)))
+            def done():
+                msg = self.t("batch_done_t", "批量处理完成：成功 {ok} 张").format(ok=ok)
+                if errors: msg += self.t("batch_fail_t", "，失败 {n} 张").format(n=len(errors))
+                self.toast(msg, ms=3000)
+                self._batch_progress.set(msg + ("\n" + "\n".join(errors[:5]) if errors else ""))
+            self._ui_queue.put(done)
+        threading.Thread(target=work, daemon=True).start()
 
     def _show_main(self):
         self.deiconify(); self.lift()

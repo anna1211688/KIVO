@@ -1738,3 +1738,54 @@ class UpdateMirrorTests(unittest.TestCase):
         self.assertTrue(0 < i_mirror < i_github)
         self.assertIn('"UpdateMirror"', SOURCE)
         self.assertIn("def _probe_latest_tag(self, page_url)", SOURCE)
+
+
+class BatchImageTests(unittest.TestCase):
+    """v1.6.2 图片批量处理: 尺寸计算、命名去重与真实图片端到端。"""
+
+    @classmethod
+    def setUpClass(cls):
+        from PIL import Image, ImageDraw, ImageFont
+        app_node = next(n for n in TREE.body if isinstance(n, ast.ClassDef) and n.name == "App")
+        cls.ns = {"os": os, "Image": Image, "ImageDraw": ImageDraw, "ImageFont": ImageFont}
+        for name in ("_batch_target_size", "_batch_output_path",
+                     "_process_one_image", "open_batch_images"):
+            node = next(n for n in app_node.body if isinstance(n, ast.FunctionDef) and n.name == name)
+            exec(ast.get_source_segment(SOURCE, node), cls.ns)
+
+    def test_target_size(self):
+        f = self.ns["_batch_target_size"]
+        self.assertEqual(f(1000, 500, 50, 0), (500, 250))
+        self.assertEqual(f(1000, 500, 100, 200), (200, 100))
+        self.assertEqual(f(100, 100, 1, 0), (1, 1))
+
+    def test_output_path_dedup(self):
+        with tempfile.TemporaryDirectory() as d:
+            used = set()
+            p1 = self.ns["_batch_output_path"](os.path.join(d, "a.png"), d, "jpg", used)
+            self.assertTrue(p1.endswith("a.jpg"))
+            open(p1, "w").close()
+            p2 = self.ns["_batch_output_path"](os.path.join(d, "a.png"), d, "jpg", used)
+            self.assertTrue(p2.endswith("a_1.jpg"))
+
+    def test_end_to_end(self):
+        from PIL import Image
+        with tempfile.TemporaryDirectory() as d:
+            src = os.path.join(d, "src.png")
+            Image.new("RGBA", (400, 200), (10, 20, 30, 255)).save(src)
+            out_dir = os.path.join(d, "out")
+            os.makedirs(out_dir)
+            class Stub:
+                _batch_target_size = staticmethod(self.ns["_batch_target_size"])
+                _batch_output_path = staticmethod(self.ns["_batch_output_path"])
+            opts = {"percent": 50, "max_side": 0, "quality": 85,
+                    "format": "jpg", "watermark": "KIVO", "wm_color": "#FF0000"}
+            out = self.ns["_process_one_image"](Stub(), src, opts, out_dir, set())
+            self.assertTrue(out.endswith(".jpg"))
+            with Image.open(out) as check:
+                self.assertEqual(check.size, (200, 100))
+                self.assertEqual(check.mode, "RGB")
+
+    def test_nav(self):
+        self.assertIn("def open_batch_images", SOURCE)
+        self.assertIn("self.open_batch_images", SOURCE)
