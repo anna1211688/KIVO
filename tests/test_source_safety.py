@@ -464,6 +464,13 @@ class ModelCenterFixTests(unittest.TestCase):
         body = method_text("_ai_fetch_models")
         self.assertIn("Bearer ***", body)
 
+    def test_ai_http_error_diagnostics_redact_secrets_and_bound_output(self):
+        body = method_text("_ai_chat_messages")
+        self.assertIn('e.read(2048)', body)
+        self.assertIn('detail.replace(secret, "***")', body)
+        self.assertIn('authorization\\s*[:=]', body)
+        self.assertIn('[:160]', body)
+
 
 if __name__ == "__main__":
     unittest.main()
