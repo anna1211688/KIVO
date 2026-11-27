@@ -326,7 +326,7 @@ class HardeningTests(unittest.TestCase):
         restore = method_text("_restore_payload")
         loader = method_text("_load_ai_chats")
         self.assertIn('return os.path.relpath(path, BASE).replace(os.sep, "/")', save)
-        self.assertIn('item.get("image_path")', restore)
+        self.assertIn('self._item_image_paths(item)', restore)  # 多图路径收集
         self.assertIn('"image_url"', restore)
         self.assertIn('item["image_path"] = m["image_path"]', loader)
         self.assertIn("self._ai_chat_messages(msgs, max_tokens=2048, route=\"chat\",", SOURCE)
@@ -1800,7 +1800,7 @@ class ContextBudgetTests(unittest.TestCase):
         app_node = next(n for n in TREE.body if isinstance(n, ast.ClassDef) and n.name == "App")
         cls.ns = {}
         for name in ("_estimate_tokens", "_context_budget", "_select_context",
-                     "_ai_chat_history_messages", "_summarize_dropped"):
+                     "_ai_chat_history_messages", "_summarize_dropped", "_item_image_paths"):
             node = next(n for n in app_node.body if isinstance(n, ast.FunctionDef) and n.name == name)
             exec(ast.get_source_segment(SOURCE, node), cls.ns)
 
@@ -1816,6 +1816,7 @@ class ContextBudgetTests(unittest.TestCase):
                 {"role": "user", "content": "最新问题"}]
         class Stub:
             _estimate_tokens = staticmethod(self.ns["_estimate_tokens"])
+            _item_image_paths = self.ns["_item_image_paths"]
         kept, dropped = self.ns["_select_context"](Stub(), hist, 30)
         self.assertEqual(kept[-1]["content"], "最新问题")  # 最后一条必保留
         self.assertTrue(len(dropped) >= 1)
@@ -1825,6 +1826,7 @@ class ContextBudgetTests(unittest.TestCase):
         hist = [{"role": "user", "content": "字" * 500}]
         class Stub:
             _estimate_tokens = staticmethod(self.ns["_estimate_tokens"])
+            _item_image_paths = self.ns["_item_image_paths"]
         kept, dropped = self.ns["_select_context"](Stub(), hist, 10)
         self.assertEqual(len(kept), 1); self.assertEqual(dropped, [])
 
@@ -1925,3 +1927,62 @@ class PromptLibraryTests(unittest.TestCase):
         self.assertIn('self._active_prompt', SOURCE)
         # + 菜单入口
         self.assertIn('ai_plus_prompt', SOURCE)
+
+
+class ImageCompressTests(unittest.TestCase):
+    """v1.6.3 AI-5: 图片压缩规格、data URL 缓存与多图。"""
+
+    class _Stub:
+        _AI_IMG_MAX_EDGE = 1568
+
+    def test_spec_constants(self):
+        app_node = next(n for n in TREE.body if isinstance(n, ast.ClassDef) and n.name == "App")
+        vals = {}
+        for n in app_node.body:
+            if isinstance(n, ast.Assign):
+                for t in n.targets:
+                    if isinstance(t, ast.Name) and t.id in ("_AI_IMG_MAX_EDGE", "_AI_IMG_QUALITY"):
+                        vals[t.id] = eval(compile(ast.Expression(n.value), "<x>", "eval"))
+        self.assertEqual(vals["_AI_IMG_MAX_EDGE"], 1568)
+        self.assertEqual(vals["_AI_IMG_QUALITY"], 85)
+
+    def test_fit_resizes_large(self):
+        from PIL import Image
+        f = load_function("_fit_ai_image"); f.__globals__["Image"] = Image
+        out = f(self._Stub, Image.new("RGB", (3000, 2000)))
+        self.assertEqual(max(out.size), 1568)
+        self.assertEqual(out.size, (1568, 1045))
+
+    def test_fit_keeps_small(self):
+        from PIL import Image
+        f = load_function("_fit_ai_image"); f.__globals__["Image"] = Image
+        self.assertEqual(f(self._Stub, Image.new("RGB", (800, 600))).size, (800, 600))
+
+    def test_item_paths_merge_dedup(self):
+        f = load_function("_item_image_paths")
+        self.assertEqual(f(None, {"image_paths": ["a.jpg", "b.jpg"]}), ["a.jpg", "b.jpg"])
+        # 旧单图 + 多图去重
+        self.assertEqual(f(None, {"image_paths": ["a.jpg"], "image_path": "a.jpg"}), ["a.jpg"])
+        self.assertEqual(f(None, {"image_path": "x.jpg"}), ["x.jpg"])
+        self.assertEqual(f(None, {}), [])
+
+    def test_cached_dataurl(self):
+        from PIL import Image
+        class Dummy:
+            pass
+        f = load_function("_cached_image_dataurl")
+        d = Dummy()
+        with tempfile.TemporaryDirectory() as td:
+            p = os.path.join(td, "x.jpg")
+            Image.new("RGB", (100, 80), (200, 30, 30)).save(p, "JPEG")
+            u1 = f(d, p)
+            u2 = f(d, p)
+            self.assertTrue(u1.startswith("data:image/jpeg;base64,"))
+            self.assertEqual(u1, u2)  # 第二次命中缓存
+            self.assertIn((os.path.abspath(p), os.path.getsize(p), os.path.getmtime(p)),
+                          d._ai_dataurl_cache)
+
+    def test_wiring(self):
+        self.assertIn("def _cached_image_dataurl", SOURCE)
+        self.assertIn('"image_paths"', SOURCE)
+        self.assertIn("ai_att_images_n", SOURCE)

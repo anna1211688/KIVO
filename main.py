@@ -5543,14 +5543,39 @@ try {
         if routes:
             for rk, sv in routes.items(): self.cfg.set("AI", rk, sv)
         self.save_config()
+    _AI_IMG_MAX_EDGE = 1568   # v1.6.3: 视觉输入统一长边上限 (1568 是多数视觉模型的推荐尺寸, 兼顾清晰度与额度)
+    _AI_IMG_QUALITY = 85      # JPEG 质量
+    @classmethod
+    def _fit_ai_image(cls, img):
+        """统一缩放: 转 RGB, 长边压到 _AI_IMG_MAX_EDGE 内 (已更小则原样返回)。"""
+        im = img.convert("RGB"); w, h = im.size; m = max(w, h)
+        if m > cls._AI_IMG_MAX_EDGE:
+            im = im.resize((max(1, round(w * cls._AI_IMG_MAX_EDGE / m)),
+                            max(1, round(h * cls._AI_IMG_MAX_EDGE / m))), Image.LANCZOS)
+        return im
     @staticmethod
     def _ai_image_dataurl(img):
-        """截图转成接口要的 data URL: 先缩到边长 1600 内再转 JPEG —— 原图 PNG 的 base64 动辄几 MB, 又慢又费额度"""
+        """截图转成接口要的 data URL: 先按统一规格压缩再转 JPEG —— 原图 PNG 的 base64 动辄几 MB, 又慢又费额度"""
         import io, base64
-        im = img.convert("RGB"); w, h = im.size; m = max(w, h)
-        if m > 1600: im = im.resize((max(1, round(w * 1600 / m)), max(1, round(h * 1600 / m))), Image.LANCZOS)
-        buf = io.BytesIO(); im.save(buf, "JPEG", quality=82)
+        im = App._fit_ai_image(img)
+        buf = io.BytesIO(); im.save(buf, "JPEG", quality=App._AI_IMG_QUALITY)
         return "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode("ascii")
+    def _cached_image_dataurl(self, path):
+        """已落盘 JPEG → data URL, 按 (路径, 大小, 修改时间) 缓存, 避免历史消息每轮重复 base64 编码。"""
+        import base64
+        try: st = os.stat(path)
+        except OSError: return None
+        key = (os.path.abspath(path), st.st_size, st.st_mtime)
+        cache = getattr(self, "_ai_dataurl_cache", None)
+        if cache is None: cache = self._ai_dataurl_cache = {}
+        if key in cache: return cache[key]
+        if len(cache) > 200: cache.clear()  # 简单上限: 防长期运行缓存无限增长
+        try:
+            with open(path, "rb") as f: raw = f.read()
+            url = "data:image/jpeg;base64," + base64.b64encode(raw).decode("ascii")
+        except OSError: return None
+        cache[key] = url
+        return url
     def _gc_chat_images(self):
         """清掉没有对话引用的聊天图片 (2026-11-28): 删/清空对话后 ai_chat_images 里的 jpg 就没人管了,
         一张张堆下去既占磁盘又让备份打包越来越慢。只删 24 小时前的孤儿文件 (误删对话还留一天回收余地),
@@ -5588,15 +5613,10 @@ try {
         import uuid
         folder = os.path.join(BASE, "ai_chat_images")
         os.makedirs(folder, exist_ok=True)
-        im = img.convert("RGB")
-        width, height = im.size
-        longest = max(width, height)
-        if longest > 1600:
-            im = im.resize((max(1, round(width * 1600 / longest)),
-                            max(1, round(height * 1600 / longest))), Image.LANCZOS)
+        im = self._fit_ai_image(img)
         name = uuid.uuid4().hex + ".jpg"
         path = os.path.join(folder, name)
-        im.save(path, "JPEG", quality=82, optimize=True)
+        im.save(path, "JPEG", quality=self._AI_IMG_QUALITY, optimize=True)
         return os.path.relpath(path, BASE).replace(os.sep, "/")
 
     @staticmethod
@@ -5629,32 +5649,47 @@ try {
                     or not isinstance(item.get("content"), str):
                 i -= 1; continue
             cost = self._estimate_tokens(item["content"])
-            if item.get("image_path"): cost += 800  # 视觉输入粗略预留
+            cost += 800 * len(self._item_image_paths(item))  # 视觉输入每张粗略预留 800
             if kept and kept_tokens + cost > budget:
                 break
             kept.append(item); kept_tokens += cost; i -= 1
         kept.reverse()
         return kept, history[:i + 1]
+    def _item_image_paths(self, item):
+        """取一条消息的全部图片相对路径 (兼容旧版单图 image_path 与新版多图 image_paths), 去重保序。"""
+        rels = []
+        ip = item.get("image_paths")
+        if isinstance(ip, list):
+            rels = [x for x in ip if isinstance(x, str)]
+        single = item.get("image_path")
+        if isinstance(single, str):
+            rels.append(single)
+        out, seen = [], set()
+        for r in rels:
+            if r not in seen: seen.add(r); out.append(r)
+        return out
     def _restore_payload(self, item):
-        """单条消息转 API 格式, 本地图片存在时还原为视觉多模态内容。"""
+        """单条消息转 API 格式, 本地图片存在时还原为视觉多模态内容 (支持一轮多图, data URL 走缓存)。"""
         content = item.get("content")
         payload_content = content
         image_root = os.path.abspath(os.path.join(BASE, "ai_chat_images"))
-        relative = item.get("image_path")
-        if item.get("role") == "user" and isinstance(relative, str):
-            try:
-                normalized = os.path.normpath(relative.replace("/", os.sep))
-                candidate = os.path.abspath(os.path.join(BASE, normalized))
-                if (normalized.startswith("ai_chat_images" + os.sep)
-                        and os.path.commonpath((image_root, candidate)) == image_root
-                        and os.path.isfile(candidate) and os.path.getsize(candidate) <= 8 * 1024 * 1024):
-                    with Image.open(candidate) as source:
-                        image = source.convert("RGB")
-                    payload_content = [
-                        {"type": "text", "text": content},
-                        {"type": "image_url", "image_url": {"url": self._ai_image_dataurl(image)}}]
-            except (OSError, ValueError):
-                pass
+        if item.get("role") == "user":
+            urls = []
+            for relative in self._item_image_paths(item):
+                try:
+                    normalized = os.path.normpath(relative.replace("/", os.sep))
+                    candidate = os.path.abspath(os.path.join(BASE, normalized))
+                    if (normalized.startswith("ai_chat_images" + os.sep)
+                            and os.path.commonpath((image_root, candidate)) == image_root
+                            and os.path.isfile(candidate)
+                            and os.path.getsize(candidate) <= 8 * 1024 * 1024):
+                        url = self._cached_image_dataurl(candidate)
+                        if url: urls.append(url)
+                except (OSError, ValueError):
+                    pass
+            if urls:
+                payload_content = [{"type": "text", "text": content}]
+                payload_content += [{"type": "image_url", "image_url": {"url": u}} for u in urls]
         return {"role": item["role"], "content": payload_content}
     def _ai_chat_history_messages(self, history):
         """按 token 预算构造 API 消息 (v1.6.3 起替代旧的固定 20 条截断), 图片按需还原。"""
@@ -6397,6 +6432,10 @@ try {
                                     item = {"role": m["role"], "content": m["content"]}
                                     if isinstance(m.get("image_path"), str):
                                         item["image_path"] = m["image_path"]
+                                    ipl = m.get("image_paths")
+                                    if isinstance(ipl, list):
+                                        plist = [x for x in ipl if isinstance(x, str)][:9]
+                                        if plist: item["image_paths"] = plist
                                     msgs.append(item)
                             if msgs:
                                 sp = c.get("system_prompt")
@@ -9259,7 +9298,7 @@ try {
         link(head, self.t("ai_clear", "清空对话"), clear).pack(side="right")
         link(head, self.t("cmn_back", "返回"), lambda: self._show_main_view()).pack(side="right", padx=(0, 14))
         # ---- 附件条 (仿 GPT): 截图/选图/文本文件先挂在这里, 发送时跟问题一起走; 平时藏着 ----
-        attach = {"kind": None, "img": None, "name": "", "text": "", "photo": None}
+        attach = {"kind": None, "img": None, "images": [], "name": "", "text": "", "photo": None}
         self._chat_attach_state = attach
         attach_bar = tk.Frame(chatcol, background=CHAT_BG)
         attach_thumb = tk.Label(attach_bar, background=CHAT_BG); attach_thumb.pack(side="left", padx=(14, 6))
@@ -9269,20 +9308,26 @@ try {
             if attach["kind"] is None:
                 attach_bar.pack_forget(); return
             if attach["kind"] == "image":
-                th = attach["img"].copy(); th.thumbnail((72, 48))
+                n = len(attach["images"])
+                th = attach["images"][0].copy(); th.thumbnail((72, 48))
                 attach["photo"] = ImageTk.PhotoImage(th); attach_thumb.config(image=attach["photo"])
-                attach_name.config(text=self.t("ai_att_image", "已附加图片, 发送时一起发给 AI"))
+                attach_name.config(text=(self.t("ai_att_image", "已附加图片, 发送时一起发给 AI")
+                                         if n == 1 else self.t("ai_att_images_n", "已附加 {n} 张图片, 发送时一起发给 AI").format(n=n)))
             else:
                 attach_thumb.config(image=""); attach["photo"] = None
                 attach_name.config(text=f"📄 {attach['name']}")
             if not attach_bar.winfo_ismapped():
                 attach_bar.pack(fill="x", pady=(8, 0), before=brow)
         def clear_attach():
-            attach.update(kind=None, img=None, name="", text="", photo=None); refresh_attach()
+            attach.update(kind=None, img=None, images=[], name="", text="", photo=None); refresh_attach()
         self._chat_clear_attach = clear_attach
         attach_x.bind("<Button-1>", lambda e: clear_attach())
         def attach_image(img):
-            attach.update(kind="image", img=img, name="", text=""); refresh_attach()
+            imgs = attach["images"]
+            if len(imgs) >= 9:  # 单轮最多 9 张, 防上下文爆炸
+                self.toast(self.t("ai_img_max", "一轮最多附加 9 张图片")); return
+            imgs.append(img)
+            attach.update(kind="image", img=imgs[0], name="", text=""); refresh_attach()
         self._chat_attach_image_impl = attach_image
         def pick_image_dialog():
             path = filedialog.askopenfilename(filetypes=[(self.t("ai_imgtypes", "图片"), "*.png *.jpg *.jpeg *.bmp *.gif *.webp")])
@@ -9376,14 +9421,15 @@ try {
             text = inp.get("1.0", "end").strip()
             if busy["on"]: return
             if not text and attach["kind"] is None: return  # 没打字也没附件: 不发空消息; 有附件没打字也能发 (图/文件本身就是问题)
-            img = attach["img"] if attach["kind"] == "image" else None
-            image_path = None
-            if img is not None:
+            img_list = attach["images"] if attach["kind"] == "image" else []
+            image_paths = []
+            for one in img_list:
                 try:
-                    image_path = self._save_ai_chat_image(img)
+                    image_paths.append(self._save_ai_chat_image(one))
                 except Exception as e:
                     self.status.set(f"图片保存失败: {e}")
                     return
+            image_path = image_paths[0] if image_paths else None
             inp.delete("1.0", "end")
             f = pending_render.get("flush")
             if f is not None:  # 长对话还没铺完就发了消息: 先把旧消息补完, 保证新气泡在最下面
@@ -9401,8 +9447,9 @@ try {
             else:
                 disp = text; hist_text = text
             user_message = {"role": "user", "content": hist_text}
-            if image_path:
-                user_message["image_path"] = image_path
+            if image_paths:
+                user_message["image_paths"] = image_paths
+                user_message["image_path"] = image_paths[0]  # 首图同时写旧字段, 气泡标记/旧逻辑兼容
             self._ai_chat_history.append(user_message)
             add_bubble("user", disp)
             self._save_current_chat()
