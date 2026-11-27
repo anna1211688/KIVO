@@ -706,6 +706,29 @@ class _NavItem(tk.Canvas):
         return super().cget(key)
 
 
+def _read_text_attachment(path, max_bytes=2 * 1024 * 1024, max_chars=60000):
+    """Read a bounded text attachment; reject oversized files before decoding."""
+    size = os.path.getsize(path)
+    if size > max_bytes:
+        raise ValueError("附件文件过大 (最大 2 MiB)")
+    with open(path, "rb") as f:
+        raw = f.read(max_bytes + 1)
+    if len(raw) > max_bytes:
+        raise ValueError("附件文件过大 (最大 2 MiB)")
+    last_error = None
+    for encoding in ("utf-8-sig", "gbk"):
+        try:
+            text = raw.decode(encoding)
+            break
+        except UnicodeDecodeError as exc:
+            last_error = exc
+    else:
+        raise UnicodeError("文件不是支持的文本编码") from last_error
+    if len(text) > max_chars:
+        text = text[:max_chars] + "\n……(文件太长, 已截断)"
+    return text
+
+
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -4894,19 +4917,35 @@ try {
         ttk.Button(bar, text=self.t("ai_another", "换一批"), command=again).pack(side="left", padx=2)
         ttk.Button(bar, text=self.t("cmn_close", "关闭"), command=win.destroy).pack(side="right", padx=2)
     def _load_ai_chats(self):
-        """读 AI 最近对话存档 (ai_chats.json, 带 .bak 兜底): 坏条目逐条丢弃, 不让一份坏档拖垮面板"""
+        """读 AI 最近对话存档 (ai_chats.json, 带 .bak 兜底): 限制文件/字段大小, 坏条目逐条丢弃"""
+        max_file_bytes = 10 * 1024 * 1024
+        max_message_chars = 60000
         for p in (AI_CHATS_PATH, AI_CHATS_PATH + ".bak"):
             try:
-                if os.path.exists(p):
-                    data = json.loads(open(p, encoding="utf-8").read())
-                    if isinstance(data, list):
-                        out = []
-                        for c in data:
-                            if isinstance(c, dict) and isinstance(c.get("messages"), list):
-                                msgs = [m for m in c["messages"] if isinstance(m, dict) and m.get("role") in ("user", "assistant") and isinstance(m.get("content"), str)][-200:]
-                                if msgs: out.append({"id": c.get("id"), "title": str(c.get("title") or "新对话"), "updated": c.get("updated") or 0, "pin": 1 if c.get("pin") else 0, "messages": msgs})
-                        return out
-            except Exception: continue
+                if not os.path.exists(p) or os.path.getsize(p) > max_file_bytes:
+                    continue
+                with open(p, "rb") as f:
+                    raw = f.read(max_file_bytes + 1)
+                if len(raw) > max_file_bytes:
+                    continue
+                data = json.loads(raw.decode("utf-8"))
+                if isinstance(data, list):
+                    out = []
+                    for c in data[:30]:
+                        if isinstance(c, dict) and isinstance(c.get("messages"), list):
+                            msgs = []
+                            for m in c["messages"][-200:]:
+                                if (isinstance(m, dict) and m.get("role") in ("user", "assistant")
+                                        and isinstance(m.get("content"), str)
+                                        and len(m["content"]) <= max_message_chars):
+                                    msgs.append({"role": m["role"], "content": m["content"]})
+                            if msgs:
+                                out.append({"id": c.get("id"), "title": str(c.get("title") or "新对话")[:200],
+                                            "updated": c.get("updated") or 0, "pin": 1 if c.get("pin") else 0,
+                                            "messages": msgs})
+                    return out
+            except Exception:
+                continue
         return []
 
     def _store_ai_chats(self):
@@ -7366,15 +7405,12 @@ try {
         def attach_file_dialog():
             path = filedialog.askopenfilename(filetypes=[(self.t("ai_filetypes", "文本文件"), "*.txt *.md *.csv *.json *.log"), (self.t("ai_all_files", "所有文件"), "*.*")])
             if not path: return
-            raw = None
-            for enc in ("utf-8-sig", "gbk"):
-                try:
-                    with open(path, "r", encoding=enc) as f: raw = f.read()
-                    break
-                except Exception: raw = None
-            if raw is None:
+            try:
+                raw = _read_text_attachment(path)
+            except ValueError as e:
+                self.status.set(str(e)); return
+            except (OSError, UnicodeError):
                 self.status.set(self.t("ai_file_fail", "文件读不了 (只支持文本文件)")); return
-            if len(raw) > 60000: raw = raw[:60000] + "\n……(文件太长, 已截断)"
             import os as _os
             attach.update(kind="file", img=None, name=_os.path.basename(path), text=raw); refresh_attach()
             self.after(60, lambda: inp.focus_force())  # 同上: 附件挂好焦点回输入框
