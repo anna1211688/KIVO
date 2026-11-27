@@ -4504,6 +4504,38 @@ try {
                 raise RuntimeError("公网地址只支持 https (http 会明文发送 API Key): " + (u[:60] or "(空)"))
         return u.rstrip("/")
 
+    def _ai_fetch_models(self, cfg, timeout=15):
+        """从 OpenAI 兼容接口读取模型目录；不支持 /models 的服务可继续手动填写模型名。"""
+        import urllib.request, urllib.error, json as _json
+        base = self._http_base(cfg.get("base", ""))
+        if not base:
+            raise RuntimeError("请先填写接口地址")
+        headers = {"Authorization": "Bearer " + (cfg.get("key") or ""), "User-Agent": "KIVO"}
+        req = urllib.request.Request(base + "/models", headers=headers, method="GET")
+        try:
+            with urllib.request.urlopen(req, timeout=max(3, min(int(timeout), 30))) as resp:
+                raw = resp.read(2 * 1024 * 1024 + 1)
+            if len(raw) > 2 * 1024 * 1024:
+                raise RuntimeError("模型列表响应过大")
+            data = _json.loads(raw.decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            detail = ""
+            try: detail = exc.read(2048).decode("utf-8", "replace")
+            except Exception: pass
+            raise RuntimeError("获取模型列表失败 (HTTP %s): %s" % (exc.code, detail[:300])) from exc
+        except urllib.error.URLError as exc:
+            raise RuntimeError("无法连接模型服务: " + str(exc.reason)) from exc
+        items = data.get("data", []) if isinstance(data, dict) else []
+        models = []
+        for item in items[:500]:
+            if not isinstance(item, dict): continue
+            mid = item.get("id")
+            if isinstance(mid, str):
+                mid = mid.strip()
+                if mid and len(mid) <= 200 and not any(ord(ch) < 32 for ch in mid):
+                    models.append(mid)
+        return sorted(set(models), key=str.casefold)
+
     def _ai_cfg(self, svc=None):
         """读某个 AI 服务的配置 (缺省读当前选中的服务): 每家服务有自己的一套 key/模型/地址
         (ZhipuKey/BailianKey... 分开存), 切换服务不会把别家的 key 冲掉; 通用的 ApiKey/Model/BaseUrl
@@ -4735,7 +4767,29 @@ try {
         ttk.Label(parent, text="API Key:").grid(row=1, column=0, sticky="e", padx=8, pady=4)
         ttk.Entry(parent, textvariable=key_var, width=40, show="*").grid(row=1, column=1, sticky="w", pady=4)
         ttk.Label(parent, text=self.t("ai_model", "模型:")).grid(row=2, column=0, sticky="e", padx=8, pady=4)
-        ttk.Entry(parent, textvariable=model_var, width=40).grid(row=2, column=1, sticky="w", pady=4)
+        model_box = ttk.Combobox(parent, textvariable=model_var, width=36, state="normal")
+        model_box.grid(row=2, column=1, sticky="w", pady=4)
+        def fetch_models():
+            stash()
+            k, m, b = store[cur["service"]]
+            test_var.set("正在获取模型列表…")
+            cfg = {"service": cur["service"], "key": k, "model": m, "base": b}
+            import threading
+            def work():
+                try:
+                    models = self._ai_fetch_models(cfg)
+                    if not models: raise RuntimeError("服务未返回可用模型；可以继续手动填写模型名称")
+                    def done():
+                        model_box.configure(values=models)
+                        if model_var.get() not in models: model_var.set(models[0])
+                        stash()
+                        test_var.set("已获取 %d 个模型，请选择后点击保存" % len(models))
+                    self._ui_queue.put(done)
+                except Exception as exc:
+                    msg = str(exc)
+                    self._ui_queue.put(lambda: test_var.set("获取模型失败: " + msg))
+            threading.Thread(target=work, daemon=True).start()
+        ttk.Button(parent, text="获取模型", command=fetch_models).grid(row=2, column=2, sticky="w", padx=4, pady=4)
         ttk.Label(parent, text=self.t("ai_baseurl", "接口地址:")).grid(row=3, column=0, sticky="e", padx=8, pady=4)
         ttk.Entry(parent, textvariable=base_var, width=40).grid(row=3, column=1, sticky="w", pady=4)
         def load_fields():
