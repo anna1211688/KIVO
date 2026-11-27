@@ -2048,14 +2048,55 @@ class App(tk.Tk):
             return hmac.compare_digest(em, expected)
         except Exception:
             return False
+    @staticmethod
+    def _tag_from_location(location):
+        """从 releases/latest 的 302 Location (.../releases/tag/<tag>) 里取版本号; 格式不对返回空串。"""
+        marker = "/releases/tag/"
+        s = str(location or "")
+        if marker not in s: return ""
+        tail = s.split(marker, 1)[1]
+        return tail.strip("/").split("?", 1)[0].strip()
+
+    def _probe_latest_tag(self):
+        """备用通道: github.com 网页 releases/latest 会 302 到 /releases/tag/<tag>。
+        api.github.com 被墙但 github.com 可达时, 至少能查到新版本号 (无资产信息, 只能打开发布页手动下载)。"""
+        import urllib.request
+        class _RedirectFound(Exception):
+            def __init__(self, location): self.location = location
+        class _StopRedirect(urllib.request.HTTPRedirectHandler):
+            def redirect_request(self, rq, fp, code, msg, headers, newurl):
+                raise _RedirectFound(newurl)
+        req = urllib.request.Request(self._RELEASE_PAGE, headers={"User-Agent": "KIVO/" + VERSION})
+        opener = urllib.request.build_opener(
+            urllib.request.ProxyHandler(_resolve_proxies()), _StopRedirect)
+        try:
+            opener.open(req, timeout=12)
+        except _RedirectFound as e:
+            return self._tag_from_location(e.location)
+        return ""
+
     def _fetch_latest_release(self):
         import urllib.request
-        req = urllib.request.Request(self._RELEASE_API, headers={"User-Agent": "KIVO/" + VERSION, "Accept": "application/vnd.github+json"})
-        with _open_url_loose(req, timeout=10) as r:
-            data = json.loads(r.read().decode("utf-8", "replace"))
-        setup_url, setup_name = self._pick_setup_asset(data)
-        sig_url = self._pick_sig_asset(data, setup_name) if setup_name else ""
-        return str(data.get("tag_name") or ""), str(data.get("html_url") or self._RELEASE_PAGE), setup_url, setup_name, sig_url
+        # 主通道: GitHub API (含资产地址, 支持一键更新), 超时/失败重试一次 (国内 api.github.com 抖动常见)
+        for attempt_timeout in (10, 12):
+            try:
+                req = urllib.request.Request(self._RELEASE_API,
+                    headers={"User-Agent": "KIVO/" + VERSION, "Accept": "application/vnd.github+json"})
+                with _open_url_loose(req, timeout=attempt_timeout) as r:
+                    data = json.loads(r.read().decode("utf-8", "replace"))
+                setup_url, setup_name = self._pick_setup_asset(data)
+                sig_url = self._pick_sig_asset(data, setup_name) if setup_name else ""
+                return str(data.get("tag_name") or ""), str(data.get("html_url") or self._RELEASE_PAGE), setup_url, setup_name, sig_url
+            except Exception:
+                continue
+        # 备用通道: 网页 302 只取版本号; 成功时资产留空, UI 只给「打开发布页」
+        try:
+            tag = self._probe_latest_tag()
+            if tag: return tag, self._RELEASE_PAGE, "", "", ""
+        except Exception:
+            pass
+        raise RuntimeError(self.t("upd_fail_hint",
+            "无法连接更新服务器：开启代理后重试，或到发布页手动下载"))
 
     def _check_update(self):
         if getattr(self, "_upd_busy", False): return
@@ -2073,7 +2114,8 @@ class App(tk.Tk):
     def _upd_done(self, res):
         self._upd_busy = False
         if res[0] != "ok":
-            self._upd_status.configure(text=self.t("upd_fail", "检查失败, 请检查网络后重试"), foreground=self.UI_DANGER); return
+            hint = res[1] if isinstance(res[1], str) and res[1] else self.t("upd_fail", "检查失败, 请检查网络后重试")
+            self._upd_status.configure(text=hint, foreground=self.UI_DANGER); return
         tag, url = res[1], res[2]
         self._upd_url = url or self._RELEASE_PAGE
         self._upd_setup = (res[3], res[4]) if len(res) > 4 else ("", "")

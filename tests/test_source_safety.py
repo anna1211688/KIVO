@@ -1246,3 +1246,46 @@ class ProxyNetworkTests(unittest.TestCase):
         self.assertNotIn("with urllib.request.urlopen", SOURCE)
         self.assertIn('opts["proxy"]', SOURCE)
         self.assertIn("def _open_url_loose", SOURCE)
+
+
+class UpdateFallbackTests(unittest.TestCase):
+    """v1.6.1 更新检查加固: 网页 302 备用通道、版本号解析、重试与友好报错。"""
+
+    def test_tag_from_location(self):
+        f = load_function("_tag_from_location")
+        self.assertEqual(f("https://github.com/anna1211688/KIVO/releases/tag/v1.6.1"), "v1.6.1")
+        self.assertEqual(f("https://github.com/anna1211688/KIVO/releases/tag/v1.6.1?x=1"), "v1.6.1")
+        self.assertEqual(f("https://github.com/anna1211688/KIVO/releases/tag/v1.6.1/"), "v1.6.1")
+        self.assertEqual(f("https://example.com/nope"), "")
+        self.assertEqual(f(""), "")
+
+    def test_probe_via_local_redirect(self):
+        import http.server, threading
+        loc = "https://github.com/anna1211688/KIVO/releases/tag/v1.6.1"
+
+        class Handler(http.server.BaseHTTPRequestHandler):
+            def do_GET(self):
+                self.send_response(302)
+                self.send_header("Location", loc)
+                self.end_headers()
+            def log_message(self, *args): pass
+
+        srv = http.server.HTTPServer(("127.0.0.1", 0), Handler)
+        port = srv.server_address[1]
+        threading.Thread(target=srv.serve_forever, daemon=True).start()
+        tag_fn = load_function("_tag_from_location")
+        fn = _load_with_ns("_probe_latest_tag",
+                           {"_resolve_proxies": lambda: {}, "VERSION": "1.6.1"})
+        try:
+            class Stub:
+                _RELEASE_PAGE = f"http://127.0.0.1:{port}/latest"
+                _tag_from_location = staticmethod(tag_fn)
+            self.assertEqual(fn(Stub()), "v1.6.1")
+        finally:
+            srv.shutdown()
+
+    def test_fetch_has_retry_and_fallback(self):
+        seg = method_text("_fetch_latest_release")
+        self.assertIn("_probe_latest_tag", seg)
+        self.assertIn("upd_fail_hint", seg)
+        self.assertIn("for attempt_timeout in (10, 12)", seg)
