@@ -344,9 +344,9 @@ class AiStreamingTests(unittest.TestCase):
         class FakeResponse:
             def __init__(self):
                 self.lines = [
-                    b'data: {"choices":[{"delta":{"content":"Hello "}}]}\\n',
-                    b'data: {"choices":[{"delta":{"content":"KIVO"}}]}\\n',
-                    b'data: [DONE]\\n',
+                    b'data: {"choices":[{"delta":{"content":"Hello "}}]}\n',
+                    b'data: {"choices":[{"delta":{"content":"KIVO"}}]}\n',
+                    b'data: [DONE]\n',
                 ]
             def __enter__(self): return self
             def __exit__(self, *args): return False
