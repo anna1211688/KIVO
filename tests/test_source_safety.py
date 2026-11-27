@@ -284,6 +284,27 @@ class HardeningTests(unittest.TestCase):
         self.assertIn("file_size", imp)  # 读之前先查声明大小
         self.assertIn("dt.astimezone()", SOURCE)  # 约时间换算按目标日期取时区偏移
 
+    def test_chat_image_history_is_persisted_and_restored_for_followups(self):
+        save = method_text("_save_ai_chat_image")
+        restore = method_text("_ai_chat_history_messages")
+        loader = method_text("_load_ai_chats")
+        self.assertIn('return os.path.relpath(path, BASE).replace(os.sep, "/")', save)
+        self.assertIn('item.get("image_path")', restore)
+        self.assertIn('"image_url"', restore)
+        self.assertIn('item["image_path"] = m["image_path"]', loader)
+        self.assertIn("self._ai_chat_messages(msgs, max_tokens=2048, route=\"chat\")", SOURCE)
+
+    def test_chat_image_restore_rejects_paths_outside_attachment_folder(self):
+        restore = method_text("_ai_chat_history_messages")
+        self.assertIn('normalized.startswith("ai_chat_images" + os.sep)', restore)
+        self.assertIn('os.path.commonpath((image_root, candidate)) == image_root', restore)
+        self.assertIn('os.path.getsize(candidate) <= 8 * 1024 * 1024', restore)
+
+    def test_regenerate_uses_saved_image_history(self):
+        body = SOURCE[SOURCE.index("        def regenerate():", SOURCE.index("def ai_chat")):SOURCE.index("        def clear():", SOURCE.index("        def regenerate():", SOURCE.index("def ai_chat")))]
+        self.assertIn("request_reply()", body)
+        self.assertNotIn("request_reply(img=", body)
+
 
 if __name__ == "__main__":
     unittest.main()
