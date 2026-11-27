@@ -386,6 +386,29 @@ class AiStreamingTests(unittest.TestCase):
         self.assertIn('else "停止"', panel)
 
 
+class AiTaskModelRoutingTests(unittest.TestCase):
+    def test_task_route_can_select_a_specific_enabled_model_profile(self):
+        body = method_text("_ai_cfg_for")
+        self.assertIn('rk + "Model"', body)
+        self.assertIn('"ModelProfiles"', body)
+        self.assertIn('if allowed: c["model"] = model', body)
+
+    def test_chat_quick_switch_persists_provider_and_model(self):
+        body = method_text("_build_ai_panel")
+        self.assertIn('self.cfg.set("AI", "RouteChatModel", model_id)', body)
+        self.assertIn('chat_model_map[label] = (svc_key, model_id)', body)
+
+    def test_task_model_routes_and_optional_same_provider_fallback(self):
+        form = method_text("_build_ai_form")
+        self.assertIn('route_choice_maps[label] = (svc_key, profile["model"])', form)
+        self.assertIn('routes[rk + "Model"] = route_choice_maps[choice]', form)
+        self.assertIn('"AutoFallback"', form)
+        chat = method_text("_ai_chat_messages")
+        self.assertIn("Optional same-provider failover", chat)
+        self.assertIn('profile.get("enabled", True)', chat)
+        self.assertIn("stream_callback is not None", chat)
+
+
 class AiModelCenterLayoutTests(unittest.TestCase):
     def test_model_center_uses_top_horizontal_tabs(self):
         body = method_text("_build_ai_form")
