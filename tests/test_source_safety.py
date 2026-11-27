@@ -292,7 +292,7 @@ class HardeningTests(unittest.TestCase):
         self.assertIn('item.get("image_path")', restore)
         self.assertIn('"image_url"', restore)
         self.assertIn('item["image_path"] = m["image_path"]', loader)
-        self.assertIn("self._ai_chat_messages(msgs, max_tokens=2048, route=\"chat\")", SOURCE)
+        self.assertIn("self._ai_chat_messages(msgs, max_tokens=2048, route=\"chat\",", SOURCE)
 
     def test_chat_image_restore_rejects_paths_outside_attachment_folder(self):
         restore = method_text("_ai_chat_history_messages")
@@ -464,6 +464,223 @@ class UiPhase1Tests(unittest.TestCase):
 
     def test_primary_button_brand_color(self):
         self.assertIn('"primary": ("#3B82F6", "#3B82F6", "#FFFFFF", "#60A5FA")', SOURCE)
+
+
+
+class AiModelCatalogTests(unittest.TestCase):
+    def test_model_catalog_filters_invalid_ids_and_deduplicates(self):
+        import io
+        from unittest.mock import patch
+        fetch = load_function("_ai_fetch_models")
+
+        class FakeResponse:
+            def __enter__(self): return self
+            def __exit__(self, *args): return False
+            def read(self, _limit):
+                return b'{"data":[{"id":"gpt-4o"},{"id":"deepseek-chat"},{"id":"gpt-4o"},{"id":""},{"id":7},{"id":"bad\\nmodel"}]}'
+
+        class FakeApp:
+            _http_base = staticmethod(lambda value: value.rstrip("/"))
+
+        with patch("urllib.request.urlopen", return_value=FakeResponse()):
+            result = fetch(FakeApp(), {"base": "https://api.example.com/v1", "key": "test"})
+        self.assertEqual(result, ["deepseek-chat", "gpt-4o"])
+
+    def test_model_catalog_rejects_oversized_response(self):
+        from unittest.mock import patch
+
+        fetch = load_function("_ai_fetch_models")
+
+        class FakeResponse:
+            def __enter__(self): return self
+            def __exit__(self, *args): return False
+            def read(self, limit): return b"x" * limit
+
+        class FakeApp:
+            _http_base = staticmethod(lambda value: value.rstrip("/"))
+            def t(self, _key, default=""): return default  # _ai_fetch_models 的报错文案走 t() (2026-11-27 i18n 修正后)
+
+        with patch("urllib.request.urlopen", return_value=FakeResponse()):
+            with self.assertRaisesRegex(RuntimeError, "响应过大"):
+                fetch(FakeApp(), {"base": "https://api.example.com/v1", "key": "test"})
+
+    def test_model_catalog_has_timeout_and_result_cap(self):
+        body = method_text("_ai_fetch_models")
+        self.assertIn("timeout=max(3, min(int(timeout), 30))", body)
+        self.assertIn("items[:500]", body)
+        self.assertIn("2 * 1024 * 1024 + 1", body)
+
+    def test_chat_model_switch_only_changes_chat_route(self):
+        body = method_text("_build_ai_panel")
+        self.assertIn('self.cfg.set("AI", "RouteChat", svc_key)', body)
+        self.assertIn("self._ai_cfg_for(\"chat\")", body)
+        self.assertIn("chat_model_box.bind(\"<<ComboboxSelected>>\", switch_chat_model)", body)
+
+
+class AiStreamingTests(unittest.TestCase):
+    def test_stream_parser_emits_tokens_and_returns_combined_content(self):
+        from unittest.mock import patch
+        fetch = load_function("_ai_chat_messages")
+        import json
+
+        class FakeResponse:
+            def __init__(self):
+                self.lines = [
+                    b'data: {"choices":[{"delta":{"content":"Hello "}}]}\n',
+                    b'data: {"choices":[{"delta":{"content":"KIVO"}}]}\n',
+                    b'data: [DONE]\n',
+                ]
+            def __enter__(self): return self
+            def __exit__(self, *args): return False
+            def readline(self, _limit): return self.lines.pop(0) if self.lines else b""
+            def read(self, _limit): return b""
+
+        class FakeApp:
+            _http_base = staticmethod(lambda value: value.rstrip("/"))
+            t = staticmethod(lambda _key, fallback: fallback)
+
+        captured = {}
+        def fake_open(req, timeout):
+            captured["payload"] = json.loads(req.data.decode("utf-8"))
+            captured["timeout"] = timeout
+            return FakeResponse()
+
+        pieces = []
+        with patch("urllib.request.urlopen", side_effect=fake_open):
+            result = fetch(FakeApp(), [{"role": "user", "content": "Hi"}],
+                           cfg={"key": "test", "base": "https://api.example.com/v1",
+                                "model": "test-model", "service": "openai"},
+                           stream_callback=pieces.append)
+        self.assertEqual(result, "Hello KIVO")
+        self.assertEqual(pieces, ["Hello ", "KIVO"])
+        self.assertTrue(captured["payload"]["stream"])
+        self.assertEqual(captured["timeout"], 45)  # 流式打开超时封顶 45s: 服务端静默时「停止」不必等满 90s
+
+    def test_streaming_source_has_cancel_and_response_limits(self):
+        body = method_text("_ai_chat_messages")
+        self.assertIn('req_payload["stream"] = True', body)
+        self.assertIn('data_line == "[DONE]"', body)
+        self.assertIn("cancel_event.is_set()", body)
+        self.assertIn("1024 * 1024 + 1", body)
+        panel = method_text("_build_ai_panel")
+        self.assertIn("def stop_reply():", panel)
+        self.assertIn('ev.set()', panel)
+        self.assertIn('self.t("ai_stop", "停止")', panel)
+
+
+class AiTaskModelRoutingTests(unittest.TestCase):
+    def test_task_route_can_select_a_specific_enabled_model_profile(self):
+        body = method_text("_ai_cfg_for")
+        self.assertIn('rk + "Model"', body)
+        self.assertIn('"ModelProfiles"', body)
+        self.assertIn('if allowed: c["model"] = model', body)
+
+    def test_chat_quick_switch_persists_provider_and_model(self):
+        body = method_text("_build_ai_panel")
+        self.assertIn('self.cfg.set("AI", "RouteChatModel", model_id)', body)
+        self.assertIn('chat_model_map[label] = (svc_key, model_id)', body)
+
+    def test_task_model_routes_and_optional_same_provider_fallback(self):
+        form = method_text("_build_ai_form")
+        self.assertIn('route_choice_maps[label] = (svc_key, profile["model"])', form)
+        self.assertIn('routes[rk], routes[rk + "Model"] = route_choice_maps[choice]', form)
+        self.assertIn('"AutoFallback"', form)
+        self.assertIn("time.monotonic()", form)
+        self.assertIn("连接正常 · 响应", form)
+        self.assertIn("连接失败 ·", form)
+        chat = method_text("_ai_chat_messages")
+        self.assertIn("Optional same-provider failover", chat)
+        self.assertIn('profile.get("enabled", True)', chat)
+        self.assertIn("stream_callback is not None", chat)
+
+
+class AiModelCenterLayoutTests(unittest.TestCase):
+    def test_model_center_uses_top_horizontal_tabs(self):
+        body = method_text("_build_ai_form")
+        self.assertIn("ttk.Notebook(parent)", body)
+        self.assertIn('notebook.add(model_tab, text=self.t("ai_mc_tab_models", "模型列表"))', body)
+        self.assertIn('notebook.add(provider_tab, text=self.t("ai_mc_tab_providers", "服务商配置"))', body)
+        self.assertIn('notebook.add(route_tab, text=self.t("ai_mc_tab_routes", "任务分配"))', body)
+        self.assertIn('notebook.add(test_tab, text=self.t("ai_mc_tab_test", "连接测试"))', body)
+
+    def test_model_center_lists_every_provider_and_keeps_separate_settings(self):
+        body = method_text("_build_ai_form")
+        self.assertIn("for svc_key in self._AI_PRESETS:", body)
+        self.assertIn('columns = ("provider", "model", "status", "default")', body)
+        self.assertIn("store[svc_key]", body)
+        self.assertIn("self._save_ai_settings(cur[\"service\"], store, routes)", body)
+
+    def test_model_center_persists_multi_model_profiles_and_management_actions(self):
+        body = method_text("_build_ai_form")
+        self.assertIn('"ModelProfiles"', body)
+        self.assertIn("json.loads", body)
+        self.assertIn("def add_current_model():", body)
+        self.assertIn("def set_selected_default():", body)
+        self.assertIn("def toggle_selected_model():", body)
+        self.assertIn("def delete_selected_model():", body)
+        self.assertIn('json.dumps(profiles', body)
+
+
+# ---- 2026-11-27 PR #13 审查修正 (模型中心 i18n/候选刷新/切换器/脱敏) 的守卫 ----
+
+class ModelCenterFixTests(unittest.TestCase):
+    def test_model_center_uses_i18n(self):
+        body = method_text("_build_ai_form")
+        self.assertIn('ai_mc_tab_models', body)
+        self.assertIn('ai_mc_tab_providers', body)
+        self.assertIn('ai_mc_fallback', body)
+        self.assertNotIn('notebook.add(model_tab, text="模型列表")', body)
+        self.assertNotIn('text="连接测试")', body)
+        self.assertNotIn('text="测试当前服务商"', body)
+
+    def test_route_choices_rebuild_on_tab(self):
+        body = method_text("_build_ai_form")
+        self.assertIn("def rebuild_route_choices", body)
+        self.assertIn("<<NotebookTabChanged>>", body)
+
+    def test_chat_switcher_no_fake_current(self):
+        self.assertNotIn("chat_model_var.set(values[0])", SOURCE)
+
+    def test_fetch_models_error_redacted(self):
+        body = method_text("_ai_fetch_models")
+        self.assertIn("_redact_ai_detail(", body)
+
+    def test_ai_http_error_diagnostics_redact_secrets_and_bound_output(self):
+        body = method_text("_ai_chat_messages")
+        self.assertIn('e.read(2048)', body)
+        self.assertIn('_redact_ai_detail(detail, cfg.get("key") or "")', body)
+        self.assertNotIn('_redact_ai_detail(detail, secret)', body)  # 曾有先用后赋值 secret 的真 bug (合并 #13 时抓到)
+        self.assertIn('[:160]', body)
+        self.assertIn('err._kivo_status = e.code', body)
+
+
+# ---- 2026-11-27 GPT 审查批 (PR #13 后续): 脱敏补漏/错误分类/故障切换上限/流式停滞上限 ----
+
+class AiEngineHardeningTests(unittest.TestCase):
+    def test_redact_ai_detail_blocks_known_leak_shapes(self):
+        fn = load_module_function("_redact_ai_detail")
+        fn.__globals__["re"] = re
+        cases = [
+            ('Bearer KEYVAL1', 'KEYVAL1'),
+            ('{"api_key": "KEYVAL2"}', 'KEYVAL2'),
+            ('{"error": "bad key sk-plain777 in request"}', 'sk-plain777'),
+            ('x-api-key: KEYVAL4', 'KEYVAL4'),
+            ('GET https://h/v1?key=AIzaSyD1234567890x failed', 'AIzaSyD1234567890x'),
+            ('Authorization: Bearer KEYVAL6 rest', 'KEYVAL6'),
+            ('token=KEYVAL7&other=1', 'KEYVAL7'),
+            ('access_token: KEYVAL8', 'KEYVAL8'),
+        ]
+        for raw, leaked in cases:
+            self.assertNotIn(leaked, fn(raw, "mine"), raw)
+        # 正常报错文案不许误伤
+        plain = '{"error": {"code": 1210, "message": "max_tokens=1024 exceeded"}}'
+        self.assertEqual(fn(plain, "mine"), plain)
+
+    def test_failover_classification_and_caps(self):
+        body = method_text("_ai_chat_messages")
+        self.assertIn('getattr(primary_error, "_kivo_status", None) in (401, 403)', body)
+        self.assertIn("tried >= 2", body)
+        self.assertIn("open_timeout = min(timeout, 45)", body)
 
 
 if __name__ == "__main__":
