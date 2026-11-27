@@ -4509,22 +4509,23 @@ try {
         import urllib.request, urllib.error, json as _json
         base = self._http_base(cfg.get("base", ""))
         if not base:
-            raise RuntimeError("请先填写接口地址")
+            raise RuntimeError(self.t("ai_mc_fetch_need_base", "请先填写接口地址"))
         headers = {"Authorization": "Bearer " + (cfg.get("key") or ""), "User-Agent": "KIVO"}
         req = urllib.request.Request(base + "/models", headers=headers, method="GET")
         try:
             with urllib.request.urlopen(req, timeout=max(3, min(int(timeout), 30))) as resp:
                 raw = resp.read(2 * 1024 * 1024 + 1)
             if len(raw) > 2 * 1024 * 1024:
-                raise RuntimeError("模型列表响应过大")
+                raise RuntimeError(self.t("ai_mc_fetch_too_big", "模型列表响应过大"))
             data = _json.loads(raw.decode("utf-8"))
         except urllib.error.HTTPError as exc:
             detail = ""
             try: detail = exc.read(2048).decode("utf-8", "replace")
             except Exception: pass
-            raise RuntimeError("获取模型列表失败 (HTTP %s): %s" % (exc.code, detail[:300])) from exc
+            detail = re.sub(r"(?i)bearer\s+\S+", "Bearer ***", detail)  # 服务端回显请求头时别把 Key 带进报错文案
+            raise RuntimeError(self.t("ai_mc_fetch_http", "获取模型列表失败 (HTTP %s): %s") % (exc.code, detail[:300])) from exc
         except urllib.error.URLError as exc:
-            raise RuntimeError("无法连接模型服务: " + str(exc.reason)) from exc
+            raise RuntimeError(self.t("ai_mc_fetch_conn", "无法连接模型服务: ") + str(exc.reason)) from exc
         items = data.get("data", []) if isinstance(data, dict) else []
         models = []
         for item in items[:500]:
@@ -4871,22 +4872,22 @@ try {
         provider_tab = ttk.Frame(notebook, padding=8)
         route_tab = ttk.Frame(notebook, padding=8)
         test_tab = ttk.Frame(notebook, padding=8)
-        notebook.add(model_tab, text="模型列表")
-        notebook.add(provider_tab, text="服务商配置")
-        notebook.add(route_tab, text="任务分配")
-        notebook.add(test_tab, text="连接测试")
+        notebook.add(model_tab, text=self.t("ai_mc_tab_models", "模型列表"))
+        notebook.add(provider_tab, text=self.t("ai_mc_tab_providers", "服务商配置"))
+        notebook.add(route_tab, text=self.t("ai_mc_tab_routes", "任务分配"))
+        notebook.add(test_tab, text=self.t("ai_mc_tab_test", "连接测试"))
 
         # ---- 模型列表: 所有内置服务商始终显示, 可直观看到配置状态和当前模型 ----
-        ttk.Label(model_tab, text="统一查看和管理 KIVO 支持的全部 AI 服务商与模型。",
+        ttk.Label(model_tab, text=self.t("ai_mc_intro", "统一查看和管理 KIVO 支持的全部 AI 服务商与模型。"),
                   style="Muted.TLabel").pack(anchor="w", pady=(0, 6))
         list_wrap = ttk.Frame(model_tab)
         list_wrap.pack(fill="both", expand=True)
         columns = ("provider", "model", "status", "default")
         model_tree = ttk.Treeview(list_wrap, columns=columns, show="headings", height=9, selectmode="browse")
-        model_tree.heading("provider", text="服务商")
-        model_tree.heading("model", text="模型 ID")
-        model_tree.heading("status", text="状态")
-        model_tree.heading("default", text="默认")
+        model_tree.heading("provider", text=self.t("ai_mc_col_provider", "服务商"))
+        model_tree.heading("model", text=self.t("ai_mc_col_model", "模型 ID"))
+        model_tree.heading("status", text=self.t("ai_mc_col_status", "状态"))
+        model_tree.heading("default", text=self.t("ai_mc_col_default", "默认"))
         model_tree.column("provider", width=170, minwidth=120)
         model_tree.column("model", width=235, minwidth=140)
         model_tree.column("status", width=75, minwidth=65, anchor="center")
@@ -4900,14 +4901,14 @@ try {
             selected_iid = None
             for svc_key in self._AI_PRESETS:
                 key, current_model, base = store[svc_key]
-                rows = profiles[svc_key] or [{"model": current_model or "(未设置)", "enabled": True}]
+                rows = profiles[svc_key] or [{"model": current_model or self.t("ai_mc_unset", "(未设置)"), "enabled": True}]
                 for index, profile in enumerate(rows):
                     model_id = profile["model"]
                     iid = "%s::%d" % (svc_key, index)
                     is_default = model_id == current_model
-                    state = ("已配置" if key else "待配置") if profile.get("enabled", True) else "已停用"
+                    state = (self.t("ai_mc_configured", "已配置") if key else self.t("ai_mc_unconfigured", "待配置")) if profile.get("enabled", True) else self.t("ai_mc_disabled", "已停用")
                     item = model_tree.insert("", "end", iid=iid,
-                        values=(names[svc_key], model_id, state, "是" if is_default else ""))
+                        values=(names[svc_key], model_id, state, self.t("ai_mc_yes", "是") if is_default else ""))
                     if svc_key == (select_service or cur["service"]) and is_default:
                         selected_iid = item
             if selected_iid:
@@ -4929,28 +4930,28 @@ try {
         model_tree.bind("<Double-1>", open_selected_provider)
         model_buttons = ttk.Frame(model_tab)
         model_buttons.pack(fill="x", pady=(7, 0))
-        ttk.Button(model_buttons, text="配置所选模型", command=open_selected_provider).pack(side="left")
-        ttk.Button(model_buttons, text="设为默认", command=lambda: set_selected_default()).pack(side="left", padx=4)
-        ttk.Button(model_buttons, text="启用/停用", command=lambda: toggle_selected_model()).pack(side="left", padx=4)
-        ttk.Button(model_buttons, text="删除模型", command=lambda: delete_selected_model()).pack(side="left", padx=4)
-        ttk.Button(model_buttons, text="刷新列表", command=lambda: (stash(), refresh_model_list())).pack(side="right")
-        ttk.Label(model_tab, text="提示：未配置 API Key 的服务商也会保留在列表中；双击即可进入配置。",
+        ttk.Button(model_buttons, text=self.t("ai_mc_configure", "配置所选模型"), command=open_selected_provider).pack(side="left")
+        ttk.Button(model_buttons, text=self.t("ai_mc_set_default", "设为默认"), command=lambda: set_selected_default()).pack(side="left", padx=4)
+        ttk.Button(model_buttons, text=self.t("ai_mc_toggle", "启用/停用"), command=lambda: toggle_selected_model()).pack(side="left", padx=4)
+        ttk.Button(model_buttons, text=self.t("ai_mc_delete", "删除模型"), command=lambda: delete_selected_model()).pack(side="left", padx=4)
+        ttk.Button(model_buttons, text=self.t("ai_mc_refresh", "刷新列表"), command=lambda: (stash(), refresh_model_list())).pack(side="right")
+        ttk.Label(model_tab, text=self.t("ai_mc_hint", "提示：未配置 API Key 的服务商也会保留在列表中；双击即可进入配置。"),
                   foreground="#888888", wraplength=560).pack(anchor="w", pady=(7, 0))
 
         # ---- 服务商配置: 各服务商的 Key / 模型 / Base URL 独立保存 ----
-        ttk.Label(provider_tab, text="选择任意服务商，分别维护它的 API Key、模型名称和接口地址。",
+        ttk.Label(provider_tab, text=self.t("ai_mc_provider_intro", "选择任意服务商，分别维护它的 API Key、模型名称和接口地址。"),
                   style="Muted.TLabel").grid(row=0, column=0, columnspan=3, sticky="w", pady=(0, 8))
-        ttk.Label(provider_tab, text="服务商:").grid(row=1, column=0, sticky="e", padx=8, pady=6)
+        ttk.Label(provider_tab, text=self.t("ai_mc_provider", "服务商:")).grid(row=1, column=0, sticky="e", padx=8, pady=6)
         svc_var = tk.StringVar(value=names[cur["service"]])
         key_var, model_var, base_var = tk.StringVar(), tk.StringVar(), tk.StringVar()
         svc = ttk.Combobox(provider_tab, textvariable=svc_var, values=list(names.values()), width=34, state="readonly")
         svc.grid(row=1, column=1, sticky="w", pady=6)
         ttk.Label(provider_tab, text="API Key:").grid(row=2, column=0, sticky="e", padx=8, pady=4)
         ttk.Entry(provider_tab, textvariable=key_var, width=42, show="*").grid(row=2, column=1, sticky="w", pady=4)
-        ttk.Label(provider_tab, text="模型:").grid(row=3, column=0, sticky="e", padx=8, pady=4)
+        ttk.Label(provider_tab, text=self.t("ai_mc_model", "模型:")).grid(row=3, column=0, sticky="e", padx=8, pady=4)
         model_box = ttk.Combobox(provider_tab, textvariable=model_var, width=38, state="normal")
         model_box.grid(row=3, column=1, sticky="w", pady=4)
-        ttk.Label(provider_tab, text="接口地址:").grid(row=4, column=0, sticky="e", padx=8, pady=4)
+        ttk.Label(provider_tab, text=self.t("ai_mc_base", "接口地址:")).grid(row=4, column=0, sticky="e", padx=8, pady=4)
         ttk.Entry(provider_tab, textvariable=base_var, width=42).grid(row=4, column=1, sticky="w", pady=4)
         def load_fields():
             k, m, b = store[cur["service"]]
@@ -4965,25 +4966,25 @@ try {
             stash()
             model_id = store[cur["service"]][1]
             if not model_id:
-                test_var.set("请先填写模型 ID，再添加到模型列表")
+                test_var.set(self.t("ai_mc_need_model", "请先填写模型 ID，再添加到模型列表"))
                 notebook.select(provider_tab)
                 return
             rows = profiles[cur["service"]]
             if not any(x["model"] == model_id for x in rows):
                 rows.append({"model": model_id, "enabled": True})
             refresh_model_list(cur["service"])
-            test_var.set("已添加模型：" + model_id)
+            test_var.set(self.t("ai_mc_added", "已添加模型：") + model_id)
         def set_selected_default():
             selected = selected_profile()
             if not selected: return
             svc_key, profile = selected
             if not profile.get("enabled", True):
-                test_var.set("请先启用该模型，再设为默认")
+                test_var.set(self.t("ai_mc_enable_first", "请先启用该模型，再设为默认"))
                 return
             store[svc_key][1] = profile["model"]
             if svc_key == cur["service"]: model_var.set(profile["model"])
             refresh_model_list(svc_key)
-            test_var.set("默认模型已设为：" + profile["model"])
+            test_var.set(self.t("ai_mc_default_set", "默认模型已设为：") + profile["model"])
         def toggle_selected_model():
             selected = selected_profile()
             if not selected: return
@@ -5004,7 +5005,7 @@ try {
                 store[svc_key][1] = fallback
                 if svc_key == cur["service"]: model_var.set(fallback)
             refresh_model_list(svc_key)
-            test_var.set("模型已从管理列表删除")
+            test_var.set(self.t("ai_mc_deleted", "模型已从管理列表删除"))
         def on_svc(*_):
             stash()
             cur["service"] = inv_names.get(svc_var.get(), cur["service"])
@@ -5015,30 +5016,30 @@ try {
             stash()
             k, m, b = store[cur["service"]]
             if not k:
-                test_var.set("请先填写当前服务商的 API Key")
+                test_var.set(self.t("ai_mc_need_key", "请先填写当前服务商的 API Key"))
                 notebook.select(test_tab)
                 return
-            test_var.set("正在获取模型列表…")
+            test_var.set(self.t("ai_mc_fetching", "正在获取模型列表…"))
             cfg = {"service": cur["service"], "key": k, "model": m, "base": b}
             import threading
             def work():
                 try:
                     models = self._ai_fetch_models(cfg)
-                    if not models: raise RuntimeError("服务未返回可用模型；可以继续手动填写模型名称")
+                    if not models: raise RuntimeError(self.t("ai_mc_fetch_none", "服务未返回可用模型；可以继续手动填写模型名称"))
                     def done():
                         model_box.configure(values=models)
                         if model_var.get() not in models: model_var.set(models[0])
                         stash()
-                        test_var.set("已获取 %d 个模型，请选择后保存" % len(models))
+                        test_var.set(self.t("ai_mc_fetched", "已获取 %d 个模型，请选择后保存") % len(models))
                         refresh_model_list(cur["service"])
                     self._ui_queue.put(done)
                 except Exception as exc:
                     msg = str(exc)
-                    self._ui_queue.put(lambda msg=msg: test_var.set("获取模型失败: " + msg))
+                    self._ui_queue.put(lambda msg=msg: test_var.set(self.t("ai_mc_fetch_fail", "获取模型失败: ") + msg))
             threading.Thread(target=work, daemon=True).start()
-        ttk.Button(provider_tab, text="获取模型列表", command=fetch_models).grid(row=3, column=2, sticky="w", padx=5, pady=4)
-        ttk.Button(provider_tab, text="添加到模型列表", command=add_current_model).grid(row=3, column=3, sticky="w", padx=5, pady=4)
-        ttk.Label(provider_tab, text="每家服务商独立保存配置；支持 OpenAI 兼容接口的服务可自动获取模型，其他服务可手动填写。",
+        ttk.Button(provider_tab, text=self.t("ai_mc_fetch", "获取模型列表"), command=fetch_models).grid(row=3, column=2, sticky="w", padx=5, pady=4)
+        ttk.Button(provider_tab, text=self.t("ai_mc_add", "添加到模型列表"), command=add_current_model).grid(row=3, column=3, sticky="w", padx=5, pady=4)
+        ttk.Label(provider_tab, text=self.t("ai_mc_provider_note", "每家服务商独立保存配置；支持 OpenAI 兼容接口的服务可自动获取模型，其他服务可手动填写。"),
                   foreground="#888888", wraplength=540, justify="left").grid(row=5, column=0, columnspan=3, sticky="w", padx=6, pady=(10, 4))
 
         # ---- 任务分配: 各类 AI 功能可使用不同服务商 ----
@@ -5048,10 +5049,26 @@ try {
                       ("RouteAnnotate", "ai_route_annotate", "标注栏 AI"),
                       ("RouteReply", "ai_route_reply", "智能回复"),
                       ("RouteText", "ai_route_text", "文本翻译")]
-        ttk.Label(route_tab, text="为不同任务指定模型服务；选择“跟随当前服务”则使用默认服务商。",
+        ttk.Label(route_tab, text=self.t("ai_mc_route_intro", "为不同任务指定模型服务；选择“跟随当前服务”则使用默认服务商。"),
                   style="Muted.TLabel").pack(anchor="w", pady=(0, 8))
         route_vars = {}
+        route_boxes = {}
         route_choice_maps = {}
+        def rebuild_route_choices():
+            """任务分配的候选随模型档案实时重建 (修: 原版只在开窗时算一次, 本窗内新加/停用的模型要重开设置才出现)"""
+            route_choice_maps.clear()
+            labels = []
+            for svc_key in self._AI_PRESETS:
+                for profile in profiles[svc_key]:
+                    if profile.get("enabled", True):
+                        label = "%s · %s" % (names[svc_key], profile["model"])
+                        labels.append(label)
+                        route_choice_maps[label] = (svc_key, profile["model"])
+            choices = list(dict.fromkeys([follow_text] + list(names.values()) + labels))
+            for rk2, var2 in route_vars.items():
+                if var2.get() not in choices: var2.set(follow_text)
+                if rk2 in route_boxes: route_boxes[rk2].configure(values=choices)
+            return labels
         profile_choices = []
         for svc_key in self._AI_PRESETS:
             for profile in profiles[svc_key]:
@@ -5069,22 +5086,25 @@ try {
                                   if pair == (cur_r, cur_m)), names.get(cur_r, follow_text) if cur_r else follow_text)
             var = tk.StringVar(value=current_label)
             choices = [follow_text] + list(names.values()) + profile_choices
-            ttk.Combobox(row, textvariable=var, values=list(dict.fromkeys(choices)),
-                         width=46, state="readonly").pack(side="left", padx=5)
+            box = ttk.Combobox(row, textvariable=var, values=list(dict.fromkeys(choices)),
+                         width=46, state="readonly")
+            box.pack(side="left", padx=5)
             route_vars[rk] = var
+            route_boxes[rk] = box
+        notebook.bind("<<NotebookTabChanged>>", lambda _e: rebuild_route_choices() if notebook.select() == str(route_tab) else None)
 
         # ---- 连接测试: 测试当前服务商 API Key / 模型是否可用 ----
-        test_var = tk.StringVar(value="选择服务商并填写 API Key、模型后，可在这里测试连接。")
-        ttk.Label(test_tab, text="使用当前选中的服务商发送测试请求，验证接口、密钥和模型是否可用。",
+        test_var = tk.StringVar(value=self.t("ai_mc_test_hint", "选择服务商并填写 API Key、模型后，可在这里测试连接。"))
+        ttk.Label(test_tab, text=self.t("ai_mc_test_intro", "使用当前选中的服务商发送测试请求，验证接口、密钥和模型是否可用。"),
                   style="Muted.TLabel", wraplength=550).pack(anchor="w", pady=(0, 8))
         fallback_var = tk.BooleanVar(value=(self.cfg.get("AI", "AutoFallback", fallback="0") or "0").strip() == "1")
-        ttk.Checkbutton(test_tab, text="当前模型失败时，自动尝试同一服务商的其他已启用模型",
+        ttk.Checkbutton(test_tab, text=self.t("ai_mc_fallback", "当前模型失败时，自动尝试同一服务商的其他已启用模型"),
                         variable=fallback_var).pack(anchor="w", pady=(0, 6))
         ttk.Label(test_tab, textvariable=test_var, foreground="#1673D1",
                   wraplength=550, justify="left").pack(anchor="w", pady=6)
         def do_test():
             stash()
-            test_var.set("测试中（向模型发送测试图片）…")
+            test_var.set(self.t("ai_mc_testing", "测试中（向模型发送测试图片）…"))
             import threading
             test_img = Image.new("RGB", (240, 90), "white")
             ImageDraw.Draw(test_img).text((12, 30), "你好 KIVO 2026", fill="black", font=self._font(24))
@@ -5096,13 +5116,13 @@ try {
                 try:
                     r = self._ai_chat_image(test_img, "只输出图片中的文字，不要解释。", cfg=test_cfg)
                     elapsed = time.monotonic() - started
-                    msg = "连接正常 · 响应 %.2f 秒 · 返回：%s" % (elapsed, r[:80] if r else "空内容")
+                    msg = self.t("ai_mc_test_ok", "连接正常 · 响应 %.2f 秒 · 返回：%s") % (elapsed, r[:80] if r else self.t("ai_mc_test_empty", "空内容"))
                 except Exception as exc:
                     elapsed = time.monotonic() - started
-                    msg = "连接失败 · %.2f 秒 · %s" % (elapsed, str(exc))
+                    msg = self.t("ai_mc_test_fail", "连接失败 · %.2f 秒 · %s") % (elapsed, str(exc))
                 self._ui_queue.put(lambda msg=msg: test_var.set(msg))
             threading.Thread(target=work, daemon=True).start()
-        ttk.Button(test_tab, text="测试当前服务商", command=do_test).pack(anchor="w", pady=6)
+        ttk.Button(test_tab, text=self.t("ai_mc_test_btn", "测试当前服务商"), command=do_test).pack(anchor="w", pady=6)
 
         # ---- 统一保存入口 ----
         footer = ttk.Frame(parent)
@@ -5125,8 +5145,8 @@ try {
             self.cfg.set("AI", "AutoFallback", "1" if fallback_var.get() else "0")
             self._save_ai_settings(cur["service"], store, routes)
             refresh_model_list(cur["service"])
-            self.status.set("AI 模型中心已保存")
-            test_var.set("配置已保存 ✓")
+            self.status.set(self.t("ai_mc_saved_status", "AI 模型中心已保存"))
+            test_var.set(self.t("ai_mc_saved", "配置已保存 ✓"))
         ttk.Button(footer, text=self.t("cmn_save", "保存全部设置"),
                    style="Accent.TButton", command=do_save).pack(side="right")
         load_fields()
@@ -7491,7 +7511,7 @@ try {
             current_label = next((label for label, pair in chat_model_map.items()
                                   if pair == (current.get("service"), current.get("model"))), "")
             if current_label: chat_model_var.set(current_label)
-            elif values: chat_model_var.set(values[0])
+            else: chat_model_var.set("")  # 当前分工不在候选里时留空, 不拿第一项冒充当前模型 (原版会显示错的模型)
         def switch_chat_model(*_):
             selected = chat_model_map.get(chat_model_var.get())
             if not selected: return
@@ -7500,7 +7520,7 @@ try {
             self.cfg.set("AI", "RouteChat", svc_key)
             self.cfg.set("AI", "RouteChatModel", model_id)
             self.save_config()
-            self.status.set("AI 聊天模型已切换: " + chat_model_var.get())
+            self.status.set(self.t("ai_model_switched", "AI 聊天模型已切换: ") + chat_model_var.get())
         chat_model_box = ttk.Combobox(head, textvariable=chat_model_var, width=30, state="readonly")
         chat_model_box.pack(side="left", padx=(8, 4))
         chat_model_box.bind("<<ComboboxSelected>>", switch_chat_model)
@@ -7646,12 +7666,12 @@ try {
                 fill = self.UI_ACCENT if on else "#B9C2CE"
                 send_ui["cv"].itemconfigure("pill", fill=fill, outline=fill)
                 if send_ui["text_item"] is not None:
-                    send_ui["cv"].itemconfigure(send_ui["text_item"], text=self.t("ai_send", "发送") if on else "停止")
+                    send_ui["cv"].itemconfigure(send_ui["text_item"], text=self.t("ai_send", "发送") if on else self.t("ai_stop", "停止"))
         def stop_reply():
             ev = send_ui.get("cancel_event")
             if busy["on"] and ev is not None:
                 ev.set()
-                self.status.set("正在停止 AI 生成…")
+                self.status.set(self.t("ai_stopping", "正在停止 AI 生成…"))
         def request_reply(img=None, img_prompt=None):
             import threading
             busy["on"] = True
@@ -7690,7 +7710,7 @@ try {
                                                    stream_callback=on_token, cancel_event=cancel_event)
                     cancelled = cancel_event.is_set()
                     if cancelled and r:
-                        r = r.rstrip() + "\n\n（已停止生成）"
+                        r = r.rstrip() + "\n\n" + self.t("ai_stopped_suffix", "（已停止生成）")
                     def done():
                         busy["on"] = False
                         send_ui["cancel_event"] = None
@@ -7705,7 +7725,7 @@ try {
                             self._save_current_chat()
                             set_send_enabled(True); hide_typing(); strip_last_regen()
                             if r: add_bubble("assistant", r, with_regen=not cancelled, msg_ref=self._ai_chat_history[-1])
-                            elif cancelled: self.status.set("已停止生成")
+                            elif cancelled: self.status.set(self.t("ai_stopped", "已停止生成"))
                         else:  # 已切到别的对话: 存回它自己的存档, 当前界面不动
                             if r: hist_ref.append({"role": "assistant", "content": r})
                             self._persist_chat(hist_ref, cid_ref)
@@ -7726,7 +7746,7 @@ try {
                         if self._ai_chat_history is hist_ref:
                             partial = streamed["text"].strip()
                             if partial:
-                                partial += "\n\n（生成中断）"
+                                partial += "\n\n" + self.t("ai_interrupted_suffix", "（生成中断）")
                                 self._ai_chat_history.append({"role": "assistant", "content": partial})
                                 self._save_current_chat()
                                 add_bubble("assistant", partial, msg_ref=self._ai_chat_history[-1])

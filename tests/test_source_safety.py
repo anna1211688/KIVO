@@ -317,6 +317,7 @@ class AiModelCatalogTests(unittest.TestCase):
 
         class FakeApp:
             _http_base = staticmethod(lambda value: value.rstrip("/"))
+            def t(self, _key, default=""): return default  # _ai_fetch_models 的报错文案走 t() (2026-11-27 i18n 修正后)
 
         with patch("urllib.request.urlopen", return_value=FakeResponse()):
             with self.assertRaisesRegex(RuntimeError, "响应过大"):
@@ -383,7 +384,7 @@ class AiStreamingTests(unittest.TestCase):
         panel = method_text("_build_ai_panel")
         self.assertIn("def stop_reply():", panel)
         self.assertIn('ev.set()', panel)
-        self.assertIn('else "停止"', panel)
+        self.assertIn('self.t("ai_stop", "停止")', panel)
 
 
 class AiTaskModelRoutingTests(unittest.TestCase):
@@ -416,10 +417,10 @@ class AiModelCenterLayoutTests(unittest.TestCase):
     def test_model_center_uses_top_horizontal_tabs(self):
         body = method_text("_build_ai_form")
         self.assertIn("ttk.Notebook(parent)", body)
-        self.assertIn('notebook.add(model_tab, text="模型列表")', body)
-        self.assertIn('notebook.add(provider_tab, text="服务商配置")', body)
-        self.assertIn('notebook.add(route_tab, text="任务分配")', body)
-        self.assertIn('notebook.add(test_tab, text="连接测试")', body)
+        self.assertIn('notebook.add(model_tab, text=self.t("ai_mc_tab_models", "模型列表"))', body)
+        self.assertIn('notebook.add(provider_tab, text=self.t("ai_mc_tab_providers", "服务商配置"))', body)
+        self.assertIn('notebook.add(route_tab, text=self.t("ai_mc_tab_routes", "任务分配"))', body)
+        self.assertIn('notebook.add(test_tab, text=self.t("ai_mc_tab_test", "连接测试"))', body)
 
     def test_model_center_lists_every_provider_and_keeps_separate_settings(self):
         body = method_text("_build_ai_form")
@@ -437,6 +438,31 @@ class AiModelCenterLayoutTests(unittest.TestCase):
         self.assertIn("def toggle_selected_model():", body)
         self.assertIn("def delete_selected_model():", body)
         self.assertIn('json.dumps(profiles', body)
+
+
+# ---- 2026-11-27 PR #13 审查修正 (模型中心 i18n/候选刷新/切换器/脱敏) 的守卫 ----
+
+class ModelCenterFixTests(unittest.TestCase):
+    def test_model_center_uses_i18n(self):
+        body = method_text("_build_ai_form")
+        self.assertIn('ai_mc_tab_models', body)
+        self.assertIn('ai_mc_tab_providers', body)
+        self.assertIn('ai_mc_fallback', body)
+        self.assertNotIn('notebook.add(model_tab, text="模型列表")', body)
+        self.assertNotIn('text="连接测试")', body)
+        self.assertNotIn('text="测试当前服务商"', body)
+
+    def test_route_choices_rebuild_on_tab(self):
+        body = method_text("_build_ai_form")
+        self.assertIn("def rebuild_route_choices", body)
+        self.assertIn("<<NotebookTabChanged>>", body)
+
+    def test_chat_switcher_no_fake_current(self):
+        self.assertNotIn("chat_model_var.set(values[0])", SOURCE)
+
+    def test_fetch_models_error_redacted(self):
+        body = method_text("_ai_fetch_models")
+        self.assertIn("Bearer ***", body)
 
 
 if __name__ == "__main__":
