@@ -1115,3 +1115,28 @@ class UiPhase3Tests(unittest.TestCase):
         for label in ("set_mini_lock", "cmn_delete", "set_mini_delall"):
             line = [l for l in self.src.splitlines() if f'self.t("{label}"' in l and "ttk.Button(bar" in l and "width=" in l]
             self.assertTrue(line and 'style="Small.TButton"' in line[0], label)
+
+
+class UiPhase4Tests(unittest.TestCase):
+    """UI P4 (2026-11-28): 全窗口底色统一 + toast 上滑微交互。"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.src = open(os.path.join(ROOT, "main.py"), encoding="utf-8").read()
+
+    def test_titled_dialogs_follow_page_bg(self):
+        # 7 个带标题栏的对话框都在创建语句后紧跟一行底色设置; 只数 Toplevel 行, 避开菜单里的同名文案
+        n = self.src.count("configure(background=self.UI_BG)")
+        self.assertGreaterEqual(n, 7)
+
+    def test_toast_slide_up(self):
+        i = self.src.index("def toast(self, text, action=None")
+        body = self.src[i:i + 2600]
+        self.assertIn("def _slide(step=0):", body)
+        self.assertIn("place_configure(y=-16 - 6 * step)", body)
+        self.assertIn('box.place(relx=0.5, rely=1.0, anchor="s", y=-16)', body)
+
+    def test_special_overlay_windows_kept(self):
+        # 复制即译的 1px 描边窗与透明翻译覆盖层是有意设计, 不能被"统一底色"误伤
+        self.assertIn("win.configure(background=self.UI_BORDER)", self.src)
+        self.assertIn('MAGIC = "#FF00FE"', self.src)

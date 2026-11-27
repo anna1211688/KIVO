@@ -2655,10 +2655,18 @@ class App(tk.Tk):
                     try: action()
                     except Exception: pass
                 act.bind("<Button-1>", _run)
-            box.place(relx=0.5, rely=1.0, anchor="s", y=-40)
+            box.place(relx=0.5, rely=1.0, anchor="s", y=-16)
             try: box.lift()
             except Exception: pass
             self._toast_win = box
+            def _slide(step=0):  # 5 帧上滑 (每帧 14ms, 共 56ms), 只改 place 坐标, 窗口销毁/被新提示顶替时自动停
+                if seq != getattr(self, "_toast_seq", 0): return
+                try: box.place_configure(y=-16 - 6 * step)
+                except Exception: return
+                if step < 4:
+                    try: self.after(14, lambda: _slide(step + 1))
+                    except Exception: pass
+            _slide()
             self.after(ms, lambda: self._hide_toast(seq))
         except Exception: pass
     def _hide_toast(self, seq=None):
@@ -3451,6 +3459,8 @@ class App(tk.Tk):
         """水印参数对话框 (仿 PixPin 水印): 文字/位置/不透明度/大小/间距/字体; 点确定返回参数 dict, 取消返回 None"""
         res = {}
         win = tk.Toplevel(parent); win.title(self.t("wm_title", "添加水印")); win.attributes("-topmost", True); win.resizable(False, False)
+        try: win.configure(background=self.UI_BG)
+        except Exception: pass
         frm = ttk.Frame(win); frm.pack(padx=12, pady=10)
         ttk.Label(frm, text=self.t("wm_text", "水印文字:")).grid(row=0, column=0, sticky="e", pady=3)
         txt_var = tk.StringVar()
@@ -4369,6 +4379,8 @@ class App(tk.Tk):
         if not HAS_PIL: return
         base = base_img.convert("RGB")
         win = tk.Toplevel(self); win.title(self.t("ed_title", "标注 - 画完点「完成并钉图」")); win.attributes("-topmost", True)
+        try: win.configure(background=self.UI_BG)
+        except Exception: pass
         tool = tk.StringVar(value="rect"); color = tk.StringVar(value="#FF0000"); width = tk.IntVar(value=3)
         ops, undone, state = [], [], {"start": None, "points": [], "temp": None}
         def _ew():  # 线宽框可手输: 填了非数字时 width.get() 会抛 TclError 让标注无声失效, 统一安全读
@@ -5908,6 +5920,8 @@ try {
     def _show_ai_translate(self, img, text):
         self.status.set(self.t("ai_img_done", "AI 看图翻译完成"))
         win = tk.Toplevel(self); win.title(self.t("ai_img_title", "AI 看图翻译")); win.attributes("-topmost", True)
+        try: win.configure(background=self.UI_BG)
+        except Exception: pass
         win.bind("<Escape>", lambda e: win.destroy())
         ow, oh = img.size; scale = min(1.0, 560 / ow, 300 / oh)
         if scale < 1.0: disp = img.resize((max(1, int(ow * scale)), max(1, int(oh * scale))), Image.LANCZOS)
@@ -5971,6 +5985,8 @@ try {
         if not cands:
             messagebox.showinfo(self.t("ai_reply_title", "智能回复"), self.t("ai_reply_none", "模型没给出候选回复, 换个更完整的对话截图再试。")); return
         win = tk.Toplevel(self); win.title(self.t("ai_reply_win_title", "智能回复 — 点一条直接粘贴")); win.minsize(540, 0); win.attributes("-topmost", True)  # 高度不写死: 候选条数不定, 让窗口按内容自适应 (写死高度会把按钮挤出窗外)
+        try: win.configure(background=self.UI_BG)
+        except Exception: pass
         win.bind("<Escape>", lambda e: win.destroy())
         ttk.Label(win, text=self.t("ai_reply_win_hint", "AI 按对话语境想了这几条, 点「粘贴」直接发到刚才的聊天窗口:"), style="Muted.TLabel").pack(anchor="w", padx=10, pady=(10, 4))
         def paste_it(text):
@@ -8309,6 +8325,8 @@ try {
             c = _find_chat(cid)
             if c is None: return
             dlg = tk.Toplevel(self); dlg.title(self.t("ai_rename", "重命名")); dlg.resizable(False, False); dlg.transient(self)
+            try: dlg.configure(background=self.UI_BG)
+            except Exception: pass
             tk.Label(dlg, text=self.t("ai_rename", "重命名"), font=self._ui_font(10, True)).pack(anchor="w", padx=14, pady=(12, 4))
             var = tk.StringVar(value=c.get("title", ""))
             ent = ttk.Entry(dlg, textvariable=var, width=34); ent.pack(padx=14, pady=(0, 10)); ent.focus_set(); ent.selection_range(0, "end")
@@ -9267,6 +9285,8 @@ try {
         (用户要求: 原图和译图都不用给图, 直接显示识别出的原文本和译文 —— 清楚、能选中、好复制。)"""
         st = {"target": target, "source": source, "translations": list(translations)}
         win = tk.Toplevel(self); win.title(self.t("tr_title", "截图翻译结果")); win.attributes("-topmost", True)
+        try: win.configure(background=self.UI_BG)
+        except Exception: pass
         win.bind("<Escape>", lambda e: win.destroy())  # Esc 关闭结果窗
         try: win.focus_force()
         except Exception: pass
@@ -9517,6 +9537,8 @@ try {
         threading.Thread(target=work, daemon=True).start()
     def show_text_result(self, title, text, translate=False, anchor=None):
         win = tk.Toplevel(self); win.title(title); win.geometry("520x340"); win.attributes("-topmost", True)
+        try: win.configure(background=self.UI_BG)
+        except Exception: pass
         win.bind("<Escape>", lambda e: win.destroy())  # Esc 关闭结果窗 (与截图翻译结果窗一致)
         # 按钮栏必须先 pack 到底部占位: 旧写法先 pack 文本框, 它默认请求 24 行高, 超过窗高后
         # 后 pack 的按钮栏被挤到窗口外看不见 (真机实证: 结果窗只有文字没有按钮)
