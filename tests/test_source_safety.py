@@ -1639,3 +1639,33 @@ class DarkModeTests(unittest.TestCase):
         self.assertIn('"Theme", fallback="light") == "dark"', SOURCE)
         self.assertIn("def _switch_theme", SOURCE)
         self.assertNotIn('W = "#FFFFFF"', SOURCE)
+
+
+class PomodoroTests(unittest.TestCase):
+    """v1.6.2 番茄钟: 纯逻辑与导航。"""
+
+    @classmethod
+    def setUpClass(cls):
+        app_node = next(n for n in TREE.body if isinstance(n, ast.ClassDef) and n.name == "App")
+        cls.ns = {}
+        for name in ("_pomo_format", "_pomo_next_mode", "open_pomodoro",
+                     "_pomo_tick", "_pomo_advance", "_pomo_apply_settings"):
+            node = next(n for n in app_node.body if isinstance(n, ast.FunctionDef) and n.name == name)
+            exec(ast.get_source_segment(SOURCE, node), cls.ns)
+
+    def test_format(self):
+        f = self.ns["_pomo_format"]
+        self.assertEqual(f(0), "00:00")
+        self.assertEqual(f(65), "01:05")
+        self.assertEqual(f(1500), "25:00")
+        self.assertEqual(f(-5), "00:00")
+
+    def test_next_mode(self):
+        f = self.ns["_pomo_next_mode"]
+        self.assertEqual(f("focus"), "break")
+        self.assertEqual(f("break"), "focus")
+
+    def test_wiring(self):
+        self.assertIn("def open_pomodoro", SOURCE)
+        self.assertIn("self.open_pomodoro", SOURCE)
+        self.assertIn("def _pomo_advance", SOURCE)

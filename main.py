@@ -1507,6 +1507,7 @@ class App(tk.Tk):
         _nav("calc", self.t("calculator", "计算器"), "calc", self.open_calc)
         _nav("dl", self.t("media_dl", "无水印下载"), "download", self.open_media_dl)
         _nav("dev", self.t("dev_title", "开发者工具箱"), "star", self.open_dev_tools)
+        _nav("pomo", self.t("pomo_title", "番茄钟"), "clock", self.open_pomodoro)
         # 边栏底部: 版本 (最底) + 设置 + 分隔线 (side=bottom 先包的贴最底)
         tk.Label(side, text=f"v{VERSION} · © KIVO", font=self._ui_font(8), background=SIDE, foreground=self.UI_MUTED).pack(side="bottom", anchor="w", padx=18, pady=(0, 10))
         _set_it = _NavItem(side, text=self.t("system_settings", "设置"), command=self.open_system_settings, font=self._ui_font(10), bg=SIDE, image=self._nav_icon("gear"), palette=_nav_pal)
@@ -1876,7 +1877,7 @@ class App(tk.Tk):
             self._build_settings_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -2278,7 +2279,7 @@ class App(tk.Tk):
             self._build_selfcheck_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -2543,7 +2544,7 @@ class App(tk.Tk):
             self._build_phrases_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_dev_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_dev_panel", "_pomo_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -6818,7 +6819,7 @@ try {
             self._build_calc_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_phrases_panel", "_clock_panel", "_dl_panel", "_dev_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_phrases_panel", "_clock_panel", "_dl_panel", "_dev_panel", "_pomo_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -7141,7 +7142,7 @@ try {
             self._build_clock_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_dl_panel", "_dev_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_dl_panel", "_dev_panel", "_pomo_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -7407,7 +7408,7 @@ try {
             self._build_clockset_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -7818,7 +7819,7 @@ try {
             self._build_texttrans_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_clock_panel", "_dl_panel", "_dev_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_clock_panel", "_dl_panel", "_dev_panel", "_pomo_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -8142,7 +8143,7 @@ try {
             self._build_dl_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_clock_panel", "_dev_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_clock_panel", "_dev_panel", "_pomo_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -9855,7 +9856,7 @@ try {
             self._build_gallery_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -10612,6 +10613,121 @@ try {
                    command=u_go).pack(side="left", padx=6)
         tk.Label(t5, textvariable=u_out, bg=self.UI_BG, fg=self.UI_ACCENT,
                  font=self._ui_font(12, True)).pack(anchor="w", padx=12)
+
+    # ---------- 番茄钟 (v1.6.2): 25/5 专注休息, 开始/暂停/重置/跳过, 阶段结束自动切换 ----------
+    @staticmethod
+    def _pomo_format(seconds):
+        seconds = max(0, int(seconds))
+        return f"{seconds // 60:02d}:{seconds % 60:02d}"
+    @staticmethod
+    def _pomo_next_mode(mode):
+        return "break" if mode == "focus" else "focus"
+    def open_pomodoro(self):
+        self._nav_show("pomo")
+        self._show_pomo_panel()
+    def _show_pomo_panel(self):
+        self._texttrans_on_hide()
+        if getattr(self, "_pomo_panel", None) is None:
+            self._build_pomo_panel()
+        try: self._body.pack_forget()
+        except Exception: pass
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel"):
+            p = getattr(self, attr, None)
+            if p is not None:
+                try: p.pack_forget()
+                except Exception: pass
+        self._ai_view_on = False
+        self._forget_aux_panels()
+        self._pomo_panel.pack(fill="both", expand=True, before=self._status_sep)
+    def _build_pomo_panel(self):
+        panel = tk.Frame(self._content, background=self.UI_BG); self._pomo_panel = panel
+        head = tk.Frame(panel, background=self.UI_BG); head.pack(fill="x", padx=14, pady=(10, 4))
+        self._panel_title(head, self.t("pomo_title", "番茄钟"), "clock")
+        back = tk.Label(head, text=self.t("cmn_back", "返回"), font=self._ui_font(9),
+                        background=self.UI_BG, foreground=self.UI_MUTED, cursor="hand2")
+        back.pack(side="right"); back.bind("<Button-1>", lambda e: self._show_main_view())
+        self._pomo = {"mode": "focus", "remain": 25 * 60, "running": False,
+                      "after": None, "focus_min": 25, "break_min": 5}
+        card = tk.Frame(panel, background=self.UI_BG)
+        self._rounded_backing(card)
+        card.pack(padx=20, pady=16)
+        self._pomo_mode_var = tk.StringVar(value=self.t("pomo_focus", "专注中"))
+        tk.Label(card, textvariable=self._pomo_mode_var, font=self._ui_font(14, True),
+                 bg=self.UI_SURFACE, fg=self.UI_ACCENT).pack(padx=80, pady=(28, 4))
+        self._pomo_time_var = tk.StringVar(value="25:00")
+        tk.Label(card, textvariable=self._pomo_time_var, font=("Consolas", 56, "bold"),
+                 bg=self.UI_SURFACE, fg=self.UI_TEXT).pack(pady=(0, 16))
+        brow = tk.Frame(card, bg=self.UI_SURFACE); brow.pack(pady=(0, 24))
+        self._pomo_main_btn = ttk.Button(brow, text=self.t("pomo_start", "开始"),
+                                         style="Accent.TButton", command=self._pomo_toggle)
+        self._pomo_main_btn.pack(side="left", padx=6)
+        ttk.Button(brow, text=self.t("pomo_reset", "重置"), style="Small.TButton",
+                   command=self._pomo_reset).pack(side="left", padx=6)
+        ttk.Button(brow, text=self.t("pomo_skip", "跳过"), style="Small.TButton",
+                   command=self._pomo_advance).pack(side="left", padx=6)
+        srow = tk.Frame(panel, bg=self.UI_BG); srow.pack(pady=(0, 16))
+        tk.Label(srow, text=self.t("pomo_focus_min", "专注(分钟):"), bg=self.UI_BG,
+                 fg=self.UI_TEXT_2, font=self._ui_font(10)).pack(side="left")
+        self._pomo_focus_e = tk.Entry(srow, width=5); self._pomo_focus_e.insert(0, "25")
+        self._pomo_focus_e.pack(side="left", padx=4)
+        tk.Label(srow, text=self.t("pomo_break_min", "休息(分钟):"), bg=self.UI_BG,
+                 fg=self.UI_TEXT_2, font=self._ui_font(10)).pack(side="left", padx=(10, 0))
+        self._pomo_break_e = tk.Entry(srow, width=5); self._pomo_break_e.insert(0, "5")
+        self._pomo_break_e.pack(side="left", padx=4)
+        ttk.Button(srow, text=self.t("pomo_apply", "应用"), style="Small.TButton",
+                   command=self._pomo_apply_settings).pack(side="left", padx=6)
+    def _pomo_toggle(self):
+        p = self._pomo
+        p["running"] = not p["running"]
+        self._pomo_main_btn.configure(text=self.t("pomo_pause", "暂停") if p["running"]
+                                      else self.t("pomo_start", "开始"))
+        if p["running"]:
+            p["after"] = self.after(1000, self._pomo_tick)
+    def _pomo_tick(self):
+        p = self._pomo
+        if not p["running"]: return
+        p["remain"] -= 1
+        if p["remain"] <= 0:
+            self._pomo_advance()
+        else:
+            self._pomo_update()
+            p["after"] = self.after(1000, self._pomo_tick)
+    def _pomo_update(self):
+        self._pomo_time_var.set(self._pomo_format(self._pomo["remain"]))
+    def _pomo_reset(self):
+        p = self._pomo
+        p["running"] = False
+        if p["after"]:
+            try: self.after_cancel(p["after"])
+            except Exception: pass
+        p["remain"] = (p["focus_min"] if p["mode"] == "focus" else p["break_min"]) * 60
+        self._pomo_main_btn.configure(text=self.t("pomo_start", "开始"))
+        self._pomo_update()
+    def _pomo_advance(self):
+        p = self._pomo
+        if p["after"]:
+            try: self.after_cancel(p["after"])
+            except Exception: pass
+        p["mode"] = self._pomo_next_mode(p["mode"])
+        p["remain"] = (p["focus_min"] if p["mode"] == "focus" else p["break_min"]) * 60
+        self._pomo_mode_var.set(self.t("pomo_focus", "专注中") if p["mode"] == "focus"
+                                else self.t("pomo_break", "休息中"))
+        self._pomo_update()
+        self.beep()
+        self.toast(self._pomo_mode_var.get(), ms=2500)
+        if p["running"]:
+            p["after"] = self.after(1000, self._pomo_tick)
+    def _pomo_apply_settings(self):
+        try:
+            f = int(self._pomo_focus_e.get()); b = int(self._pomo_break_e.get())
+            if not (1 <= f <= 180 and 1 <= b <= 60): raise ValueError
+        except Exception:
+            self.toast(self.t("pomo_bad", "请输入有效分钟数"), ms=2000); return
+        p = self._pomo
+        p["focus_min"], p["break_min"] = f, b
+        if not p["running"]:
+            self._pomo_reset()
+        self.toast(self.t("pomo_saved", "已应用"), ms=1500)
 
     def _show_main(self):
         self.deiconify(); self.lift()
