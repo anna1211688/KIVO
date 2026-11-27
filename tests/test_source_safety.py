@@ -335,5 +335,56 @@ class AiModelCatalogTests(unittest.TestCase):
         self.assertIn("chat_model_box.bind(\"<<ComboboxSelected>>\", switch_chat_model)", body)
 
 
+class AiStreamingTests(unittest.TestCase):
+    def test_stream_parser_emits_tokens_and_returns_combined_content(self):
+        from unittest.mock import patch
+        fetch = load_function("_ai_chat_messages")
+        import json
+
+        class FakeResponse:
+            def __init__(self):
+                self.lines = [
+                    b'data: {"choices":[{"delta":{"content":"Hello "}}]}\\n',
+                    b'data: {"choices":[{"delta":{"content":"KIVO"}}]}\\n',
+                    b'data: [DONE]\\n',
+                ]
+            def __enter__(self): return self
+            def __exit__(self, *args): return False
+            def readline(self, _limit): return self.lines.pop(0) if self.lines else b""
+            def read(self, _limit): return b""
+
+        class FakeApp:
+            _http_base = staticmethod(lambda value: value.rstrip("/"))
+            t = staticmethod(lambda _key, fallback: fallback)
+
+        captured = {}
+        def fake_open(req, timeout):
+            captured["payload"] = json.loads(req.data.decode("utf-8"))
+            captured["timeout"] = timeout
+            return FakeResponse()
+
+        pieces = []
+        with patch("urllib.request.urlopen", side_effect=fake_open):
+            result = fetch(FakeApp(), [{"role": "user", "content": "Hi"}],
+                           cfg={"key": "test", "base": "https://api.example.com/v1",
+                                "model": "test-model", "service": "openai"},
+                           stream_callback=pieces.append)
+        self.assertEqual(result, "Hello KIVO")
+        self.assertEqual(pieces, ["Hello ", "KIVO"])
+        self.assertTrue(captured["payload"]["stream"])
+        self.assertEqual(captured["timeout"], 90)
+
+    def test_streaming_source_has_cancel_and_response_limits(self):
+        body = method_text("_ai_chat_messages")
+        self.assertIn('req_payload["stream"] = True', body)
+        self.assertIn('data_line == "[DONE]"', body)
+        self.assertIn("cancel_event.is_set()", body)
+        self.assertIn("1024 * 1024 + 1", body)
+        panel = method_text("_build_ai_panel")
+        self.assertIn("def stop_reply():", panel)
+        self.assertIn('ev.set()', panel)
+        self.assertIn('text="停止"', panel)
+
+
 if __name__ == "__main__":
     unittest.main()
