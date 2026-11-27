@@ -4787,7 +4787,7 @@ try {
                     self._ui_queue.put(done)
                 except Exception as exc:
                     msg = str(exc)
-                    self._ui_queue.put(lambda: test_var.set("获取模型失败: " + msg))
+                    self._ui_queue.put(lambda msg=msg: test_var.set("获取模型失败: " + msg))
             threading.Thread(target=work, daemon=True).start()
         ttk.Button(parent, text="获取模型", command=fetch_models).grid(row=2, column=2, sticky="w", padx=4, pady=4)
         ttk.Label(parent, text=self.t("ai_baseurl", "接口地址:")).grid(row=3, column=0, sticky="e", padx=8, pady=4)
