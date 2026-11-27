@@ -1954,6 +1954,22 @@ class App(tk.Tk):
         nentry.bind("<Return>", lambda _e: self._apply_proxy_ui())
         ttk.Label(nfrm, text=self.t("net_note", "「跟随系统」自动使用科学上网工具开启的系统代理，开关代理无需重启软件；「手动代理」填本机代理端口，如 127.0.0.1:7890；访问 Google、OpenAI 等国际服务需要开启代理。本机服务（如 Ollama）会自动绕过代理。"),
                   foreground=self.UI_MUTED, wraplength=560, justify="left").pack(anchor="w", padx=4, pady=(0, 4))
+        mfrm2 = self._set_section(frm, self.t("set_mirror_frame", "更新镜像"))
+        mrow = ttk.Frame(mfrm2); mrow.pack(fill="x", pady=4, padx=4)
+        ttk.Label(mrow, text=self.t("mirror_addr", "镜像地址:")).pack(side="left")
+        self._mirror_var = tk.StringVar(value=self.cfg.get("Network", "UpdateMirror", fallback=""))
+        m_entry = ttk.Entry(mrow, textvariable=self._mirror_var, width=34)
+        m_entry.pack(side="left", padx=4)
+        def save_mirror():
+            v = (self._mirror_var.get() or "").strip().rstrip("/")
+            if v and not re.fullmatch(r"https?://[A-Za-z0-9.\-]+(?::\d+)?(?:/[^\s]*)?", v):
+                self.toast(self.t("mirror_bad", "请输入合法的 http(s) 地址"), ms=2200); return
+            self.cfg.set("Network", "UpdateMirror", v); self.save_config()
+            self.toast(self.t("mirror_saved", "更新镜像已保存"), ms=1500)
+        ttk.Button(mrow, text=self.t("mirror_save", "保存"), style="Small.TButton",
+                   command=save_mirror).pack(side="left", padx=4)
+        ttk.Label(mfrm2, text=self.t("mirror_note", "留空 = 不启用，检查更新直连 GitHub。填写后优先走镜像（需为 GitHub 兼容反代，路径与 github.com 一致），镜像失败再回退 GitHub；适合无法稳定访问 GitHub 的网络。"),
+                  foreground=self.UI_MUTED, wraplength=560, justify="left").pack(anchor="w", padx=4, pady=(0, 4))
         hfrm = self._set_section(frm, self.t("set_hist_frame", "截图历史"))
         self._hist_save_var = tk.BooleanVar(value=self.cfg.get("Snip", "HistorySave", fallback="1").strip() != "0")
         self._hist_max_var = tk.StringVar(value=self.cfg.get("Snip", "HistoryMax", fallback="100"))
@@ -2097,16 +2113,26 @@ class App(tk.Tk):
         tail = s.split(marker, 1)[1]
         return tail.strip("/").split("?", 1)[0].strip()
 
-    def _probe_latest_tag(self):
-        """备用通道: github.com 网页 releases/latest 会 302 到 /releases/tag/<tag>。
-        api.github.com 被墙但 github.com 可达时, 至少能查到新版本号 (无资产信息, 只能打开发布页手动下载)。"""
+    def _update_mirror_base(self):
+        """更新镜像 base (v1.6.2): [Network] UpdateMirror, 默认空=不启用; 约定为 GitHub 兼容反代,
+        路径与 github.com / api.github.com 完全一致 (如 https://example.com/repos/.../releases/latest)。"""
+        return (self.cfg.get("Network", "UpdateMirror", fallback="") or "").strip().rstrip("/")
+    def _mirror_rewrite(self, url):
+        """把 github.com / api.github.com 的 URL 改写到镜像 base; 无镜像或非 GitHub 地址原样返回。"""
+        base = self._update_mirror_base()
+        if not base or not url: return url
+        m = re.match(r"https?://(?:api\.)?github\.com(/.*)", url)
+        return base + m.group(1) if m else url
+    def _probe_latest_tag(self, page_url):
+        """备用通道: 网页 releases/latest 会 302 到 /releases/tag/<tag>。
+        API 被墙但网页可达时, 至少能查到新版本号 (无资产信息, 只能打开发布页手动下载)。"""
         import urllib.request
         class _RedirectFound(Exception):
             def __init__(self, location): self.location = location
         class _StopRedirect(urllib.request.HTTPRedirectHandler):
             def redirect_request(self, rq, fp, code, msg, headers, newurl):
                 raise _RedirectFound(newurl)
-        req = urllib.request.Request(self._RELEASE_PAGE, headers={"User-Agent": "KIVO/" + VERSION})
+        req = urllib.request.Request(page_url, headers={"User-Agent": "KIVO/" + VERSION})
         opener = urllib.request.build_opener(
             urllib.request.ProxyHandler(_resolve_proxies()), _StopRedirect)
         try:
@@ -2117,26 +2143,38 @@ class App(tk.Tk):
 
     def _fetch_latest_release(self):
         import urllib.request
-        # 主通道: GitHub API (含资产地址, 支持一键更新), 超时/失败重试一次 (国内 api.github.com 抖动常见)
-        for attempt_timeout in (10, 12):
+        base = self._update_mirror_base()
+        # 通道顺序: 配了镜像先镜像 (API→网页), 再 GitHub (API→网页); 每个 API 通道超时重试一次
+        channels = []
+        if base:
+            channels.append((base + "/repos/anna1211688/KIVO/releases/latest",
+                             base + "/anna1211688/KIVO/releases/latest", True))
+        channels.append((self._RELEASE_API, self._RELEASE_PAGE, False))
+        last_page = self._RELEASE_PAGE
+        for api_url, page_url, is_mirror in channels:
+            for attempt_timeout in (10, 12):
+                try:
+                    req = urllib.request.Request(api_url,
+                        headers={"User-Agent": "KIVO/" + VERSION, "Accept": "application/vnd.github+json"})
+                    with _open_url_loose(req, timeout=attempt_timeout) as r:
+                        data = json.loads(r.read().decode("utf-8", "replace"))
+                    setup_url, setup_name = self._pick_setup_asset(data)
+                    sig_url = self._pick_sig_asset(data, setup_name) if setup_name else ""
+                    if is_mirror:  # 镜像返回的资产地址可能仍指向 github.com, 统一改写走镜像
+                        setup_url = self._mirror_rewrite(setup_url); sig_url = self._mirror_rewrite(sig_url)
+                    html_url = str(data.get("html_url") or page_url)
+                    return str(data.get("tag_name") or ""), html_url, setup_url, setup_name, sig_url
+                except Exception:
+                    continue
             try:
-                req = urllib.request.Request(self._RELEASE_API,
-                    headers={"User-Agent": "KIVO/" + VERSION, "Accept": "application/vnd.github+json"})
-                with _open_url_loose(req, timeout=attempt_timeout) as r:
-                    data = json.loads(r.read().decode("utf-8", "replace"))
-                setup_url, setup_name = self._pick_setup_asset(data)
-                sig_url = self._pick_sig_asset(data, setup_name) if setup_name else ""
-                return str(data.get("tag_name") or ""), str(data.get("html_url") or self._RELEASE_PAGE), setup_url, setup_name, sig_url
+                tag = self._probe_latest_tag(page_url)
+                if tag:
+                    last_page = page_url
+                    return tag, page_url, "", "", ""
             except Exception:
-                continue
-        # 备用通道: 网页 302 只取版本号; 成功时资产留空, UI 只给「打开发布页」
-        try:
-            tag = self._probe_latest_tag()
-            if tag: return tag, self._RELEASE_PAGE, "", "", ""
-        except Exception:
-            pass
+                pass
         raise RuntimeError(self.t("upd_fail_hint",
-            "无法连接更新服务器：开启代理后重试，或到发布页手动下载"))
+            "无法连接更新服务器：开启代理或配置更新镜像后重试，或到发布页手动下载"))
 
     def _check_update(self):
         if getattr(self, "_upd_busy", False): return

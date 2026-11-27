@@ -1278,9 +1278,9 @@ class UpdateFallbackTests(unittest.TestCase):
                            {"_resolve_proxies": lambda: {}, "VERSION": "1.6.1"})
         try:
             class Stub:
-                _RELEASE_PAGE = f"http://127.0.0.1:{port}/latest"
                 _tag_from_location = staticmethod(tag_fn)
-            self.assertEqual(fn(Stub()), "v1.6.1")
+            page = f"http://127.0.0.1:{port}/latest"
+            self.assertEqual(fn(Stub(), page), "v1.6.1")
         finally:
             srv.shutdown()
 
@@ -1695,3 +1695,46 @@ class WindowManagerTests(unittest.TestCase):
         self.assertIn('self._winman_track(True)', SOURCE)
         # 非 Windows 平台必须安全降级
         self.assertIn('if sys.platform != "win32": return None', SOURCE)
+
+
+class UpdateMirrorTests(unittest.TestCase):
+    """v1.6.2 更新镜像: URL 改写、通道顺序与设置接线。"""
+
+    @classmethod
+    def setUpClass(cls):
+        app_node = next(n for n in TREE.body if isinstance(n, ast.ClassDef) and n.name == "App")
+        cls.ns = {"re": re}
+        for name in ("_update_mirror_base", "_mirror_rewrite", "_fetch_latest_release"):
+            node = next(n for n in app_node.body if isinstance(n, ast.FunctionDef) and n.name == name)
+            exec(ast.get_source_segment(SOURCE, node), cls.ns)
+
+    def _stub(self, mirror):
+        import configparser
+        class Stub:
+            cfg = configparser.RawConfigParser()
+        Stub.cfg.add_section("Network")
+        Stub.cfg.set("Network", "UpdateMirror", mirror or "")
+        Stub._update_mirror_base = self.ns["_update_mirror_base"]
+        return Stub()
+
+    def test_rewrite_with_mirror(self):
+        s = self._stub("https://mirror.example")
+        f = self.ns["_mirror_rewrite"]
+        self.assertEqual(f(s, "https://github.com/anna1211688/KIVO/releases/latest"),
+                         "https://mirror.example/anna1211688/KIVO/releases/latest")
+        self.assertEqual(f(s, "https://api.github.com/repos/anna1211688/KIVO/releases/latest"),
+                         "https://mirror.example/repos/anna1211688/KIVO/releases/latest")
+        self.assertEqual(f(s, "https://other.com/x"), "https://other.com/x")
+
+    def test_rewrite_without_mirror(self):
+        s = self._stub("")
+        f = self.ns["_mirror_rewrite"]
+        self.assertEqual(f(s, "https://github.com/x"), "https://github.com/x")
+
+    def test_channel_order_and_settings(self):
+        # 镜像通道排在 GitHub 之前
+        i_mirror = SOURCE.find('channels.append((base + "/repos/')
+        i_github = SOURCE.find("channels.append((self._RELEASE_API")
+        self.assertTrue(0 < i_mirror < i_github)
+        self.assertIn('"UpdateMirror"', SOURCE)
+        self.assertIn("def _probe_latest_tag(self, page_url)", SOURCE)
