@@ -7178,9 +7178,36 @@ try {
             inp.focus_set()
         # ---- 顶栏: 标题 + 服务名, 右侧 返回 / 清空 (文字链) ----
         head = tk.Frame(chatcol, background=CHAT_BG); head.pack(fill="x", padx=14, pady=(10, 6))
-        svc_name = self._ai_preset_name(self._ai_cfg()["service"])
         self._panel_title(head, self.t("ai_chat", "AI 助手"), "ai", bg=CHAT_BG)
-        tk.Label(head, text=f"  {svc_name}", font=self._ui_font(9), background=CHAT_BG, foreground=TXT_MUTED).pack(side="left")
+        # 聊天窗口快捷模型切换：只改变 AI 聊天路由，不覆盖看图/翻译等功能的独立分工。
+        chat_model_map = {}
+        chat_model_var = tk.StringVar()
+        def refresh_chat_models():
+            chat_model_map.clear()
+            values = []
+            for svc_key in self._AI_PRESETS:
+                cfg = self._ai_cfg(svc_key)
+                if not cfg.get("key"): continue
+                label = "%s · %s" % (self._ai_preset_name(svc_key), cfg.get("model") or "(未设置模型)")
+                chat_model_map[label] = svc_key
+                values.append(label)
+            chat_model_box.configure(values=values)
+            current = self._ai_cfg_for("chat")
+            current_label = next((label for label, key in chat_model_map.items()
+                                  if key == current.get("service")), "")
+            if current_label: chat_model_var.set(current_label)
+            elif values: chat_model_var.set(values[0])
+        def switch_chat_model(*_):
+            svc_key = chat_model_map.get(chat_model_var.get())
+            if not svc_key: return
+            if not self.cfg.has_section("AI"): self.cfg.add_section("AI")
+            self.cfg.set("AI", "RouteChat", svc_key)
+            self.save_config()
+            self.status.set("AI 聊天模型已切换: " + chat_model_var.get())
+        chat_model_box = ttk.Combobox(head, textvariable=chat_model_var, width=30, state="readonly")
+        chat_model_box.pack(side="left", padx=(8, 4))
+        chat_model_box.bind("<<ComboboxSelected>>", switch_chat_model)
+        refresh_chat_models()
         self._ai_think_var = tk.BooleanVar(value=(self.cfg.get("AI", "Thinking", fallback="0") or "0").strip() == "1")  # 深度思考开关: 挂在输入框 + 菜单里 (仿 GPT), 保存见 _save_ai_thinking
         busy = {"on": False}
         def link(parent, text, cmd):
