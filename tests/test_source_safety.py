@@ -321,6 +321,30 @@ class HardeningTests(unittest.TestCase):
         self.assertIn('n.startswith("ai_chat_images/")', restore)
         self.assertIn("len(image_names) > 500", restore)
 
+    def test_attachment_reader_rejects_oversized_before_reading(self):
+        read_attachment = _load_with_ns("_read_text_attachment", {})
+        with tempfile.TemporaryDirectory() as td:
+            path = os.path.join(td, "large.txt")
+            with open(path, "wb") as f:
+                f.write(b"x" * 128)
+            with self.assertRaises(ValueError):
+                read_attachment(path, max_bytes=64)
+
+    def test_attachment_reader_decodes_and_caps_text(self):
+        read_attachment = _load_with_ns("_read_text_attachment", {})
+        with tempfile.TemporaryDirectory() as td:
+            path = os.path.join(td, "sample.txt")
+            with open(path, "wb") as f:
+                f.write("中文内容".encode("utf-8"))
+            self.assertEqual(read_attachment(path), "中文内容")
+            self.assertTrue(read_attachment(path, max_chars=2).startswith("中文"))
+
+    def test_ai_history_loader_checks_size_before_read(self):
+        body = method_text("_load_ai_chats")
+        self.assertIn("os.path.getsize(p) > max_file_bytes", body)
+        self.assertIn("f.read(max_file_bytes + 1)", body)
+        self.assertIn('len(m["content"]) <= max_message_chars', body)
+
 
 if __name__ == "__main__":
     unittest.main()
