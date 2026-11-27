@@ -285,5 +285,49 @@ class HardeningTests(unittest.TestCase):
         self.assertIn("dt.astimezone()", SOURCE)  # 约时间换算按目标日期取时区偏移
 
 
+
+class AiModelCatalogTests(unittest.TestCase):
+    def test_model_catalog_filters_invalid_ids_and_deduplicates(self):
+        import io
+        from unittest.mock import patch
+        fetch = load_function("_ai_fetch_models")
+
+        class FakeResponse:
+            def __enter__(self): return self
+            def __exit__(self, *args): return False
+            def read(self, _limit):
+                return b'{"data":[{"id":"gpt-4o"},{"id":"deepseek-chat"},{"id":"gpt-4o"},{"id":""},{"id":7},{"id":"bad\\nmodel"}]}'
+
+        class FakeApp:
+            _http_base = staticmethod(lambda value: value.rstrip("/"))
+
+        with patch("urllib.request.urlopen", return_value=FakeResponse()):
+            result = fetch(FakeApp(), {"base": "https://api.example.com/v1", "key": "test"})
+        self.assertEqual(result, ["deepseek-chat", "gpt-4o"])
+
+    def test_model_catalog_rejects_oversized_response(self):
+        from unittest.mock import patch
+
+        fetch = load_function("_ai_fetch_models")
+
+        class FakeResponse:
+            def __enter__(self): return self
+            def __exit__(self, *args): return False
+            def read(self, limit): return b"x" * limit
+
+        class FakeApp:
+            _http_base = staticmethod(lambda value: value.rstrip("/"))
+
+        with patch("urllib.request.urlopen", return_value=FakeResponse()):
+            with self.assertRaisesRegex(RuntimeError, "响应过大"):
+                fetch(FakeApp(), {"base": "https://api.example.com/v1", "key": "test"})
+
+    def test_model_catalog_has_timeout_and_result_cap(self):
+        body = method_text("_ai_fetch_models")
+        self.assertIn("timeout=max(3, min(int(timeout), 30))", body)
+        self.assertIn("items[:500]", body)
+        self.assertIn("2 * 1024 * 1024 + 1", body)
+
+
 if __name__ == "__main__":
     unittest.main()
