@@ -2155,7 +2155,6 @@ class App(tk.Tk):
             channels.append((base + "/repos/anna1211688/KIVO/releases/latest",
                              base + "/anna1211688/KIVO/releases/latest", True))
         channels.append((self._RELEASE_API, self._RELEASE_PAGE, False))
-        last_page = self._RELEASE_PAGE
         for api_url, page_url, is_mirror in channels:
             for attempt_timeout in (10, 12):
                 try:
@@ -2174,7 +2173,6 @@ class App(tk.Tk):
             try:
                 tag = self._probe_latest_tag(page_url)
                 if tag:
-                    last_page = page_url
                     return tag, page_url, "", "", ""
             except Exception:
                 pass
@@ -9682,7 +9680,6 @@ try {
                 except Exception as e:
                     self.status.set(f"图片保存失败: {e}")
                     return
-            image_path = image_paths[0] if image_paths else None
             inp.delete("1.0", "end")
             f = pending_render.get("flush")
             if f is not None:  # 长对话还没铺完就发了消息: 先把旧消息补完, 保证新气泡在最下面
@@ -10861,7 +10858,6 @@ try {
                    command=lambda: (win.destroy(), self._pick_screen_color())).pack(side="left")
         grid = tk.Frame(win, bg=self.UI_BG); grid.pack(fill="both", expand=True, padx=12)
         detail = tk.Frame(win, bg=self.UI_BG); detail.pack(fill="x", padx=12, pady=(0, 12))
-        detail_lbs = {}
         def show_detail(hexv):
             fmts = self._color_formats(hexv)
             for w in detail.winfo_children(): w.destroy()
@@ -10941,7 +10937,6 @@ try {
                     cv.create_line(i, 0, i, tick, fill="#5B4A00")
                     if major: cv.create_text(i + 2, thick - 2, text=str(i), anchor="e",
                                              font=("Consolas", 8), fill="#5B4A00")
-            close_pos = thick - 14
             if vertical:
                 cv.create_text(thick // 2, 12, text="×", fill="#B00020", font=("Segoe UI", 12, "bold"))
                 cv.create_text(thick // 2, 28, text="⇄", fill="#5B4A00", font=("Segoe UI", 10))
@@ -11387,7 +11382,6 @@ try {
         self._forget_aux_panels()
         self._project_panel.pack(fill="both", expand=True, before=self._status_sep)
     def _build_project_panel(self):
-        from tkinter import font as tkfont
         panel = tk.Frame(self._content, background="#FFFFFF"); self._project_panel = panel
         self._projects = self._load_projects()
         self._current_project = None
