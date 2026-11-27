@@ -4554,6 +4554,52 @@ try {
         if m > 1600: im = im.resize((max(1, round(w * 1600 / m)), max(1, round(h * 1600 / m))), Image.LANCZOS)
         buf = io.BytesIO(); im.save(buf, "JPEG", quality=82)
         return "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode("ascii")
+    def _save_ai_chat_image(self, img):
+        """Persist a chat image as a bounded JPEG and return a BASE-relative path."""
+        import uuid
+        folder = os.path.join(BASE, "ai_chat_images")
+        os.makedirs(folder, exist_ok=True)
+        im = img.convert("RGB")
+        width, height = im.size
+        longest = max(width, height)
+        if longest > 1600:
+            im = im.resize((max(1, round(width * 1600 / longest)),
+                            max(1, round(height * 1600 / longest))), Image.LANCZOS)
+        name = uuid.uuid4().hex + ".jpg"
+        path = os.path.join(folder, name)
+        im.save(path, "JPEG", quality=82, optimize=True)
+        return os.path.relpath(path, BASE).replace(os.sep, "/")
+
+    def _ai_chat_history_messages(self, history):
+        """Build recent API messages, restoring locally persisted images when available."""
+        messages = []
+        image_root = os.path.abspath(os.path.join(BASE, "ai_chat_images"))
+        for item in history[-20:]:
+            if not isinstance(item, dict) or item.get("role") not in ("user", "assistant"):
+                continue
+            content = item.get("content")
+            if not isinstance(content, str):
+                continue
+            payload_content = content
+            relative = item.get("image_path")
+            if item.get("role") == "user" and isinstance(relative, str):
+                try:
+                    normalized = os.path.normpath(relative.replace("/", os.sep))
+                    candidate = os.path.abspath(os.path.join(BASE, normalized))
+                    if (normalized.startswith("ai_chat_images" + os.sep)
+                            and os.path.commonpath((image_root, candidate)) == image_root
+                            and os.path.isfile(candidate) and os.path.getsize(candidate) <= 8 * 1024 * 1024):
+                        with Image.open(candidate) as source:
+                            image = source.convert("RGB")
+                        payload_content = [
+                            {"type": "text", "text": content},
+                            {"type": "image_url", "image_url": {"url": self._ai_image_dataurl(image)}},
+                        ]
+                except (OSError, ValueError):
+                    pass
+            messages.append({"role": item["role"], "content": payload_content})
+        return messages
+
     def _ai_chat_image(self, img, prompt, cfg=None, temperature=0.7, timeout=90, route=None):
         """把图+提示词发给视觉模型, 返回模型回复的纯文本; 配置缺失/接口出错抛 RuntimeError (带人话原因)。
         只用标准库 urllib, 不加新依赖; 调用方必须在后台线程里调 (网络往返几秒起)。
@@ -4903,7 +4949,15 @@ try {
                         out = []
                         for c in data:
                             if isinstance(c, dict) and isinstance(c.get("messages"), list):
-                                msgs = [m for m in c["messages"] if isinstance(m, dict) and m.get("role") in ("user", "assistant") and isinstance(m.get("content"), str)][-200:]
+                                msgs = []
+                                for m in c["messages"][-200:]:
+                                    if not (isinstance(m, dict) and m.get("role") in ("user", "assistant")
+                                            and isinstance(m.get("content"), str)):
+                                        continue
+                                    item = {"role": m["role"], "content": m["content"]}
+                                    if isinstance(m.get("image_path"), str):
+                                        item["image_path"] = m["image_path"]
+                                    msgs.append(item)
                                 if msgs: out.append({"id": c.get("id"), "title": str(c.get("title") or "新对话"), "updated": c.get("updated") or 0, "pin": 1 if c.get("pin") else 0, "messages": msgs})
                         return out
             except Exception: continue
@@ -7188,7 +7242,8 @@ try {
         def add_bubble(role, text, with_regen=False, msg_ref=None):
             row = tk.Frame(inner, background=CHAT_BG); row.pack(fill="x", pady=(10, 0), padx=14)
             if role == "user":
-                bubble(row, text, self.UI_ACCENT, "#FFFFFF").pack(anchor="e")
+                display_text = ("🖼 " + text) if msg_ref and msg_ref.get("image_path") else text
+                bubble(row, display_text, self.UI_ACCENT, "#FFFFFF").pack(anchor="e")
             else:
                 # 豆包式 (Jane 2026-11-27 改主意, 照豆包截图): 图标行在气泡内部、文字下方一条细线隔开;
                 # 蓝色小方片依次 复制/朗读/点赞/点踩/分享, 重新生成是右端一个刷新方片 (只有最新一条回复有)
@@ -7267,19 +7322,16 @@ try {
             if send_ui["cv"] is not None:
                 fill = self.UI_ACCENT if on else "#B9C2CE"
                 send_ui["cv"].itemconfigure("pill", fill=fill, outline=fill)
-        def request_reply(img=None, img_prompt=None):
+        def request_reply():
             busy["on"] = True; set_send_enabled(False)
             show_typing()
             import threading
-            msgs = list(self._ai_chat_history[-20:])
             hist_ref = self._ai_chat_history  # 记住这条回复属于哪个对话: 等回复期间切到别的对话, 回复不能串过去
             cid_ref = getattr(self, "_ai_chat_id", None)
             def work():
                 try:
-                    if img is not None:  # 带图提问: 这一轮走看图通道 (聊天分工), 图不进历史, 追问按纯文本继续
-                        r = self._ai_chat_image(img, img_prompt or "", route="chat")
-                    else:
-                        r = self._ai_chat_messages(msgs, max_tokens=2048, route="chat")
+                    msgs = self._ai_chat_history_messages(hist_ref)
+                    r = self._ai_chat_messages(msgs, max_tokens=2048, route="chat")
                     def done():
                         busy["on"] = False
                         if self._ai_chat_history is hist_ref:
@@ -7423,11 +7475,18 @@ try {
             text = inp.get("1.0", "end").strip()
             if busy["on"]: return
             if not text and attach["kind"] is None: return  # 没打字也没附件: 不发空消息; 有附件没打字也能发 (图/文件本身就是问题)
+            img = attach["img"] if attach["kind"] == "image" else None
+            image_path = None
+            if img is not None:
+                try:
+                    image_path = self._save_ai_chat_image(img)
+                except Exception as e:
+                    self.status.set(f"图片保存失败: {e}")
+                    return
             inp.delete("1.0", "end")
             if rows and not self._ai_chat_history:
                 for r in rows: r.destroy()
                 rows.clear()
-            img = attach["img"] if attach["kind"] == "image" else None
             if attach["kind"] == "image":
                 disp = ("🖼 " + text) if text else self.t("ai_img_look", "看看这张图")
                 hist_text = text or "请描述这张图的内容。"
@@ -7436,11 +7495,14 @@ try {
                 hist_text = f"【附件文件 {attach['name']} 内容】\n{attach['text']}\n【附件结束】\n" + (text or "请看看这个文件, 总结要点。")
             else:
                 disp = text; hist_text = text
-            self._ai_chat_history.append({"role": "user", "content": hist_text})
+            user_message = {"role": "user", "content": hist_text}
+            if image_path:
+                user_message["image_path"] = image_path
+            self._ai_chat_history.append(user_message)
             add_bubble("user", disp)
             self._save_current_chat()
             clear_attach()
-            request_reply(img=img, img_prompt=hist_text if img is not None else None)
+            request_reply()
         send_cv.bind("<Button-1>", lambda e: send_ui["enabled"] and send())
         def on_enter(e):
             if e.state & 0x1: return None  # Shift+回车: 换行
