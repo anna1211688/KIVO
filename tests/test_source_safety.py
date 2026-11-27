@@ -1082,3 +1082,36 @@ class UiPhase2Tests(unittest.TestCase):
     def test_ui_tokens_for_p2(self):
         self.assertIn('UI_ACCENT_LINE = "#BFDBFE"', self.src)
         self.assertIn("R_CARD", self.src)
+
+
+class UiPhase3Tests(unittest.TestCase):
+    """UI P3 (2026-11-28): 全局控件交互态令牌化 + 旧灰文字收口 + 迷你窗口重排。"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.src = open(os.path.join(ROOT, "main.py"), encoding="utf-8").read()
+
+    def test_interaction_tokens_defined(self):
+        for tok, val in (("UI_HOVER", "#E8F1FE"), ("UI_PRESS", "#DBEAFE"),
+                         ("UI_DANGER_LINE", "#FCA5A5"), ("UI_DANGER_HOVER", "#FEE2E2"), ("UI_DANGER_PRESS", "#FECACA")):
+            self.assertIn(f'{tok} = "{val}"', self.src)
+
+    def test_theme_maps_use_tokens_not_old_tints(self):
+        self.assertNotIn('"#E3EEFF"', self.src)  # 旧 hover 底
+        self.assertNotIn('"#CFE2FF"', self.src)  # 旧按下底
+        self.assertNotIn('"#FDECEC"', self.src)  # 旧危险底
+        self.assertNotIn('bordercolor="#BCD6FF"', self.src)
+        self.assertIn('st.map("TButton", background=[("active", self.UI_HOVER), ("pressed", self.UI_PRESS)]', self.src)
+        self.assertIn('st.configure("Danger.TButton", background=self.UI_DANGER_BG, foreground=self.UI_DANGER', self.src)
+
+    def test_old_muted_gray_replaced(self):
+        self.assertNotIn('foreground="#888888"', self.src)
+
+    def test_mini_window_layout(self):
+        self.assertIn('w.geometry(f"320x400+', self.src)
+        self.assertIn('w.configure(background=self.UI_BG)', self.src)
+        self.assertIn('self.t("mini_hint", "双击一行 = 从这行开始粘贴")', self.src)
+        # 5 个按钮全部小号样式 (命令与文案没动)
+        for label in ("set_mini_lock", "cmn_delete", "set_mini_delall"):
+            line = [l for l in self.src.splitlines() if f'self.t("{label}"' in l and "ttk.Button(bar" in l and "width=" in l]
+            self.assertTrue(line and 'style="Small.TButton"' in line[0], label)

@@ -1186,6 +1186,11 @@ class App(tk.Tk):
     UI_SOFT = "#F3F6FB"      # 胶囊按钮/搜索框的浅灰底
     UI_DANGER = "#DC2626"    # 危险文字 (删除类)
     UI_DANGER_BG = "#FEF2F2" # 危险浅底
+    UI_DANGER_LINE = "#FCA5A5"  # 危险描边 (P3: 删除类按钮轮廓)
+    UI_DANGER_HOVER = "#FEE2E2"  # 危险悬停
+    UI_DANGER_PRESS = "#FECACA"  # 危险按下
+    UI_HOVER = "#E8F1FE"     # 中性控件悬停底 (P3 统一, 原 #E3EEFF)
+    UI_PRESS = "#DBEAFE"     # 中性控件按下底 (P3 统一, 原 #CFE2FF)
     UI_SUCCESS = "#16A34A"
     UI_SIDE = "#111C2E"      # 边栏底 (比旧 #172235 更深: 与内容区的明度差拉大, 边界不再靠一条线)
     UI_SIDE_TEXT = "#8FA3BE"  # 边栏未选中文字
@@ -1253,37 +1258,37 @@ class App(tk.Tk):
             st.configure("TLabelframe.Label", background=bg, foreground="#475569", font=fb)
             st.configure("TButton", background=self.UI_SURFACE, foreground=tx, bordercolor=bd,
                          padding=(12, 6), relief="solid", borderwidth=1, focusthickness=0)  # 统一 12/6 内边距, 按钮不再忽胖忽瘦
-            st.map("TButton", background=[("active", "#E3EEFF"), ("pressed", "#CFE2FF")],
+            st.map("TButton", background=[("active", self.UI_HOVER), ("pressed", self.UI_PRESS)],
                    bordercolor=[("focus", self.UI_ACCENT)])
-            st.configure("Outline.TButton", background="#FFFFFF", foreground=self.UI_ACCENT,
-                         bordercolor="#BCD6FF", padding=(10, 5), relief="solid", borderwidth=1, focusthickness=0)
-            st.map("Outline.TButton", background=[("active", "#EBF2FF"), ("pressed", "#D8E8FF")])
+            st.configure("Outline.TButton", background=self.UI_SURFACE, foreground=self.UI_ACCENT,
+                         bordercolor=self.UI_ACCENT_LINE, padding=(10, 5), relief="solid", borderwidth=1, focusthickness=0)
+            st.map("Outline.TButton", background=[("active", self.UI_ACCENT_TINT), ("pressed", self.UI_HOVER)])
             st.configure("Tool.TButton", background=self.UI_SURFACE, foreground=tx, bordercolor=bd,
                          padding=(6, 5), relief="solid", borderwidth=1, focusthickness=0)
-            st.map("Tool.TButton", background=[("active", "#E3EEFF"), ("pressed", "#CFE2FF")],
+            st.map("Tool.TButton", background=[("active", self.UI_HOVER), ("pressed", self.UI_PRESS)],
                    bordercolor=[("focus", self.UI_ACCENT)])
-            st.configure("ToolOutline.TButton", background="#FFFFFF", foreground=self.UI_ACCENT,
-                         bordercolor="#BCD6FF", padding=(6, 5), relief="solid", borderwidth=1, focusthickness=0)
-            st.map("ToolOutline.TButton", background=[("active", "#EBF2FF"), ("pressed", "#D8E8FF")])
-            st.configure("Danger.TButton", background="#FDECEC", foreground="#C0392B", bordercolor="#F0C4C4",
+            st.configure("ToolOutline.TButton", background=self.UI_SURFACE, foreground=self.UI_ACCENT,
+                         bordercolor=self.UI_ACCENT_LINE, padding=(6, 5), relief="solid", borderwidth=1, focusthickness=0)
+            st.map("ToolOutline.TButton", background=[("active", self.UI_ACCENT_TINT), ("pressed", self.UI_HOVER)])
+            st.configure("Danger.TButton", background=self.UI_DANGER_BG, foreground=self.UI_DANGER, bordercolor=self.UI_DANGER_LINE,
                          padding=(10, 5), relief="solid", borderwidth=1, focusthickness=0)
-            st.map("Danger.TButton", background=[("active", "#FBDADA"), ("pressed", "#F6C8C8")])
+            st.map("Danger.TButton", background=[("active", self.UI_DANGER_HOVER), ("pressed", self.UI_DANGER_PRESS)])
             st.configure("Calc.TButton", background=self.UI_SURFACE, foreground=tx, bordercolor=bd,
                          padding=(20, 15), font=self._ui_font(18), relief="solid", borderwidth=1, focusthickness=0)
-            st.map("Calc.TButton", background=[("active", "#E3EEFF"), ("pressed", "#CFE2FF")],
+            st.map("Calc.TButton", background=[("active", self.UI_HOVER), ("pressed", self.UI_PRESS)],
                    bordercolor=[("focus", self.UI_ACCENT)])
-            st.configure("CalcOutline.TButton", background="#FFFFFF", foreground=self.UI_ACCENT,
-                         bordercolor="#BCD6FF", padding=(20, 15), font=self._ui_font(18), relief="solid", borderwidth=1, focusthickness=0)
-            st.map("CalcOutline.TButton", background=[("active", "#EBF2FF"), ("pressed", "#D8E8FF")])
-            st.configure("CalcDanger.TButton", background="#FDECEC", foreground="#C0392B", bordercolor="#F0C4C4",
+            st.configure("CalcOutline.TButton", background=self.UI_SURFACE, foreground=self.UI_ACCENT,
+                         bordercolor=self.UI_ACCENT_LINE, padding=(20, 15), font=self._ui_font(18), relief="solid", borderwidth=1, focusthickness=0)
+            st.map("CalcOutline.TButton", background=[("active", self.UI_ACCENT_TINT), ("pressed", self.UI_HOVER)])
+            st.configure("CalcDanger.TButton", background=self.UI_DANGER_BG, foreground=self.UI_DANGER, bordercolor=self.UI_DANGER_LINE,
                          padding=(20, 15), font=self._ui_font(18), relief="solid", borderwidth=1, focusthickness=0)
-            st.map("CalcDanger.TButton", background=[("active", "#FBDADA"), ("pressed", "#F6C8C8")])
+            st.map("CalcDanger.TButton", background=[("active", self.UI_DANGER_HOVER), ("pressed", self.UI_DANGER_PRESS)])
             st.configure("CalcAccent.TButton", background=self.UI_ACCENT, foreground="#FFFFFF", bordercolor=self.UI_ACCENT,
                          padding=(20, 15), font=self._ui_font(18, True), relief="solid", borderwidth=1, focusthickness=0)
             st.map("CalcAccent.TButton", background=[("active", self.UI_ACCENT_HOVER), ("pressed", self.UI_ACCENT_PRESS)])
             st.configure("Small.TButton", background=self.UI_SURFACE, foreground=tx, bordercolor=bd,
                          padding=(10, 4), font=self._ui_font(9), relief="solid", borderwidth=1, focusthickness=0)
-            st.map("Small.TButton", background=[("active", "#E3EEFF"), ("pressed", "#CFE2FF")])
+            st.map("Small.TButton", background=[("active", self.UI_HOVER), ("pressed", self.UI_PRESS)])
             st.configure("Accent.TButton", background=self.UI_ACCENT, foreground="#FFFFFF",
                          bordercolor=self.UI_ACCENT, padding=(16, 7), font=fb, focusthickness=0)  # 主按钮比次级按钮大一号
             st.map("Accent.TButton", background=[("active", self.UI_ACCENT_HOVER), ("pressed", self.UI_ACCENT_PRESS)],
@@ -1660,10 +1665,17 @@ class App(tk.Tk):
         try:
             if self._mini_win is None or not self._mini_win.winfo_exists():
                 w = tk.Toplevel(self); w.title(self.t("set_mini_title", "迷你窗口")); w.attributes("-topmost", True)
-                w.geometry(f"300x360+{max(0, w.winfo_screenwidth() - 330)}+80")
+                w.geometry(f"320x400+{max(0, w.winfo_screenwidth() - 350)}+80")
+                w.configure(background=self.UI_BG)  # 窗口底色跟随令牌, 别露系统灰
                 w.protocol("WM_DELETE_WINDOW", self._hide_mini)
                 w.bind("<Escape>", lambda e: self._hide_mini())  # Esc 隐藏迷你窗口
-                frame = ttk.Frame(w); frame.pack(fill="both", expand=True, padx=4, pady=4)
+                # 迷你窗标题条 (2026-11-28 UI P3): 一行说清"这是什么 + 怎么用", 按钮组按「常用→次要」分两簇
+                _mh = tk.Frame(w, background=self.UI_BG); _mh.pack(fill="x", padx=8, pady=(8, 0))
+                tk.Label(_mh, text=self.t("set_mini_title", "迷你窗口"), font=self._ui_font(10, True),
+                         background=self.UI_BG, foreground=self.UI_TEXT).pack(side="left")
+                tk.Label(_mh, text=self.t("mini_hint", "双击一行 = 从这行开始粘贴"), font=self._ui_font(8),
+                         background=self.UI_BG, foreground=self.UI_MUTED).pack(side="right")
+                frame = ttk.Frame(w); frame.pack(fill="both", expand=True, padx=8, pady=(6, 4))
                 self._mini_list = ttk.Treeview(frame, columns=("no", "text"), show="headings", selectmode="browse", height=12)
                 self._mini_list.heading("no", text=self.t("col_no", "序号")); self._mini_list.heading("text", text=self.t("col_text", "文本内容"))
                 self._mini_list.column("no", width=44, anchor="center", stretch=False); self._mini_list.column("text", anchor="w")
@@ -1672,7 +1684,7 @@ class App(tk.Tk):
                 sb = ttk.Scrollbar(frame, orient="vertical", command=self._mini_list.yview)
                 self._mini_list.config(yscrollcommand=sb.set)
                 self._mini_list.pack(side="left", fill="both", expand=True); sb.pack(side="right", fill="y")
-                bar = ttk.Frame(w); bar.pack(fill="x", padx=4, pady=(0, 4))
+                bar = ttk.Frame(w); bar.pack(fill="x", padx=8, pady=(0, 8))
                 def mini_lock():
                     i = self._mini_row()
                     if i >= 0: self.records[i]["locked"] = not self.records[i]["locked"]; self.save_records(); self.refresh_list()
@@ -1693,11 +1705,11 @@ class App(tk.Tk):
                 def mini_goto(_e=None):
                     i = self._mini_row()
                     if i >= 0: self.paste_index = i; self.refresh_list()
-                ttk.Button(bar, text=self.t("set_mini_lock", "锁定"), width=5, command=mini_lock).pack(side="left", padx=1)
-                ttk.Button(bar, text=self.t("cmn_delete", "删除"), width=5, command=mini_del).pack(side="left", padx=1)
-                ttk.Button(bar, text=self.t("set_mini_delall", "删全部"), width=6, command=self.delete_all).pack(side="left", padx=1)
-                ttk.Button(bar, text="↑", width=3, command=lambda: mini_move(-1)).pack(side="left", padx=1)
-                ttk.Button(bar, text="↓", width=3, command=lambda: mini_move(1)).pack(side="left", padx=1)
+                ttk.Button(bar, text=self.t("set_mini_lock", "锁定"), width=5, command=mini_lock, style="Small.TButton").pack(side="left", padx=(0, 4))
+                ttk.Button(bar, text=self.t("cmn_delete", "删除"), width=5, command=mini_del, style="Small.TButton").pack(side="left", padx=(0, 4))
+                ttk.Button(bar, text=self.t("set_mini_delall", "删全部"), width=6, command=self.delete_all, style="Small.TButton").pack(side="left", padx=(0, 10))
+                ttk.Button(bar, text="↑", width=3, command=lambda: mini_move(-1), style="Small.TButton").pack(side="left", padx=(0, 4))
+                ttk.Button(bar, text="↓", width=3, command=lambda: mini_move(1), style="Small.TButton").pack(side="left", padx=(0, 4))
                 self._mini_list.bind("<Double-Button-1>", mini_goto)
                 self._mini_win = w
             w = self._mini_win; w.deiconify(); w.lift(); self._refresh_mini()  # 先显示再刷: _refresh_mini 对不可见窗口会跳过
@@ -1776,7 +1788,7 @@ class App(tk.Tk):
         ttk.Label(lrow, text=self.t("lang_label", "语言:")).pack(side="left")
         lang_box = ttk.Combobox(lrow, textvariable=self.lang_var, width=9, state="readonly", values=["Chinese", "English"])
         lang_box.pack(side="left", padx=4); lang_box.bind("<<ComboboxSelected>>", self._switch_language)
-        ttk.Label(lrow, text=self.t("lang_restart_hint", "(重启后生效)"), foreground="#888888").pack(side="left")
+        ttk.Label(lrow, text=self.t("lang_restart_hint", "(重启后生效)"), foreground=self.UI_MUTED).pack(side="left")
         ttk.Checkbutton(frm, text=self.t("wave_sound", "提示音 (复制/粘贴成功时响一声)"), variable=self.wave_var, command=self._toggle_wave).pack(anchor="w", pady=3)
         mfrm = self._set_section(frm, self.t("mini_frame", "迷你窗口 (复制/粘贴时自动悬浮)"))
         mrow = ttk.Frame(mfrm); mrow.pack(fill="x", pady=4, padx=4)
@@ -1807,7 +1819,7 @@ class App(tk.Tk):
         ttk.Label(hrow, text=self.t("set_hist_unit", "张")).pack(side="left", padx=(2, 0))
         hentry.bind("<FocusOut>", lambda _e: apply_hist()); hentry.bind("<Return>", lambda _e: apply_hist())
         if not self._hist_save_var.get(): hentry.configure(state="disabled")
-        ttk.Label(hfrm, text=self.t("set_hist_note", "不勾选 = 截图和 GIF 都不再存入历史 (已存的不会自动删, 可在历史截图里「删除全部」); 上限改小会立即删掉多出的老图。"), foreground="#888888").pack(anchor="w", padx=4, pady=(0, 4))
+        ttk.Label(hfrm, text=self.t("set_hist_note", "不勾选 = 截图和 GIF 都不再存入历史 (已存的不会自动删, 可在历史截图里「删除全部」); 上限改小会立即删掉多出的老图。"), foreground=self.UI_MUTED).pack(anchor="w", padx=4, pady=(0, 4))
         sfrm = self._set_section(frm, self.t("set_snip_frame", "截图 / 贴图"))
         srow1 = ttk.Frame(sfrm); srow1.pack(fill="x", pady=4, padx=4)
         ttk.Label(srow1, text=self.t("trans_target", "截图翻译目标语言:")).pack(side="left")
@@ -1837,7 +1849,7 @@ class App(tk.Tk):
         brow2 = ttk.Frame(bfrm); brow2.pack(fill="x", padx=6, pady=(6, 2))
         ttk.Button(brow2, text=self.t("bak_export", "导出备份"), command=self._backup_export_dialog).pack(side="left")
         ttk.Button(brow2, text=self.t("bak_import", "导入备份"), command=self._backup_import_dialog).pack(side="left", padx=6)
-        ttk.Label(bfrm, text=self.t("bak_note", "备份包含设置、复制记录、常用语、AI 对话等全部数据 (含你填过的密钥, 请妥善保管)。导入备份后软件会立即关闭且不保存当前状态, 重新打开即是备份里的数据。"), foreground="#888888", wraplength=560, justify="left").pack(anchor="w", padx=6, pady=(0, 6))
+        ttk.Label(bfrm, text=self.t("bak_note", "备份包含设置、复制记录、常用语、AI 对话等全部数据 (含你填过的密钥, 请妥善保管)。导入备份后软件会立即关闭且不保存当前状态, 重新打开即是备份里的数据。"), foreground=self.UI_MUTED, wraplength=560, justify="left").pack(anchor="w", padx=6, pady=(0, 6))
         ufrm = self._set_section(frm, self.t("set_update_frame", "软件更新"))
         urow = ttk.Frame(ufrm); urow.pack(fill="x", padx=6, pady=(6, 2))
         ttk.Label(urow, text=self.t("upd_current", "当前版本:")).pack(side="left")
@@ -3461,7 +3473,7 @@ class App(tk.Tk):
         ttk.Label(frm, text=self.t("wm_font", "字体:")).grid(row=5, column=0, sticky="e", pady=3)
         font_var = tk.StringVar(value="微软雅黑")
         ttk.Combobox(frm, textvariable=font_var, values=list(self._FONT_FILES), width=14, state="readonly").grid(row=5, column=1, sticky="w", pady=3)
-        ttk.Label(frm, text=self.t("wm_note", "颜色用当前标注颜色; 平铺会把水印重复盖满整张图。"), foreground="#888888").grid(row=6, column=0, columnspan=2, pady=(4, 0), sticky="w")
+        ttk.Label(frm, text=self.t("wm_note", "颜色用当前标注颜色; 平铺会把水印重复盖满整张图。"), foreground=self.UI_MUTED).grid(row=6, column=0, columnspan=2, pady=(4, 0), sticky="w")
         btns = ttk.Frame(win); btns.pack(pady=(2, 10))
         def ok():
             text = txt_var.get().strip()
@@ -5039,7 +5051,7 @@ try {
             cur["service"] = {v: k for k, v in names.items()}[svc_var.get()]
             load_fields()
         svc_var.trace_add("write", on_svc)
-        ttk.Label(parent, text=self.t("tr_note", "百度/有道到各自开放平台免费申请 APP ID 和密钥; 谷歌在 Google Cloud 开通翻译 API 后创建 API 密钥 (只需填密钥栏)。\n密钥只保存在本机, 不上传别处; 没填或接口出错时自动用免费接口翻译。"), foreground="#888888", wraplength=440, justify="left").grid(row=3, column=0, columnspan=2, padx=8, pady=4, sticky="w")
+        ttk.Label(parent, text=self.t("tr_note", "百度/有道到各自开放平台免费申请 APP ID 和密钥; 谷歌在 Google Cloud 开通翻译 API 后创建 API 密钥 (只需填密钥栏)。\n密钥只保存在本机, 不上传别处; 没填或接口出错时自动用免费接口翻译。"), foreground=self.UI_MUTED, wraplength=440, justify="left").grid(row=3, column=0, columnspan=2, padx=8, pady=4, sticky="w")
         test_var = tk.StringVar()
         ttk.Label(parent, textvariable=test_var, foreground="#2563EB", wraplength=440).grid(row=4, column=0, columnspan=2, padx=8, sticky="w")
         btns = ttk.Frame(parent); btns.grid(row=5, column=0, columnspan=2, pady=10)
@@ -5661,7 +5673,7 @@ try {
         ttk.Button(model_buttons, text=self.t("ai_mc_delete", "删除模型"), command=lambda: delete_selected_model()).pack(side="left", padx=4)
         ttk.Button(model_buttons, text=self.t("ai_mc_refresh", "刷新列表"), command=lambda: (stash(), refresh_model_list())).pack(side="right")
         ttk.Label(model_tab, text=self.t("ai_mc_hint", "提示：未配置 API Key 的服务商也会保留在列表中；双击即可进入配置。"),
-                  foreground="#888888", wraplength=560).pack(anchor="w", pady=(7, 0))
+                  foreground=self.UI_MUTED, wraplength=560).pack(anchor="w", pady=(7, 0))
 
         # ---- 服务商配置: 各服务商的 Key / 模型 / Base URL 独立保存 ----
         ttk.Label(provider_tab, text=self.t("ai_mc_provider_intro", "选择任意服务商，分别维护它的 API Key、模型名称和接口地址。"),
@@ -5765,7 +5777,7 @@ try {
         ttk.Button(provider_tab, text=self.t("ai_mc_fetch", "获取模型列表"), command=fetch_models).grid(row=3, column=2, sticky="w", padx=5, pady=4)
         ttk.Button(provider_tab, text=self.t("ai_mc_add", "添加到模型列表"), command=add_current_model).grid(row=3, column=3, sticky="w", padx=5, pady=4)
         ttk.Label(provider_tab, text=self.t("ai_mc_provider_note", "每家服务商独立保存配置；支持 OpenAI 兼容接口的服务可自动获取模型，其他服务可手动填写。"),
-                  foreground="#888888", wraplength=540, justify="left").grid(row=5, column=0, columnspan=3, sticky="w", padx=6, pady=(10, 4))
+                  foreground=self.UI_MUTED, wraplength=540, justify="left").grid(row=5, column=0, columnspan=3, sticky="w", padx=6, pady=(10, 4))
 
         # ---- 任务分配: 各类 AI 功能可使用不同服务商 ----
         follow_text = self.t("ai_route_follow", "跟随当前服务")
@@ -9664,7 +9676,7 @@ try {
         win.bind("<Escape>", lambda e: win.destroy())  # Esc 关闭贴图 (贴图有焦点时)
         _twrap = tk.Frame(win, bg="#E3C565"); _twrap.pack()
         tk.Label(_twrap, text=text[:2000], bg="#FFF7D6", fg="#4A3F14", bd=0, justify="left", wraplength=420, padx=8, pady=6).pack(padx=1, pady=1)
-        ttk.Label(win, text=self.t("txtpin_hint", "文字贴图 · 拖动移动 · 双击关闭 · 右键有菜单"), background="#fffbe6", foreground="#888888").pack()
+        ttk.Label(win, text=self.t("txtpin_hint", "文字贴图 · 拖动移动 · 双击关闭 · 右键有菜单"), background="#fffbe6", foreground=self.UI_MUTED).pack()
         tmenu = tk.Menu(win, tearoff=0)
         tmenu.add_command(label=self.t("txtpin_copy", "复制文字"), command=lambda: self.clip_set(text))
         tmenu.add_command(label=self.t("pin_close", "关闭贴图 (双击也可)"), command=win.destroy)
