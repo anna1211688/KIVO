@@ -4594,7 +4594,7 @@ try {
         return self._ai_chat_messages([{"role": "user", "content": [
             {"type": "text", "text": prompt},
             {"type": "image_url", "image_url": {"url": self._ai_image_dataurl(img)}}]}], cfg=cfg, temperature=temperature, timeout=timeout, route=route)
-    def _ai_chat_messages(self, messages, cfg=None, temperature=0.7, max_tokens=1024, timeout=90, route=None):
+    def _ai_chat_messages(self, messages, cfg=None, temperature=0.7, max_tokens=1024, timeout=90, route=None, stream_callback=None, cancel_event=None):
         """把一组 OpenAI 格式消息发给当前 AI 服务, 返回回复纯文本 (看图/纯文本会话共用); 配置缺失/出错抛 RuntimeError。
         只用标准库 urllib; 调用方必须在后台线程里调。cfg 显式传入时用传入值 (设置窗测试用), 不碰 self.cfg。"""
         import urllib.request, urllib.error, json as _json
@@ -4613,16 +4613,59 @@ try {
                 except Exception: think = False
             payload["chat_template_kwargs"] = {"enable_thinking": think}  # Dots 的深度思考默认开着, 必须显式传开关 (文档支持此参数)
         def _send(pl):
+            req_payload = dict(pl)
+            if stream_callback is not None:
+                req_payload["stream"] = True
             req = urllib.request.Request(self._http_base(cfg["base"]) + "/chat/completions",
-                                         data=_json.dumps(pl).encode("utf-8"), headers=headers)
+                                         data=_json.dumps(req_payload).encode("utf-8"), headers=headers)
             try:
                 with urllib.request.urlopen(req, timeout=timeout) as r:
-                    return _json.loads(r.read().decode("utf-8"))
+                    if stream_callback is None:
+                        return _json.loads(r.read().decode("utf-8"))
+                    chunks = []
+                    saw_sse = False
+                    while not (cancel_event is not None and cancel_event.is_set()):
+                        line = r.readline(1024 * 1024 + 1)
+                        if not line:
+                            break
+                        if len(line) > 1024 * 1024:
+                            raise RuntimeError("AI 流式响应单行超过 1 MiB，已中止")
+                        line = line.decode("utf-8", "replace").strip()
+                        if not line or line.startswith(":") or not line.startswith("data:"):
+                            continue
+                        data_line = line[5:].strip()
+                        if data_line == "[DONE]":
+                            break
+                        saw_sse = True
+                        try:
+                            event = _json.loads(data_line)
+                        except Exception:
+                            continue
+                        if isinstance(event, dict) and event.get("error"):
+                            raise RuntimeError(str(event["error"])[:500])
+                        choices = event.get("choices", []) if isinstance(event, dict) else []
+                        if not choices or not isinstance(choices[0], dict):
+                            continue
+                        delta = choices[0].get("delta", {})
+                        piece = delta.get("content", "") if isinstance(delta, dict) else ""
+                        if isinstance(piece, list):
+                            piece = "".join(str(p.get("text", "")) for p in piece if isinstance(p, dict))
+                        if isinstance(piece, str) and piece:
+                            chunks.append(piece)
+                            stream_callback(piece)
+                    if saw_sse:
+                        return {"choices": [{"message": {"content": "".join(chunks)}}]}
+                    # 某些兼容接口忽略 stream=true，返回普通 JSON；仍兼容旧响应。
+                    raw = r.read(2 * 1024 * 1024 + 1)
+                    if len(raw) > 2 * 1024 * 1024:
+                        raise RuntimeError("AI 响应超过 2 MiB，已中止")
+                    return _json.loads(raw.decode("utf-8"))
             except urllib.error.HTTPError as e:
-                try: detail = e.read().decode("utf-8", "ignore")[:200]
+                try: detail = e.read(2048).decode("utf-8", "ignore")[:200]
                 except Exception: detail = ""
                 raise RuntimeError(self.t("ai_err_http", "AI 接口返回 {code} 错误。{detail}").replace("{code}", str(e.code)).replace("{detail}", detail))
             except Exception as e:
+                if isinstance(e, RuntimeError): raise
                 raise RuntimeError(self.t("ai_err_conn", "AI 接口连不上 ({e}), 检查网络后重试。").replace("{e}", str(e)))
         def _extract(d):
             try: msg = d["choices"][0]["message"]
@@ -7342,35 +7385,75 @@ try {
         def hide_typing():
             if typing["row"] is not None:
                 typing["row"].destroy(); typing["row"] = None
-        send_ui = {"cv": None, "enabled": True}
+        send_ui = {"cv": None, "enabled": True, "text_item": None, "cancel_event": None, "stream_label": None}
         def set_send_enabled(on):
             send_ui["enabled"] = on
             if send_ui["cv"] is not None:
                 fill = self.UI_ACCENT if on else "#B9C2CE"
                 send_ui["cv"].itemconfigure("pill", fill=fill, outline=fill)
+                if send_ui["text_item"] is not None:
+                    send_ui["cv"].itemconfigure(send_ui["text_item"], text=self.t("ai_send", "发送") if on else "停止")
+        def stop_reply():
+            ev = send_ui.get("cancel_event")
+            if busy["on"] and ev is not None:
+                ev.set()
+                self.status.set("正在停止 AI 生成…")
         def request_reply(img=None, img_prompt=None):
-            busy["on"] = True; set_send_enabled(False)
-            show_typing()
             import threading
+            busy["on"] = True
+            cancel_event = threading.Event()
+            send_ui["cancel_event"] = cancel_event
+            set_send_enabled(False)
+            show_typing()
             msgs = list(self._ai_chat_history[-20:])
             hist_ref = self._ai_chat_history  # 记住这条回复属于哪个对话: 等回复期间切到别的对话, 回复不能串过去
             cid_ref = getattr(self, "_ai_chat_id", None)
+            streamed = {"text": ""}
+            def on_token(piece):
+                streamed["text"] += piece
+                snapshot = streamed["text"]
+                def paint():
+                    if not panel.winfo_exists() or self._ai_chat_history is not hist_ref: return
+                    if typing["row"] is not None:
+                        hide_typing()
+                    label = send_ui.get("stream_label")
+                    if label is None or not label.winfo_exists():
+                        label = tk.Label(inner, text=snapshot, background=BUB_AI, foreground=self.UI_TEXT,
+                                         font=chat_font, justify="left", anchor="w", wraplength=348,
+                                         padx=13, pady=9)
+                        label.pack(anchor="w", padx=14, pady=(10, 0))
+                        send_ui["stream_label"] = label
+                    else:
+                        label.configure(text=snapshot)
+                    scroll_bottom()
+                self._ui_queue.put(paint)
             def work():
                 try:
-                    if img is not None:  # 带图提问: 这一轮走看图通道 (聊天分工), 图不进历史, 追问按纯文本继续
+                    if img is not None:  # 图片请求暂时保留兼容的非流式通道
                         r = self._ai_chat_image(img, img_prompt or "", route="chat")
                     else:
-                        r = self._ai_chat_messages(msgs, max_tokens=2048, route="chat")
+                        r = self._ai_chat_messages(msgs, max_tokens=2048, route="chat",
+                                                   stream_callback=on_token, cancel_event=cancel_event)
+                    cancelled = cancel_event.is_set()
+                    if cancelled and r:
+                        r = r.rstrip() + "\n\n（已停止生成）"
                     def done():
                         busy["on"] = False
+                        send_ui["cancel_event"] = None
+                        if send_ui.get("stream_label") is not None:
+                            try: send_ui["stream_label"].destroy()
+                            except Exception: pass
+                            send_ui["stream_label"] = None
                         if self._ai_chat_history is hist_ref:
-                            self._ai_chat_history.append({"role": "assistant", "content": r})
+                            if r:
+                                self._ai_chat_history.append({"role": "assistant", "content": r})
                             if not panel.winfo_exists(): return
                             self._save_current_chat()
                             set_send_enabled(True); hide_typing(); strip_last_regen()
-                            add_bubble("assistant", r, with_regen=True, msg_ref=self._ai_chat_history[-1])  # 增量追加: 不整表重画, 回复出现得更快
+                            if r: add_bubble("assistant", r, with_regen=not cancelled, msg_ref=self._ai_chat_history[-1])
+                            elif cancelled: self.status.set("已停止生成")
                         else:  # 已切到别的对话: 存回它自己的存档, 当前界面不动
-                            hist_ref.append({"role": "assistant", "content": r})
+                            if r: hist_ref.append({"role": "assistant", "content": r})
                             self._persist_chat(hist_ref, cid_ref)
                             if hasattr(self, "_refresh_recent"): self._refresh_recent()
                             if panel.winfo_exists(): set_send_enabled(True)
@@ -7379,11 +7462,22 @@ try {
                     msg = str(e)
                     def fail():
                         busy["on"] = False
+                        send_ui["cancel_event"] = None
+                        if send_ui.get("stream_label") is not None:
+                            try: send_ui["stream_label"].destroy()
+                            except Exception: pass
+                            send_ui["stream_label"] = None
                         if not panel.winfo_exists(): return
-                        set_send_enabled(True)
+                        set_send_enabled(True); hide_typing()
                         if self._ai_chat_history is hist_ref:
-                            hide_typing()
-                            add_bubble("assistant", f"({self.t('ai_err_word', '出错了')}: {msg})")
+                            partial = streamed["text"].strip()
+                            if partial:
+                                partial += "\n\n（生成中断）"
+                                self._ai_chat_history.append({"role": "assistant", "content": partial})
+                                self._save_current_chat()
+                                add_bubble("assistant", partial, msg_ref=self._ai_chat_history[-1])
+                            else:
+                                add_bubble("assistant", f"({self.t('ai_err_word', '出错了')}: {msg})")
                         else:
                             self.status.set(f"{self.t('ai_reply_failed2', 'AI 回复失败')}: {msg[:80]}")
                     self._ui_queue.put(fail)
@@ -7496,8 +7590,8 @@ try {
         send_cv = tk.Canvas(brow, width=80, height=42, highlightthickness=0, background=CHAT_BG, cursor="hand2")
         send_cv.pack(side="right", padx=(10, 0))
         send_cv.create_polygon(_rrect_pts(80, 42, 21), smooth=True, fill=self.UI_ACCENT, outline=self.UI_ACCENT, tags="pill")
-        send_cv.create_text(40, 21, text=self.t("ai_send", "发送"), font=self._ui_font(11, True), fill="#FFFFFF")
         send_ui["cv"] = send_cv
+        send_ui["text_item"] = send_cv.create_text(40, 21, text=self.t("ai_send", "发送"), font=self._ui_font(11, True), fill="#FFFFFF")
         send_cv.bind("<Enter>", lambda e: send_ui["enabled"] and send_cv.itemconfigure("pill", fill="#2B83E6", outline="#2B83E6"))
         send_cv.bind("<Leave>", lambda e: send_ui["enabled"] and send_cv.itemconfigure("pill", fill=self.UI_ACCENT, outline=self.UI_ACCENT))
         def send():
@@ -7522,7 +7616,7 @@ try {
             self._save_current_chat()
             clear_attach()
             request_reply(img=img, img_prompt=hist_text if img is not None else None)
-        send_cv.bind("<Button-1>", lambda e: send_ui["enabled"] and send())
+        send_cv.bind("<Button-1>", lambda e: stop_reply() if busy["on"] else (send() if send_ui["enabled"] else None))
         def on_enter(e):
             if e.state & 0x1: return None  # Shift+回车: 换行
             send(); return "break"
