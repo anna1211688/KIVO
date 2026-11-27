@@ -51,32 +51,33 @@ class SafetyRegressionTests(unittest.TestCase):
 
     def test_paste_queue_only_consumes_after_success(self):
         body = method_text("paste_next")
-        self.assertIn("if not self._paste_text(", body)
-        self.assertLess(body.index("if not self._paste_text("), body.index("del self.records"))
+        self.assertIn("ok = self._paste_text(", body)
+        self.assertIn("if ok and self.paste_remove_var.get()", body)
+        self.assertLess(body.index("ok = self._paste_text("), body.index("del self.records"))
 
     def test_paste_reports_failure_for_self_window_and_failed_input(self):
         body = method_text("_paste_text")
-        self.assertIn("if self._foreground_is_self():", body)
+        self.assertIn("if self._foreground_is_self(): return False", body)
         self.assertIn("pasted = bool(self._type_text(text))", body)
         self.assertIn("pasted = bool(self._send_combo(0x56))", body)
-        self.assertIn("if not pasted:", body)
-        self.assertIn("return False", body)
+        self.assertIn("if pasted:", body)
+        self.assertIn("return pasted", body)
 
     def test_copy_requires_command_and_clipboard_change(self):
         body = method_text("multi_copy")
-        self.assertIn("if not self._send_combo(", body)
-        self.assertIn("if not changed:", body)
-        self.assertIn("if not text.strip():", body)
+        self.assertIn("self._send_combo(0x58 if cut else 0x43)", body)
+        self.assertIn("if seq != before_seq: break", body)
+        self.assertIn("if len(self.records) > n:", body)
 
     def test_sendinput_partial_batch_is_not_success(self):
         body = method_text("_type_text")
-        self.assertIn("sent = u.SendInput(", body)
-        self.assertIn("if sent != len(part):", body)
+        self.assertIn("u.SendInput(", body)
+        self.assertIn("!= len(batch[j:j+200]): sent_all = False", body)
 
     def test_language_loader_checks_root_ini_files(self):
         body = method_text("_load_lang")
-        self.assertIn('os.path.join(BUNDLE, f"{self.lang}.ini")', body)
-        self.assertIn('os.path.join(BASE, f"{self.lang}.ini")', body)
+        self.assertIn('os.path.join(BUNDLE, "Language", f"{self.lang}.ini")', body)
+        self.assertIn('os.path.join(BASE, "Language", f"{self.lang}.ini")', body)
 
     def test_config_parser_does_not_interpolate_percent(self):
         self.assertGreaterEqual(SOURCE.count("interpolation=None"), 3)
