@@ -1149,7 +1149,7 @@ class App(tk.Tk):
         _nav("calc", self.t("calculator", "计算器"), "calc", self.open_calc)
         _nav("dl", self.t("media_dl", "无水印下载"), "download", self.open_media_dl)
         # 边栏底部: 版本 (最底) + 设置 + 分隔线 (side=bottom 先包的贴最底)
-        tk.Label(side, text=f"v{VERSION} · © KIVO", font=self._ui_font(8), background="#172235", foreground="#8496AD).pack(side="bottom", anchor="w", padx=18, pady=(0, 10))
+        tk.Label(side, text=f"v{VERSION} · © KIVO", font=self._ui_font(8), background="#172235", foreground="#8496AD").pack(side="bottom", anchor="w", padx=18, pady=(0, 10))
         _set_it = _NavItem(side, text=self.t("system_settings", "设置"), command=self.open_system_settings, font=self._ui_font(10), bg="#172235", image=self._tool_icon("gear"))
         _set_it.pack(side="bottom", padx=8, pady=1)
         self._nav_items["settings"] = _set_it; self._nav_titles["settings"] = self.t("system_settings", "设置")
