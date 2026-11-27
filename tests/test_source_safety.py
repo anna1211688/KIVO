@@ -1900,3 +1900,28 @@ class RateLimitTests(unittest.TestCase):
     def test_wiring(self):
         self.assertIn("e.code == 429 and not _rate_retried", SOURCE)
         self.assertIn("return _send(pl, True)", SOURCE)
+
+
+class PromptLibraryTests(unittest.TestCase):
+    """v1.6.3 AI-4: 提示词库/角色预设。"""
+
+    def test_builtin_prompts(self):
+        app_node = next(n for n in TREE.body if isinstance(n, ast.ClassDef) and n.name == "App")
+        node = next(n for n in app_node.body if isinstance(n, ast.Assign)
+                    and any(isinstance(t, ast.Name) and t.id == "_BUILTIN_PROMPTS" for t in n.targets))
+        items = eval(compile(ast.Expression(node.value), "<x>", "eval"))
+        self.assertGreaterEqual(len(items), 6)
+        for it in items:
+            self.assertTrue(it["title"].strip())
+            self.assertTrue(it["prompt"].strip())
+
+    def test_wiring(self):
+        for name in ("def _load_prompt_library", "def _save_prompt_library",
+                     "def open_prompt_library", "def set_active_prompt",
+                     "def _refresh_prompt_indicator"):
+            self.assertIn(name, SOURCE)
+        # 角色作为 system 前置且持久化
+        self.assertIn('"system_prompt"', SOURCE)
+        self.assertIn('self._active_prompt', SOURCE)
+        # + 菜单入口
+        self.assertIn('ai_plus_prompt', SOURCE)

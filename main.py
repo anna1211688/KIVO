@@ -471,6 +471,7 @@ PHRASES_PATH = os.path.join(BASE, "phrases.json")
 # 常用语库: 与临时队列分开存, 不被删全部/去重/上限清理影响
 AI_CHATS_PATH = os.path.join(BASE, "ai_chats.json")  # AI 最近对话: 多个对话存档, 与常用语库同款存法
 AI_MEMORY_PATH = os.path.join(BASE, "ai_memory.json")  # AI 长期记忆: 用户主动保存的条目, 聊天时作为 system 上下文带上
+AI_PROMPTS_PATH = os.path.join(BASE, "ai_prompts.json")  # 提示词库/角色预设 (v1.6.3)
 
 CRASH_LOG_PATH = os.path.join(BASE, "crash.log")
 _crash_seen = {}
@@ -6398,9 +6399,11 @@ try {
                                         item["image_path"] = m["image_path"]
                                     msgs.append(item)
                             if msgs:
+                                sp = c.get("system_prompt")
                                 out.append({"id": c.get("id"), "title": str(c.get("title") or "新对话")[:200],
                                             "updated": c.get("updated") or 0, "pin": 1 if c.get("pin") else 0,
-                                            "messages": msgs})
+                                            "messages": msgs,
+                                            "system_prompt": sp if isinstance(sp, dict) else None})
                     return out
             except Exception:
                 continue
@@ -6496,6 +6499,96 @@ try {
         scored.sort(key=lambda x: (-x[0], x[1]))
         return [m for _hit, _i, m in scored[:top_n]]
 
+    # ---- 提示词库/角色预设 (v1.6.3): 本地 JSON, 内置角色首次运行写入, 可增删改, 选中作为当前对话 system 角色 ----
+    _BUILTIN_PROMPTS = [
+        {"title": "通用助手", "prompt": "你是一个乐于助人的 AI 助手，回答准确、条理清晰、语言简洁。"},
+        {"title": "专业翻译", "prompt": "你是资深翻译，译文忠实原文、通顺自然，只输出译文，不添加解释。"},
+        {"title": "代码审查", "prompt": "你是资深工程师，审查代码时指出缺陷、风险和可改进点，给出可直接使用的修改建议与示例代码。"},
+        {"title": "写作教练", "prompt": "你是写作教练，帮用户打磨文章结构与表达，语言自然，保留作者原意。"},
+        {"title": "产品经理", "prompt": "你是经验丰富的产品经理，擅长需求拆解、用户场景分析和方案权衡，输出结构化、可落地的建议。"},
+        {"title": "数据分析师", "prompt": "你是数据分析师，分析问题时先澄清口径，结论基于证据，给出指标定义与分析步骤。"}]
+    def _load_prompt_library(self):
+        """读提示词库; 文件缺失时用内置角色初始化并落盘; 坏档回退内置角色。"""
+        try:
+            if os.path.exists(AI_PROMPTS_PATH):
+                data = json.loads(open(AI_PROMPTS_PATH, encoding="utf-8").read())
+                if isinstance(data, list):
+                    out = [{"title": str(it.get("title", ""))[:80], "prompt": str(it.get("prompt", ""))[:4000]}
+                           for it in data[:100] if isinstance(it, dict)
+                           and str(it.get("title", "")).strip() and str(it.get("prompt", "")).strip()]
+                    if out: return out
+        except Exception:
+            pass
+        self._save_prompt_library(self._BUILTIN_PROMPTS)
+        return [dict(it) for it in self._BUILTIN_PROMPTS]
+    def _save_prompt_library(self, items):
+        try:
+            _atomic_write(AI_PROMPTS_PATH, json.dumps(items, ensure_ascii=False))
+        except Exception:
+            pass
+    def set_active_prompt(self, item):
+        """选中角色: 记录到当前会话并在输入区上方显示; item=None 表示清除角色。"""
+        self._active_prompt = item
+        if item is not None:
+            self._save_current_chat()
+        self._refresh_prompt_indicator()
+    def _refresh_prompt_indicator(self):
+        var = getattr(self, "_prompt_indicator", None)
+        if var is None: return
+        item = getattr(self, "_active_prompt", None)
+        var.set(("🎭 " + item["title"] + "  ✕") if item else "")
+    def open_prompt_library(self):
+        win = tk.Toplevel(self); win.title(self.t("pl_title", "角色 / 提示词库"))
+        win.geometry("520x460"); win.transient(self)
+        try: win.configure(background=self.UI_BG)
+        except Exception: pass
+        items = self._load_prompt_library()
+        lb = tk.Listbox(win, height=12, font=self._ui_font(10), bg=self.UI_SURFACE, fg=self.UI_TEXT,
+                        selectbackground=self.UI_SEL_BG, selectforeground=self.UI_ACCENT, relief="flat", bd=0)
+        lb.pack(fill="x", padx=14, pady=12)
+        def refresh():
+            lb.delete(0, "end")
+            for it in items: lb.insert("end", it["title"])
+        refresh()
+        def pick():
+            sel = lb.curselection()
+            if not sel: return
+            self.set_active_prompt(dict(items[sel[0]])); win.destroy()
+        brow = tk.Frame(win, bg=self.UI_BG); brow.pack(fill="x", padx=14)
+        ttk.Button(brow, text=self.t("pl_apply", "选用角色"), style="Accent.TButton",
+                   command=pick).pack(side="left", padx=3)
+        ttk.Button(brow, text=self.t("pl_add", "新增"), style="Small.TButton",
+                   command=lambda: self._prompt_add_dialog(items, refresh)).pack(side="left", padx=3)
+        ttk.Button(brow, text=self.t("pl_delete", "删除选中"), style="Small.TButton",
+                   command=lambda: self._prompt_delete(items, lb, refresh)).pack(side="left", padx=3)
+        ttk.Button(brow, text=self.t("pl_clear", "清除角色"), style="Small.TButton",
+                   command=lambda: (self.set_active_prompt(None), win.destroy())).pack(side="left", padx=3)
+        ttk.Button(brow, text=self.t("cmn_close", "关闭"), style="Small.TButton",
+                   command=win.destroy).pack(side="right")
+        win.bind("<Escape>", lambda e: win.destroy())
+    def _prompt_add_dialog(self, items, refresh):
+        dlg = tk.Toplevel(self); dlg.title(self.t("pl_add_title", "新增提示词"))
+        dlg.geometry("420x320"); dlg.transient(self)
+        try: dlg.configure(background=self.UI_BG)
+        except Exception: pass
+        ttk.Label(dlg, text=self.t("pl_title_lb", "标题:")).pack(anchor="w", padx=14, pady=(12, 2))
+        t_e = tk.Entry(dlg, width=40); t_e.pack(padx=14)
+        ttk.Label(dlg, text=self.t("pl_prompt_lb", "提示词内容:")).pack(anchor="w", padx=14, pady=(8, 2))
+        p_t = tk.Text(dlg, height=8, font=self._ui_font(10), relief="solid", bd=1)
+        p_t.pack(fill="x", padx=14)
+        def save():
+            title, prompt = t_e.get().strip(), p_t.get("1.0", "end").strip()
+            if not title or not prompt: return
+            items.append({"title": title[:80], "prompt": prompt[:4000]})
+            self._save_prompt_library(items); refresh(); dlg.destroy()
+        ttk.Button(dlg, text=self.t("pl_save", "保存"), style="Accent.TButton",
+                   command=save).pack(anchor="w", padx=14, pady=10)
+    def _prompt_delete(self, items, lb, refresh):
+        sel = lb.curselection()
+        if not sel: return
+        del items[sel[0]]
+        self._save_prompt_library(items); refresh()
+
     def _read_attach_text(self, path):
         """读附件文件为纯文本, 返回 (text, err): 文本直读 (utf-8/gbk), PDF/Word/Excel 纯本地提取 (无第三方库);
         上限 12MB; 旧版 Office 格式与读不出的文件返回人话 err。"""
@@ -6574,7 +6667,10 @@ try {
             first = next((m["content"] for m in hist if m["role"] == "user"), "新对话")
             entry = {"id": cid, "title": first.replace("\n", " ")[:18], "updated": 0, "messages": []}
             self._ai_chats.insert(0, entry)
-        entry["messages"] = [dict(m) for m in hist][-200:]  # 单个对话最多存最近 200 条: 防长年累月攒到上千条, 打开时整表渲染会卡 (发给 AI 的上下文只用最近 20 条, 截掉老的无影响)
+        entry["messages"] = [dict(m) for m in hist][-200:]  # 单个对话最多存最近 200 条: 防长年累月攒到上千条, 打开时整表渲染会卡
+        ap = getattr(self, "_active_prompt", None)
+        if ap is not None:
+            entry["system_prompt"] = ap
         entry["updated"] = time.time()
         self._ai_chats.sort(key=lambda c: (0 if c.get("pin") else 1, -(c.get("updated") or 0)))  # 置顶的永远排前面 (仿 GPT), 组内按最近更新
         del self._ai_chats[30:]
@@ -8569,6 +8665,7 @@ try {
         chat_font = tkfont.Font(font=self._ui_font(11))
         self._ai_chats = self._load_ai_chats()
         self._ai_chat_id = None
+        self._active_prompt = None
         # ---- 左侧边栏: 新对话 + 最近对话 (侧边的功能入口按钮已按 Jane 要求去掉, 功能本身保留: AI 设置在系统设置里, 看图翻译在截图工具栏/贴图菜单, 智能回复 Shift+F4) ----
         SIDE_BG = "#F5F5F7"
         side = tk.Frame(panel, background=SIDE_BG, width=224); side.pack(side="left", fill="y"); side.pack_propagate(False)
@@ -8617,6 +8714,10 @@ try {
             d.line([18, 30, 32, 30], fill="#64748B", width=3)
         def _draw_spark(d):
             d.polygon([(24, 4), (28, 18), (42, 22), (28, 26), (24, 40), (20, 26), (6, 22), (20, 18)], outline="#64748B", width=3)
+        def _draw_mask(d):
+            d.rounded_rectangle([10, 12, 38, 34], radius=9, outline="#64748B", width=3)
+            d.ellipse([16, 20, 21, 25], fill="#64748B")
+            d.ellipse([27, 20, 32, 25], fill="#64748B")
         def _draw_copy(d, color="#64748B", fill="#FFFFFF"):
             # 豆包式: 两张圆角方片错位叠放, 前片填底色遮住后片的线
             d.rounded_rectangle([17, 8, 41, 32], radius=7, outline=color, width=4)
@@ -8679,6 +8780,7 @@ try {
         self._ai_menu_icons = {"pin": _menu_icon(_draw_pin), "pencil": _menu_icon(_draw_pencil),
                                "trash": _menu_icon(_draw_trash), "chat": _menu_icon(_draw_chat),
                                "image": _menu_icon(_draw_image), "file": _menu_icon(_draw_file), "spark": _menu_icon(_draw_spark),
+                               "mask": _menu_icon(_draw_mask),
                                "copy": _menu_icon(_draw_copy), "up": _menu_icon(_draw_up),
                                "down": _menu_icon(_draw_down), "speak": _menu_icon(_draw_speak),
                                "share": _menu_icon(_draw_share), "dots": _menu_icon(_draw_dots), "regen": _menu_icon(_draw_regen)}
@@ -8708,6 +8810,8 @@ try {
             if c is None or cid == getattr(self, "_ai_chat_id", None): return
             self._ai_chat_id = cid
             self._ai_chat_history = [dict(m) for m in c.get("messages", [])]
+            self._active_prompt = c.get("system_prompt")
+            self._refresh_prompt_indicator()
             render_all(); refresh_recent()
         def pin_chat(cid):
             c = _find_chat(cid)
@@ -8720,7 +8824,9 @@ try {
             if not messagebox.askyesno(self.t("ai_del_title", "删除对话"), f"{self.t('ai_del_title', '删除对话')}「{c.get('title', '')}」?"): return
             self._ai_chats = [x for x in self._ai_chats if x.get("id") != cid]
             if cid == getattr(self, "_ai_chat_id", None):
-                self._ai_chat_id = None; self._ai_chat_history = []; render_all()
+                self._ai_chat_id = None; self._ai_chat_history = []
+                self._active_prompt = None; self._refresh_prompt_indicator()
+                render_all()
             self._store_ai_chats(); refresh_recent()
         def rename_chat(cid):
             c = _find_chat(cid)
@@ -8789,6 +8895,8 @@ try {
             if busy["on"]: return
             self._ai_chat_id = None
             self._ai_chat_history = []
+            self._active_prompt = None
+            self._refresh_prompt_indicator()
             render_all(); refresh_recent()
             inp.focus_set()
         # ---- 顶栏: 标题 + 服务名, 右侧 返回 / 清空 (文字链) ----
@@ -9060,6 +9168,9 @@ try {
                 try:
                     kept, dropped = self._select_context(hist_ref, self._context_budget())
                     msgs = [self._restore_payload(it) for it in kept]
+                    ap = getattr(self, "_active_prompt", None)  # 角色提示词置于最前, 优先级最高
+                    if ap and ap.get("prompt"):
+                        msgs = [{"role": "system", "content": ap["prompt"]}] + msgs
                     if dropped and self._auto_summary_on():
                         summary = self._summarize_dropped(dropped)
                         if summary:
@@ -9141,6 +9252,8 @@ try {
                 self._ai_chat_id = None
                 self._store_ai_chats()
             self._ai_chat_history = []
+            self._active_prompt = None
+            self._refresh_prompt_indicator()
             render_all(); refresh_recent()
         link(head, self.t("ai_mem_open", "记忆"), lambda: self._open_ai_memory_window()).pack(side="right", padx=(0, 14))
         link(head, self.t("ai_clear", "清空对话"), clear).pack(side="right")
@@ -9208,8 +9321,15 @@ try {
                     self.after(60, lambda: inp.focus_force())  # 同上: 附件挂好焦点回输入框
                 self._ui_queue.put(done)
             threading.Thread(target=work, daemon=True).start()
+        # ---- 当前角色指示条 (点击即清除角色), 位于输入框上方 ----
+        self._prompt_indicator = tk.StringVar()
+        ind_row = tk.Frame(chatcol, background=CHAT_BG); ind_row.pack(fill="x", padx=18)
+        ind_lbl = tk.Label(ind_row, textvariable=self._prompt_indicator, background=CHAT_BG,
+                           foreground=self.UI_MUTED, font=self._ui_font(10), cursor="hand2")
+        ind_lbl.pack(side="left")
+        ind_lbl.bind("<Button-1>", lambda e: self.set_active_prompt(None))
         # ---- 底部输入区: 圆角输入框 (画布圆角底 + 内嵌文本) + 圆角药丸发送键 ----
-        brow = tk.Frame(chatcol, background=CHAT_BG); brow.pack(fill="x", padx=14, pady=(12, 14))
+        brow = tk.Frame(chatcol, background=CHAT_BG); brow.pack(fill="x", padx=14, pady=(4, 14))
         plus_cv = tk.Canvas(brow, width=42, height=42, highlightthickness=0, background=CHAT_BG, cursor="hand2")
         plus_cv.pack(side="left", padx=(0, 8))
         plus_cv.create_oval(2, 2, 40, 40, outline="#C3CCD6", fill="#FFFFFF")
@@ -9222,6 +9342,9 @@ try {
             items = [
                 {"label": self.t("ai_plus_image", "选择图片…"), "icon": self._ai_menu_icons["image"], "command": pick_image_dialog},
                 {"label": self.t("ai_plus_file", "附加文本文件…"), "icon": self._ai_menu_icons["file"], "command": attach_file_dialog},
+                {"sep": True},
+                {"label": self.t("ai_plus_prompt", "角色 / 提示词库…"), "icon": self._ai_menu_icons["mask"],
+                 "command": self.open_prompt_library, "checked": bool(getattr(self, "_active_prompt", None))},
                 {"sep": True},
                 {"label": self.t("ai_deep_think", "深度思考"), "icon": self._ai_menu_icons["spark"], "command": toggle_thinking,
                  "checked": bool(self._ai_think_var.get())},
