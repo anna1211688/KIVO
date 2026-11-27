@@ -617,7 +617,7 @@ class _PillButton(tk.Canvas):
     """圆角胶囊按钮 (画布绘制): primary=品牌蓝实心白字 / soft=浅灰底深字 / outline=白底蓝字浅蓝边。
     支持 config(text=) 改字并自动改宽 (主窗口截图按钮的热键标注刷新靠它), 也支持 cget("text")"""
     _VARIANTS = {
-        "primary": ("#287FD1", "#287FD1", "#FFFFFF", "#4A97DC"),
+        "primary": ("#3B82F6", "#3B82F6", "#FFFFFF", "#60A5FA"),
         "soft": ("#EAF0F8", "#EAF0F8", "#2A3440", "#DCE8F7"),
         "outline": ("#FFFFFF", "#BCD6FF", "#1F6AB3", "#EBF2FF"),
         "tool": ("#FFFFFF", "#E1E7F0", "#2A3440", "#EDF3FF"),
@@ -681,7 +681,7 @@ class _PillButton(tk.Canvas):
 class _NavItem(tk.Canvas):
     """左侧边栏导航项: 圆角胶囊高亮 (选中浅蓝/悬停更浅) + 糖果图标 + 文字 (Jane 2026-11-27 边栏版)"""
     def __init__(self, parent, text="", command=None, font=None, bg="#FFFFFF", image=None):
-        super().__init__(parent, width=188, height=40, background=bg, highlightthickness=0, bd=0, cursor="hand2")
+        super().__init__(parent, width=204, height=40, background=bg, highlightthickness=0, bd=0, cursor="hand2")
         self._text = text; self._command = command; self._font = font; self._image = image
         self._selected = False; self._hover = False
         self.bind("<Button-1>", lambda _e: self.invoke())
@@ -690,9 +690,9 @@ class _NavItem(tk.Canvas):
         self._draw()
     def _draw(self):
         self.delete("all")
-        fill = "#D9E9F8" if self._selected else ("#EFF5FC" if self._hover else None)
-        if fill: self.create_polygon(_rrect_pts(188, 40, 10), fill=fill, outline=fill, smooth=True)
-        if self._image is not None: self.create_image(14, 20, image=self._image, anchor="w")
+        fill = "#334B6C" if self._selected else ("#26364D" if self._hover else None)
+        if fill: self.create_polygon(_rrect_pts(204, 40, 10), fill=fill, outline=fill, smooth=True)
+        if self._image is not None: self.create_image(16, 20, image=self._image, anchor="w")
         self.create_text(52, 21, text=self._text, anchor="w", font=self._font,
                          fill="#1F6AB3" if self._selected else "#1C2634")
     def _set_hover(self, on):
@@ -953,14 +953,14 @@ class App(tk.Tk):
         except Exception: return 80  # 间隔被写成非数字 (旧版托盘保存没校验) 时别让软件启动就崩
 
     # ---------- 界面主题 (v1.4.17 美化: 全软件统一一套视觉语言, 与 KIVO 图标同系的品牌蓝) ----------
-    UI_BG = "#F5F7FA"        # 窗口底色: 柔和浅蓝灰 (比旧版略深, 白卡更跳)
+    UI_BG = "#F3F6FB"        # 窗口底色: 柔和浅蓝灰 (比旧版略深, 白卡更跳)
     UI_SURFACE = "#FFFFFF"   # 输入框/列表等内容面
     UI_BORDER = "#E5EAF0"    # 描边
     UI_TEXT = "#1C2634"      # 主文字
     UI_MUTED = "#7E8CA3"     # 次要文字
-    UI_ACCENT = "#287FD1"    # 品牌蓝: 明亮蔚蓝 (主按钮/焦点/选中)
-    UI_ACCENT_HOVER = "#4A97DC"
-    UI_ACCENT_PRESS = "#1F6AB3"
+    UI_ACCENT = "#3B82F6"    # 品牌蓝: 明亮蔚蓝 (主按钮/焦点/选中)
+    UI_ACCENT_HOVER = "#60A5FA"
+    UI_ACCENT_PRESS = "#2563EB"
     UI_SEL_BG = "#D9E9F8"    # 列表选中行底色
     UI_HEAD_BG = "#EEF2F8"   # 表头底色
     UI_STRIPE = "#F6F9FD"    # 列表斑马纹 (奇数行)
@@ -1109,20 +1109,20 @@ class App(tk.Tk):
         # ===== 新设计 (简约时尚): 白色品牌头 + 圆角胶囊按钮 + 白色卡片分区, 去掉旧的描边分组框 =====
         W = "#FFFFFF"
         # ---------- 左侧边栏导航 (Jane 2026-11-27 拍板边栏版; 排序按她定: AI 助手第一, 翻译第二, 世界时钟与货币汇率分开不合并) ----------
-        side = tk.Frame(self, background=W, width=204, highlightthickness=1, highlightbackground=self.UI_BORDER)
+        side = tk.Frame(self, background="#172235", width=220, highlightthickness=1, highlightbackground="#26364D")
         side.pack(side="left", fill="y"); side.pack_propagate(False)
         self._content = tk.Frame(self, background=self.UI_BG); self._content.pack(side="left", fill="both", expand=True)
-        brand = tk.Frame(side, background=W); brand.pack(fill="x", padx=16, pady=(14, 2))
+        brand = tk.Frame(side, background="#172235"); brand.pack(fill="x", padx=16, pady=(14, 2))
         try:
             _icon = tk.PhotoImage(data=_ICON_PNG_B64).subsample(7, 7)
-            tk.Label(brand, image=_icon, background=W).pack(side="left")
+            tk.Label(brand, image=_icon, background="#172235").pack(side="left")
             self._head_icon = _icon  # 留引用防被回收
         except Exception: pass
-        tk.Label(brand, text="KIVO", font=self._ui_font(15, True), background=W, foreground=self.UI_TEXT).pack(side="left", padx=(8, 4))
+        tk.Label(brand, text="KIVO", font=self._ui_font(15, True), background="#172235", foreground="#FFFFFF").pack(side="left", padx=(8, 4))
         if self.lang != "English":  # 品牌中文名只在中文模式陪衬 (英文模式界面不留中文, en_walk 零残留纪律)
-            tk.Label(brand, text="启沃", font=self._ui_font(10), background=W, foreground=self.UI_MUTED).pack(side="left", pady=(3, 0))
-        tk.Label(side, text=("Make Work Flow." if self.lang == "English" else "让效率, 自然发生"), font=self._ui_font(8), background=W, foreground=self.UI_MUTED).pack(anchor="w", padx=17, pady=(0, 8))
-        tk.Frame(side, background=self.UI_BORDER, height=1).pack(fill="x", padx=14, pady=(0, 6))
+            tk.Label(brand, text="启沃", font=self._ui_font(10), background="#172235", foreground="#A9BBD2").pack(side="left", pady=(3, 0))
+        tk.Label(side, text=("Make Work Flow." if self.lang == "English" else "让效率, 自然发生"), font=self._ui_font(8), background="#172235", foreground="#A9BBD2").pack(anchor="w", padx=17, pady=(0, 8))
+        tk.Frame(side, background="#344256", height=1).pack(fill="x", padx=14, pady=(0, 6))
         # 内容区顶栏: 当前页标题 (随导航切换) + 右侧定位语
         topbar = tk.Frame(self._content, background=self.UI_BG); topbar.pack(fill="x", padx=16, pady=(12, 2))
         self._page_title = tk.Label(topbar, text="", font=self._ui_font(15, True), background=self.UI_BG, foreground=self.UI_TEXT)
@@ -1134,11 +1134,11 @@ class App(tk.Tk):
         self._nav_items = {}
         self._nav_titles = {}
         def _nav(key, text, icn, cmd):
-            _it = _NavItem(side, text=text, command=cmd, font=self._ui_font(10), bg=W, image=self._tool_icon(icn))
+            _it = _NavItem(side, text=text, command=cmd, font=self._ui_font(10), bg="#172235", image=self._tool_icon(icn))
             _it.pack(padx=8, pady=1)
             self._nav_items[key] = _it; self._nav_titles[key] = text
         def _nav_group(text):
-            tk.Label(side, text=text, font=self._ui_font(9, True), background=W, foreground=self.UI_MUTED).pack(anchor="w", padx=18, pady=(10, 3))
+            tk.Label(side, text=text, font=self._ui_font(9, True), background="#172235", foreground="#8496AD).pack(anchor="w", padx=18, pady=(10, 3))
         _nav("ai", self.t("ai_chat", "AI 助手"), "ai", self.open_ai_chat)
         _nav("trans", self.t("nav_trans", "翻译中心"), "translate", self._show_texttrans_panel)
         _nav("clip", self.t("copy_paste", "剪贴板"), "copy", self._show_main_view)
@@ -1149,11 +1149,11 @@ class App(tk.Tk):
         _nav("calc", self.t("calculator", "计算器"), "calc", self.open_calc)
         _nav("dl", self.t("media_dl", "无水印下载"), "download", self.open_media_dl)
         # 边栏底部: 版本 (最底) + 设置 + 分隔线 (side=bottom 先包的贴最底)
-        tk.Label(side, text=f"v{VERSION} · © KIVO", font=self._ui_font(8), background=W, foreground=self.UI_MUTED).pack(side="bottom", anchor="w", padx=18, pady=(0, 10))
-        _set_it = _NavItem(side, text=self.t("system_settings", "设置"), command=self.open_system_settings, font=self._ui_font(10), bg=W, image=self._tool_icon("gear"))
+        tk.Label(side, text=f"v{VERSION} · © KIVO", font=self._ui_font(8), background="#172235", foreground="#8496AD).pack(side="bottom", anchor="w", padx=18, pady=(0, 10))
+        _set_it = _NavItem(side, text=self.t("system_settings", "设置"), command=self.open_system_settings, font=self._ui_font(10), bg="#172235", image=self._tool_icon("gear"))
         _set_it.pack(side="bottom", padx=8, pady=1)
         self._nav_items["settings"] = _set_it; self._nav_titles["settings"] = self.t("system_settings", "设置")
-        tk.Frame(side, background=self.UI_BORDER, height=1).pack(side="bottom", fill="x", padx=14, pady=(0, 6))
+        tk.Frame(side, background="#344256", height=1).pack(side="bottom", fill="x", padx=14, pady=(0, 6))
         self._toolbar_btns = []  # 旧顶栏工具条已被边栏导航取代, 留空列表兼容旧引用
         self._nav_show("clip")
         # 下半区容器: 记录卡/操作行/各设置卡都装在这里; 点「AI 功能」时整块被聊天面板盖住 (Jane 要求不弹新窗)
