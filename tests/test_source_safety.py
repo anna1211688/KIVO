@@ -373,7 +373,7 @@ class AiStreamingTests(unittest.TestCase):
         self.assertEqual(result, "Hello KIVO")
         self.assertEqual(pieces, ["Hello ", "KIVO"])
         self.assertTrue(captured["payload"]["stream"])
-        self.assertEqual(captured["timeout"], 90)
+        self.assertEqual(captured["timeout"], 45)  # 流式打开超时封顶 45s: 服务端静默时「停止」不必等满 90s
 
     def test_streaming_source_has_cancel_and_response_limits(self):
         body = method_text("_ai_chat_messages")
@@ -462,14 +462,43 @@ class ModelCenterFixTests(unittest.TestCase):
 
     def test_fetch_models_error_redacted(self):
         body = method_text("_ai_fetch_models")
-        self.assertIn("Bearer ***", body)
+        self.assertIn("_redact_ai_detail(", body)
 
     def test_ai_http_error_diagnostics_redact_secrets_and_bound_output(self):
         body = method_text("_ai_chat_messages")
         self.assertIn('e.read(2048)', body)
-        self.assertIn('detail.replace(secret, "***")', body)
-        self.assertIn('authorization\\s*[:=]', body)
+        self.assertIn('_redact_ai_detail(detail, secret)', body)
         self.assertIn('[:160]', body)
+        self.assertIn('err._kivo_status = e.code', body)
+
+
+# ---- 2026-11-27 GPT 审查批 (PR #13 后续): 脱敏补漏/错误分类/故障切换上限/流式停滞上限 ----
+
+class AiEngineHardeningTests(unittest.TestCase):
+    def test_redact_ai_detail_blocks_known_leak_shapes(self):
+        fn = load_module_function("_redact_ai_detail")
+        fn.__globals__["re"] = re
+        cases = [
+            ('Bearer KEYVAL1', 'KEYVAL1'),
+            ('{"api_key": "KEYVAL2"}', 'KEYVAL2'),
+            ('{"error": "bad key sk-plain777 in request"}', 'sk-plain777'),
+            ('x-api-key: KEYVAL4', 'KEYVAL4'),
+            ('GET https://h/v1?key=AIzaSyD1234567890x failed', 'AIzaSyD1234567890x'),
+            ('Authorization: Bearer KEYVAL6 rest', 'KEYVAL6'),
+            ('token=KEYVAL7&other=1', 'KEYVAL7'),
+            ('access_token: KEYVAL8', 'KEYVAL8'),
+        ]
+        for raw, leaked in cases:
+            self.assertNotIn(leaked, fn(raw, "mine"), raw)
+        # 正常报错文案不许误伤
+        plain = '{"error": {"code": 1210, "message": "max_tokens=1024 exceeded"}}'
+        self.assertEqual(fn(plain, "mine"), plain)
+
+    def test_failover_classification_and_caps(self):
+        body = method_text("_ai_chat_messages")
+        self.assertIn('getattr(primary_error, "_kivo_status", None) in (401, 403)', body)
+        self.assertIn("tried >= 2", body)
+        self.assertIn("open_timeout = min(timeout, 45)", body)
 
 
 if __name__ == "__main__":

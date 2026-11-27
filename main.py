@@ -527,6 +527,24 @@ def _ini_scalar(v):
     值中的一行 "Evil=1" 下次读取就变成一个真键 (注入/损坏双防), 所有落盘值先过这里。"""
     return " ".join(str(v).split())
 
+def _redact_ai_detail(detail, secret=""):
+    """AI 接口报错文案的统一脱敏: 服务端可能在错误体里回显请求头/Key/带 Key 的 URL,
+    原样显示或存进记录都会泄密。覆盖 Authorization 整行 / Bearer / api_key 的裸写与
+    JSON 带引号写法 / URL 查询参数 / 常见 Key 形状 (sk-…、AIza…、ghp_…), 最后再按
+    当前 Key 原文兜底替换。GPT 在 PR #13 的内联版经实测漏了带引号 JSON、URL 参数和
+    裸 sk- 三种, 这里一并补齐并收敛成一处实现, 两个调用点共用。"""
+    s = str(detail or "")
+    s = re.sub(r"(?i)(authorization\s*[:=]\s*)[^\r\n]+", r"\1***", s)
+    s = re.sub(r"(?i)(bearer\s+)[^\s,;\"']+", r"\1***", s)
+    s = re.sub(r"(?i)((?:api[-_ ]?key|access[-_ ]?token|token)\"?\s*[:=]\s*\"?)"
+               r"[^\s,;\"}\]&]+", r"\1***", s)
+    s = re.sub(r"(?i)([?&](?:key|api_key|token|access_token)=)[^&\s\"']+", r"\1***", s)
+    s = re.sub(r"\b(sk-[A-Za-z0-9_\-]{6,}|AIza[A-Za-z0-9_\-]{10,}|ghp_[A-Za-z0-9]{12,})", "***", s)
+    if secret:
+        s = s.replace(secret, "***")
+    return s
+
+
 def _migrate_old_data():
     """老数据搬移 (新目录还没有 Config.ini 时才搬, 已存在的文件不覆盖):
     ① 旧品牌数据目录 %APPDATA%\\SPST 与 %APPDATA%\\SnapPaste (这两个是被搬移的旧目录名, 历史引用, 不能改成 KIVO) ② 更早的老版本 (<=v1.4.4) 放在 EXE 旁的数据"""
@@ -4522,7 +4540,7 @@ try {
             detail = ""
             try: detail = exc.read(2048).decode("utf-8", "replace")
             except Exception: pass
-            detail = re.sub(r"(?i)bearer\s+\S+", "Bearer ***", detail)  # 服务端回显请求头时别把 Key 带进报错文案
+            detail = _redact_ai_detail(detail, cfg.get("key") or "")  # 服务端回显请求头/Key 时别带进报错文案
             raise RuntimeError(self.t("ai_mc_fetch_http", "获取模型列表失败 (HTTP %s): %s") % (exc.code, detail[:300])) from exc
         except urllib.error.URLError as exc:
             raise RuntimeError(self.t("ai_mc_fetch_conn", "无法连接模型服务: ") + str(exc.reason)) from exc
@@ -4630,7 +4648,8 @@ try {
             req = urllib.request.Request(self._http_base(cfg["base"]) + "/chat/completions",
                                          data=_json.dumps(req_payload).encode("utf-8"), headers=headers)
             try:
-                with urllib.request.urlopen(req, timeout=timeout) as r:
+                open_timeout = min(timeout, 45) if stream_callback is not None else timeout
+                with urllib.request.urlopen(req, timeout=open_timeout) as r:
                     if stream_callback is None:
                         return _json.loads(r.read().decode("utf-8"))
                     chunks = []
@@ -4681,13 +4700,12 @@ try {
                 # Never surface raw server diagnostics: they may echo credentials or request data.
                 try: detail = e.read(2048).decode("utf-8", "ignore")[:200]
                 except Exception: detail = ""
-                detail = re.sub(r"(?i)(bearer\s+)[^\s,;]+", r"\1***", detail)
-                detail = re.sub(r"(?i)(api[-_ ]?key\s*[:=]\s*)[^\s,;]+", r"\1***", detail)
-                detail = re.sub(r"(?i)(authorization\s*[:=]\s*)[^\r\n]+", r"\1***", detail)
+                detail = _redact_ai_detail(detail, secret)
                 secret = str(cfg.get("key") or "")
-                if secret: detail = detail.replace(secret, "***")
                 detail = re.sub(r"[\r\n\t]+", " ", detail).strip()[:160]
-                raise RuntimeError(self.t("ai_err_http", "AI 接口返回 {code} 错误。{detail}").replace("{code}", str(e.code)).replace("{detail}", detail))
+                err = RuntimeError(self.t("ai_err_http", "AI 接口返回 {code} 错误。{detail}").replace("{code}", str(e.code)).replace("{detail}", detail))
+                err._kivo_status = e.code  # 供上层错误分类: 401/403 是同一把 Key 的鉴权问题, 换模型也不会好, 不做故障切换
+                raise err
             except Exception as e:
                 if isinstance(e, RuntimeError): raise
                 raise RuntimeError(self.t("ai_err_conn", "AI 接口连不上 ({e}), 检查网络后重试。").replace("{e}", str(e)))
@@ -4705,16 +4723,22 @@ try {
             if (stream_callback is not None or
                     (self.cfg.get("AI", "AutoFallback", fallback="0") or "0").strip() != "1"):
                 raise
+            if getattr(primary_error, "_kivo_status", None) in (401, 403):
+                raise  # 鉴权/权限失败是同一把 Key 的问题: 换同服务商的模型也不会好, 直接报原始错误
             try:
                 raw = _json.loads(self.cfg.get("AI", "ModelProfiles", fallback="{}") or "{}")
                 rows = raw.get(cfg.get("service"), []) if isinstance(raw, dict) else []
             except Exception:
                 rows = []
             attempted = {cfg.get("model")}
+            tried = 0
             for profile in rows if isinstance(rows, list) else []:
                 if not isinstance(profile, dict) or not profile.get("enabled", True): continue
                 candidate = str(profile.get("model", "")).strip()[:200]
                 if not candidate or candidate in attempted: continue
+                if tried >= 2:
+                    raise primary_error  # 备用最多试 2 个, 避免一排坏模型把额度和时间耗光
+                tried += 1
                 attempted.add(candidate)
                 retry_payload = dict(payload)
                 retry_payload["model"] = candidate
