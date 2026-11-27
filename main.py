@@ -4808,6 +4808,27 @@ try {
         store = self._ai_store()
         names = {k: self._ai_preset_name(k) for k in self._AI_PRESETS}
         inv_names = {v: k for k, v in names.items()}
+        # ModelProfiles supports multiple model IDs per provider; legacy single models migrate in memory.
+        profiles = {k: [] for k in self._AI_PRESETS}
+        try:
+            raw_profiles = json.loads(self.cfg.get("AI", "ModelProfiles", fallback="{}") or "{}")
+            if isinstance(raw_profiles, dict):
+                for svc_key in self._AI_PRESETS:
+                    rows = raw_profiles.get(svc_key, [])
+                    if not isinstance(rows, list): continue
+                    seen = set()
+                    for row in rows[:500]:
+                        if not isinstance(row, dict): continue
+                        model_id = str(row.get("model", "")).strip()[:200]
+                        if not model_id or model_id in seen: continue
+                        seen.add(model_id)
+                        profiles[svc_key].append({"model": model_id, "enabled": bool(row.get("enabled", True))})
+        except Exception:
+            profiles = {k: [] for k in self._AI_PRESETS}
+        for svc_key in self._AI_PRESETS:
+            current_model = (store[svc_key][1] or "").strip()[:200]
+            if current_model and not any(x["model"] == current_model for x in profiles[svc_key]):
+                profiles[svc_key].insert(0, {"model": current_model, "enabled": True})
         notebook = ttk.Notebook(parent)
         notebook.pack(fill="both", expand=True, padx=6, pady=6)
         model_tab = ttk.Frame(notebook, padding=8)
@@ -4824,41 +4845,59 @@ try {
                   style="Muted.TLabel").pack(anchor="w", pady=(0, 6))
         list_wrap = ttk.Frame(model_tab)
         list_wrap.pack(fill="both", expand=True)
-        columns = ("provider", "model", "status")
+        columns = ("provider", "model", "status", "default")
         model_tree = ttk.Treeview(list_wrap, columns=columns, show="headings", height=9, selectmode="browse")
         model_tree.heading("provider", text="服务商")
-        model_tree.heading("model", text="当前模型")
-        model_tree.heading("status", text="配置状态")
-        model_tree.column("provider", width=190, minwidth=130)
-        model_tree.column("model", width=250, minwidth=150)
-        model_tree.column("status", width=90, minwidth=80, anchor="center")
+        model_tree.heading("model", text="模型 ID")
+        model_tree.heading("status", text="状态")
+        model_tree.heading("default", text="默认")
+        model_tree.column("provider", width=170, minwidth=120)
+        model_tree.column("model", width=235, minwidth=140)
+        model_tree.column("status", width=75, minwidth=65, anchor="center")
+        model_tree.column("default", width=65, minwidth=55, anchor="center")
         tree_scroll = ttk.Scrollbar(list_wrap, orient="vertical", command=model_tree.yview)
         model_tree.configure(yscrollcommand=tree_scroll.set)
         model_tree.pack(side="left", fill="both", expand=True)
         tree_scroll.pack(side="right", fill="y")
         def refresh_model_list(select_service=None):
             for item in model_tree.get_children(): model_tree.delete(item)
+            selected_iid = None
             for svc_key in self._AI_PRESETS:
-                key, model, base = store[svc_key]
-                state = "已配置" if key else "待配置"
-                item = model_tree.insert("", "end", iid=svc_key,
-                                         values=(names[svc_key], model or "(未设置)", state))
-                if svc_key == (select_service or cur["service"]):
-                    model_tree.selection_set(item)
-                    model_tree.focus(item)
-            selected = select_service or cur["service"]
-            if selected in self._AI_PRESETS:
-                model_tree.see(selected)
-        def open_selected_provider(_event=None):
+                key, current_model, base = store[svc_key]
+                rows = profiles[svc_key] or [{"model": current_model or "(未设置)", "enabled": True}]
+                for index, profile in enumerate(rows):
+                    model_id = profile["model"]
+                    iid = "%s::%d" % (svc_key, index)
+                    is_default = model_id == current_model
+                    state = ("已配置" if key else "待配置") if profile.get("enabled", True) else "已停用"
+                    item = model_tree.insert("", "end", iid=iid,
+                        values=(names[svc_key], model_id, state, "是" if is_default else ""))
+                    if svc_key == (select_service or cur["service"]) and is_default:
+                        selected_iid = item
+            if selected_iid:
+                model_tree.selection_set(selected_iid); model_tree.focus(selected_iid); model_tree.see(selected_iid)
+        def selected_profile():
             selected = model_tree.selection()
+            if not selected: return None
+            try:
+                svc_key, index = selected[0].rsplit("::", 1)
+                return svc_key, profiles[svc_key][int(index)]
+            except (ValueError, KeyError, IndexError):
+                return None
+        def open_selected_provider(_event=None):
+            selected = selected_profile()
             if not selected: return
             svc_var.set(names[selected[0]])
+            model_var.set(selected[1]["model"])
             notebook.select(provider_tab)
         model_tree.bind("<Double-1>", open_selected_provider)
         model_buttons = ttk.Frame(model_tab)
         model_buttons.pack(fill="x", pady=(7, 0))
-        ttk.Button(model_buttons, text="配置所选服务商", command=open_selected_provider).pack(side="left")
-        ttk.Button(model_buttons, text="刷新列表", command=lambda: (stash(), refresh_model_list())).pack(side="left", padx=6)
+        ttk.Button(model_buttons, text="配置所选模型", command=open_selected_provider).pack(side="left")
+        ttk.Button(model_buttons, text="设为默认", command=lambda: set_selected_default()).pack(side="left", padx=4)
+        ttk.Button(model_buttons, text="启用/停用", command=lambda: toggle_selected_model()).pack(side="left", padx=4)
+        ttk.Button(model_buttons, text="删除模型", command=lambda: delete_selected_model()).pack(side="left", padx=4)
+        ttk.Button(model_buttons, text="刷新列表", command=lambda: (stash(), refresh_model_list())).pack(side="right")
         ttk.Label(model_tab, text="提示：未配置 API Key 的服务商也会保留在列表中；双击即可进入配置。",
                   foreground="#888888", wraplength=560).pack(anchor="w", pady=(7, 0))
 
@@ -4883,8 +4922,53 @@ try {
             model_box.configure(values=())
         def stash():
             store[cur["service"]] = [key_var.get().strip(), model_var.get().strip(), base_var.get().strip()]
-            if "model_tree" in locals():
-                refresh_model_list()
+            model_id = model_var.get().strip()[:200]
+            if model_id and not any(x["model"] == model_id for x in profiles[cur["service"]]):
+                profiles[cur["service"]].append({"model": model_id, "enabled": True})
+        def add_current_model():
+            stash()
+            model_id = store[cur["service"]][1]
+            if not model_id:
+                test_var.set("请先填写模型 ID，再添加到模型列表")
+                notebook.select(provider_tab)
+                return
+            rows = profiles[cur["service"]]
+            if not any(x["model"] == model_id for x in rows):
+                rows.append({"model": model_id, "enabled": True})
+            refresh_model_list(cur["service"])
+            test_var.set("已添加模型：" + model_id)
+        def set_selected_default():
+            selected = selected_profile()
+            if not selected: return
+            svc_key, profile = selected
+            if not profile.get("enabled", True):
+                test_var.set("请先启用该模型，再设为默认")
+                return
+            store[svc_key][1] = profile["model"]
+            if svc_key == cur["service"]: model_var.set(profile["model"])
+            refresh_model_list(svc_key)
+            test_var.set("默认模型已设为：" + profile["model"])
+        def toggle_selected_model():
+            selected = selected_profile()
+            if not selected: return
+            svc_key, profile = selected
+            profile["enabled"] = not profile.get("enabled", True)
+            if not profile["enabled"] and store[svc_key][1] == profile["model"]:
+                fallback = next((x["model"] for x in profiles[svc_key] if x.get("enabled", True)), "")
+                store[svc_key][1] = fallback
+                if svc_key == cur["service"]: model_var.set(fallback)
+            refresh_model_list(svc_key)
+        def delete_selected_model():
+            selected = selected_profile()
+            if not selected: return
+            svc_key, profile = selected
+            profiles[svc_key] = [x for x in profiles[svc_key] if x is not profile]
+            if store[svc_key][1] == profile["model"]:
+                fallback = next((x["model"] for x in profiles[svc_key] if x.get("enabled", True)), "")
+                store[svc_key][1] = fallback
+                if svc_key == cur["service"]: model_var.set(fallback)
+            refresh_model_list(svc_key)
+            test_var.set("模型已从管理列表删除")
         def on_svc(*_):
             stash()
             cur["service"] = inv_names.get(svc_var.get(), cur["service"])
@@ -4917,6 +5001,7 @@ try {
                     self._ui_queue.put(lambda msg=msg: test_var.set("获取模型失败: " + msg))
             threading.Thread(target=work, daemon=True).start()
         ttk.Button(provider_tab, text="获取模型列表", command=fetch_models).grid(row=3, column=2, sticky="w", padx=5, pady=4)
+        ttk.Button(provider_tab, text="添加到模型列表", command=add_current_model).grid(row=3, column=3, sticky="w", padx=5, pady=4)
         ttk.Label(provider_tab, text="每家服务商独立保存配置；支持 OpenAI 兼容接口的服务可自动获取模型，其他服务可手动填写。",
                   foreground="#888888", wraplength=540, justify="left").grid(row=5, column=0, columnspan=3, sticky="w", padx=6, pady=(10, 4))
 
@@ -4971,6 +5056,8 @@ try {
             stash()
             routes = {rk: ("" if var.get() == follow_text else inv_names.get(var.get(), ""))
                       for rk, var in route_vars.items()}
+            if not self.cfg.has_section("AI"): self.cfg.add_section("AI")
+            self.cfg.set("AI", "ModelProfiles", json.dumps(profiles, ensure_ascii=False, separators=(",", ":")))
             self._save_ai_settings(cur["service"], store, routes)
             refresh_model_list(cur["service"])
             self.status.set("AI 模型中心已保存")
