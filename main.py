@@ -434,7 +434,7 @@ _BTN_ICONS_B64 = {
     "gear": "iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAD5klEQVR4nLWUT4jVVRTHv+fce3/vvRnGHExpoj+LIOGBM8ErsSJ+o0VjOeXqB4ENisZr0yaGVlnDMIhItiiIYFCzhbaYwcVo5bgoZxGE+iCHHF1WJkOaZaH2fr977zkt5k9jTY4EneXhns+559+XcGdGaTpgAGBiYjDcYcz/Y7SYM8syM1KtanoSPDExGNZu3LIs59ZXEeLPZ0/s/wgApWlquru7ZWpqikZGRuIdgRfa6he3t5UKOp6UWp5QACG/+d7Dbb/3Lwa7HZgAoKtn+5vWlTfkzZt7nePL7Cqnfd5sMrMTifnk+P1tXRsvbWbrXhOff3l2/MCu2XidA/HC8gFoZ8+Ona7SOqSQ9TZJPpVIa3zR/I6ZS8RsQDjf+eyl5421Rwi6wVVahzp7duwEoLOMW8Ej1epcthckhBiKIocKQPohVFepikoIEUAXsYzF4DX4IpfgBUS9f2Ms+PHUFCHLDBHtBtSQ4ZKKKJhLRNTCbJitMwSyABEAEJFTVYLqHgCUnvyL94/hrVuXVW4ua0nZJKOq2gIVZZdw9MV5IrrGbB4XEUA1srVGYtF37Q8Z/X7i4+YiwxtgDACdX1/aayxvkxi+VaXHiJAY4zhqeMv+xHsajWHf+dwrvUw0qiIJQFDIaSZ+CKAzxlx/uXHsk6sAwGmaWmBQuk79uDUpl18XkXY2yVNEKDMbDuKnzn62b1ejMexrtbqb/HzfMRE9bGxCqiLGuLWqWGGTck/wlb0AFGlq+Pr11TP9EtwDACqSqwSoqhAzoPgNgNbqdedcq51ZKr1MRABBRSJUJVeJUOJ7F7aCAMWaTVuWm9hy1LjkSV/kV0DaTiBmNhQlbp48vv8oANR66w+EqGcIuFtVAOAXY90KEZkWCZsmjx/4ZgADRAsSaK1Wd9KBR6MPXcT8LlTLABEReVE5zMAVJdpGRCslSjTWmhh8vzP2qxvxxg8Xxg9Nz7Hm1kPTdMA2GsM+FvEuY5P3oagAIFUVVUmsS7axK71BmIESgSUGMdbt9iG2Xxg/NF2r1d3c9c3v3UQ3BAARY4gIRlUKADDWGYAQfB6CbwZVUWOtmU3qicgRYwhQavR2zOvHrQcCqCrG2Do2LimxsSTR9ynklDHOErFVxdUYfD8Rw7pSia0jVYwBpLOMRQ9kXoTYldZHX3wwOb7/SOfGHb8yuE00BuOSkhb5I0p0n3Xl/uCbXywmQkvK5oPp1vLyij3qyi3PSIyIobgSYqidO3Hw4u3i7GLOLMtMtVrVkzNC31z1dN9LnvkdEK9UlbfPnTh4sVaru0ZvR8z+Rej/qy1Z6ZIP5t5lWcbArDQODspSAX8Cm0TtanseiCAAAAAASUVORK5CYII=",
     "star": "iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAACeUlEQVR4nNWUQUhUURSG/3PfffNmTGdMxRQ3ErhoxsVkkW0EayEEtRxo0SIiWhRCRfvnrFyVqNUqaNUiWhpEKyMS2pQtzAgXtQkRLH0zOE/fu++cFk8Tx4EZI5DO6t7Lf7/733PPucDhhxBE6LBdNBKxy/Zr71ra7nztiZfqO1d1uYVYY5pbb5jIuACAMVj1ttXPmSsKANJrXz6CcDylg+6V+/mN+CYkjYPdWQ0Mx+NfSxbafkTp1a48OfZ7UtoiU7m4lll5je+9Gr29Jha+AYrnzMEcA2i9/fkp7OarEAaHlZelydylenu2wfG1Wm4ttquEvgMQi9kypEgBcCB0F4oSAEE48okwCWBLWJi0owFRHJiJ8qPszx3WrmNXFJY/WOlU6rrSqceUzEDCDYA0ZNMDsJ1OIpCTAcSA7COQTQ9s/Jsl33+C7lMRisQ1UhGflhn9dBKJ9CsCjklYCUHK3ivjkOwmW4AVBKUL3nR+vvoxq8qNBK5obzo/z+H6kEg0RzqpIcK7UGHSSS0SzXG4PuRN5+fhiq6ukP11XCSDwkKiPDWwpAJ/HNohEARABEgEQKAdUoE/Xp4aWEJhIYEimWpM7QbJ5hiuq1jrkdiJGLJTFjlpKz6AhLUegesqZHNcC1EbPIYIizkCR2chTJQ86nDgv5Wt8jNymhMgIjAPYjFHGEPUIFgUiKSjp7+T7KYzwpHHQWW0tHzivDeZvcJRcFnM5jLs1GBHT38niASQfZz94EJcKYHwsJCaEd44XZroe4gXYBTEKj3oex76qwMQmglku0ULjTUaAKDp3reuPxN3Vtca79EcLIR2PqG9y0I73+nfQf+J5n+J39QzDLg7vrq5AAAAAElFTkSuQmCC",
 }  # 按钮小图标 (22px, PIL 手绘线条风: 图标+文字并排, 与常见软件一致)
-VERSION = "1.6.0"  # v1.4.22: ①去掉内置浏览器整套 (Jane 真机定版不好用: 面板/书签/历史/菜单/pywebview 子进程全删, 工具栏回 8 按钮, 自检减为六项, 打包去 pywebview) ②世界时间加「刷新」(绕过天气 15 分钟节流立即重拉) ③文本翻译框自适应高度 (默认 8 行, 随内容长高至 24 行封顶, 按钮行跟随) ④系统设置/软件自检/历史截图/城市选择全部改为主窗口内面板 (Jane 定版「能收的都收」, 不再弹独立窗口, 重复开窗问题从结构上消除) ⑤启动时清理浏览器残留文件 (bookmarks/browser_history/browser_profile) ⑥工具栏改一行 8 按钮 ⑦截图翻译学有道: F4 出无边框浮动条 (原文区透明盖选区透出真实截图对照/译文框在选区下方、不够翻上方/大小随内容/源语言可选/条内复制原文·译文·AI 智能回复), 完整结果窗保留给无选区入口; v1.4.23: ①修真 bug: 配置解析关 % 插值 (分隔符/路径/接口地址带 % 不再抛错) ②备份导入加固 (JSON 先验货后落盘, 坏备份整包拒绝) + 备份说明去掉书签残留文案 ③英文模式运行时漏网文案两批全清 (汇率/托盘/取色器/下载提示/识别结果窗/AI 气泡与接口报错/测试连接结果/计算器/截图浮层, 三个翻译助手改实例方法并本地化报错) ④F4 纯数字/符号截图提示「没有可翻译的文字」不再误报失败 ⑤删死代码, 新增边缘测试套件; v1.4.24: 修 AI 聊天真机 400 (Jane 实测): 智谱 glm-4v-flash 的 max_tokens 上限 1024, 聊天面板传 2048 被拒 (code 1210); 已在 _ai_chat_messages 对智谱统一钳制 [1,1024], 别家不受影响, test_edge 扩至 17 项含此用例; v1.4.25: ①F4 截图翻译合并引擎 (Jane 定案): 配了 AI Key 先 AI 看图翻译 (一次读图+翻译, 尝试上限 20 秒), AI 失效/没配 Key 立刻回退 OCR 通道 ②F4 提速: 免费翻译通道黏性 (通的通道 120 秒内优先)、Google 超时 12→8 秒、MyMemory 12→10 秒、逐行兜底改并发 ③文本翻译源语言改下拉可选 (自动检测+13 种, 改选即重译并真传引擎) ④文本翻译接 AI 通道 + 「启用AI翻译」勾选 (默认开: 勾上才优先 AI、失效回退在线; 不勾绝不调 AI; 选择落盘 TTUseAI) ⑤_ai_chat_image/_ai_chat_messages 加 timeout 参数 (默认 90 不变); v1.4.26: ①F4 修 AI 回复把提示词的「第一部分/第二部分」标签回声进正文 (改提示词措辞+解析层剥标签兜底) ②全部勾选/单选改圆点指示 (选中绿点/未选空心圈, PIL 生成 Dot.indicator, 含经典 tk 城市勾选) ③工具栏 8 按钮统一样式 (AI 功能去掉蓝色描边款) ④F4 第二轮提速: OCR 与 AI 并行 (回退零等待, Jane 定案保持并行)、OCR 引擎启动预热、「翻译中…」占位浮签 ⑤马赛克/模糊加强: 强度随区域自适应 (旧版几乎无效), F1 编辑器预览改真效果 ⑥全面审查修复 18 项: 多显示器坐标校正、长截图/F4 后台线程兜底、备份验 Config.ini+导出原子写、迷你窗脏值兜底、天气失败负缓存改 60 秒、画廊/预览句柄泄漏、计算器英文错误态、AI 空白返回、强力粘贴验返回值、GlobalLock 判空、WinOCR 逐行容错、import_txt 支持 UTF-16、复制反馈存活守卫、配置双编码全新 parser、分隔符脏值校验; 两 ini 438 键同集 (新增 long_fail); v1.4.27: 功能与 1.4.26 相同, 首次提供安装版 (Inno Setup: 按用户安装/原地升级/开始菜单与桌面快捷方式/设置里可卸载; 发布页同时附 KIVO.exe 单文件版与 KIVO-Setup 安装包, Jane 2026-11-25 定案); v1.4.28: ①修任务栏恢复闪黑 (列表补刷推迟到窗口画出后, 不再同步重建堵第一帧) ②截图/贴图设置并入系统设置 (截图翻译目标语言/对照翻译/延时秒数/UI 检测, 与主窗口共用同一变量两处同步) ③F4 浮动条重做: 原文框全透明只留 1px 细边、与选区等大, 译文框独立白卡与原文框像素等宽左对齐, 功能条独立成条保持自然宽度 ④F4 截图翻译不使用 UI 检测 (纯自由框选, F1 等不受影响) ⑤UI 检测三招: 悬停常驻 UIA 桥实时查元素、假框过滤 (占整窗 85% 以上的容器矩形不要)、拖拽边缘 8px 磁吸 ⑥AI 分工: AI 聊天/看图翻译/标注栏 AI/智能回复/文本翻译五路可各选一家 (缺省跟随当前服务, 指定的那家没 Key 自动回退当前服务), 预设扩到 14 家 (新增 OpenAI/Gemini/Claude/DeepSeek/Kimi/火山豆包/腾讯混元/百度千帆/Grok/Ollama 本地自建), 修 _ai_cfg 镜像串扰真 bug (读别家配置会串到当前服务的 key/地址/模型, 分工会把请求发错地方) ⑦第五轮审查优化: UIA 桥读行加 2.5 秒超时杀桥 (防挂起应用堵死检测)、历史截图画廊缩略图分批渲染 (打开不冻结)、备份导入单文件 64MB 上限、记录/常用语落盘改紧凑 JSON (文件小三成读写更快); v1.4.29: ①品牌升级为 KIVO 启沃 (新 Logo/配色/功能改名/启动页/关于 KIVO) ②左侧边栏导航 (Jane 定序: AI 助手第一/翻译中心第二, 世界时钟与货币汇率分开) ③Dots.ai 第 15 家预设 + 深度思考开关 (实测: 正文被思考吃空时自动关思考重试一次) ④AI 聊天 GPT/豆包式改造 (+菜单附件/建议行/最近对话置顶重命名删除/圆角弹窗/气泡内豆包式图标行含朗读) ⑤迷你翻译 F10 + 复制即译 F11 (独立开关与热键, 跟随文本翻译的 AI 开关, 复制即译只按热键触发不监听剪贴板) ⑥约时间换算 (含单语复制模式)/对方作息提示/复制双语 ⑦计算器放大居中+计算历史/汇率 30 币种国旗/世界时钟天气图标+温馨提醒+分享 ⑧全局圆角 (主窗口外框直角除外)+KIVO 配色+弹窗美化, 标注默认矩形 ⑨设置内检查更新+一键更新 (下载字节数检/MZ 验头/SHA256+RSA 签名双重验证, 无 .sig 的版本拒装) ⑩第六轮深度审查: 边栏最小高度 600 防裁设置项 v1.4.30: 千问审查整改 — OCR 引擎锁竞态 (锁改为类定义时建好)、F7 消费模式只在粘成功时删记录、F4 碎片合并框并集底边、下载链接剥尾标点、恢复 _ini_scalar/_http_base 护栏、save_config/save_phrases 落盘失败记 crash.log。 v1.5.0: AI 助手全面升级 — 模型中心 (多服务商多模型档案/任务级选模型/连接测试/同服务商故障切换)、聊天流式输出与停止生成、图片上下文与图片备份、长期记忆、PDF/Word/Excel 附件解析、附件与历史读取上限、深色边栏与品牌蓝统一、备份事务回滚、热键冲突提示、AI 报错脱敏加固。
+VERSION = "1.6.1"  # v1.4.22: ①去掉内置浏览器整套 (Jane 真机定版不好用: 面板/书签/历史/菜单/pywebview 子进程全删, 工具栏回 8 按钮, 自检减为六项, 打包去 pywebview) ②世界时间加「刷新」(绕过天气 15 分钟节流立即重拉) ③文本翻译框自适应高度 (默认 8 行, 随内容长高至 24 行封顶, 按钮行跟随) ④系统设置/软件自检/历史截图/城市选择全部改为主窗口内面板 (Jane 定版「能收的都收」, 不再弹独立窗口, 重复开窗问题从结构上消除) ⑤启动时清理浏览器残留文件 (bookmarks/browser_history/browser_profile) ⑥工具栏改一行 8 按钮 ⑦截图翻译学有道: F4 出无边框浮动条 (原文区透明盖选区透出真实截图对照/译文框在选区下方、不够翻上方/大小随内容/源语言可选/条内复制原文·译文·AI 智能回复), 完整结果窗保留给无选区入口; v1.4.23: ①修真 bug: 配置解析关 % 插值 (分隔符/路径/接口地址带 % 不再抛错) ②备份导入加固 (JSON 先验货后落盘, 坏备份整包拒绝) + 备份说明去掉书签残留文案 ③英文模式运行时漏网文案两批全清 (汇率/托盘/取色器/下载提示/识别结果窗/AI 气泡与接口报错/测试连接结果/计算器/截图浮层, 三个翻译助手改实例方法并本地化报错) ④F4 纯数字/符号截图提示「没有可翻译的文字」不再误报失败 ⑤删死代码, 新增边缘测试套件; v1.4.24: 修 AI 聊天真机 400 (Jane 实测): 智谱 glm-4v-flash 的 max_tokens 上限 1024, 聊天面板传 2048 被拒 (code 1210); 已在 _ai_chat_messages 对智谱统一钳制 [1,1024], 别家不受影响, test_edge 扩至 17 项含此用例; v1.4.25: ①F4 截图翻译合并引擎 (Jane 定案): 配了 AI Key 先 AI 看图翻译 (一次读图+翻译, 尝试上限 20 秒), AI 失效/没配 Key 立刻回退 OCR 通道 ②F4 提速: 免费翻译通道黏性 (通的通道 120 秒内优先)、Google 超时 12→8 秒、MyMemory 12→10 秒、逐行兜底改并发 ③文本翻译源语言改下拉可选 (自动检测+13 种, 改选即重译并真传引擎) ④文本翻译接 AI 通道 + 「启用AI翻译」勾选 (默认开: 勾上才优先 AI、失效回退在线; 不勾绝不调 AI; 选择落盘 TTUseAI) ⑤_ai_chat_image/_ai_chat_messages 加 timeout 参数 (默认 90 不变); v1.4.26: ①F4 修 AI 回复把提示词的「第一部分/第二部分」标签回声进正文 (改提示词措辞+解析层剥标签兜底) ②全部勾选/单选改圆点指示 (选中绿点/未选空心圈, PIL 生成 Dot.indicator, 含经典 tk 城市勾选) ③工具栏 8 按钮统一样式 (AI 功能去掉蓝色描边款) ④F4 第二轮提速: OCR 与 AI 并行 (回退零等待, Jane 定案保持并行)、OCR 引擎启动预热、「翻译中…」占位浮签 ⑤马赛克/模糊加强: 强度随区域自适应 (旧版几乎无效), F1 编辑器预览改真效果 ⑥全面审查修复 18 项: 多显示器坐标校正、长截图/F4 后台线程兜底、备份验 Config.ini+导出原子写、迷你窗脏值兜底、天气失败负缓存改 60 秒、画廊/预览句柄泄漏、计算器英文错误态、AI 空白返回、强力粘贴验返回值、GlobalLock 判空、WinOCR 逐行容错、import_txt 支持 UTF-16、复制反馈存活守卫、配置双编码全新 parser、分隔符脏值校验; 两 ini 438 键同集 (新增 long_fail); v1.4.27: 功能与 1.4.26 相同, 首次提供安装版 (Inno Setup: 按用户安装/原地升级/开始菜单与桌面快捷方式/设置里可卸载; 发布页同时附 KIVO.exe 单文件版与 KIVO-Setup 安装包, Jane 2026-11-25 定案); v1.4.28: ①修任务栏恢复闪黑 (列表补刷推迟到窗口画出后, 不再同步重建堵第一帧) ②截图/贴图设置并入系统设置 (截图翻译目标语言/对照翻译/延时秒数/UI 检测, 与主窗口共用同一变量两处同步) ③F4 浮动条重做: 原文框全透明只留 1px 细边、与选区等大, 译文框独立白卡与原文框像素等宽左对齐, 功能条独立成条保持自然宽度 ④F4 截图翻译不使用 UI 检测 (纯自由框选, F1 等不受影响) ⑤UI 检测三招: 悬停常驻 UIA 桥实时查元素、假框过滤 (占整窗 85% 以上的容器矩形不要)、拖拽边缘 8px 磁吸 ⑥AI 分工: AI 聊天/看图翻译/标注栏 AI/智能回复/文本翻译五路可各选一家 (缺省跟随当前服务, 指定的那家没 Key 自动回退当前服务), 预设扩到 14 家 (新增 OpenAI/Gemini/Claude/DeepSeek/Kimi/火山豆包/腾讯混元/百度千帆/Grok/Ollama 本地自建), 修 _ai_cfg 镜像串扰真 bug (读别家配置会串到当前服务的 key/地址/模型, 分工会把请求发错地方) ⑦第五轮审查优化: UIA 桥读行加 2.5 秒超时杀桥 (防挂起应用堵死检测)、历史截图画廊缩略图分批渲染 (打开不冻结)、备份导入单文件 64MB 上限、记录/常用语落盘改紧凑 JSON (文件小三成读写更快); v1.4.29: ①品牌升级为 KIVO 启沃 (新 Logo/配色/功能改名/启动页/关于 KIVO) ②左侧边栏导航 (Jane 定序: AI 助手第一/翻译中心第二, 世界时钟与货币汇率分开) ③Dots.ai 第 15 家预设 + 深度思考开关 (实测: 正文被思考吃空时自动关思考重试一次) ④AI 聊天 GPT/豆包式改造 (+菜单附件/建议行/最近对话置顶重命名删除/圆角弹窗/气泡内豆包式图标行含朗读) ⑤迷你翻译 F10 + 复制即译 F11 (独立开关与热键, 跟随文本翻译的 AI 开关, 复制即译只按热键触发不监听剪贴板) ⑥约时间换算 (含单语复制模式)/对方作息提示/复制双语 ⑦计算器放大居中+计算历史/汇率 30 币种国旗/世界时钟天气图标+温馨提醒+分享 ⑧全局圆角 (主窗口外框直角除外)+KIVO 配色+弹窗美化, 标注默认矩形 ⑨设置内检查更新+一键更新 (下载字节数检/MZ 验头/SHA256+RSA 签名双重验证, 无 .sig 的版本拒装) ⑩第六轮深度审查: 边栏最小高度 600 防裁设置项 v1.4.30: 千问审查整改 — OCR 引擎锁竞态 (锁改为类定义时建好)、F7 消费模式只在粘成功时删记录、F4 碎片合并框并集底边、下载链接剥尾标点、恢复 _ini_scalar/_http_base 护栏、save_config/save_phrases 落盘失败记 crash.log。 v1.5.0: AI 助手全面升级 — 模型中心 (多服务商多模型档案/任务级选模型/连接测试/同服务商故障切换)、聊天流式输出与停止生成、图片上下文与图片备份、长期记忆、PDF/Word/Excel 附件解析、附件与历史读取上限、深色边栏与品牌蓝统一、备份事务回滚、热键冲突提示、AI 报错脱敏加固。
 # v1.4.20: 瘦身版, 功能零变化 — 打包侧剔除未用组件 (cv2 视频插件/级联数据、numpy 测试集、onnxruntime 的 transformers/tools/quantization/datasets/backend), 已模拟验证删除后 OCR 中英文识别正常
 # v1.4.19: ①AI 面板侧边栏去掉「AI 功能」快捷入口组 (功能本体全保留) ②修复 v1.4.18 的 F4 截图翻译主流程 (_translate_lines 误标 @staticmethod 致后台线程静默失败) ③记录上限改硬线 (全锁定时不再突破 2000) ④截图翻译目标语言扩到 13 种 ⑤内嵌微型浏览器 (WebView2 子进程收编: 谷歌翻译主页/书签栏前 8+书签管理/浏览历史/清除数据/页面缩放/下载说明) ⑥文本翻译面板 (打字停笔 350ms 自动翻译, 无缓存每次实时译) + 工具栏按序重排为两行并配线条图标 ⑦品牌头重排 (系统设置移左上挨着 KIVO, 副标题「多功能工作台」居中, 右上留空) + 软件图标换 Jane 的樱花小女孩原图 ⑧窗口最小高度解锁 (最大化/缩放恢复正常) ⑨全界面双语化补齐 (约 330 条文案入语言文件, 英文模式复检残留中文 0 条) + 第八轮深查 (线程/网络/浏览器生命周期/热键英文保存往返全过)
 # v1.4.18: ①截图翻译修复 (OCR 碎片合并+整段翻译, 结果窗改纯文本) ②翻译结果窗内嵌 AI 智能回复 ③AI/热键/翻译设置全并入系统设置 ④AI 功能改内嵌面板+豆包式侧边栏+最近对话存档 (圆角气泡) ⑤主窗口简约重设计 (方角) ⑥货币汇率 ⑦计算器 ⑧常用语库面板化+序号 ⑨世界时间 (全球城市自选+当地天气) ⑩无水印下载 (FB/IG/小红书等, 保存位置可每次询问或固定) ⑪历史截图保存设置 (张数/不保存, 含 GIF) ⑫移除网络搜索 ⑬三轮深查整改: AI 回复防串话/时钟计时链/天气失败重试/设置窗滚轮隔离/下载实际文件名/汇率过期刷新/AI 回复增量渲染 (320ms→24ms)/单实例保护/单对话存档封顶 200 条
@@ -571,14 +571,52 @@ _ATTACH_INFLATE_LIMIT = 20 * 1024 * 1024   # 一次解析允许的解压总量
 _ATTACH_TEXT_LIMIT = 4 * 1024 * 1024       # 提取出的文字总量
 _ATTACH_ENTRY_LIMIT = 2000                 # 压缩包内条目数
 
-_SAFE_OPENER = None
-def _open_url(req, timeout=None):
-    """带重定向防护的 urlopen (v1.5.1): urllib 默认会把 Authorization/api-key 等请求头原样复制到 302 后的
-    新地址, 也不拦 https->http 降级。第三方中转/被接管的接口只要回一个跳转, API Key 就送到别人机器上了
-    (本次审计已用本地双端口实测复现)。这里只放行"同协议同主机"的跳转, 其余直接报错终止。"""
-    global _SAFE_OPENER
+# ---------- 统一网络代理 (v1.6.1): 三档模式 system/manual/off, 代理变化后下一次请求自动重建 opener,
+# 开启/关闭科学上网工具不用重启软件; 本机回环地址永远绕过代理 (Ollama 等本地服务) ----------
+_PROXY_CFG = {"mode": "system", "manual": ""}
+_PROXY_CACHE = {"sig": None, "strict": None, "loose": None}
+_LOOPBACK_HOSTS = ("localhost", "127.0.0.1", "::1")
+
+def _normalize_manual_proxy(raw):
+    """手动代理规整: 只填 host:port 时补 http://; 只接受 http/https (urllib 原生支持, Clash 混合端口兼容)。"""
+    s = (raw or "").strip()
+    if not s: return ""
+    if "://" not in s: s = "http://" + s
+    import urllib.parse as _up
+    p = _up.urlsplit(s)
+    if p.scheme not in ("http", "https") or not p.hostname or not p.port: return ""
+    return s
+
+def _resolve_proxies():
+    """当前生效的代理字典 (urllib ProxyHandler 用): off=空, manual=手动地址, system=环境变量+系统代理。"""
+    import urllib.request as _ur
+    mode = _PROXY_CFG.get("mode", "system")
+    if mode == "off": return {}
+    if mode == "manual":
+        m = _normalize_manual_proxy(_PROXY_CFG.get("manual", ""))
+        return {"http": m, "https": m} if m else {}
+    return _ur.getproxies()
+
+def _proxy_signature(proxies):
+    return tuple(sorted((k, str(v)) for k, v in (proxies or {}).items()))
+
+def _build_net_opener(strict):
+    """按最新代理构建 opener 并缓存; 代理签名变化或模式切换时自动重建。strict 带同主机跳转防护。"""
     import urllib.request as _ur, urllib.error as _ue, urllib.parse as _up
-    if _SAFE_OPENER is None:
+    proxies = _resolve_proxies()
+    sig = _proxy_signature(proxies)
+    key = "strict" if strict else "loose"
+    if _PROXY_CACHE.get(key) is not None and _PROXY_CACHE.get("sig") == sig:
+        return _PROXY_CACHE[key]
+
+    class _LoopbackProxyHandler(_ur.ProxyHandler):
+        def proxy_open(self, req, proxy, ptype):
+            host = (_up.urlsplit(req.full_url).hostname or "").lower()
+            if host in _LOOPBACK_HOSTS: return None  # 本地服务不走代理
+            return super().proxy_open(req, proxy, ptype)
+
+    handlers = [_LoopbackProxyHandler(proxies)]
+    if strict:
         class _SameHostRedirect(_ur.HTTPRedirectHandler):
             def redirect_request(self, rq, fp, code, msg, headers, newurl):
                 old, new = _up.urlsplit(rq.full_url), _up.urlsplit(newurl)
@@ -589,8 +627,28 @@ def _open_url(req, timeout=None):
                 if _o != _n:
                     raise _ue.HTTPError(newurl, code, "接口要求跳转到其他地址, 为保护密钥已中止", headers, fp)
                 return super().redirect_request(rq, fp, code, msg, headers, newurl)
-        _SAFE_OPENER = _ur.build_opener(_SameHostRedirect)
-    return _SAFE_OPENER.open(req, timeout=timeout)
+        handlers.append(_SameHostRedirect)
+    opener = _ur.build_opener(*handlers)
+    _PROXY_CACHE[key] = opener
+    _PROXY_CACHE["sig"] = sig
+    return opener
+
+def _open_url(req, timeout=None):
+    """带同主机跳转防护的打开方式 (AI 等带凭据请求使用), 自动跟随系统/手动代理。"""
+    return _build_net_opener(True).open(req, timeout=timeout)
+
+def _open_url_loose(req, timeout=None):
+    """普通打开方式: 允许正常跨主机跳转, 同样自动跟随代理 (天气/汇率/更新/在线翻译等)。"""
+    return _build_net_opener(False).open(req, timeout=timeout)
+
+def _set_proxy_config(mode, manual=""):
+    _PROXY_CFG["mode"] = mode if mode in ("system", "manual", "off") else "system"
+    _PROXY_CFG["manual"] = (manual or "").strip()
+
+def _active_proxy_url():
+    """供 yt-dlp 的 proxy 参数: 返回当前代理地址, 无代理返回 None。"""
+    px = _resolve_proxies()
+    return px.get("https") or px.get("http") or None
 
 class _AttachLimit(Exception):
     """附件解压/提取超过安全上限 (解压炸弹防护)"""
@@ -939,6 +997,7 @@ class App(tk.Tk):
         self._tk_sequences = []    # 窗口内绑定的序列, 改热键时解绑旧的
         self.cfg = self.load_config()
         self._load_lang()
+        self._apply_proxy_config()
         self._apply_theme()
         self.after(2500, self._ocr_warmup)  # 空闲预热 OCR 引擎: 首次建引擎加载三模型要数秒, 别让第一次走 OCR 的 F4 干等
         self._splash = self._make_splash()  # 启动页 (仅打包版/显式开启): 构建期间盖住空白主窗
@@ -1099,7 +1158,26 @@ class App(tk.Tk):
                 except Exception: lp = configparser.ConfigParser(strict=False, interpolation=None); continue
             if lp.has_section("UI"): self._strings = dict(lp.items("UI"))
     def t(self, key, zh):
-        return self._strings.get(key, zh).replace("\\n", "\n")  # ini 里多行文案写成 \n 转义, 这里还原
+        return self._strings.get(key, zh).replace("\\n", "\n")
+    def _apply_proxy_config(self):
+        """读 [Network] 代理设置并同步到模块级网络层 (启动/备份导入后调用)。"""
+        if not self.cfg.has_section("Network"): self.cfg.add_section("Network")
+        mode = (self.cfg.get("Network", "ProxyMode", fallback="system") or "system").strip()
+        manual = self.cfg.get("Network", "ProxyServer", fallback="") or ""
+        _set_proxy_config(mode, manual)
+    def _apply_proxy_ui(self):
+        """设置面板里改代理: 校验后落盘并立即生效 (不用重启)。"""
+        mode = (self._proxy_mode_var.get() or "system").strip()
+        manual = (self._proxy_server_var.get() or "").strip()
+        if mode == "manual" and manual and not _normalize_manual_proxy(manual):
+            self.status.set(self.t("net_bad", "代理地址格式不对，示例：127.0.0.1:7890"))
+            return
+        if not self.cfg.has_section("Network"): self.cfg.add_section("Network")
+        self.cfg.set("Network", "ProxyMode", mode)
+        self.cfg.set("Network", "ProxyServer", manual)
+        self.save_config()
+        _set_proxy_config(mode, manual)
+        self.status.set(self.t("net_saved", "网络代理设置已保存"))  # ini 里多行文案写成 \n 转义, 这里还原
     def save_config(self):
         # 保存配置绝不能把程序搞崩: 整个过程兜底; 但失败不能静默 — 磁盘满/文件被占用时用户以为存上了,
         # 重启才发现设置回滚且无从排查 (千问 2026-11-27 指出)。记进 crash.log, _log_crash 自带 60 秒去重不刷屏。
@@ -1819,6 +1897,23 @@ class App(tk.Tk):
         me.bind("<FocusOut>", lambda _e: self._save_mini_settings()); me.bind("<Return>", lambda _e: self._save_mini_settings())
         ttk.Checkbutton(mrow, text=self.t("mini_always", "常显 (不自动隐藏)"), variable=self.mini_always_var, command=self._save_mini_settings).pack(side="left", padx=6)
         ttk.Button(mfrm, text=self.t("mini_show_btn", "立即显示"), command=lambda: self.show_mini()).pack(anchor="w", padx=4, pady=(0, 4))
+        nfrm = self._set_section(frm, self.t("set_net_frame", "网络代理"))
+        self._proxy_mode_var = tk.StringVar(value=(self.cfg.get("Network", "ProxyMode", fallback="system") or "system").strip())
+        self._proxy_server_var = tk.StringVar(value=self.cfg.get("Network", "ProxyServer", fallback=""))
+        nrow1 = ttk.Frame(nfrm); nrow1.pack(fill="x", pady=4, padx=4)
+        for _txt, _val in [(self.t("net_mode_system", "跟随系统 (推荐)"), "system"),
+                           (self.t("net_mode_manual", "手动代理"), "manual"),
+                           (self.t("net_mode_off", "直连 (不使用代理)"), "off")]:
+            ttk.Radiobutton(nrow1, text=_txt, variable=self._proxy_mode_var, value=_val,
+                            command=self._apply_proxy_ui).pack(side="left", padx=6)
+        nrow2 = ttk.Frame(nfrm); nrow2.pack(fill="x", pady=(0, 4), padx=4)
+        ttk.Label(nrow2, text=self.t("net_addr", "代理地址:")).pack(side="left")
+        nentry = ttk.Entry(nrow2, textvariable=self._proxy_server_var, width=24)
+        nentry.pack(side="left", padx=4)
+        nentry.bind("<FocusOut>", lambda _e: self._apply_proxy_ui())
+        nentry.bind("<Return>", lambda _e: self._apply_proxy_ui())
+        ttk.Label(nfrm, text=self.t("net_note", "「跟随系统」自动使用科学上网工具开启的系统代理，开关代理无需重启软件；「手动代理」填本机代理端口，如 127.0.0.1:7890；访问 Google、OpenAI 等国际服务需要开启代理。本机服务（如 Ollama）会自动绕过代理。"),
+                  foreground=self.UI_MUTED, wraplength=560, justify="left").pack(anchor="w", padx=4, pady=(0, 4))
         hfrm = self._set_section(frm, self.t("set_hist_frame", "截图历史"))
         self._hist_save_var = tk.BooleanVar(value=self.cfg.get("Snip", "HistorySave", fallback="1").strip() != "0")
         self._hist_max_var = tk.StringVar(value=self.cfg.get("Snip", "HistoryMax", fallback="100"))
@@ -1956,7 +2051,7 @@ class App(tk.Tk):
     def _fetch_latest_release(self):
         import urllib.request
         req = urllib.request.Request(self._RELEASE_API, headers={"User-Agent": "KIVO/" + VERSION, "Accept": "application/vnd.github+json"})
-        with urllib.request.urlopen(req, timeout=10) as r:
+        with _open_url_loose(req, timeout=10) as r:
             data = json.loads(r.read().decode("utf-8", "replace"))
         setup_url, setup_name = self._pick_setup_asset(data)
         sig_url = self._pick_sig_asset(data, setup_name) if setup_name else ""
@@ -2008,7 +2103,7 @@ class App(tk.Tk):
                 req = urllib.request.Request(url, headers={"User-Agent": "KIVO/" + VERSION})
                 done = 0; last = [-1]
                 MAX_BYTES = 300 * 1024 * 1024  # 安装包大小上限: 正常包几十 MB, 超过 300MB 必是异常响应, 别把磁盘写满
-                with urllib.request.urlopen(req, timeout=30) as r, open(part, "wb") as f:
+                with _open_url_loose(req, timeout=30) as r, open(part, "wb") as f:
                     total = int(r.headers.get("Content-Length") or 0)
                     if total > MAX_BYTES: raise OSError("too large")
                     while True:
@@ -2025,7 +2120,7 @@ class App(tk.Tk):
                 sig_url = getattr(self, "_upd_sig_url", "")
                 if not sig_url: raise OSError("no signature asset")  # 没有签名文件的版本不给一键安装 (发布页仍可手动下)
                 sreq = urllib.request.Request(sig_url, headers={"User-Agent": "KIVO/" + VERSION})
-                with urllib.request.urlopen(sreq, timeout=15) as sr:
+                with _open_url_loose(sreq, timeout=15) as sr:
                     mani = json.loads(sr.read().decode("utf-8", "replace"))
                 import hashlib
                 h = hashlib.sha256()
@@ -6237,7 +6332,7 @@ try {
         """拉美元基准的全部汇率: 返回 (rates, 更新时间UTC字符串)。免费接口, 数据每日更新 (面板上会标明更新时间)"""
         import urllib.request
         req = urllib.request.Request("https://open.er-api.com/v6/latest/USD", headers={"User-Agent": "KIVO"})
-        with urllib.request.urlopen(req, timeout=20) as r:
+        with _open_url_loose(req, timeout=20) as r:
             data = json.loads(r.read().decode("utf-8"))
         if data.get("result") != "success" or not isinstance(data.get("rates"), dict):
             raise RuntimeError("汇率接口返回异常")
@@ -7367,7 +7462,7 @@ try {
         try:
             import urllib.request
             req = urllib.request.Request("https://ipapi.co/json/", headers={"User-Agent": "KIVO"})
-            with urllib.request.urlopen(req, timeout=10) as r:
+            with _open_url_loose(req, timeout=10) as r:
                 d = json.loads(r.read().decode("utf-8"))
             if d.get("latitude") is not None: coords = (float(d["latitude"]), float(d["longitude"]))
         except Exception: coords = None
@@ -7390,7 +7485,7 @@ try {
             q = urllib.parse.quote(self._clock_zone_name(tzname))
             req = urllib.request.Request(f"https://geocoding-api.open-meteo.com/v1/search?name={q}&count=1&language=en",
                                          headers={"User-Agent": "KIVO"})
-            with urllib.request.urlopen(req, timeout=12) as r:
+            with _open_url_loose(req, timeout=12) as r:
                 d = json.loads(r.read().decode("utf-8"))
             res = d.get("results") or []
             if res: coords = (float(res[0]["latitude"]), float(res[0]["longitude"]))
@@ -7407,7 +7502,7 @@ try {
         import urllib.request
         try:
             req = urllib.request.Request(f"https://wttr.in/{lat},{lon}?format=j1", headers={"User-Agent": "curl/8.0"})
-            with urllib.request.urlopen(req, timeout=12) as r:
+            with _open_url_loose(req, timeout=12) as r:
                 d = json.loads(r.read().decode("utf-8"))
             cc = (d.get("current_condition") or [{}])[0]
             if cc.get("temp_C") is not None:
@@ -7418,7 +7513,7 @@ try {
         try:
             url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m,weather_code"
             req = urllib.request.Request(url, headers={"User-Agent": "KIVO"})
-            with urllib.request.urlopen(req, timeout=12) as r:
+            with _open_url_loose(req, timeout=12) as r:
                 d = json.loads(r.read().decode("utf-8"))
             cur = d.get("current") or {}
             if cur.get("temperature_2m") is not None:
@@ -8041,6 +8136,8 @@ try {
                     "format": "best/bv*+ba/bestvideo+bestaudio",
                     "progress_hooks": [hook]}
             if use_cookies: opts["cookiesfrombrowser"] = ("chrome",)
+            _dl_proxy = _active_proxy_url()
+            if _dl_proxy: opts["proxy"] = _dl_proxy  # 视频下载同样走当前代理 (国际站点需要)
             def done_info(info):
                 set_busy(False)
                 if info is None: return
@@ -8973,14 +9070,14 @@ try {
             url = "https://translate.googleapis.com/translate_a/single?" + urllib.parse.urlencode(
                 {"client": "gtx", "sl": source or "auto", "tl": target, "dt": "t", "q": q})
             req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-            with urllib.request.urlopen(req, timeout=5) as r:  # 5s: 国内这条基本不通, 别让 8s 超时拖着整批
+            with _open_url_loose(req, timeout=5) as r:  # 5s: 国内这条基本不通, 别让 8s 超时拖着整批
                 d = _json.loads(r.read().decode("utf-8"))
             return "".join(seg[0] for seg in (d[0] or []) if seg and seg[0])
         def via_mymemory(q):
             src = source or ("zh-CN" if has_cjk else "en")
             url = "https://api.mymemory.translated.net/get?" + urllib.parse.urlencode({"q": q, "langpair": f"{src}|{target}"})
             req = urllib.request.Request(url, headers={"User-Agent": "KIVO"})
-            with urllib.request.urlopen(req, timeout=6) as r:
+            with _open_url_loose(req, timeout=6) as r:
                 d = _json.loads(r.read().decode("utf-8"))
             return (d.get("responseData") or {}).get("translatedText") or ""
         def via_api(q):

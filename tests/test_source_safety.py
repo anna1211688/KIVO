@@ -815,9 +815,11 @@ class AiMemoryAndFilesTests(unittest.TestCase):
         """302 到别的域名时 urllib 会把 Authorization 一起带过去: AI 请求必须走同主机校验的封装"""
         for name in ("_ai_chat_messages", "_ai_fetch_models", "_baidu_translate", "_google_translate"):
             self.assertIn('globals().get("_open_url")', method_text(name), name)
-        guard = module_text("_open_url")
+        # 同主机跳转防护已收进统一 opener 工厂 (strict=True 时挂载), _open_url 走 strict 分支
+        guard = module_text("_build_net_opener")
         self.assertIn("HTTPRedirectHandler", guard)
         self.assertIn("hostname", guard)
+        self.assertIn("_build_net_opener(True)", module_text("_open_url"))
 
 
 class RecordQueueTests(unittest.TestCase):
@@ -1161,3 +1163,86 @@ class CleanupRoundTests(unittest.TestCase):
 
     def test_old_swatch_color_gone(self):
         self.assertNotIn('"#D7DFEA"', self.src)
+
+
+class ProxyNetworkTests(unittest.TestCase):
+    """v1.6.1 统一网络代理: 三档模式、手动地址规整、回环绕过、代理变化自动重建、全量走代理 helper。"""
+
+    @classmethod
+    def setUpClass(cls):
+        ns = {}
+        wanted = {"_PROXY_CFG", "_PROXY_CACHE", "_LOOPBACK_HOSTS"}
+        for node in TREE.body:
+            if (isinstance(node, ast.Assign)
+                    and any(isinstance(t, ast.Name) and t.id in wanted for t in node.targets)):
+                exec(ast.get_source_segment(SOURCE, node), ns)
+        fnames = ("_normalize_manual_proxy", "_resolve_proxies", "_proxy_signature",
+                  "_build_net_opener", "_open_url", "_open_url_loose",
+                  "_set_proxy_config", "_active_proxy_url")
+        for name in fnames:
+            node = next(n for n in TREE.body if isinstance(n, ast.FunctionDef) and n.name == name)
+            exec(ast.get_source_segment(SOURCE, node), ns)
+        cls.ns = ns
+
+    def test_manual_normalize(self):
+        n = self.ns["_normalize_manual_proxy"]
+        self.assertEqual(n("127.0.0.1:7890"), "http://127.0.0.1:7890")
+        self.assertEqual(n("http://127.0.0.1:7890"), "http://127.0.0.1:7890")
+        self.assertEqual(n("https://proxy.local:8443"), "https://proxy.local:8443")
+        self.assertEqual(n(""), "")
+        self.assertEqual(n("127.0.0.1"), "")          # 缺端口
+        self.assertEqual(n("ftp://127.0.0.1:21"), "")  # 不支持的协议
+
+    def test_off_mode(self):
+        self.ns["_set_proxy_config"]("off")
+        self.assertEqual(self.ns["_resolve_proxies"](), {})
+        self.assertIsNone(self.ns["_active_proxy_url"]())
+
+    def test_manual_mode(self):
+        self.ns["_set_proxy_config"]("manual", "127.0.0.1:7890")
+        px = self.ns["_resolve_proxies"]()
+        self.assertEqual(px, {"http": "http://127.0.0.1:7890", "https": "http://127.0.0.1:7890"})
+        self.assertEqual(self.ns["_active_proxy_url"](), "http://127.0.0.1:7890")
+
+    def test_system_mode_follows_getproxies(self):
+        import urllib.request
+        original = urllib.request.getproxies
+        urllib.request.getproxies = lambda: {"https": "http://127.0.0.1:7890"}
+        try:
+            self.ns["_set_proxy_config"]("system")
+            self.assertEqual(self.ns["_resolve_proxies"](), {"https": "http://127.0.0.1:7890"})
+        finally:
+            urllib.request.getproxies = original
+
+    def test_opener_rebuilds_when_proxy_changes(self):
+        self.ns["_set_proxy_config"]("off")
+        first = self.ns["_build_net_opener"](False)
+        self.ns["_set_proxy_config"]("manual", "127.0.0.1:7890")
+        second = self.ns["_build_net_opener"](False)
+        self.assertIsNot(first, second)
+        # 再次相同签名应复用缓存
+        self.assertIs(second, self.ns["_build_net_opener"](False))
+        # strict 版带重定向防护 handler
+        strict = self.ns["_build_net_opener"](True)
+        kinds = [type(h).__name__ for h in strict.handlers]
+        self.assertIn("_SameHostRedirect", kinds)
+
+    def test_loopback_bypasses_proxy(self):
+        import urllib.request
+        self.ns["_set_proxy_config"]("manual", "127.0.0.1:7890")
+        opener = self.ns["_build_net_opener"](False)
+        handler = next(h for h in opener.handlers if isinstance(h, urllib.request.ProxyHandler))
+        local_req = urllib.request.Request("http://127.0.0.1:11434/v1/models")
+        self.assertIsNone(handler.proxy_open(local_req, "http://127.0.0.1:7890", "http"))
+        self.assertEqual(local_req.host, "127.0.0.1:11434")
+        self.assertIsNone(getattr(local_req, "_tunnel_host", None))
+        remote_req = urllib.request.Request("https://generativelanguage.googleapis.com/v1beta/openai/models")
+        self.assertIsNone(handler.proxy_open(remote_req, "http://127.0.0.1:7890", "https"))
+        self.assertEqual(remote_req.host, "127.0.0.1:7890")
+        self.assertEqual(remote_req._tunnel_host, "generativelanguage.googleapis.com")
+
+    def test_no_raw_urlopen_left(self):
+        # 所有请求都必须经过代理感知的 helper (AI 代码里的 or 兜底除外)
+        self.assertNotIn("with urllib.request.urlopen", SOURCE)
+        self.assertIn('opts["proxy"]', SOURCE)
+        self.assertIn("def _open_url_loose", SOURCE)
