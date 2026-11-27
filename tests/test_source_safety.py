@@ -401,8 +401,11 @@ class AiTaskModelRoutingTests(unittest.TestCase):
     def test_task_model_routes_and_optional_same_provider_fallback(self):
         form = method_text("_build_ai_form")
         self.assertIn('route_choice_maps[label] = (svc_key, profile["model"])', form)
-        self.assertIn('routes[rk + "Model"] = route_choice_maps[choice]', form)
+        self.assertIn('routes[rk], routes[rk + "Model"] = route_choice_maps[choice]', form)
         self.assertIn('"AutoFallback"', form)
+        self.assertIn("time.monotonic()", form)
+        self.assertIn("连接正常 · 响应", form)
+        self.assertIn("连接失败 ·", form)
         chat = method_text("_ai_chat_messages")
         self.assertIn("Optional same-provider failover", chat)
         self.assertIn('profile.get("enabled", True)', chat)
