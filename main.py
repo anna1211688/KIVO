@@ -6443,6 +6443,33 @@ try {
         lines = [m.get("text", "") for m in (mems or []) if isinstance(m, dict) and m.get("text")]
         if not lines: return ""
         return (head + "\n" + "\n".join("- " + x for x in lines))[:4000]
+    @staticmethod
+    def _text_tokens(text):
+        """轻量分词: 拉丁词按小写单词 (>=2 字符), 中日韩按单字; 用于记忆相关性, 不引入新依赖。"""
+        if not text: return set()
+        words = set(re.findall(r"[a-z0-9]{2,}", text.lower()))
+        words.update(ch for ch in text if "\u4e00" <= ch <= "\u9fff")
+        return words
+    def _memory_top_n(self):
+        try:
+            return min(100, max(1, int(self.cfg.get("AI", "MemoryTopN", fallback="8"))))
+        except Exception:
+            return 8
+    def _relevant_memories(self, mems, question, top_n):
+        """按与当前问题的词面重叠打分, 只返回最相关的前 top_n 条; 无命中返回空列表 (不注入)。"""
+        q = self._text_tokens(question)
+        if not q:
+            return list(mems[:top_n])
+        scored = []
+        for i, m in enumerate(mems):
+            mt = self._text_tokens(m.get("text", ""))
+            hit = len(q & mt)
+            if hit > 0:
+                scored.append((hit, i, m))
+        if not scored:
+            return []
+        scored.sort(key=lambda x: (-x[0], x[1]))
+        return [m for _hit, _i, m in scored[:top_n]]
 
     def _read_attach_text(self, path):
         """读附件文件为纯文本, 返回 (text, err): 文本直读 (utf-8/gbk), PDF/Word/Excel 纯本地提取 (无第三方库);
@@ -9014,10 +9041,12 @@ try {
                             msgs = [{"role": "system", "content": self.t(
                                 "ai_summary_head", "以下是早期对话的摘要, 供参考:") + "\n" + summary}] + msgs
                     last_user = next((m for m in reversed(hist_ref) if m.get("role") == "user"), None)
-                    if not (last_user and last_user.get("image_path")):  # 长期记忆只进文字聊天: 作为 system 上下文放最前面 (带图的那轮不带)
+                    if not (last_user and last_user.get("image_path")):  # 长期记忆只进文字聊天: 带图的那轮不带
                         mems = getattr(self, "_ai_memory", None)
                         if mems is None: mems = self._ai_memory = self._load_ai_memory()
-                        sys_text = self._memory_system_text(mems, self.t("ai_mem_system_head", "以下是用户主动保存的长期记忆, 回答时请参考 (与当前问题无关的条目请忽略):"))
+                        question = last_user.get("content", "") if last_user else ""
+                        picked = self._relevant_memories(mems, question, self._memory_top_n())
+                        sys_text = self._memory_system_text(picked, self.t("ai_mem_system_head", "以下是与当前问题相关的长期记忆, 回答时请参考:"))
                         if sys_text: msgs = [{"role": "system", "content": sys_text}] + msgs
                     r = self._ai_chat_messages(msgs, max_tokens=2048, route="chat",
                                                stream_callback=on_token, cancel_event=cancel_event)

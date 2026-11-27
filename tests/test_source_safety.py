@@ -1838,3 +1838,40 @@ class ContextBudgetTests(unittest.TestCase):
         self.assertIn("def _summarize_dropped", SOURCE)
         self.assertIn('"ContextBudget"', SOURCE)
         self.assertIn("ai_summary_head", SOURCE)
+
+
+class MemoryRelevanceTests(unittest.TestCase):
+    """v1.6.3 AI-2: 记忆相关性筛选与接线。"""
+
+    @classmethod
+    def setUpClass(cls):
+        app_node = next(n for n in TREE.body if isinstance(n, ast.ClassDef) and n.name == "App")
+        cls.ns = {"re": re}
+        for name in ("_text_tokens", "_memory_top_n", "_relevant_memories"):
+            node = next(n for n in app_node.body if isinstance(n, ast.FunctionDef) and n.name == name)
+            exec(ast.get_source_segment(SOURCE, node), cls.ns)
+
+    def test_tokens(self):
+        f = self.ns["_text_tokens"]
+        self.assertEqual(f("Hello World hello"), {"hello", "world"})
+        self.assertEqual(f("你好"), {"你", "好"})
+        self.assertEqual(f(""), set())
+
+    def test_relevance_ranking(self):
+        mems = [{"text": "python 编程技巧"}, {"text": "今天买菜清单"},
+                {"text": "python 部署经验"}, {"text": "旅行计划"}]
+        class Stub:
+            _text_tokens = staticmethod(self.ns["_text_tokens"])
+        picked = self.ns["_relevant_memories"](Stub(), mems, "python 怎么部署", 8)
+        self.assertEqual(len(picked), 2)
+        self.assertIn("python", picked[0]["text"])  # 命中两个词的排前
+
+    def test_no_hit_returns_empty(self):
+        mems = [{"text": "完全无关的内容"}]
+        class Stub:
+            _text_tokens = staticmethod(self.ns["_text_tokens"])
+        self.assertEqual(self.ns["_relevant_memories"](Stub(), mems, "quantum physics", 8), [])
+
+    def test_wiring(self):
+        self.assertIn("def _relevant_memories", SOURCE)
+        self.assertIn('"MemoryTopN"', SOURCE)
