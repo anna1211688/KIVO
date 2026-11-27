@@ -5598,35 +5598,84 @@ try {
         im.save(path, "JPEG", quality=82, optimize=True)
         return os.path.relpath(path, BASE).replace(os.sep, "/")
 
-    def _ai_chat_history_messages(self, history):
-        """Build recent API messages, restoring locally persisted images when available."""
-        messages = []
+    @staticmethod
+    def _estimate_tokens(text):
+        """本地 token 估算 (无第三方依赖): 中日韩文字约 1 字 1 token, 其余约 4 字符 1 token。"""
+        if not text: return 0
+        cjk = 0
+        for ch in text:
+            o = ord(ch)
+            if ((0x4E00 <= o <= 0x9FFF) or (0x3040 <= o <= 0x30FF) or
+                    (0x3000 <= o <= 0x303F) or (0xFF00 <= o <= 0xFFEF)):
+                cjk += 1
+        return cjk + (len(text) - cjk + 3) // 4
+    def _context_budget(self):
+        try:
+            v = int(self.cfg.get("AI", "ContextBudget", fallback="6000"))
+            return min(128000, max(512, v))
+        except Exception:
+            return 6000
+    def _auto_summary_on(self):
+        return (self.cfg.get("AI", "AutoSummary", fallback="1") or "1").strip() == "1"
+    def _select_context(self, history, budget):
+        """从最新一条往回装, 累计估算 token 不超过 budget; 最后一条一定保留。
+        返回 (保留的原始 item 列表, 被裁掉的 item 列表)。"""
+        kept, kept_tokens = [], 0
+        i = len(history) - 1
+        while i >= 0:
+            item = history[i]
+            if not isinstance(item, dict) or item.get("role") not in ("user", "assistant") \
+                    or not isinstance(item.get("content"), str):
+                i -= 1; continue
+            cost = self._estimate_tokens(item["content"])
+            if item.get("image_path"): cost += 800  # 视觉输入粗略预留
+            if kept and kept_tokens + cost > budget:
+                break
+            kept.append(item); kept_tokens += cost; i -= 1
+        kept.reverse()
+        return kept, history[:i + 1]
+    def _restore_payload(self, item):
+        """单条消息转 API 格式, 本地图片存在时还原为视觉多模态内容。"""
+        content = item.get("content")
+        payload_content = content
         image_root = os.path.abspath(os.path.join(BASE, "ai_chat_images"))
-        for item in history[-20:]:
-            if not isinstance(item, dict) or item.get("role") not in ("user", "assistant"):
-                continue
-            content = item.get("content")
-            if not isinstance(content, str):
-                continue
-            payload_content = content
-            relative = item.get("image_path")
-            if item.get("role") == "user" and isinstance(relative, str):
-                try:
-                    normalized = os.path.normpath(relative.replace("/", os.sep))
-                    candidate = os.path.abspath(os.path.join(BASE, normalized))
-                    if (normalized.startswith("ai_chat_images" + os.sep)
-                            and os.path.commonpath((image_root, candidate)) == image_root
-                            and os.path.isfile(candidate) and os.path.getsize(candidate) <= 8 * 1024 * 1024):
-                        with Image.open(candidate) as source:
-                            image = source.convert("RGB")
-                        payload_content = [
-                            {"type": "text", "text": content},
-                            {"type": "image_url", "image_url": {"url": self._ai_image_dataurl(image)}},
-                        ]
-                except (OSError, ValueError):
-                    pass
-            messages.append({"role": item["role"], "content": payload_content})
-        return messages
+        relative = item.get("image_path")
+        if item.get("role") == "user" and isinstance(relative, str):
+            try:
+                normalized = os.path.normpath(relative.replace("/", os.sep))
+                candidate = os.path.abspath(os.path.join(BASE, normalized))
+                if (normalized.startswith("ai_chat_images" + os.sep)
+                        and os.path.commonpath((image_root, candidate)) == image_root
+                        and os.path.isfile(candidate) and os.path.getsize(candidate) <= 8 * 1024 * 1024):
+                    with Image.open(candidate) as source:
+                        image = source.convert("RGB")
+                    payload_content = [
+                        {"type": "text", "text": content},
+                        {"type": "image_url", "image_url": {"url": self._ai_image_dataurl(image)}}]
+            except (OSError, ValueError):
+                pass
+        return {"role": item["role"], "content": payload_content}
+    def _ai_chat_history_messages(self, history):
+        """按 token 预算构造 API 消息 (v1.6.3 起替代旧的固定 20 条截断), 图片按需还原。"""
+        kept, _dropped = self._select_context(history, self._context_budget())
+        return [self._restore_payload(it) for it in kept]
+    def _summarize_dropped(self, dropped):
+        """把被裁掉的早期对话压缩成要点; 失败返回空串, 不阻断主请求。"""
+        convo = []
+        for it in dropped:
+            if isinstance(it, dict) and it.get("role") in ("user", "assistant") \
+                    and isinstance(it.get("content"), str):
+                who = "用户" if it["role"] == "user" else "助手"
+                convo.append(f"{who}: {it['content']}")
+        if not convo: return ""
+        prompt = ("请把下面的早期对话压缩成简短要点, 保留关键事实、决定和待办, 用条目形式, 不要寒暄:\n\n"
+                  + "\n".join(convo))[:6000]
+        try:
+            return self._ai_chat_messages(
+                [{"role": "user", "content": prompt}], max_tokens=512,
+                temperature=0.2, timeout=30, route="chat")
+        except Exception:
+            return ""
 
     def _ai_chat_image(self, img, prompt, cfg=None, temperature=0.7, timeout=90, route=None):
         """把图+提示词发给视觉模型, 返回模型回复的纯文本; 配置缺失/接口出错抛 RuntimeError (带人话原因)。
@@ -8957,7 +9006,13 @@ try {
                 self._ui_queue.put(paint)
             def work():
                 try:
-                    msgs = self._ai_chat_history_messages(hist_ref)
+                    kept, dropped = self._select_context(hist_ref, self._context_budget())
+                    msgs = [self._restore_payload(it) for it in kept]
+                    if dropped and self._auto_summary_on():
+                        summary = self._summarize_dropped(dropped)
+                        if summary:
+                            msgs = [{"role": "system", "content": self.t(
+                                "ai_summary_head", "以下是早期对话的摘要, 供参考:") + "\n" + summary}] + msgs
                     last_user = next((m for m in reversed(hist_ref) if m.get("role") == "user"), None)
                     if not (last_user and last_user.get("image_path")):  # 长期记忆只进文字聊天: 作为 system 上下文放最前面 (带图的那轮不带)
                         mems = getattr(self, "_ai_memory", None)

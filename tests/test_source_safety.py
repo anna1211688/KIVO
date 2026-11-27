@@ -322,7 +322,7 @@ class HardeningTests(unittest.TestCase):
 
     def test_chat_image_history_is_persisted_and_restored_for_followups(self):
         save = method_text("_save_ai_chat_image")
-        restore = method_text("_ai_chat_history_messages")
+        restore = method_text("_restore_payload")
         loader = method_text("_load_ai_chats")
         self.assertIn('return os.path.relpath(path, BASE).replace(os.sep, "/")', save)
         self.assertIn('item.get("image_path")', restore)
@@ -331,7 +331,7 @@ class HardeningTests(unittest.TestCase):
         self.assertIn("self._ai_chat_messages(msgs, max_tokens=2048, route=\"chat\",", SOURCE)
 
     def test_chat_image_restore_rejects_paths_outside_attachment_folder(self):
-        restore = method_text("_ai_chat_history_messages")
+        restore = method_text("_restore_payload")
         self.assertIn('normalized.startswith("ai_chat_images" + os.sep)', restore)
         self.assertIn('os.path.commonpath((image_root, candidate)) == image_root', restore)
         self.assertIn('os.path.getsize(candidate) <= 8 * 1024 * 1024', restore)
@@ -1789,3 +1789,52 @@ class BatchImageTests(unittest.TestCase):
     def test_nav(self):
         self.assertIn("def open_batch_images", SOURCE)
         self.assertIn("self.open_batch_images", SOURCE)
+
+
+class ContextBudgetTests(unittest.TestCase):
+    """v1.6.3 AI-1: token 估算、预算裁剪与摘要接线。"""
+
+    @classmethod
+    def setUpClass(cls):
+        app_node = next(n for n in TREE.body if isinstance(n, ast.ClassDef) and n.name == "App")
+        cls.ns = {}
+        for name in ("_estimate_tokens", "_context_budget", "_select_context",
+                     "_ai_chat_history_messages", "_summarize_dropped"):
+            node = next(n for n in app_node.body if isinstance(n, ast.FunctionDef) and n.name == name)
+            exec(ast.get_source_segment(SOURCE, node), cls.ns)
+
+    def test_estimate(self):
+        f = self.ns["_estimate_tokens"]
+        self.assertEqual(f(""), 0)
+        self.assertEqual(f("你好世界"), 4)
+        self.assertEqual(f("abcdefgh"), 2)  # 8 Latin chars / 4
+
+    def test_select_keeps_last_and_drops_old(self):
+        hist = [{"role": "user", "content": "一" * 20}, {"role": "assistant", "content": "二" * 20},
+                {"role": "user", "content": "三" * 20}, {"role": "assistant", "content": "四" * 20},
+                {"role": "user", "content": "最新问题"}]
+        class Stub:
+            _estimate_tokens = staticmethod(self.ns["_estimate_tokens"])
+        kept, dropped = self.ns["_select_context"](Stub(), hist, 30)
+        self.assertEqual(kept[-1]["content"], "最新问题")  # 最后一条必保留
+        self.assertTrue(len(dropped) >= 1)
+        self.assertEqual(len(kept) + len(dropped), len(hist))
+
+    def test_oversized_last_still_kept(self):
+        hist = [{"role": "user", "content": "字" * 500}]
+        class Stub:
+            _estimate_tokens = staticmethod(self.ns["_estimate_tokens"])
+        kept, dropped = self.ns["_select_context"](Stub(), hist, 10)
+        self.assertEqual(len(kept), 1); self.assertEqual(dropped, [])
+
+    def test_budget_bounds(self):
+        import configparser
+        class Stub:
+            cfg = configparser.RawConfigParser()
+        Stub.cfg.add_section("AI"); Stub.cfg.set("AI", "ContextBudget", "999999")
+        self.assertEqual(self.ns["_context_budget"](Stub()), 128000)
+
+    def test_wiring(self):
+        self.assertIn("def _summarize_dropped", SOURCE)
+        self.assertIn('"ContextBudget"', SOURCE)
+        self.assertIn("ai_summary_head", SOURCE)
