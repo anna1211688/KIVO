@@ -510,11 +510,18 @@ def _install_crash_logging():
     except Exception: pass
 
 def _atomic_write(path, text):
-    """原子写: 先写临时文件再 os.replace 换名。直接覆盖写时若断电/崩溃, 文件会写一半损坏,
-    记录和配置 (含翻译密钥) 就全丢了; 原子写保证磁盘上永远是完整的新版或旧版。"""
+    """原子写: 先写临时文件, flush+fsync 落盘后再 os.replace 换名。直接覆盖写时若断电/崩溃, 文件会写一半损坏,
+    记录和配置 (含翻译密钥) 就全丢了; 原子写保证磁盘上永远是完整的新版或旧版。fsync 不能省 (2026-11-27 审查):
+    没有它, 断电/蓝屏时数据可能还停在系统缓存里, replace 完成了照样丢最后一次写。"""
     tmp = path + ".tmp"
-    with open(tmp, "w", encoding="utf-8") as f: f.write(text)
+    with open(tmp, "w", encoding="utf-8") as f:
+        f.write(text); f.flush(); os.fsync(f.fileno())
     os.replace(tmp, path)
+    try:  # 目录项也刷一次, 保证改名本身落盘 (Windows 上目录 fsync 不可用, 失败就算了)
+        dfd = os.open(os.path.dirname(os.path.abspath(path)), os.O_RDONLY)
+        try: os.fsync(dfd)
+        finally: os.close(dfd)
+    except Exception: pass
 def _ini_scalar(v):
     """配置值收成一行: 换行/制表/连续空白全压成单个空格。值里混进换行会把 Config.ini 写坏 —
     值中的一行 "Evil=1" 下次读取就变成一个真键 (注入/损坏双防), 所有落盘值先过这里。"""
@@ -1587,16 +1594,30 @@ class App(tk.Tk):
 
     @staticmethod
     def _ver_tuple(s):
-        nums = [int(x) for x in re.findall(r"\d+", str(s or ""))][:3]
-        return tuple(nums + [0] * (3 - len(nums)))
+        """版本号 -> 可比较元组: 数字段 + 正式版标记 + 预发布序号。
+        预发布 (如 v1.5.0-beta1) 必须排在同号正式版之前 (2026-11-27 审查: 旧版对 beta 后缀无感, 会把测试版当正式版提示更新)。"""
+        s = str(s or "").strip().lstrip("vV")
+        main_part, _, pre = s.partition("-")
+        nums = [int(x) for x in re.findall(r"\d+", main_part)][:3]
+        nums += [0] * (3 - len(nums))
+        if not pre: return tuple(nums + [1])
+        pre_nums = [int(x) for x in re.findall(r"\d+", pre)]
+        return tuple(nums + [0] + pre_nums)
 
     @staticmethod
     def _pick_setup_asset(data):
-        for a in (data or {}).get("assets") or []:
+        """挑安装包资产: 优先与 release tag 版本号同名的那个 (2026-11-27 审查: 旧版取首个匹配,
+        release 里有多个 KIVO-Setup-*.exe 时可能选到旧的); 没有同名的才退回首个匹配。"""
+        assets = (data or {}).get("assets") or []
+        ver = str((data or {}).get("tag_name") or "").strip().lstrip("vV")
+        fallback = ("", "")
+        for a in assets:
             name = str(a.get("name") or "")
             if name.startswith("KIVO-Setup-") and name.lower().endswith(".exe"):
-                return str(a.get("browser_download_url") or ""), name
-        return "", ""
+                if ver and name == f"KIVO-Setup-{ver}.exe":
+                    return str(a.get("browser_download_url") or ""), name
+                if not fallback[1]: fallback = (str(a.get("browser_download_url") or ""), name)
+        return fallback
 
     @staticmethod
     def _pick_sig_asset(data, setup_name):
@@ -1674,16 +1695,20 @@ class App(tk.Tk):
         except Exception: pass
         import tempfile, urllib.request
         dest = os.path.join(tempfile.gettempdir(), name or "KIVO-Setup.exe")
+        part = dest + f".part{os.getpid()}"  # 先下到带进程号的临时名 (2026-11-27 审查: 固定文件名可预测, 且半成品会冒充完整包), 验签通过后才改名到 dest
         def work():
             try:
                 req = urllib.request.Request(url, headers={"User-Agent": "KIVO/" + VERSION})
                 done = 0; last = [-1]
-                with urllib.request.urlopen(req, timeout=30) as r, open(dest, "wb") as f:
+                MAX_BYTES = 300 * 1024 * 1024  # 安装包大小上限: 正常包几十 MB, 超过 300MB 必是异常响应, 别把磁盘写满
+                with urllib.request.urlopen(req, timeout=30) as r, open(part, "wb") as f:
                     total = int(r.headers.get("Content-Length") or 0)
+                    if total > MAX_BYTES: raise IOError("too large")
                     while True:
                         chunk = r.read(262144)
                         if not chunk: break
                         f.write(chunk); done += len(chunk)
+                        if done > MAX_BYTES: raise IOError("too large")
                         pct = int(done * 100 / total) if total else -1
                         if pct != last[0]:
                             last[0] = pct
@@ -1697,7 +1722,7 @@ class App(tk.Tk):
                     mani = json.loads(sr.read().decode("utf-8", "replace"))
                 import hashlib
                 h = hashlib.sha256()
-                with open(dest, "rb") as f:
+                with open(part, "rb") as f:
                     while True:
                         b = f.read(1048576)
                         if not b: break
@@ -1706,8 +1731,11 @@ class App(tk.Tk):
                 ver = str(getattr(self, "_upd_tag", "") or "").lstrip("v")
                 if str(mani.get("name") or "") != (name or "") or str(mani.get("sha256") or "").lower() != digest: raise IOError("hash mismatch")
                 if not self._verify_update_sig(str(mani.get("name") or ""), str(mani.get("version") or ver), digest, str(mani.get("sig") or "")): raise IOError("bad signature")
+                os.replace(part, dest)  # 全部验证通过, 才把安装包放到正式文件名上
                 self._ui_queue.put(lambda: self._upd_downloaded(dest))
             except Exception as e:
+                try: os.remove(part)
+                except Exception: pass
                 if str(e) in ("no signature asset", "hash mismatch", "bad signature"):
                     self._ui_queue.put(self._upd_verify_failed)
                 else:
@@ -1858,10 +1886,18 @@ class App(tk.Tk):
     def _import_backup(self, path):
         import zipfile
         with zipfile.ZipFile(path) as z:
-            if "kivo_backup.json" not in z.namelist() and "spst_backup.json" not in z.namelist(): raise ValueError("not a KIVO backup")  # spst_backup.json 是旧版备份的标记文件名 (历史引用, 保留它才能导入旧备份)
+            marker = "kivo_backup.json" if "kivo_backup.json" in z.namelist() else ("spst_backup.json" if "spst_backup.json" in z.namelist() else None)
+            if marker is None: raise ValueError("not a KIVO backup")
+            try:  # 标记文件里的 app 字段也要对得上 (2026-11-27 审查): 只认文件名的话, 任意带同名空文件的 zip 都能过第一道门
+                meta = json.loads(z.read(marker).decode("utf-8", "replace"))
+                if str(meta.get("app") or "") not in ("KIVO", "SPST"): raise ValueError("not a KIVO backup")
+            except ValueError: raise
+            except Exception: raise ValueError("not a KIVO backup")
             payload = {}
             for name in self._BACKUP_FILES:
                 if name in z.namelist():
+                    declared = z.getinfo(name).file_size
+                    if declared > 64 * 1024 * 1024: raise ValueError("backup entry too large")  # 先查声明大小再读 (2026-11-27 审查): 读完才查, 解压炸弹在 read 那一步就把内存打爆了
                     data = z.read(name)
                     if len(data) > 64 * 1024 * 1024: raise ValueError("backup entry too large")  # 解压后单文件封顶 64MB: 正常备份远到不了, 防构造的压缩包把内存撑爆
                     if ".json" in name: json.loads(data.decode("utf-8"))  # 先验货再覆盖: JSON 已损坏的备份整包拒绝, 不拿坏数据顶掉现有好数据
@@ -1875,10 +1911,18 @@ class App(tk.Tk):
                             except Exception: continue
                         if not ok_ini: raise ValueError("bad Config.ini in backup")
                     payload[name] = data
-            for name, data in payload.items():
-                tmp = os.path.join(BASE, name + ".tmp")
-                with open(tmp, "wb") as f: f.write(data)
-                os.replace(tmp, os.path.join(BASE, name))
+            staged = []  # 两阶段落盘 (2026-11-27 审查): 先把所有文件都写成 .tmp, 再统一 replace; 中途失败不会留下新旧混合状态
+            try:
+                for name, data in payload.items():
+                    tmp = os.path.join(BASE, name + ".tmp")
+                    with open(tmp, "wb") as f: f.write(data)
+                    staged.append((tmp, os.path.join(BASE, name)))
+                for tmp, dst in staged: os.replace(tmp, dst)
+            except Exception:
+                for tmp, _dst in staged:
+                    try: os.remove(tmp)
+                    except Exception: pass
+                raise
     def _backup_export_dialog(self):
         path = filedialog.asksaveasfilename(title=self.t("bak_export_title", "保存备份文件"),
                                             defaultextension=".zip", filetypes=[("ZIP", "*.zip")],
@@ -2131,9 +2175,12 @@ class App(tk.Tk):
             self._write_records()
     def _write_records(self):
         text = json.dumps(self.records, ensure_ascii=False, separators=(",", ":"))  # 同上: 2000 条记录时 indent 版白多三成体积
-        _atomic_write(RECORDS_PATH, text)
-        try: _atomic_write(RECORDS_PATH + ".bak", text)  # 同步留一份备份, 供下次启动损坏时回退
-        except Exception: pass
+        try:
+            _atomic_write(RECORDS_PATH, text)
+            try: _atomic_write(RECORDS_PATH + ".bak", text)  # 同步留一份备份, 供下次启动损坏时回退
+            except Exception: pass
+        except Exception:  # 与 save_phrases/save_config 对齐 (2026-11-27 审查): 主写失败要留痕并重新置脏, 下次保存时重试, 别静默丢队列变更
+            _log_crash("save-records", *sys.exc_info()); self._records_dirty = True
     def add_record(self, text, dedupe=True, save=True):
         text = text.strip("\r\n")
         if not text: return
@@ -2526,7 +2573,7 @@ class App(tk.Tk):
                 try: keyboard.remove_hotkey(self._oc_handle)
                 except Exception: pass
                 self._oc_handle = None
-        except Exception: keyboard = None
+        except Exception: keyboard = None; _log_crash("hotkeys-import", *sys.exc_info())  # 全局热键整条路失效必须留痕 (2026-11-27 审查), 否则用户只会觉得热键时灵时不灵
         self._hk_handles = []
         for seq in self._tk_sequences:
             try: self.unbind(seq)
@@ -2549,7 +2596,7 @@ class App(tk.Tk):
                 try: self._hk_handles.append(keyboard.add_hotkey(hk, lambda f=fn: self._ui_queue.put(f), suppress=True)); global_ok = True
                 except Exception:
                     try: self._hk_handles.append(keyboard.add_hotkey(hk, lambda f=fn: self._ui_queue.put(f))); global_ok = True
-                    except Exception: pass
+                    except Exception: _log_crash(f"hotkey-register:{hk}", *sys.exc_info())  # 两次都注册不上要留痕 (2026-11-27 审查)
         scope = self.t("st_global", "全局热键") if global_ok else self.t("st_inapp", "窗口内热键")
         self.status.set(f"{scope} {self.t('st_enabled', '已启用')}: " + (" / ".join(labels) if labels else self.t("st_notset", "未设置, 到「系统设置」里的「热键设置」区添加")))
         # 全局切换热键 (原版 [OCHotKey]): 单独注册, 不归 toggle 管, 这样关掉后还能按它恢复
@@ -2559,7 +2606,7 @@ class App(tk.Tk):
             try: self._oc_handle = keyboard.add_hotkey(oc, lambda: self._ui_queue.put(self.toggle_hotkeys), suppress=True)
             except Exception:
                 try: self._oc_handle = keyboard.add_hotkey(oc, lambda: self._ui_queue.put(self.toggle_hotkeys))
-                except Exception: pass
+                except Exception: _log_crash(f"hotkey-register:{oc}", *sys.exc_info())
         self._hk_enabled = True
         self._refresh_snip_btn_labels()  # 热键刚按新设置注册完, 主窗口按钮标注同步刷新
     def toggle_hotkeys(self):
@@ -4438,12 +4485,23 @@ try {
     @staticmethod
     def _http_base(u):
         """AI 接口地址校验 + 规整: 只许 http/https 且必须有主机名, 去掉尾部斜杠;
-        file:// 这类怪地址直接报错, 别让 urllib 去试奇怪的协议。"""
+        file:// 这类怪地址直接报错, 别让 urllib 去试奇怪的协议。
+        http 只放行本机/局域网 (2026-11-27 审查): 公网 http 会把 Authorization 里的 API Key 明文送出去,
+        本地 Ollama (localhost/127.0.0.1) 和局域网自建服务 (192.168.x.x 等私有地址) 不受影响。"""
         from urllib.parse import urlparse
+        import ipaddress
         u = (u or "").strip()
         p = urlparse(u)
         if p.scheme not in ("http", "https") or not p.netloc or any(c in u for c in " \t\r\n"):
             raise RuntimeError("AI 接口地址不对 (只支持 http/https 地址): " + (u[:60] or "(空)"))
+        if p.scheme == "http":
+            host = (p.hostname or "").lower()
+            local = host in ("localhost",) or host.endswith(".local")
+            if not local:
+                try: ip = ipaddress.ip_address(host); local = ip.is_loopback or ip.is_private or ip.is_link_local
+                except ValueError: local = False
+            if not local:
+                raise RuntimeError("公网地址只支持 https (http 会明文发送 API Key): " + (u[:60] or "(空)"))
         return u.rstrip("/")
 
     def _ai_cfg(self, svc=None):
@@ -5619,7 +5677,7 @@ try {
         if tz is None:
             self._conv_result.set(self.t("clk_conv_bad", "格式不对: 日期用 2026-11-28, 时间用 15:00")); self._conv_msg = ""
             return
-        mine = dt.replace(tzinfo=datetime.now().astimezone().tzinfo)
+        mine = dt.astimezone()  # naive 按本地时间解释, astimezone 会按目标日期当天的规则取偏移 (2026-11-27 审查: 旧写法拿今天的固定偏移套任意日期, 跨夏令时区间会差 1 小时)
         theirs = mine.astimezone(tz)
         wd_en = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
         wd_zh = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
@@ -8155,7 +8213,7 @@ try {
             self._tray = pystray.Icon("KIVO", self._make_tray_icon(), f"KIVO {self.t('tagline', '智能工作台')}", menu)
             threading.Thread(target=self._tray.run, daemon=True).start()
         except Exception:
-            self._tray = None
+            self._tray = None; _log_crash("tray-init", *sys.exc_info())  # 托盘起不来要留痕 (2026-11-27 审查): 点 X 的行为会因此不同, 不能静默
 
     def toggle_main_window(self):
         """唤出/隐藏主窗口 (预设 F2, 在「热键设置」里可改): 藏在托盘/最小化时唤出到前台;
