@@ -784,8 +784,10 @@ class ScreenshotTranslationPerformanceTests(unittest.TestCase):
 
     def test_f4_saves_history_without_blocking_the_ui_callback(self):
         source = method_text("snip_region")
-        self.assertIn("self.save_shot_async(final)", source)
-        self.assertNotIn("self.save_shot(final)", source)
+        self.assertIn(
+            "final = full.crop(box); close_overlay(); self.save_shot_async(final); self.translate_image_inplace",
+            source,
+        )
         async_save = method_text("save_shot_async")
         self.assertIn("threading.Thread", async_save)
         self.assertIn("self._ui_queue.put(self.refresh_shots)", async_save)
