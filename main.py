@@ -1127,7 +1127,8 @@ class App(tk.Tk):
     def load_config(self):
         hk_defaults = {f"HotKey{i}": "无" for i in range(13)}; hk_defaults.update(DEFAULT_HOTKEYS)
         defaults_dict = {"Config": {"SleepTime": "80", "WaveSet": "0", "AutoRun": "0", "Language": "Chinese", "PasteEnter": "0", "PasteRemove": "1",
-                                    "MiniFormTime": "5", "MiniFormSet": "0", "AddChar": "1", "LetterSet": "0", "ShowHotKey": "F2"},
+                                    "MiniFormTime": "5", "MiniFormSet": "0", "AddChar": "1", "LetterSet": "0", "ShowHotKey": "F2",
+                                    "QuickPanelKey": "F12"},
                          "HotKey": hk_defaults, "Snip": dict(DEFAULT_SNIP_KEYS),
                          "OCHotKey": {"HotKey": "无", "OCAutoSet": "0"}}
         def _fresh():
@@ -3293,6 +3294,7 @@ class App(tk.Tk):
     def hotkey_actions(self):
         # (section, key, 显示名, 动作)
         return [("Config", "ShowHotKey", self.t("hk_show_main", "唤出主窗口"), self.toggle_main_window),
+                ("Config", "QuickPanelKey", self.t("hk_quick_panel", "快捷面板"), self.open_quick_panel),
                 ("HotKey", "HotKey1", self.t("hk_select_all", "全选"), self.act_select_all),
                 ("HotKey", "HotKey2", self.t("hk_cut", "剪切"), self.act_cut),
                 ("HotKey", "HotKey3", self.t("hk_copy", "复制"), self.act_copy),
@@ -9980,6 +9982,111 @@ try {
             else:
                 self._show_main()
         except Exception: pass
+
+    # ---------- 全局快捷面板 (v1.6.2): Spotlight 式, 全局热键呼出, 搜记录/常用语/算术, 回车即粘贴 ----------
+    _QUICK_MAX_RESULTS = 12
+    @staticmethod
+    def _safe_eval_math(expr):
+        """安全算术求值: 只允许数字与 + - * / % ( ) . 空格, AST 白名单求值, 不合法返回 None。"""
+        import ast as _ast, operator
+        if not expr or not re.fullmatch(r"[0-9+\-*/%().\s]+", expr): return None
+        ops = {_ast.Add: operator.add, _ast.Sub: operator.sub, _ast.Mult: operator.mul,
+               _ast.Div: operator.truediv, _ast.Mod: operator.mod, _ast.USub: operator.neg,
+               _ast.UAdd: operator.pos}
+        def ev(node):
+            if isinstance(node, _ast.Expression): return ev(node.body)
+            if isinstance(node, _ast.Constant) and isinstance(node.value, (int, float)): return node.value
+            if isinstance(node, _ast.BinOp) and type(node.op) in ops:
+                return ops[type(node.op)](ev(node.left), ev(node.right))
+            if isinstance(node, _ast.UnaryOp) and type(node.op) in ops:
+                return ops[type(node.op)](ev(node.operand))
+            raise ValueError("bad node")
+        try:
+            v = ev(_ast.parse(expr, mode="eval"))
+            return round(v, 10) if isinstance(v, float) else v
+        except Exception:
+            return None
+    def open_quick_panel(self):
+        win = getattr(self, "_quick_win", None)
+        try:
+            if win is not None and win.winfo_exists():
+                win.destroy(); self._quick_win = None; return
+        except Exception: pass
+        self._build_quick_panel()
+    def _build_quick_panel(self):
+        win = tk.Toplevel(self)
+        win.overrideredirect(True)
+        win.attributes("-topmost", True)
+        win.configure(background=self.UI_BORDER_STRONG)
+        self._quick_win = win
+        self._quick_results = []
+        w, h = 580, 380
+        sw, sh = win.winfo_screenwidth(), win.winfo_screenheight()
+        win.geometry(f"{w}x{h}+{(sw - w) // 2}+{int(sh * 0.30)}")
+        card = tk.Frame(win, bg=self.UI_SURFACE)
+        card.pack(fill="both", expand=True, padx=1, pady=1)
+        entry = tk.Entry(card, relief="flat", font=self._ui_font(13), bg=self.UI_SURFACE,
+                         fg=self.UI_TEXT, insertbackground=self.UI_TEXT, highlightthickness=0, borderwidth=0)
+        entry.pack(fill="x", padx=16, pady=(14, 8))
+        self._quick_entry = entry
+        lb = tk.Listbox(card, relief="flat", bd=0, activestyle="none", font=self._ui_font(11),
+                        bg=self.UI_SURFACE, fg=self.UI_TEXT, selectbackground=self.UI_SEL_BG,
+                        selectforeground=self.UI_ACCENT_PRESS, highlightthickness=0, height=12)
+        lb.pack(fill="both", expand=True, padx=10, pady=(0, 12))
+        self._quick_list = lb
+        def on_type(e):
+            if e.keysym == "Escape": win.destroy(); return "break"
+            if e.keysym == "Return": self._quick_pick(); return "break"
+            if e.keysym == "Up":
+                i = max(0, (lb.curselection()[0] if lb.curselection() else 0) - 1)
+                lb.selection_clear(0, "end"); lb.selection_set(i); return "break"
+            if e.keysym == "Down":
+                i = min(max(0, lb.size() - 1), (lb.curselection()[0] if lb.curselection() else -1) + 1)
+                lb.selection_clear(0, "end"); lb.selection_set(i); return "break"
+            self.after_idle(self._quick_refresh)
+        entry.bind("<Key>", on_type)
+        entry.bind("<FocusOut>", lambda e: win.destroy())
+        entry.focus_set()
+        self._quick_refresh()
+    def _quick_collect(self, q):
+        q = (q or "").strip().lower()
+        out = []
+        math_val = self._safe_eval_math(q)
+        if math_val is not None:
+            out.append(("= " + str(math_val), str(math_val)))
+        for r in self.records:
+            t = r["text"]
+            if not q or q in t.lower():
+                out.append((t.replace("\n", " ")[:80], t))
+            if len(out) >= self._QUICK_MAX_RESULTS: break
+        if len(out) < self._QUICK_MAX_RESULTS:
+            for p in self.phrases:
+                t = str(p.get("text", ""))
+                if not q or q in t.lower():
+                    out.append(("◆ " + t.replace("\n", " ")[:78], t))
+                if len(out) >= self._QUICK_MAX_RESULTS: break
+        return out
+    def _quick_refresh(self):
+        if getattr(self, "_quick_win", None) is None: return
+        self._quick_results = self._quick_collect(self._quick_entry.get())
+        lb = self._quick_list
+        lb.delete(0, "end")
+        for label, _v in self._quick_results:
+            lb.insert("end", label)
+        if lb.size(): lb.selection_set(0)
+    def _quick_pick(self):
+        win = getattr(self, "_quick_win", None)
+        if win is None or not self._quick_results: return
+        sel = self._quick_list.curselection()
+        text = self._quick_results[sel[0] if sel else 0][1]
+        win.destroy(); self._quick_win = None
+        self._mark_self_clip(text)  # 自己写剪贴板, 不触发自动历史
+        def do_paste():
+            try:
+                self.clip_set(text)
+                self._send_combo(0x56)  # 模拟 Ctrl+V 粘到当前前台窗口
+            except Exception: pass
+        self.after(150, do_paste)
 
     def _show_main(self):
         self.deiconify(); self.lift()

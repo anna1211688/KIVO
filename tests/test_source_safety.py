@@ -1413,3 +1413,48 @@ class ClipboardWatchTests(unittest.TestCase):
     def test_settings_checkbox_in_source(self):
         self.assertIn('self.t("clip_watch",', SOURCE)
         self.assertIn("def _toggle_clip_watch", SOURCE)
+
+
+class QuickPanelTests(unittest.TestCase):
+    """v1.6.2 全局快捷面板: 安全算术、结果收集与过滤、热键注册。"""
+
+    @classmethod
+    def setUpClass(cls):
+        app_node = next(n for n in TREE.body if isinstance(n, ast.ClassDef) and n.name == "App")
+        cls.ns = {"re": re}
+        wanted = ("_safe_eval_math", "open_quick_panel", "_build_quick_panel",
+                  "_quick_collect", "_quick_refresh", "_quick_pick")
+        for name in wanted:
+            node = next(n for n in app_node.body if isinstance(n, ast.FunctionDef) and n.name == name)
+            exec(ast.get_source_segment(SOURCE, node), cls.ns)
+
+    def test_safe_math(self):
+        f = self.ns["_safe_eval_math"]
+        self.assertEqual(f("1+2*3"), 7)
+        self.assertEqual(f("(8-2)/4"), 1.5)
+        self.assertEqual(f("10%3"), 1)
+        self.assertEqual(f("-5+2"), -3)
+        self.assertIsNone(f(""))
+        self.assertIsNone(f("1+__import__('os')"))
+        self.assertIsNone(f("a+b"))
+        self.assertIsNone(f("1 and 2"))
+
+    def test_collect_filters_and_caps(self):
+        class Stub:
+            _QUICK_MAX_RESULTS = 12
+            records = [{"text": "hello world"}, {"text": "goodbye"}, {"text": "HELLO again"}]
+            phrases = [{"text": "phrase one"}]
+        Stub._safe_eval_math = staticmethod(self.ns["_safe_eval_math"])
+        s = Stub()
+        out = self.ns["_quick_collect"]
+        all_rows = out(s, "")
+        self.assertEqual(len(all_rows), 4)  # 3 records + 1 phrase
+        hello_rows = out(s, "hello")
+        self.assertEqual([v for _k, v in hello_rows], ["hello world", "HELLO again"])
+        math_rows = out(s, "6*7")
+        self.assertEqual(math_rows[0][1], "42")
+
+    def test_hotkey_registered(self):
+        self.assertIn('"QuickPanelKey"', SOURCE)
+        self.assertIn('"QuickPanelKey": "F12"', SOURCE)
+        self.assertIn("def open_quick_panel", SOURCE)
