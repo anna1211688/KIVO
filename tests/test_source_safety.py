@@ -750,3 +750,42 @@ class AiMemoryAndFilesTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ScreenshotTranslationPerformanceTests(unittest.TestCase):
+    def test_ai_result_is_used_immediately_when_it_finishes_first(self):
+        from concurrent.futures import Future
+        resolve = _load_with_ns("_resolve_screenshot_translation_futures", {})
+        ocr = Future()
+        ai = Future()
+        ocr.set_running_or_notify_cancel()
+        expected = ([{"t": "hello"}], ["你好"], "zh-CN")
+        ai.set_result(expected)
+        ai_result, ocr_result = resolve(ocr, ai, ai_grace=0)
+        self.assertEqual(ai_result, expected)
+        self.assertIsNone(ocr_result)
+
+    def test_completed_ocr_does_not_wait_for_a_slow_ai_request(self):
+        from concurrent.futures import Future
+        resolve = _load_with_ns("_resolve_screenshot_translation_futures", {})
+        ocr = Future()
+        ai = Future()
+        ocr.set_result([{"t": "hello"}])
+        ai.set_running_or_notify_cancel()
+        ai_result, ocr_result = resolve(ocr, ai, ai_grace=0)
+        self.assertIsNone(ai_result)
+        self.assertEqual(ocr_result, [{"t": "hello"}])
+
+    def test_empty_line_ocr_does_not_start_a_second_ocr_pass(self):
+        body = method_text("translate_image_inplace")
+        self.assertIn("if lines is not None:", body)
+        self.assertLess(body.index("if lines is not None:"), body.index("self.ocr_image(img)"))
+        self.assertIn("[] 表示 OCR 已正常运行但没有识别到文字", body)
+
+    def test_f4_saves_history_without_blocking_the_ui_callback(self):
+        source = method_text("snip_region")
+        self.assertIn("self.save_shot_async(final)", source)
+        self.assertNotIn("self.save_shot(final)", source)
+        async_save = method_text("save_shot_async")
+        self.assertIn("threading.Thread", async_save)
+        self.assertIn("self._ui_queue.put(self.refresh_shots)", async_save)
