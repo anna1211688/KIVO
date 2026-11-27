@@ -5091,11 +5091,15 @@ try {
             k, m, b = store[cur["service"]]
             test_cfg = {"service": cur["service"], "key": k, "model": m, "base": b}
             def work():
+                import time
+                started = time.monotonic()
                 try:
                     r = self._ai_chat_image(test_img, "只输出图片中的文字，不要解释。", cfg=test_cfg)
-                    msg = "测试成功：模型返回「%s」" % (r[:80] if r else "空内容")
+                    elapsed = time.monotonic() - started
+                    msg = "连接正常 · 响应 %.2f 秒 · 返回：%s" % (elapsed, r[:80] if r else "空内容")
                 except Exception as exc:
-                    msg = "测试失败：" + str(exc)
+                    elapsed = time.monotonic() - started
+                    msg = "连接失败 · %.2f 秒 · %s" % (elapsed, str(exc))
                 self._ui_queue.put(lambda msg=msg: test_var.set(msg))
             threading.Thread(target=work, daemon=True).start()
         ttk.Button(test_tab, text="测试当前服务商", command=do_test).pack(anchor="w", pady=6)
