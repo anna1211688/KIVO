@@ -383,7 +383,7 @@ class AiStreamingTests(unittest.TestCase):
         panel = method_text("_build_ai_panel")
         self.assertIn("def stop_reply():", panel)
         self.assertIn('ev.set()', panel)
-        self.assertIn('text="停止"', panel)
+        self.assertIn('else "停止"', panel)
 
 
 if __name__ == "__main__":
