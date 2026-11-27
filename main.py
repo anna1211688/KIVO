@@ -869,9 +869,14 @@ class _NavItem(tk.Canvas):
         self.bind("<Leave>", lambda _e: self._set_hover(False))
         self._draw()
     def _draw(self):
+        """选中态不再用整块品牌蓝: 实心蓝是「主按钮」的语义, 边栏整条蓝会和页面里的主按钮抢注意力;
+        改成深色 tint 底 + 左侧 3px 品牌蓝指示条 (2026-11-28 重设计)。"""
         self.delete("all")
-        fill = "#3B82F6" if self._selected else ("#24344E" if self._hover else None)
-        if fill: self.create_polygon(_rrect_pts(188, 40, 10), fill=fill, outline=fill, smooth=True)
+        if self._selected:
+            self.create_polygon(_rrect_pts(188, 40, 10), fill="#1C2C45", outline="", smooth=True)
+            self.create_rectangle(0, 10, 3, 30, fill="#3B82F6", outline="")
+        elif self._hover:
+            self.create_polygon(_rrect_pts(188, 40, 10), fill="#18263C", outline="", smooth=True)
         if self._image is not None: self.create_image(14, 20, image=self._image, anchor="w")
         self.create_text(52, 21, text=self._text, anchor="w", font=self._font,
                          fill="#FFFFFF" if self._selected else "#C9D6E8")
@@ -971,7 +976,7 @@ class App(tk.Tk):
             except Exception: pass
             tk.Label(card, text="KIVO", font=self._ui_font(20, True), background="#FFFFFF", foreground="#1C2634").pack()
             tk.Label(card, text=self.t("splash_sub", "启沃智能工作台"), font=self._ui_font(10), background="#FFFFFF", foreground="#7A8699").pack(pady=(2, 0))
-            tk.Label(card, text=self.t("about_slogan", "让效率, 自然发生 · Make Work Flow"), font=self._ui_font(9), background="#FFFFFF", foreground="#287FD1").pack(pady=(10, 2))
+            tk.Label(card, text=self.t("about_slogan", "让效率, 自然发生 · Make Work Flow"), font=self._ui_font(9), background="#FFFFFF", foreground=self.UI_ACCENT).pack(pady=(10, 2))
             tk.Label(card, text=self.t("splash_loading", "正在启动…"), font=self._ui_font(9), background="#FFFFFF", foreground="#7A8699").pack(pady=(0, 22))
             sp.update_idletasks()
             w, h = sp.winfo_reqwidth(), sp.winfo_reqheight()
@@ -1160,18 +1165,39 @@ class App(tk.Tk):
         except Exception: return 80  # 间隔被写成非数字 (旧版托盘保存没校验) 时别让软件启动就崩
 
     # ---------- 界面主题 (v1.4.17 美化: 全软件统一一套视觉语言, 与 KIVO 图标同系的品牌蓝) ----------
-    UI_BG = "#F5F7FA"        # 窗口底色: 柔和浅蓝灰 (比旧版略深, 白卡更跳)
-    UI_SURFACE = "#FFFFFF"   # 输入框/列表等内容面
-    UI_BORDER = "#E5EAF0"    # 描边
-    UI_TEXT = "#1C2634"      # 主文字
-    UI_MUTED = "#7E8CA3"     # 次要文字
+    # ---- 颜色令牌 (2026-11-28 UI 重设计 P1): 只在这里定义一次, 控件一律引用, 不再散落字面色值。
+    # 中性色按 50→900 收窄到 6 档, 层次比旧版更分明: 一屏上深浅不超过 4 档灰, 才不会显得花。
+    UI_BG = "#F6F8FB"        # 底 (L0): 页面背景
+    UI_SURFACE = "#FFFFFF"   # 面 (L1): 卡片/输入框/列表
+    UI_BORDER = "#E7ECF3"    # 描边: 比底深一档, 白卡才有边
+    UI_BORDER_STRONG = "#D7DFEA"  # 强描边: 浮层/聚焦容器
+    UI_TEXT = "#0F172A"      # 主文字 900
+    UI_TEXT_2 = "#475569"    # 次文字 600
+    UI_MUTED = "#64748B"     # 辅助文字 500
+    UI_MUTED_2 = "#94A3B8"   # 三级文字/占位 400
     UI_ACCENT = "#3B82F6"    # 品牌蓝 (2026-11-27 UI 第一批统一: 与主按钮/边栏同色, 旧值 #287FD1 在 AI 气泡/发送键/焦点边框上残留会同屏色差)
     UI_ACCENT_HOVER = "#60A5FA"
     UI_ACCENT_PRESS = "#2563EB"
-    UI_SEL_BG = "#D9E9F8"    # 列表选中行底色
-    UI_HEAD_BG = "#EEF2F8"   # 表头底色
-    UI_STRIPE = "#F6F9FD"    # 列表斑马纹 (奇数行)
-    UI_SOFT = "#EAF0F8"      # 胶囊按钮/搜索框的浅灰底
+    UI_ACCENT_TINT = "#EFF6FF"   # 主色浅底: 选中/hover/标签底
+    UI_ACCENT_LINE = "#BFDBFE"   # 主色描边: 次级按钮轮廓
+    UI_SEL_BG = "#E8F1FE"    # 列表选中行底色
+    UI_HEAD_BG = "#F3F6FB"   # 表头底色
+    UI_STRIPE = "#FAFBFE"    # 列表斑马纹 (奇数行): 只差 2% 明度, 长列表不花
+    UI_SOFT = "#EEF2F8"      # 胶囊按钮/搜索框的浅灰底
+    UI_DANGER = "#DC2626"    # 危险文字 (删除类)
+    UI_DANGER_BG = "#FEF2F2" # 危险浅底
+    UI_SUCCESS = "#16A34A"
+    UI_SIDE = "#111C2E"      # 边栏底 (比旧 #172235 更深: 与内容区的明度差拉大, 边界不再靠一条线)
+    UI_SIDE_TEXT = "#8FA3BE"  # 边栏未选中文字
+    UI_SIDE_ACTIVE_BG = "#1C2C45"  # 边栏选中底 (深色版 tint)
+    # ---- 间距: 只用 4 的倍数, 杜绝 3/5/7 这类随手值 ----
+    SP_1, SP_2, SP_3, SP_4, SP_5, SP_6 = 4, 8, 12, 16, 24, 32
+    # ---- 圆角: 卡片 12 / 按钮 8 / 输入 8 / 药丸 999 ----
+    R_CARD, R_BTN, R_INPUT, R_PILL = 12, 8, 8, 999
+    # ---- 字号阶梯 (pt): 品牌 18 / 页面标题 15 / 卡片标题 11 / 正文 10 / 辅助 9 / 微 8 ----
+    TYPE = {"brand": 18, "page": 15, "card": 11, "body": 10, "caption": 9, "micro": 8}
+    # ---- 动效: 只做 120/180ms 两档, 超过 200ms 会显得迟钝 ----
+    DUR_FAST, DUR_BASE = 120, 180
     def _ui_font(self, size=10, bold=False):
         fam = "Microsoft YaHei UI" if sys.platform == "win32" else "Noto Sans CJK SC"
         return (fam, size, "bold") if bold else (fam, size)
@@ -1226,7 +1252,7 @@ class App(tk.Tk):
             st.configure("TLabelframe", background=bg, bordercolor=bd, relief="solid", borderwidth=1, padding=(10, 6))
             st.configure("TLabelframe.Label", background=bg, foreground="#2F4B73", font=fb)
             st.configure("TButton", background=self.UI_SURFACE, foreground=tx, bordercolor=bd,
-                         padding=(10, 5), relief="solid", borderwidth=1, focusthickness=0)
+                         padding=(12, 6), relief="solid", borderwidth=1, focusthickness=0)  # 统一 12/6 内边距, 按钮不再忽胖忽瘦
             st.map("TButton", background=[("active", "#E3EEFF"), ("pressed", "#CFE2FF")],
                    bordercolor=[("focus", self.UI_ACCENT)])
             st.configure("Outline.TButton", background="#FFFFFF", foreground=self.UI_ACCENT,
@@ -1254,12 +1280,12 @@ class App(tk.Tk):
             st.map("CalcDanger.TButton", background=[("active", "#FBDADA"), ("pressed", "#F6C8C8")])
             st.configure("CalcAccent.TButton", background=self.UI_ACCENT, foreground="#FFFFFF", bordercolor=self.UI_ACCENT,
                          padding=(20, 15), font=self._ui_font(18, True), relief="solid", borderwidth=1, focusthickness=0)
-            st.map("CalcAccent.TButton", background=[("active", "#287FD1"), ("pressed", "#287FD1")])
+            st.map("CalcAccent.TButton", background=[("active", self.UI_ACCENT_HOVER), ("pressed", self.UI_ACCENT_PRESS)])
             st.configure("Small.TButton", background=self.UI_SURFACE, foreground=tx, bordercolor=bd,
-                         padding=(8, 3), font=self._ui_font(9), relief="solid", borderwidth=1, focusthickness=0)
+                         padding=(10, 4), font=self._ui_font(9), relief="solid", borderwidth=1, focusthickness=0)
             st.map("Small.TButton", background=[("active", "#E3EEFF"), ("pressed", "#CFE2FF")])
             st.configure("Accent.TButton", background=self.UI_ACCENT, foreground="#FFFFFF",
-                         bordercolor=self.UI_ACCENT, padding=(12, 6), font=fb, focusthickness=0)
+                         bordercolor=self.UI_ACCENT, padding=(16, 7), font=fb, focusthickness=0)  # 主按钮比次级按钮大一号
             st.map("Accent.TButton", background=[("active", self.UI_ACCENT_HOVER), ("pressed", self.UI_ACCENT_PRESS)],
                    foreground=[("active", "#FFFFFF"), ("pressed", "#FFFFFF")])
             st.configure("TEntry", fieldbackground=self.UI_SURFACE, bordercolor=bd, padding=4)
@@ -1296,12 +1322,12 @@ class App(tk.Tk):
             st.configure("TCheckbutton", background=bg, foreground=tx)
             st.configure("TRadiobutton", background=bg, foreground=tx)
             st.configure("Treeview", background=self.UI_SURFACE, fieldbackground=self.UI_SURFACE,
-                         foreground=tx, rowheight=30, bordercolor=bd, relief="flat", borderwidth=0)
+                         foreground=tx, rowheight=34, bordercolor=bd, relief="flat", borderwidth=0)  # 30→34: 中文 10pt 在 30 里挤
             st.configure("Treeview.Heading", background=self.UI_HEAD_BG, foreground=self.UI_MUTED,
-                         font=fb, relief="flat", borderwidth=0)
-            st.map("Treeview", background=[("selected", self.UI_SEL_BG)], foreground=[("selected", "#0B3556")])
+                         font=self._ui_font(9, True), relief="flat", borderwidth=0)  # 表头用小字重, 不与正文抢
+            st.map("Treeview", background=[("selected", self.UI_SEL_BG)], foreground=[("selected", self.UI_ACCENT_PRESS)])
             st.map("Treeview.Heading", background=[("active", "#D8E6FA")])
-            st.configure("TScrollbar", background="#DCE6F2", troughcolor=bg, bordercolor=bd, arrowcolor=self.UI_MUTED)
+            st.configure("TScrollbar", background="#DDE5EF", troughcolor=bg, bordercolor=bg, arrowcolor=self.UI_MUTED_2, width=10)
             st.configure("TNotebook", background=bg, bordercolor=bd)
             st.configure("TNotebook.Tab", background="#E3EBF7", padding=(10, 4))
             st.map("TNotebook.Tab", background=[("selected", self.UI_SURFACE)])
@@ -1315,9 +1341,9 @@ class App(tk.Tk):
     def build_ui(self):
         # ===== 设计: 深色边栏 + 浅色工作区 + 圆角胶囊按钮 + 白色卡片分区 (2026-11-27 UI 第一批: 边栏深色化, 修 GPT PR #6 只改子元素漏改外框/品牌区/导航文字色的三处) =====
         W = "#FFFFFF"
-        SIDE = "#172235"  # 边栏深蓝灰底: 外框/品牌区/导航项必须同色, 漏一处就深一块白一块
+        SIDE = self.UI_SIDE  # 边栏底 (令牌): 外框/品牌区/导航项必须同色, 漏一处就深一块白一块
         # ---------- 左侧边栏导航 (Jane 2026-11-27 拍板边栏版; 排序按她定: AI 助手第一, 翻译第二, 世界时钟与货币汇率分开不合并) ----------
-        side = tk.Frame(self, background=SIDE, width=204, highlightthickness=1, highlightbackground=self.UI_BORDER)
+        side = tk.Frame(self, background=SIDE, width=216, highlightthickness=0)  # 204→216: 导航行左右留白够, 不再贴边; 去 1px 描边改用色差分隔
         side.pack(side="left", fill="y"); side.pack_propagate(False)
         self._content = tk.Frame(self, background=self.UI_BG); self._content.pack(side="left", fill="both", expand=True)
         brand = tk.Frame(side, background=SIDE); brand.pack(fill="x", padx=16, pady=(14, 2))
@@ -1343,7 +1369,7 @@ class App(tk.Tk):
         self._nav_titles = {}
         def _nav(key, text, icn, cmd):
             _it = _NavItem(side, text=text, command=cmd, font=self._ui_font(10), bg=SIDE, image=self._tool_icon(icn))
-            _it.pack(padx=8, pady=1)
+            _it.pack(padx=8, pady=2)
             self._nav_items[key] = _it; self._nav_titles[key] = text
         def _nav_group(text):
             tk.Label(side, text=text, font=self._ui_font(9, True), background=SIDE, foreground="#8496AD").pack(anchor="w", padx=18, pady=(10, 3))
@@ -1372,11 +1398,22 @@ class App(tk.Tk):
         card.pack(fill="both", expand=True, padx=12, pady=(10, 2))
         chead = tk.Frame(card, background=W); chead.pack(fill="x", padx=12, pady=(9, 2))
         tk.Label(chead, text=self.t("records_title", "复制记录"), font=self._ui_font(10, True), background=W, foreground=self.UI_TEXT).pack(side="left")
+        # 标题行只留 3 个轻量入口, 删除/上移/下移收进「更多」圆角菜单 (2026-11-28 重设计):
+        # 旧版一行 6 个同级按钮, 「删除全部」和「去重」视觉权重一样, 误点代价却是不可逆的
         ops = tk.Frame(chead, background=W); ops.pack(side="right")
-        for txt, cmd in [(self.t("lock_unlock", "锁定/解锁"), self.toggle_lock), (self.t("delete_selected", "删除选定"), self.delete_sel),
-                         (self.t("delete_all", "删除全部"), self.delete_all), (self.t("move_up", "上移"), lambda: self.move(-1)),
-                         (self.t("move_down", "下移"), lambda: self.move(1)), (self.t("dedupe", "去重"), self.dedupe)]:
-            ttk.Button(ops, text=txt, command=cmd, style="Small.TButton").pack(side="left", padx=2)
+        ttk.Button(ops, text=self.t("lock_unlock", "锁定/解锁"), command=self.toggle_lock, style="Small.TButton").pack(side="left", padx=2)
+        ttk.Button(ops, text=self.t("dedupe", "去重"), command=self.dedupe, style="Small.TButton").pack(side="left", padx=2)
+        def _record_more(btn):
+            self._popup_menu(btn.winfo_rootx(), btn.winfo_rooty() + btn.winfo_height() + 4, [
+                {"label": self.t("move_up", "上移"), "command": lambda: self.move(-1)},
+                {"label": self.t("move_down", "下移"), "command": lambda: self.move(1)},
+                {"sep": True},
+                {"label": self.t("delete_selected", "删除选定"), "command": self.delete_sel},
+                {"label": self.t("delete_all", "删除全部"), "command": self.delete_all, "color": self.UI_DANGER},
+            ])
+        _rec_more = ttk.Button(ops, text=self.t("more", "更多") + " ▾", style="Small.TButton",
+                               command=lambda: _record_more(_rec_more))
+        _rec_more.pack(side="left", padx=2)
         mid = tk.Frame(card, background=W); mid.pack(fill="both", expand=True, padx=6, pady=(2, 6))
         # 记录列表按原版分两列: 序号 | 文本内容 (Treeview; 内部沿用 listbox 这个名字, 行 id 存 _row_iids 与 _visible 对齐)
         self.listbox = ttk.Treeview(mid, columns=("no", "text"), show="headings", selectmode="browse")
@@ -1388,14 +1425,21 @@ class App(tk.Tk):
         self.listbox.tag_configure("odd", background=self.UI_STRIPE)  # 斑马纹: 长列表逐行看不串行
         self._row_iids = []
         # ---------- 主操作行: 多次复制是主按钮 (蓝实心), 其余普通按钮 ----------
+        # 主操作行: 一条主路径 + 两个高频动作, 其余进「更多操作」(2026-11-28 重设计)
         act = tk.Frame(body, background=self.UI_BG); act.pack(fill="x", padx=12, pady=(8, 0))
-        for txt, cmd, var_ in [(self.t("multi_copy_btn", "多次复制 (加入队列)"), self.multi_copy, "primary"),
-                               (self.t("paste_next_btn", "顺序粘贴下一条"), self.paste_next, "soft"),
-                               (self.t("paste_all_btn", "全部粘贴"), self.paste_all, "soft"),
-                               (self.t("power_paste_btn", "强力粘贴选定"), self.paste_selected, "soft"),
-                               (self.t("import_text", "导入文本"), self.import_txt, "soft"),
-                               (self.t("export_text", "导出文本"), self.export_txt, "soft")]:
-            ttk.Button(act, text=txt, command=cmd, style="Accent.TButton" if var_ == "primary" else "TButton").pack(side="left", padx=3)
+        ttk.Button(act, text=self.t("multi_copy_btn", "多次复制 (加入队列)"), command=self.multi_copy, style="Accent.TButton").pack(side="left", padx=(0, 8))
+        ttk.Button(act, text=self.t("paste_next_btn", "顺序粘贴下一条"), command=self.paste_next, style="TButton").pack(side="left", padx=3)
+        ttk.Button(act, text=self.t("paste_all_btn", "全部粘贴"), command=self.paste_all, style="TButton").pack(side="left", padx=3)
+        def _ops_more(btn):
+            self._popup_menu(btn.winfo_rootx(), btn.winfo_rooty() + btn.winfo_height() + 4, [
+                {"label": self.t("power_paste_btn", "强力粘贴选定"), "command": self.paste_selected},
+                {"sep": True},
+                {"label": self.t("import_text", "导入文本"), "command": self.import_txt},
+                {"label": self.t("export_text", "导出文本"), "command": self.export_txt},
+            ])
+        _ops_more_btn = ttk.Button(act, text=self.t("more_ops", "更多操作") + " ▾", style="Outline.TButton",
+                                   command=lambda: _ops_more(_ops_more_btn))
+        _ops_more_btn.pack(side="left", padx=3)
         # ---------- 白色卡片分区 (代替旧 LabelFrame) ----------
         def card_section(title):
             outer = tk.Frame(body, background=W, highlightthickness=1, highlightbackground=self.UI_BORDER, highlightcolor=self.UI_BORDER)
@@ -3746,7 +3790,7 @@ class App(tk.Tk):
                 tk.Button(r2, text=txt, font=("Microsoft YaHei", 9), relief="flat", bg="#FFFFFF",
                           command=lambda k=kind: finish(k)).pack(side="left", padx=1)
             tk.Button(r2, text="✕", font=("Microsoft YaHei", 9), relief="flat", bg="#FFFFFF", command=close_overlay).pack(side="left", padx=1)
-            tk.Button(r2, text=self.t("snip_copy_done", "✓ 复制"), font=("Microsoft YaHei", 9, "bold"), relief="flat", bg="#287FD1", fg="#FFFFFF", activebackground="#4A97DC", activeforeground="#FFFFFF",
+            tk.Button(r2, text=self.t("snip_copy_done", "✓ 复制"), font=("Microsoft YaHei", 9, "bold"), relief="flat", bg=self.UI_ACCENT, fg="#FFFFFF", activebackground=self.UI_ACCENT_HOVER, activeforeground="#FFFFFF",
                       command=lambda: finish("copy")).pack(side="left", padx=1)
             def _no_focus(w):  # 工具栏按钮不抢键盘焦点, 焦点留在选区窗, Esc 等快捷键始终有效 (含两排子框架, 递归处理)
                 for ch in w.winfo_children():
@@ -9212,7 +9256,7 @@ try {
         flip = (ay2 + need > bar.winfo_screenheight() - 4) and (ay1 - need >= 4)
         reply_box = ttk.Frame(root); reply_box.pack(side="bottom", fill="x")  # AI 回复候选区 (先占位, 空着不占高)
         orig_card = tk.Frame(root, bg=(MAGIC if MAGIC else self.UI_SURFACE), width=sel_w, height=sel_h,
-                             highlightthickness=1, highlightbackground="#287FD1")
+                             highlightthickness=1, highlightbackground=self.UI_ACCENT_LINE)
         orig_card.pack_propagate(False)
         tran_hold = tk.Frame(root, bg=RBG, width=sel_w, height=th * 24 + 12)
         tran_hold.pack_propagate(False)
@@ -9266,7 +9310,7 @@ try {
         tgt_combo = ttk.Combobox(strip, textvariable=tgt_var, values=[n for n, _ in self._TRANS_TARGETS], width=10, state="readonly")
         tgt_combo.pack(side="left")
         busy_var = tk.StringVar()
-        lab3 = tk.Label(strip, textvariable=busy_var, font=self._ui_font(9), bg=self.UI_BG, fg="#287FD1"); lab3.pack(side="left", padx=4)
+        lab3 = tk.Label(strip, textvariable=busy_var, font=self._ui_font(9), bg=self.UI_BG, fg=self.UI_ACCENT); lab3.pack(side="left", padx=4)
         def _link(text, cmd, accent=False, bold=False):
             lb = tk.Label(strip, text=text, font=self._ui_font(9, bold), bg=self.UI_BG,
                           fg="#FFFFFF" if accent else self.UI_ACCENT, cursor="hand2")

@@ -486,7 +486,8 @@ class AiPanelBatch1Tests(unittest.TestCase):
 class UiPhase1Tests(unittest.TestCase):
     def test_sidebar_dark_palette_is_consistent(self):
         body = method_text("build_ui")
-        self.assertIn('SIDE = "#172235"', body)
+        self.assertIn("SIDE = self.UI_SIDE", body)          # 2026-11-28: 边栏底色收敛到令牌
+        self.assertIn('UI_SIDE = "#111C2E"', SOURCE)
         self.assertIn("side = tk.Frame(self, background=SIDE", body)   # 外框必须同色 (PR #6 漏改处)
         self.assertIn("brand = tk.Frame(side, background=SIDE)", body)  # 品牌区框架必须同色 (PR #6 漏改处)
         seg_start = body.find("side = tk.Frame")
@@ -957,6 +958,46 @@ class ChatImageGcTests(unittest.TestCase):
     def test_foreign_files_untouched(self):
         n, left = self._run([], {"note.txt": 30 * 3600, "README": 30 * 3600})
         self.assertEqual((n, left), (0, ["README", "note.txt"]))
+
+
+class UiRedesignPhase1Tests(unittest.TestCase):
+    """2026-11-28 整套 UI 重设计 P1: 令牌层 + 信息层级 (一屏一个主按钮)"""
+
+    def test_design_tokens_exist(self):
+        for token in ("UI_TEXT_2", "UI_BORDER_STRONG", "UI_ACCENT_TINT", "UI_ACCENT_LINE",
+                      "UI_DANGER", "UI_DANGER_BG", "UI_SIDE", "UI_SIDE_TEXT", "UI_SIDE_ACTIVE_BG"):
+            self.assertIn(token + " = \"#", SOURCE, token)
+        for token in ("SP_1, SP_2, SP_3, SP_4, SP_5, SP_6 = 4, 8, 12, 16, 24, 32",
+                      "R_CARD, R_BTN, R_INPUT, R_PILL = 12, 8, 8, 999",
+                      "DUR_FAST, DUR_BASE = 120, 180"):
+            self.assertIn(token, SOURCE)
+
+    def test_type_scale_is_single_source(self):
+        self.assertIn('TYPE = {"brand": 18, "page": 15, "card": 11, "body": 10, "caption": 9, "micro": 8}', SOURCE)
+
+    def test_sidebar_selection_uses_tint_not_solid_blue(self):
+        seg = SOURCE[SOURCE.find("class _NavItem"):SOURCE.find("class App")]
+        self.assertIn('fill="#1C2C45"', seg)          # 选中=深色 tint 底
+        self.assertIn('create_rectangle(0, 10, 3, 30, fill="#3B82F6"', seg)  # 左侧 3px 指示条
+        self.assertNotIn('fill = "#3B82F6" if self._selected', seg)          # 不再是整块实心蓝
+
+    def test_records_header_has_one_menu_for_destructive_actions(self):
+        body = method_text("build_ui")
+        self.assertNotIn('for txt, cmd in [(self.t("lock_unlock"', body)  # 六按钮平铺已移除
+        self.assertIn("def _record_more(btn)", body)
+        self.assertIn('self.t("delete_all", "删除全部")', body)          # 功能仍可达
+        self.assertIn('"color": self.UI_DANGER', body)                      # 危险项用文字色区分
+
+    def test_action_row_keeps_one_primary(self):
+        body = method_text("build_ui")
+        row = body[body.find("act = tk.Frame(body"):body.find("def card_section")]
+        self.assertEqual(row.count("Accent.TButton"), 1)
+        for key in ("paste_selected", "import_txt", "export_txt"):
+            self.assertIn("self." + key, row)   # 收进「更多操作」后命令仍在
+
+    def test_list_rows_taller_and_softer_stripes(self):
+        self.assertIn("rowheight=34", SOURCE)
+        self.assertIn('UI_STRIPE = "#FAFBFE"', SOURCE)
 
 
 if __name__ == "__main__":
