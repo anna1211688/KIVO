@@ -4553,14 +4553,24 @@ try {
                 "model": g(pre + "Model") or (g("Model") if active else "") or pmodel}
     _AI_ROUTES = {"chat": "RouteChat", "vision": "RouteVision", "reply": "RouteReply", "text": "RouteText", "annotate": "RouteAnnotate"}
     def _ai_cfg_for(self, route):
-        """按「分工」设置取某个功能用的 AI 配置 (Jane 2026-11-25 要求多 AI 分工): 分工里给这个功能指定了
-        服务、且那家填了 key, 就用那家; 没指定/指定无效/那家没 key, 一律跟随当前服务, 永不因分工报错。"""
+        """Resolve a task's provider AND optional model profile; invalid routes safely fall back to active service."""
         rk = self._AI_ROUTES.get(route or "")
         if rk:
             svc = (self.cfg.get("AI", rk, fallback="") or "").strip()
             if svc in self._AI_PRESETS:
                 c = self._ai_cfg(svc)
-                if c["key"]: return c
+                if c["key"]:
+                    model = (self.cfg.get("AI", rk + "Model", fallback="") or "").strip()[:200]
+                    if model:
+                        try:
+                            profiles = json.loads(self.cfg.get("AI", "ModelProfiles", fallback="{}") or "{}")
+                            rows = profiles.get(svc, []) if isinstance(profiles, dict) else []
+                            allowed = any(isinstance(x, dict) and x.get("model") == model and x.get("enabled", True)
+                                          for x in rows if isinstance(rows, list))
+                        except Exception:
+                            allowed = False
+                        if allowed: c["model"] = model
+                    return c
         return self._ai_cfg()
     def _ai_store(self):
         """AI 设置窗打开时把四家服务的已存值都读出来 (切来切去互不丢失)"""
@@ -4680,7 +4690,33 @@ try {
             if isinstance(c, list):  # 个别服务把回复拆成片段数组
                 c = "".join(str(p.get("text", "")) for p in c if isinstance(p, dict))
             return (c or "").strip(), (msg.get("reasoning_content") or "")
-        content, reasoning = _extract(_send(payload))
+        try:
+            content, reasoning = _extract(_send(payload))
+        except Exception as primary_error:
+            # Optional same-provider failover; never silently switch to a different paid provider.
+            if (stream_callback is not None or
+                    (self.cfg.get("AI", "AutoFallback", fallback="0") or "0").strip() != "1"):
+                raise
+            try:
+                raw = _json.loads(self.cfg.get("AI", "ModelProfiles", fallback="{}") or "{}")
+                rows = raw.get(cfg.get("service"), []) if isinstance(raw, dict) else []
+            except Exception:
+                rows = []
+            attempted = {cfg.get("model")}
+            for profile in rows if isinstance(rows, list) else []:
+                if not isinstance(profile, dict) or not profile.get("enabled", True): continue
+                candidate = str(profile.get("model", "")).strip()[:200]
+                if not candidate or candidate in attempted: continue
+                attempted.add(candidate)
+                retry_payload = dict(payload)
+                retry_payload["model"] = candidate
+                try:
+                    content, reasoning = _extract(_send(retry_payload))
+                    if content: break
+                except Exception:
+                    continue
+            else:
+                raise primary_error
         if not content and reasoning and cfg.get("service") == "dots":
             # Dots 实测 (2026-11-27, Jane 的 Key): 深度思考的推理会占用 max_tokens, 推理太长时正文反而是空的 —— 关掉思考重试一次, 保证拿到答案
             payload["chat_template_kwargs"] = {"enable_thinking": False}
@@ -5015,20 +5051,35 @@ try {
         ttk.Label(route_tab, text="为不同任务指定模型服务；选择“跟随当前服务”则使用默认服务商。",
                   style="Muted.TLabel").pack(anchor="w", pady=(0, 8))
         route_vars = {}
+        route_choice_maps = {}
+        profile_choices = []
+        for svc_key in self._AI_PRESETS:
+            for profile in profiles[svc_key]:
+                if profile.get("enabled", True):
+                    label = "%s · %s" % (names[svc_key], profile["model"])
+                    profile_choices.append(label)
+                    route_choice_maps[label] = (svc_key, profile["model"])
         for rk, lk, lz in route_defs:
             row = ttk.Frame(route_tab)
             row.pack(fill="x", pady=4)
             ttk.Label(row, text=self.t(lk, lz) + ":", width=16).pack(side="left")
             cur_r = (self.cfg.get("AI", rk, fallback="") or "").strip()
-            var = tk.StringVar(value=names.get(cur_r, follow_text))
-            ttk.Combobox(row, textvariable=var, values=[follow_text] + list(names.values()),
-                         width=34, state="readonly").pack(side="left", padx=5)
+            cur_m = (self.cfg.get("AI", rk + "Model", fallback="") or "").strip()
+            current_label = next((label for label, pair in route_choice_maps.items()
+                                  if pair == (cur_r, cur_m)), names.get(cur_r, follow_text) if cur_r else follow_text)
+            var = tk.StringVar(value=current_label)
+            choices = [follow_text] + list(names.values()) + profile_choices
+            ttk.Combobox(row, textvariable=var, values=list(dict.fromkeys(choices)),
+                         width=46, state="readonly").pack(side="left", padx=5)
             route_vars[rk] = var
 
         # ---- 连接测试: 测试当前服务商 API Key / 模型是否可用 ----
         test_var = tk.StringVar(value="选择服务商并填写 API Key、模型后，可在这里测试连接。")
-        ttk.Label(test_tab, text="使用当前选中的服务商发送一张测试图片，验证接口、密钥和模型是否可用。",
+        ttk.Label(test_tab, text="使用当前选中的服务商发送测试请求，验证接口、密钥和模型是否可用。",
                   style="Muted.TLabel", wraplength=550).pack(anchor="w", pady=(0, 8))
+        fallback_var = tk.BooleanVar(value=(self.cfg.get("AI", "AutoFallback", fallback="0") or "0").strip() == "1")
+        ttk.Checkbutton(test_tab, text="当前模型失败时，自动尝试同一服务商的其他已启用模型",
+                        variable=fallback_var).pack(anchor="w", pady=(0, 6))
         ttk.Label(test_tab, textvariable=test_var, foreground="#1673D1",
                   wraplength=550, justify="left").pack(anchor="w", pady=6)
         def do_test():
@@ -5054,10 +5105,20 @@ try {
         footer.pack(fill="x", padx=8, pady=(0, 8))
         def do_save():
             stash()
-            routes = {rk: ("" if var.get() == follow_text else inv_names.get(var.get(), ""))
-                      for rk, var in route_vars.items()}
+            routes = {}
+            for rk, var in route_vars.items():
+                choice = var.get()
+                if choice == follow_text:
+                    routes[rk] = ""
+                    routes[rk + "Model"] = ""
+                elif choice in route_choice_maps:
+                    routes[rk], routes[rk + "Model"] = route_choice_maps[choice]
+                else:
+                    routes[rk] = inv_names.get(choice, "")
+                    routes[rk + "Model"] = ""
             if not self.cfg.has_section("AI"): self.cfg.add_section("AI")
             self.cfg.set("AI", "ModelProfiles", json.dumps(profiles, ensure_ascii=False, separators=(",", ":")))
+            self.cfg.set("AI", "AutoFallback", "1" if fallback_var.get() else "0")
             self._save_ai_settings(cur["service"], store, routes)
             refresh_model_list(cur["service"])
             self.status.set("AI 模型中心已保存")
@@ -7410,20 +7471,30 @@ try {
             for svc_key in self._AI_PRESETS:
                 cfg = self._ai_cfg(svc_key)
                 if not cfg.get("key"): continue
-                label = "%s · %s" % (self._ai_preset_name(svc_key), cfg.get("model") or "(未设置模型)")
-                chat_model_map[label] = svc_key
-                values.append(label)
+                rows = profiles = []
+                try:
+                    raw = json.loads(self.cfg.get("AI", "ModelProfiles", fallback="{}") or "{}")
+                    rows = raw.get(svc_key, []) if isinstance(raw, dict) else []
+                except Exception: rows = []
+                model_ids = [x.get("model") for x in rows if isinstance(x, dict) and x.get("enabled", True) and x.get("model")]
+                if cfg.get("model") and cfg["model"] not in model_ids: model_ids.insert(0, cfg["model"])
+                for model_id in model_ids:
+                    label = "%s · %s" % (self._ai_preset_name(svc_key), model_id)
+                    chat_model_map[label] = (svc_key, model_id)
+                    values.append(label)
             chat_model_box.configure(values=values)
             current = self._ai_cfg_for("chat")
-            current_label = next((label for label, key in chat_model_map.items()
-                                  if key == current.get("service")), "")
+            current_label = next((label for label, pair in chat_model_map.items()
+                                  if pair == (current.get("service"), current.get("model"))), "")
             if current_label: chat_model_var.set(current_label)
             elif values: chat_model_var.set(values[0])
         def switch_chat_model(*_):
-            svc_key = chat_model_map.get(chat_model_var.get())
-            if not svc_key: return
+            selected = chat_model_map.get(chat_model_var.get())
+            if not selected: return
+            svc_key, model_id = selected
             if not self.cfg.has_section("AI"): self.cfg.add_section("AI")
             self.cfg.set("AI", "RouteChat", svc_key)
+            self.cfg.set("AI", "RouteChatModel", model_id)
             self.save_config()
             self.status.set("AI 聊天模型已切换: " + chat_model_var.get())
         chat_model_box = ttk.Combobox(head, textvariable=chat_model_var, width=30, state="readonly")
