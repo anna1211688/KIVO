@@ -306,6 +306,20 @@ class HardeningTests(unittest.TestCase):
         body = SOURCE[start:end]
         self.assertIn("request_reply()", body)
         self.assertNotIn("request_reply(img=", body)
+ 
+    def test_chat_images_are_included_in_backup_export_and_import(self):
+        export = method_text("_export_backup")
+        restore = method_text("_import_backup")
+        self.assertIn('"ai_chat_images/" + filename', export)
+        self.assertIn('r"ai_chat_images/[0-9a-f]{32}\\.jpg"', restore)
+        self.assertIn("total_image_bytes > 128 * 1024 * 1024", restore)
+        self.assertIn("with Image.open(BytesIO(data)) as _image: _image.verify()", restore)
+        self.assertIn("os.makedirs(os.path.dirname(destination), exist_ok=True)", restore)
+
+    def test_chat_image_backup_rejects_unexpected_names_and_excess_count(self):
+        restore = method_text("_import_backup")
+        self.assertIn('n.startswith("ai_chat_images/")', restore)
+        self.assertIn("len(image_names) > 500", restore)
 
 
 if __name__ == "__main__":
