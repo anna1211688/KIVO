@@ -398,9 +398,19 @@ class AiModelCenterLayoutTests(unittest.TestCase):
     def test_model_center_lists_every_provider_and_keeps_separate_settings(self):
         body = method_text("_build_ai_form")
         self.assertIn("for svc_key in self._AI_PRESETS:", body)
-        self.assertIn('columns = ("provider", "model", "status")', body)
+        self.assertIn('columns = ("provider", "model", "status", "default")', body)
         self.assertIn("store[svc_key]", body)
         self.assertIn("self._save_ai_settings(cur[\"service\"], store, routes)", body)
+
+    def test_model_center_persists_multi_model_profiles_and_management_actions(self):
+        body = method_text("_build_ai_form")
+        self.assertIn('"ModelProfiles"', body)
+        self.assertIn("json.loads", body)
+        self.assertIn("def add_current_model():", body)
+        self.assertIn("def set_selected_default():", body)
+        self.assertIn("def toggle_selected_model():", body)
+        self.assertIn("def delete_selected_model():", body)
+        self.assertIn('json.dumps(profiles', body)
 
 
 if __name__ == "__main__":
