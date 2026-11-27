@@ -443,5 +443,28 @@ class AiPanelBatch1Tests(unittest.TestCase):
         self.assertNotIn('inbox = tk.Canvas(brow, height=62', body)
 
 
+# ---- 2026-11-27 UI 现代化第一批 (深色边栏) 的一致性守卫 ----
+
+class UiPhase1Tests(unittest.TestCase):
+    def test_sidebar_dark_palette_is_consistent(self):
+        body = method_text("build_ui")
+        self.assertIn('SIDE = "#172235"', body)
+        self.assertIn("side = tk.Frame(self, background=SIDE", body)   # 外框必须同色 (PR #6 漏改处)
+        self.assertIn("brand = tk.Frame(side, background=SIDE)", body)  # 品牌区框架必须同色 (PR #6 漏改处)
+        seg_start = body.find("side = tk.Frame")
+        seg = body[seg_start:body.find("body = tk.Frame", seg_start)]
+        self.assertNotIn("background=W", seg)  # 边栏内不许再留白色底子元素
+        self.assertNotIn("bg=W", seg)
+
+    def test_nav_item_dark_text_colors(self):
+        seg = SOURCE[SOURCE.find("class _NavItem"):SOURCE.find("class App")]
+        self.assertIn('"#3B82F6"', seg)   # 选中胶囊品牌蓝
+        self.assertIn('"#C9D6E8"', seg)   # 未选浅灰蓝字 (旧值 #1C2634 在深底上不可读)
+        self.assertNotIn('"#1C2634"', seg)
+
+    def test_primary_button_brand_color(self):
+        self.assertIn('"primary": ("#3B82F6", "#3B82F6", "#FFFFFF", "#60A5FA")', SOURCE)
+
+
 if __name__ == "__main__":
     unittest.main()
