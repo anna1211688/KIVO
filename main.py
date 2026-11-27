@@ -1138,7 +1138,7 @@ class App(tk.Tk):
             _it.pack(padx=8, pady=1)
             self._nav_items[key] = _it; self._nav_titles[key] = text
         def _nav_group(text):
-            tk.Label(side, text=text, font=self._ui_font(9, True), background="#172235", foreground="#8496AD).pack(anchor="w", padx=18, pady=(10, 3))
+            tk.Label(side, text=text, font=self._ui_font(9, True), background="#172235", foreground="#8496AD").pack(anchor="w", padx=18, pady=(10, 3))
         _nav("ai", self.t("ai_chat", "AI 助手"), "ai", self.open_ai_chat)
         _nav("trans", self.t("nav_trans", "翻译中心"), "translate", self._show_texttrans_panel)
         _nav("clip", self.t("copy_paste", "剪贴板"), "copy", self._show_main_view)
