@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-SPST - 一键复制粘贴 + 截图贴图 (原 SnapPaste, v1.4.15 起改名 SPST)
+KIVO 启沃 · 智能工作台 - 剪贴板队列、截图翻译、AI 助手、世界时钟、汇率换算
 ================================================
 由「一键复制粘贴工具」(2012, Delphi 加壳版) 重写、并合入 Snipaste 核心功能而来:
   文字: 多次复制队列 / 顺序·全部粘贴 / 分割·正则 / 大小写 / 搜索 / 去重 / 锁定
@@ -24,7 +24,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
 APP_NAME = "KIVO 启沃智能工作台"
-# KIVO 图标 (256×256 PNG 的 base64 内嵌: 窗口/托盘图标共用, 不依赖外部文件; 2026-11-27 品牌升级 SPST→KIVO 启沃: 蓝渐变圆角方+白色 K 流线标, 主图在 branding/kivo_logo_master_1024.png; 旧樱花小女孩图标源图仍在 branding/spst_girl_original_1024.png, 可随时换回)
+# KIVO 图标 (256×256 PNG 的 base64 内嵌: 窗口/托盘图标共用, 不依赖外部文件; 2026-11-27 品牌定名 KIVO 启沃: 蓝渐变圆角方+白色 K 流线标, 主图在 branding/kivo_logo_master_1024.png; 旧樱花小女孩图标源图仍在 branding/kivo_girl_original_1024.png, 可随时换回)
 _ICON_PNG_B64 = (
     "iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAABWNklEQVR4nO19eYAdRbX371T3vbPP"
     "JJkkkBBIAgEMQRAQEFwguLCIgEqC23uKPlyfG27ve4qTKM8NcHvyVBTQ53PLCAiigIgkCApEQMQE"
@@ -429,13 +429,13 @@ _BTN_ICONS_B64 = {
     "gear": "iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAD5klEQVR4nLWUT4jVVRTHv+fce3/vvRnGHExpoj+LIOGBM8ErsSJ+o0VjOeXqB4ENisZr0yaGVlnDMIhItiiIYFCzhbaYwcVo5bgoZxGE+iCHHF1WJkOaZaH2fr977zkt5k9jTY4EneXhns+559+XcGdGaTpgAGBiYjDcYcz/Y7SYM8syM1KtanoSPDExGNZu3LIs59ZXEeLPZ0/s/wgApWlquru7ZWpqikZGRuIdgRfa6he3t5UKOp6UWp5QACG/+d7Dbb/3Lwa7HZgAoKtn+5vWlTfkzZt7nePL7Cqnfd5sMrMTifnk+P1tXRsvbWbrXhOff3l2/MCu2XidA/HC8gFoZ8+Ona7SOqSQ9TZJPpVIa3zR/I6ZS8RsQDjf+eyl5421Rwi6wVVahzp7duwEoLOMW8Ej1epcthckhBiKIocKQPohVFepikoIEUAXsYzF4DX4IpfgBUS9f2Ms+PHUFCHLDBHtBtSQ4ZKKKJhLRNTCbJitMwSyABEAEJFTVYLqHgCUnvyL94/hrVuXVW4ua0nZJKOq2gIVZZdw9MV5IrrGbB4XEUA1srVGYtF37Q8Z/X7i4+YiwxtgDACdX1/aayxvkxi+VaXHiJAY4zhqeMv+xHsajWHf+dwrvUw0qiIJQFDIaSZ+CKAzxlx/uXHsk6sAwGmaWmBQuk79uDUpl18XkXY2yVNEKDMbDuKnzn62b1ejMexrtbqb/HzfMRE9bGxCqiLGuLWqWGGTck/wlb0AFGlq+Pr11TP9EtwDACqSqwSoqhAzoPgNgNbqdedcq51ZKr1MRABBRSJUJVeJUOJ7F7aCAMWaTVuWm9hy1LjkSV/kV0DaTiBmNhQlbp48vv8oANR66w+EqGcIuFtVAOAXY90KEZkWCZsmjx/4ZgADRAsSaK1Wd9KBR6MPXcT8LlTLABEReVE5zMAVJdpGRCslSjTWmhh8vzP2qxvxxg8Xxg9Nz7Hm1kPTdMA2GsM+FvEuY5P3oagAIFUVVUmsS7axK71BmIESgSUGMdbt9iG2Xxg/NF2r1d3c9c3v3UQ3BAARY4gIRlUKADDWGYAQfB6CbwZVUWOtmU3qicgRYwhQavR2zOvHrQcCqCrG2Do2LimxsSTR9ynklDHOErFVxdUYfD8Rw7pSia0jVYwBpLOMRQ9kXoTYldZHX3wwOb7/SOfGHb8yuE00BuOSkhb5I0p0n3Xl/uCbXywmQkvK5oPp1vLyij3qyi3PSIyIobgSYqidO3Hw4u3i7GLOLMtMtVrVkzNC31z1dN9LnvkdEK9UlbfPnTh4sVaru0ZvR8z+Rej/qy1Z6ZIP5t5lWcbArDQODspSAX8Cm0TtanseiCAAAAAASUVORK5CYII=",
     "star": "iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAACeUlEQVR4nNWUQUhUURSG/3PfffNmTGdMxRQ3ErhoxsVkkW0EayEEtRxo0SIiWhRCRfvnrFyVqNUqaNUiWhpEKyMS2pQtzAgXtQkRLH0zOE/fu++cFk8Tx4EZI5DO6t7Lf7/733PPucDhhxBE6LBdNBKxy/Zr71ra7nztiZfqO1d1uYVYY5pbb5jIuACAMVj1ttXPmSsKANJrXz6CcDylg+6V+/mN+CYkjYPdWQ0Mx+NfSxbafkTp1a48OfZ7UtoiU7m4lll5je+9Gr29Jha+AYrnzMEcA2i9/fkp7OarEAaHlZelydylenu2wfG1Wm4ttquEvgMQi9kypEgBcCB0F4oSAEE48okwCWBLWJi0owFRHJiJ8qPszx3WrmNXFJY/WOlU6rrSqceUzEDCDYA0ZNMDsJ1OIpCTAcSA7COQTQ9s/Jsl33+C7lMRisQ1UhGflhn9dBKJ9CsCjklYCUHK3ivjkOwmW4AVBKUL3nR+vvoxq8qNBK5obzo/z+H6kEg0RzqpIcK7UGHSSS0SzXG4PuRN5+fhiq6ukP11XCSDwkKiPDWwpAJ/HNohEARABEgEQKAdUoE/Xp4aWEJhIYEimWpM7QbJ5hiuq1jrkdiJGLJTFjlpKz6AhLUegesqZHNcC1EbPIYIizkCR2chTJQ86nDgv5Wt8jNymhMgIjAPYjFHGEPUIFgUiKSjp7+T7KYzwpHHQWW0tHzivDeZvcJRcFnM5jLs1GBHT38niASQfZz94EJcKYHwsJCaEd44XZroe4gXYBTEKj3oex76qwMQmglku0ULjTUaAKDp3reuPxN3Vtca79EcLIR2PqG9y0I73+nfQf+J5n+J39QzDLg7vrq5AAAAAElFTkSuQmCC",
 }  # 按钮小图标 (22px, PIL 手绘线条风: 图标+文字并排, 与常见软件一致)
-VERSION = "1.4.30"  # v1.4.22: ①去掉内置浏览器整套 (Jane 真机定版不好用: 面板/书签/历史/菜单/pywebview 子进程全删, 工具栏回 8 按钮, 自检减为六项, 打包去 pywebview) ②世界时间加「刷新」(绕过天气 15 分钟节流立即重拉) ③文本翻译框自适应高度 (默认 8 行, 随内容长高至 24 行封顶, 按钮行跟随) ④系统设置/软件自检/历史截图/城市选择全部改为主窗口内面板 (Jane 定版「能收的都收」, 不再弹独立窗口, 重复开窗问题从结构上消除) ⑤启动时清理浏览器残留文件 (bookmarks/browser_history/browser_profile) ⑥工具栏改一行 8 按钮 ⑦截图翻译学有道: F4 出无边框浮动条 (原文区透明盖选区透出真实截图对照/译文框在选区下方、不够翻上方/大小随内容/源语言可选/条内复制原文·译文·AI 智能回复), 完整结果窗保留给无选区入口; v1.4.23: ①修真 bug: 配置解析关 % 插值 (分隔符/路径/接口地址带 % 不再抛错) ②备份导入加固 (JSON 先验货后落盘, 坏备份整包拒绝) + 备份说明去掉书签残留文案 ③英文模式运行时漏网文案两批全清 (汇率/托盘/取色器/下载提示/识别结果窗/AI 气泡与接口报错/测试连接结果/计算器/截图浮层, 三个翻译助手改实例方法并本地化报错) ④F4 纯数字/符号截图提示「没有可翻译的文字」不再误报失败 ⑤删死代码, 新增边缘测试套件; v1.4.24: 修 AI 聊天真机 400 (Jane 实测): 智谱 glm-4v-flash 的 max_tokens 上限 1024, 聊天面板传 2048 被拒 (code 1210); 已在 _ai_chat_messages 对智谱统一钳制 [1,1024], 别家不受影响, test_edge 扩至 17 项含此用例; v1.4.25: ①F4 截图翻译合并引擎 (Jane 定案): 配了 AI Key 先 AI 看图翻译 (一次读图+翻译, 尝试上限 20 秒), AI 失效/没配 Key 立刻回退 OCR 通道 ②F4 提速: 免费翻译通道黏性 (通的通道 120 秒内优先)、Google 超时 12→8 秒、MyMemory 12→10 秒、逐行兜底改并发 ③文本翻译源语言改下拉可选 (自动检测+13 种, 改选即重译并真传引擎) ④文本翻译接 AI 通道 + 「启用AI翻译」勾选 (默认开: 勾上才优先 AI、失效回退在线; 不勾绝不调 AI; 选择落盘 TTUseAI) ⑤_ai_chat_image/_ai_chat_messages 加 timeout 参数 (默认 90 不变); v1.4.26: ①F4 修 AI 回复把提示词的「第一部分/第二部分」标签回声进正文 (改提示词措辞+解析层剥标签兜底) ②全部勾选/单选改圆点指示 (选中绿点/未选空心圈, PIL 生成 Dot.indicator, 含经典 tk 城市勾选) ③工具栏 8 按钮统一样式 (AI 功能去掉蓝色描边款) ④F4 第二轮提速: OCR 与 AI 并行 (回退零等待, Jane 定案保持并行)、OCR 引擎启动预热、「翻译中…」占位浮签 ⑤马赛克/模糊加强: 强度随区域自适应 (旧版几乎无效), F1 编辑器预览改真效果 ⑥全面审查修复 18 项: 多显示器坐标校正、长截图/F4 后台线程兜底、备份验 Config.ini+导出原子写、迷你窗脏值兜底、天气失败负缓存改 60 秒、画廊/预览句柄泄漏、计算器英文错误态、AI 空白返回、强力粘贴验返回值、GlobalLock 判空、WinOCR 逐行容错、import_txt 支持 UTF-16、复制反馈存活守卫、配置双编码全新 parser、分隔符脏值校验; 两 ini 438 键同集 (新增 long_fail); v1.4.27: 功能与 1.4.26 相同, 首次提供安装版 (Inno Setup: 按用户安装/原地升级/开始菜单与桌面快捷方式/设置里可卸载; 发布页同时附 SPST.exe 单文件版与 SPST-Setup 安装包, Jane 2026-11-25 定案); v1.4.28: ①修任务栏恢复闪黑 (列表补刷推迟到窗口画出后, 不再同步重建堵第一帧) ②截图/贴图设置并入系统设置 (截图翻译目标语言/对照翻译/延时秒数/UI 检测, 与主窗口共用同一变量两处同步) ③F4 浮动条重做: 原文框全透明只留 1px 细边、与选区等大, 译文框独立白卡与原文框像素等宽左对齐, 功能条独立成条保持自然宽度 ④F4 截图翻译不使用 UI 检测 (纯自由框选, F1 等不受影响) ⑤UI 检测三招: 悬停常驻 UIA 桥实时查元素、假框过滤 (占整窗 85% 以上的容器矩形不要)、拖拽边缘 8px 磁吸 ⑥AI 分工: AI 聊天/看图翻译/标注栏 AI/智能回复/文本翻译五路可各选一家 (缺省跟随当前服务, 指定的那家没 Key 自动回退当前服务), 预设扩到 14 家 (新增 OpenAI/Gemini/Claude/DeepSeek/Kimi/火山豆包/腾讯混元/百度千帆/Grok/Ollama 本地自建), 修 _ai_cfg 镜像串扰真 bug (读别家配置会串到当前服务的 key/地址/模型, 分工会把请求发错地方) ⑦第五轮审查优化: UIA 桥读行加 2.5 秒超时杀桥 (防挂起应用堵死检测)、历史截图画廊缩略图分批渲染 (打开不冻结)、备份导入单文件 64MB 上限、记录/常用语落盘改紧凑 JSON (文件小三成读写更快); v1.4.29: ①品牌升级 SPST→KIVO 启沃 (新 Logo/配色/功能改名/启动页/关于 KIVO) ②左侧边栏导航 (Jane 定序: AI 助手第一/翻译中心第二, 世界时钟与货币汇率分开) ③Dots.ai 第 15 家预设 + 深度思考开关 (实测: 正文被思考吃空时自动关思考重试一次) ④AI 聊天 GPT/豆包式改造 (+菜单附件/建议行/最近对话置顶重命名删除/圆角弹窗/气泡内豆包式图标行含朗读) ⑤迷你翻译 F10 + 复制即译 F11 (独立开关与热键, 跟随文本翻译的 AI 开关, 复制即译只按热键触发不监听剪贴板) ⑥约时间换算 (含单语复制模式)/对方作息提示/复制双语 ⑦计算器放大居中+计算历史/汇率 30 币种国旗/世界时钟天气图标+温馨提醒+分享 ⑧全局圆角 (主窗口外框直角除外)+KIVO 配色+弹窗美化, 标注默认矩形 ⑨设置内检查更新+一键更新 (下载字节数检/MZ 验头/SHA256+RSA 签名双重验证, 无 .sig 的版本拒装) ⑩第六轮深度审查: 边栏最小高度 600 防裁设置项 v1.4.30: 千问审查整改 — OCR 引擎锁竞态 (锁改为类定义时建好)、F7 消费模式只在粘成功时删记录、F4 碎片合并框并集底边、下载链接剥尾标点、恢复 _ini_scalar/_http_base 护栏、save_config/save_phrases 落盘失败记 crash.log。
+VERSION = "1.4.30"  # v1.4.22: ①去掉内置浏览器整套 (Jane 真机定版不好用: 面板/书签/历史/菜单/pywebview 子进程全删, 工具栏回 8 按钮, 自检减为六项, 打包去 pywebview) ②世界时间加「刷新」(绕过天气 15 分钟节流立即重拉) ③文本翻译框自适应高度 (默认 8 行, 随内容长高至 24 行封顶, 按钮行跟随) ④系统设置/软件自检/历史截图/城市选择全部改为主窗口内面板 (Jane 定版「能收的都收」, 不再弹独立窗口, 重复开窗问题从结构上消除) ⑤启动时清理浏览器残留文件 (bookmarks/browser_history/browser_profile) ⑥工具栏改一行 8 按钮 ⑦截图翻译学有道: F4 出无边框浮动条 (原文区透明盖选区透出真实截图对照/译文框在选区下方、不够翻上方/大小随内容/源语言可选/条内复制原文·译文·AI 智能回复), 完整结果窗保留给无选区入口; v1.4.23: ①修真 bug: 配置解析关 % 插值 (分隔符/路径/接口地址带 % 不再抛错) ②备份导入加固 (JSON 先验货后落盘, 坏备份整包拒绝) + 备份说明去掉书签残留文案 ③英文模式运行时漏网文案两批全清 (汇率/托盘/取色器/下载提示/识别结果窗/AI 气泡与接口报错/测试连接结果/计算器/截图浮层, 三个翻译助手改实例方法并本地化报错) ④F4 纯数字/符号截图提示「没有可翻译的文字」不再误报失败 ⑤删死代码, 新增边缘测试套件; v1.4.24: 修 AI 聊天真机 400 (Jane 实测): 智谱 glm-4v-flash 的 max_tokens 上限 1024, 聊天面板传 2048 被拒 (code 1210); 已在 _ai_chat_messages 对智谱统一钳制 [1,1024], 别家不受影响, test_edge 扩至 17 项含此用例; v1.4.25: ①F4 截图翻译合并引擎 (Jane 定案): 配了 AI Key 先 AI 看图翻译 (一次读图+翻译, 尝试上限 20 秒), AI 失效/没配 Key 立刻回退 OCR 通道 ②F4 提速: 免费翻译通道黏性 (通的通道 120 秒内优先)、Google 超时 12→8 秒、MyMemory 12→10 秒、逐行兜底改并发 ③文本翻译源语言改下拉可选 (自动检测+13 种, 改选即重译并真传引擎) ④文本翻译接 AI 通道 + 「启用AI翻译」勾选 (默认开: 勾上才优先 AI、失效回退在线; 不勾绝不调 AI; 选择落盘 TTUseAI) ⑤_ai_chat_image/_ai_chat_messages 加 timeout 参数 (默认 90 不变); v1.4.26: ①F4 修 AI 回复把提示词的「第一部分/第二部分」标签回声进正文 (改提示词措辞+解析层剥标签兜底) ②全部勾选/单选改圆点指示 (选中绿点/未选空心圈, PIL 生成 Dot.indicator, 含经典 tk 城市勾选) ③工具栏 8 按钮统一样式 (AI 功能去掉蓝色描边款) ④F4 第二轮提速: OCR 与 AI 并行 (回退零等待, Jane 定案保持并行)、OCR 引擎启动预热、「翻译中…」占位浮签 ⑤马赛克/模糊加强: 强度随区域自适应 (旧版几乎无效), F1 编辑器预览改真效果 ⑥全面审查修复 18 项: 多显示器坐标校正、长截图/F4 后台线程兜底、备份验 Config.ini+导出原子写、迷你窗脏值兜底、天气失败负缓存改 60 秒、画廊/预览句柄泄漏、计算器英文错误态、AI 空白返回、强力粘贴验返回值、GlobalLock 判空、WinOCR 逐行容错、import_txt 支持 UTF-16、复制反馈存活守卫、配置双编码全新 parser、分隔符脏值校验; 两 ini 438 键同集 (新增 long_fail); v1.4.27: 功能与 1.4.26 相同, 首次提供安装版 (Inno Setup: 按用户安装/原地升级/开始菜单与桌面快捷方式/设置里可卸载; 发布页同时附 KIVO.exe 单文件版与 KIVO-Setup 安装包, Jane 2026-11-25 定案); v1.4.28: ①修任务栏恢复闪黑 (列表补刷推迟到窗口画出后, 不再同步重建堵第一帧) ②截图/贴图设置并入系统设置 (截图翻译目标语言/对照翻译/延时秒数/UI 检测, 与主窗口共用同一变量两处同步) ③F4 浮动条重做: 原文框全透明只留 1px 细边、与选区等大, 译文框独立白卡与原文框像素等宽左对齐, 功能条独立成条保持自然宽度 ④F4 截图翻译不使用 UI 检测 (纯自由框选, F1 等不受影响) ⑤UI 检测三招: 悬停常驻 UIA 桥实时查元素、假框过滤 (占整窗 85% 以上的容器矩形不要)、拖拽边缘 8px 磁吸 ⑥AI 分工: AI 聊天/看图翻译/标注栏 AI/智能回复/文本翻译五路可各选一家 (缺省跟随当前服务, 指定的那家没 Key 自动回退当前服务), 预设扩到 14 家 (新增 OpenAI/Gemini/Claude/DeepSeek/Kimi/火山豆包/腾讯混元/百度千帆/Grok/Ollama 本地自建), 修 _ai_cfg 镜像串扰真 bug (读别家配置会串到当前服务的 key/地址/模型, 分工会把请求发错地方) ⑦第五轮审查优化: UIA 桥读行加 2.5 秒超时杀桥 (防挂起应用堵死检测)、历史截图画廊缩略图分批渲染 (打开不冻结)、备份导入单文件 64MB 上限、记录/常用语落盘改紧凑 JSON (文件小三成读写更快); v1.4.29: ①品牌升级为 KIVO 启沃 (新 Logo/配色/功能改名/启动页/关于 KIVO) ②左侧边栏导航 (Jane 定序: AI 助手第一/翻译中心第二, 世界时钟与货币汇率分开) ③Dots.ai 第 15 家预设 + 深度思考开关 (实测: 正文被思考吃空时自动关思考重试一次) ④AI 聊天 GPT/豆包式改造 (+菜单附件/建议行/最近对话置顶重命名删除/圆角弹窗/气泡内豆包式图标行含朗读) ⑤迷你翻译 F10 + 复制即译 F11 (独立开关与热键, 跟随文本翻译的 AI 开关, 复制即译只按热键触发不监听剪贴板) ⑥约时间换算 (含单语复制模式)/对方作息提示/复制双语 ⑦计算器放大居中+计算历史/汇率 30 币种国旗/世界时钟天气图标+温馨提醒+分享 ⑧全局圆角 (主窗口外框直角除外)+KIVO 配色+弹窗美化, 标注默认矩形 ⑨设置内检查更新+一键更新 (下载字节数检/MZ 验头/SHA256+RSA 签名双重验证, 无 .sig 的版本拒装) ⑩第六轮深度审查: 边栏最小高度 600 防裁设置项 v1.4.30: 千问审查整改 — OCR 引擎锁竞态 (锁改为类定义时建好)、F7 消费模式只在粘成功时删记录、F4 碎片合并框并集底边、下载链接剥尾标点、恢复 _ini_scalar/_http_base 护栏、save_config/save_phrases 落盘失败记 crash.log。
 # v1.4.20: 瘦身版, 功能零变化 — 打包侧剔除未用组件 (cv2 视频插件/级联数据、numpy 测试集、onnxruntime 的 transformers/tools/quantization/datasets/backend), 已模拟验证删除后 OCR 中英文识别正常
-# v1.4.19: ①AI 面板侧边栏去掉「AI 功能」快捷入口组 (功能本体全保留) ②修复 v1.4.18 的 F4 截图翻译主流程 (_translate_lines 误标 @staticmethod 致后台线程静默失败) ③记录上限改硬线 (全锁定时不再突破 2000) ④截图翻译目标语言扩到 13 种 ⑤内嵌微型浏览器 (WebView2 子进程收编: 谷歌翻译主页/书签栏前 8+书签管理/浏览历史/清除数据/页面缩放/下载说明) ⑥文本翻译面板 (打字停笔 350ms 自动翻译, 无缓存每次实时译) + 工具栏按序重排为两行并配线条图标 ⑦品牌头重排 (系统设置移左上挨着 SPST, 副标题「多功能工作台」居中, 右上留空) + 软件图标换 Jane 的樱花小女孩原图 ⑧窗口最小高度解锁 (最大化/缩放恢复正常) ⑨全界面双语化补齐 (约 330 条文案入语言文件, 英文模式复检残留中文 0 条) + 第八轮深查 (线程/网络/浏览器生命周期/热键英文保存往返全过)
+# v1.4.19: ①AI 面板侧边栏去掉「AI 功能」快捷入口组 (功能本体全保留) ②修复 v1.4.18 的 F4 截图翻译主流程 (_translate_lines 误标 @staticmethod 致后台线程静默失败) ③记录上限改硬线 (全锁定时不再突破 2000) ④截图翻译目标语言扩到 13 种 ⑤内嵌微型浏览器 (WebView2 子进程收编: 谷歌翻译主页/书签栏前 8+书签管理/浏览历史/清除数据/页面缩放/下载说明) ⑥文本翻译面板 (打字停笔 350ms 自动翻译, 无缓存每次实时译) + 工具栏按序重排为两行并配线条图标 ⑦品牌头重排 (系统设置移左上挨着 KIVO, 副标题「多功能工作台」居中, 右上留空) + 软件图标换 Jane 的樱花小女孩原图 ⑧窗口最小高度解锁 (最大化/缩放恢复正常) ⑨全界面双语化补齐 (约 330 条文案入语言文件, 英文模式复检残留中文 0 条) + 第八轮深查 (线程/网络/浏览器生命周期/热键英文保存往返全过)
 # v1.4.18: ①截图翻译修复 (OCR 碎片合并+整段翻译, 结果窗改纯文本) ②翻译结果窗内嵌 AI 智能回复 ③AI/热键/翻译设置全并入系统设置 ④AI 功能改内嵌面板+豆包式侧边栏+最近对话存档 (圆角气泡) ⑤主窗口简约重设计 (方角) ⑥货币汇率 ⑦计算器 ⑧常用语库面板化+序号 ⑨世界时间 (全球城市自选+当地天气) ⑩无水印下载 (FB/IG/小红书等, 保存位置可每次询问或固定) ⑪历史截图保存设置 (张数/不保存, 含 GIF) ⑫移除网络搜索 ⑬三轮深查整改: AI 回复防串话/时钟计时链/天气失败重试/设置窗滚轮隔离/下载实际文件名/汇率过期刷新/AI 回复增量渲染 (320ms→24ms)/单实例保护/单对话存档封顶 200 条
 # v1.4.7: 新增一键截图翻译 (F4 预设, 自动检测源语言, 目标语言主窗口可设中文/English) + v1.4.6 的工具栏同窗/图片复制双通道/窗口自适应高度
 # v1.4.6: 标注工具栏改冻结屏同窗 Frame (独立小窗真机反复不显示) + 图片复制补全 Win32 签名并加 PowerShell 备用通道 + 主窗口按内容自适应高度 (底部不再被裁)
-# v1.4.5: 数据目录改到 %APPDATA%\SnapPaste, 桌面只剩单个 EXE (老数据首次运行自动从 EXE 旁搬移) + v1.4.4 的 Esc 焦点修复
+# v1.4.5: 数据目录改到 %APPDATA%\KIVO, 桌面只剩单个 EXE (老数据首次运行自动从 EXE 旁搬移) + v1.4.4 的 Esc 焦点修复
 # v1.4.4: 修复框选/检测元素阶段 Esc 退不出 (覆盖层被热键从别的程序唤起时抢不到键盘焦点, Esc 落到原程序): 打开覆盖层时用 AttachThreadInput 强抢前台焦点, 并挂临时全局 Esc (覆盖层关闭即注销)
 # v1.4.3: 系统托盘 (点 X 隐藏到右下角托盘, 双击图标打开, 右键菜单截图/贴图/退出; 依赖 pystray) / 标注工具栏改两排并加固放置 + 选区右键菜单兜底 / 识别线条黄改蓝 / 放大镜改 PixPin 式网格+蓝色十字+深色信息卡 (坐标/色块/HEX/RGB 跟随光标) / 文字贴图加关闭提示
 # v1.4.2: 工具栏改两排并加固放置 (真机出现标注后找不到保存/复制: 工具栏尺寸在窗口未映射时取到 1x1 被放错位; 改用请求尺寸+显式尺寸+置顶, 并加选区右键菜单兜底) / 文字贴图加关闭提示与右键菜单
@@ -447,13 +447,13 @@ DEFAULT_HOTKEYS = {"HotKey8": "F6", "HotKey9": "F7", "HotKey10": "F8",
 # Snipaste 习惯键: F1 截图 / F3 贴图, 放在 Config.ini [Snip] 段
 DEFAULT_SNIP_KEYS = {"SnipKey": "F1", "PinKey": "F3", "CopyKey": "F5", "TransKey": "F4", "ReplyKey": "SHIFT+F4", "MiniTransKey": "F10", "CopyTransKey": "F11", "DelayKey": "无",
                      "ClosePinsKey": "无", "TogglePinsKey": "无", "RestorePinKey": "无", "ClickThroughKey": "无"}
-# 数据目录: 源码运行时在 main.py 旁; 打成 EXE 后数据统一放 %APPDATA%\SPST,
-# 桌面上只剩一个 SPST.exe (v1.4.5 起数据进 AppData; v1.4.15 改名前是 %APPDATA%\SnapPaste, 老数据自动搬移)。
+# 数据目录: 源码运行时在 main.py 旁; 打成 EXE 后数据统一放 %APPDATA%\KIVO,
+# 桌面上只剩一个 KIVO.exe (v1.4.5 起数据进 AppData; 旧版数据目录 %APPDATA%\SPST 与更早的 %APPDATA%\SnapPaste 由 _migrate_old_data 自动搬移)。
 # 注意也不能用 _MEIPASS 临时目录: 那是单文件解压目录, 关程序就全丢 (v1.3.2 审查发现)。
 if getattr(sys, "frozen", False):
     EXE_DIR = os.path.dirname(os.path.abspath(sys.executable))
     BUNDLE = getattr(sys, "_MEIPASS", EXE_DIR)  # EXE 内置的默认文件 (打包时 --add-data 带入)
-    BASE = os.path.join(os.environ.get("APPDATA") or EXE_DIR, "SPST")
+    BASE = os.path.join(os.environ.get("APPDATA") or EXE_DIR, "KIVO")
     try: os.makedirs(BASE, exist_ok=True)
     except Exception: BASE = EXE_DIR  # AppData 建不了时退回 EXE 旁 (老行为, 至少能用)
 else:
@@ -522,7 +522,7 @@ def _ini_scalar(v):
 
 def _migrate_old_data():
     """老数据搬移 (新目录还没有 Config.ini 时才搬, 已存在的文件不覆盖):
-    ① 改名前的 %APPDATA%\\SnapPaste (v1.4.15 改名为 SPST) ② 更早的老版本 (<=v1.4.4) 放在 EXE 旁的数据"""
+    ① 旧品牌数据目录 %APPDATA%\\SPST 与 %APPDATA%\\SnapPaste (这两个是被搬移的旧目录名, 历史引用, 不能改成 KIVO) ② 更早的老版本 (<=v1.4.4) 放在 EXE 旁的数据"""
     if not getattr(sys, "frozen", False) or os.path.abspath(BASE) == os.path.abspath(EXE_DIR): return
     if os.path.exists(os.path.join(BASE, "Config.ini")): return  # 新目录已有数据, 不再搬
     import shutil
@@ -545,8 +545,9 @@ def _migrate_old_data():
             except Exception: pass
     appdata = os.environ.get("APPDATA")
     if appdata:
-        old_base = os.path.join(appdata, "SnapPaste")
-        if os.path.abspath(old_base) != os.path.abspath(BASE): _copy_from(old_base)
+        for legacy_name in ("SPST", "SnapPaste"):  # 旧品牌数据目录名 (历史引用, 故意保留旧名)
+            old_base = os.path.join(appdata, legacy_name)
+            if os.path.abspath(old_base) != os.path.abspath(BASE): _copy_from(old_base)
     _copy_from(EXE_DIR)
 
 def _cleanup_legacy_browser_files():
@@ -704,7 +705,7 @@ class App(tk.Tk):
         ensure_runtime_files()
         enable_hidpi()
         self.title(f"{APP_NAME} v{VERSION}")
-        try:  # 窗口图标 (标题栏/任务栏) 用内嵌的 SPST 图标
+        try:  # 窗口图标 (标题栏/任务栏) 用内嵌的 KIVO 图标
             self._icon_photo = tk.PhotoImage(data=_ICON_PNG_B64); self.iconphoto(True, self._icon_photo)
         except Exception: pass
         self.geometry("680x580"); self.minsize(600, 500)  # v1.3: 内容区变高, 旧 460 高会裁掉底部状态栏
@@ -944,7 +945,7 @@ class App(tk.Tk):
         try: return max(10, self.cfg.getint("Config", "SleepTime", fallback=80))
         except Exception: return 80  # 间隔被写成非数字 (旧版托盘保存没校验) 时别让软件启动就崩
 
-    # ---------- 界面主题 (v1.4.17 美化: 全软件统一一套视觉语言, 与 SPST 图标同系的品牌蓝) ----------
+    # ---------- 界面主题 (v1.4.17 美化: 全软件统一一套视觉语言, 与 KIVO 图标同系的品牌蓝) ----------
     UI_BG = "#F5F7FA"        # 窗口底色: 柔和浅蓝灰 (比旧版略深, 白卡更跳)
     UI_SURFACE = "#FFFFFF"   # 输入框/列表等内容面
     UI_BORDER = "#E5EAF0"    # 描边
@@ -1339,11 +1340,12 @@ class App(tk.Tk):
             if self.cfg.get("Config", "AutoRun", fallback="0") == "1":
                 exe = sys.executable
                 cmd = f'"{exe}"' if getattr(sys, "frozen", False) else f'"{exe}" "{os.path.abspath(__file__)}"'
-                winreg.SetValueEx(key, "SPST", 0, winreg.REG_SZ, cmd)
-                try: winreg.DeleteValue(key, "SnapPaste")  # 清理改名前的自启项, 免得它还指向旧 exe
-                except FileNotFoundError: pass
+                winreg.SetValueEx(key, "KIVO", 0, winreg.REG_SZ, cmd)
+                for legacy in ("SPST", "SnapPaste"):  # 清理改名前的自启项, 免得它们还指向旧 exe (历史引用, 故意保留旧名)
+                    try: winreg.DeleteValue(key, legacy)
+                    except FileNotFoundError: pass
             else:
-                for legacy in ("SPST", "SnapPaste"):
+                for legacy in ("KIVO", "SPST", "SnapPaste"):
                     try: winreg.DeleteValue(key, legacy)
                     except FileNotFoundError: pass
         except Exception: pass
@@ -1580,8 +1582,8 @@ class App(tk.Tk):
         tk.Label(abfrm, text=self.t("about_text", "KIVO (启沃) 是一款面向现代工作与生活场景的智能效率平台, 将 AI 智能、多语言翻译、信息管理、屏幕截图及多种实用工具整合在一个统一的工作空间中, 帮助你简化操作流程, 提高信息处理效率。"), background=self.UI_BG, foreground="#5B6B7C", wraplength=560, justify="left").pack(anchor="w", padx=6, pady=(2, 2))
         tk.Label(abfrm, text=f"v{VERSION} · © KIVO", background=self.UI_BG, foreground=self.UI_MUTED).pack(anchor="w", padx=6, pady=(0, 6))
     # ---------- 检查更新 ----------
-    _RELEASE_API = "https://api.github.com/repos/anna1211688/snappaste/releases/latest"
-    _RELEASE_PAGE = "https://github.com/anna1211688/snappaste/releases/latest"
+    _RELEASE_API = "https://api.github.com/repos/anna1211688/KIVO/releases/latest"
+    _RELEASE_PAGE = "https://github.com/anna1211688/KIVO/releases/latest"
 
     @staticmethod
     def _ver_tuple(s):
@@ -1592,7 +1594,7 @@ class App(tk.Tk):
     def _pick_setup_asset(data):
         for a in (data or {}).get("assets") or []:
             name = str(a.get("name") or "")
-            if (name.startswith("SPST-Setup-") or name.startswith("KIVO-Setup-")) and name.lower().endswith(".exe"):
+            if name.startswith("KIVO-Setup-") and name.lower().endswith(".exe"):
                 return str(a.get("browser_download_url") or ""), name
         return "", ""
 
@@ -1625,7 +1627,7 @@ class App(tk.Tk):
             return False
     def _fetch_latest_release(self):
         import urllib.request
-        req = urllib.request.Request(self._RELEASE_API, headers={"User-Agent": "SPST/" + VERSION, "Accept": "application/vnd.github+json"})
+        req = urllib.request.Request(self._RELEASE_API, headers={"User-Agent": "KIVO/" + VERSION, "Accept": "application/vnd.github+json"})
         with urllib.request.urlopen(req, timeout=10) as r:
             data = json.loads(r.read().decode("utf-8", "replace"))
         setup_url, setup_name = self._pick_setup_asset(data)
@@ -1663,7 +1665,7 @@ class App(tk.Tk):
 
     def _upd_install(self):
         """一键更新 (Jane 2026-11-27 问能否点这里直接更新): 后台下载安装包到临时目录, 下完启动安装向导,
-        本程序随即退出 (安装要覆盖文件且有单实例锁), 向导最后一步默认勾选启动 SPST, 装完自动打开新版。"""
+        本程序随即退出 (安装要覆盖文件且有单实例锁), 向导最后一步默认勾选启动 KIVO, 装完自动打开新版。"""
         url, name = getattr(self, "_upd_setup", ("", ""))
         if not url: self._open_release_page(); return
         if getattr(self, "_upd_busy", False): return
@@ -1671,10 +1673,10 @@ class App(tk.Tk):
         try: self._upd_now.configure(state="disabled")
         except Exception: pass
         import tempfile, urllib.request
-        dest = os.path.join(tempfile.gettempdir(), name or "SPST-Setup.exe")
+        dest = os.path.join(tempfile.gettempdir(), name or "KIVO-Setup.exe")
         def work():
             try:
-                req = urllib.request.Request(url, headers={"User-Agent": "SPST/" + VERSION})
+                req = urllib.request.Request(url, headers={"User-Agent": "KIVO/" + VERSION})
                 done = 0; last = [-1]
                 with urllib.request.urlopen(req, timeout=30) as r, open(dest, "wb") as f:
                     total = int(r.headers.get("Content-Length") or 0)
@@ -1690,7 +1692,7 @@ class App(tk.Tk):
                 # ---- 哈希 + 签名双重验证 (Jane 2026-11-27 选定): 取同发布的 .sig 清单, 先验签名 (证明清单出自发布私钥) 再比对安装包哈希 ----
                 sig_url = getattr(self, "_upd_sig_url", "")
                 if not sig_url: raise IOError("no signature asset")  # 没有签名文件的版本不给一键安装 (发布页仍可手动下)
-                sreq = urllib.request.Request(sig_url, headers={"User-Agent": "SPST/" + VERSION})
+                sreq = urllib.request.Request(sig_url, headers={"User-Agent": "KIVO/" + VERSION})
                 with urllib.request.urlopen(sreq, timeout=15) as sr:
                     mani = json.loads(sr.read().decode("utf-8", "replace"))
                 import hashlib
@@ -1732,7 +1734,7 @@ class App(tk.Tk):
         try: self._launch_installer(dest)
         except Exception:
             self._upd_dl_failed(); return
-        self.after(900, self._quit_app)  # 退出让安装程序覆盖文件 (装完向导会默认勾选重新启动 SPST)
+        self.after(900, self._quit_app)  # 退出让安装程序覆盖文件 (装完向导会默认勾选重新启动 KIVO)
 
     def _upd_dl_failed(self):
         self._upd_busy = False
@@ -1844,7 +1846,7 @@ class App(tk.Tk):
         tmp = path + ".tmp"  # 先写临时再换名: 旧版直接在目标路径建 zip, 中途失败会把原有的一份好备份截断销毁 (审查发现)
         try:
             with zipfile.ZipFile(tmp, "w", zipfile.ZIP_DEFLATED) as z:
-                z.writestr("spst_backup.json", json.dumps({"app": "SPST", "version": VERSION, "time": time.strftime("%Y-%m-%d %H:%M:%S")}, ensure_ascii=False))
+                z.writestr("kivo_backup.json", json.dumps({"app": "KIVO", "version": VERSION, "time": time.strftime("%Y-%m-%d %H:%M:%S")}, ensure_ascii=False))
                 for name in self._BACKUP_FILES:
                     p = os.path.join(BASE, name)
                     if os.path.exists(p): z.write(p, name)
@@ -1856,7 +1858,7 @@ class App(tk.Tk):
     def _import_backup(self, path):
         import zipfile
         with zipfile.ZipFile(path) as z:
-            if "spst_backup.json" not in z.namelist(): raise ValueError("not an SPST backup")
+            if "kivo_backup.json" not in z.namelist() and "spst_backup.json" not in z.namelist(): raise ValueError("not a KIVO backup")  # spst_backup.json 是旧版备份的标记文件名 (历史引用, 保留它才能导入旧备份)
             payload = {}
             for name in self._BACKUP_FILES:
                 if name in z.namelist():
@@ -4005,7 +4007,7 @@ try {
         """Windows 自带 OCR: 有结果返回文字, 没文字返回 '', 引擎/语言包不可用返回 None"""
         if sys.platform != "win32": return None
         import subprocess, tempfile
-        tmp = tempfile.mkdtemp(prefix="spst_ocr_")
+        tmp = tempfile.mkdtemp(prefix="kivo_ocr_")
         img_path, out_path, ps_path = (os.path.join(tmp, n) for n in ("in.png", "out.txt", "ocr.ps1"))
         try:
             img, _scale = cls._ocr_prepare(img, boost)
@@ -4075,7 +4077,7 @@ try {
         """Windows 内置 OCR 带行坐标版: 返回 [{'t','x','y','w','h'}...]; 引擎不可用返回 None, 没文字返回 []"""
         if sys.platform != "win32": return None
         import subprocess, tempfile, json as _json
-        tmp = tempfile.mkdtemp(prefix="spst_ocrl_")
+        tmp = tempfile.mkdtemp(prefix="kivo_ocrl_")
         img_path, out_path, ps_path = (os.path.join(tmp, n) for n in ("in.png", "out.json", "ocrl.ps1"))
         try:
             img, _scale = cls._ocr_prepare(img, boost)
@@ -4294,7 +4296,7 @@ try {
         url = "https://fanyi-api.baidu.com/api/trans/vip/translate?" + urllib.parse.urlencode(
             {"q": q, "from": ({"zh-CN": "zh", "zh-TW": "cht", "ja": "jp", "ko": "kor", "fr": "fra", "es": "spa", "vi": "vie"}.get(source, source) if source else "auto"), "to": {"zh-CN": "zh", "zh-TW": "cht", "ja": "jp", "ko": "kor", "fr": "fra", "es": "spa", "vi": "vie"}.get(target, target),
              "appid": appid, "salt": salt, "sign": sign})
-        req = urllib.request.Request(url, headers={"User-Agent": "SPST"})
+        req = urllib.request.Request(url, headers={"User-Agent": "KIVO"})
         with urllib.request.urlopen(req, timeout=12) as r:
             d = _json.loads(r.read().decode("utf-8"))
         if d.get("error_code"): raise RuntimeError(f"{self.t('tr_err_baidu', '百度翻译错误')} {d.get('error_code')}: {d.get('error_msg', '')}")
@@ -4309,7 +4311,7 @@ try {
                                        "appKey": appkey, "salt": salt, "sign": sign,
                                        "signType": "v3", "curtime": curtime}).encode("utf-8")
         req = urllib.request.Request("https://openapi.youdao.com/api", data=data,
-                                     headers={"Content-Type": "application/x-www-form-urlencoded", "User-Agent": "SPST"})
+                                     headers={"Content-Type": "application/x-www-form-urlencoded", "User-Agent": "KIVO"})
         with urllib.request.urlopen(req, timeout=12) as r:
             d = _json.loads(r.read().decode("utf-8"))
         if str(d.get("errorCode", "0")) != "0": raise RuntimeError(f"{self.t('tr_err_youdao', '有道翻译错误码')} {d.get('errorCode')}")
@@ -4322,7 +4324,7 @@ try {
         if source: _params["source"] = source
         data = urllib.parse.urlencode(_params).encode("utf-8")
         req = urllib.request.Request(url, data=data,
-                                     headers={"Content-Type": "application/x-www-form-urlencoded", "User-Agent": "SPST"})
+                                     headers={"Content-Type": "application/x-www-form-urlencoded", "User-Agent": "KIVO"})
         with urllib.request.urlopen(req, timeout=12) as r:
             d = _json.loads(r.read().decode("utf-8"))
         if d.get("error"): raise RuntimeError(f"{self.t('tr_err_google', '谷歌翻译错误')} {d['error'].get('code')}: {d['error'].get('message', '')}")
@@ -4512,7 +4514,7 @@ try {
         if cfg.get("service") == "zhipu": max_tokens = max(1, min(int(max_tokens), 1024))  # 智谱 glm-4v-flash 的 max_tokens 只许 [1,1024]: 聊天面板传 2048 会被 400 拒绝 (Jane 真机 2026-11-25 实测 code 1210)
         payload = {"model": cfg["model"], "max_tokens": max_tokens, "temperature": temperature, "messages": messages}
         headers = {"Content-Type": "application/json",
-                   "Authorization": "Bearer " + cfg["key"], "User-Agent": "SPST"}
+                   "Authorization": "Bearer " + cfg["key"], "User-Agent": "KIVO"}
         if cfg.get("service") == "dots":
             headers["api-key"] = cfg["key"]  # Dots 平台的规矩: Key 走 api-key 头, 它的文档只认这个 (Bearer 一并带上无妨)
             think = False
@@ -4653,8 +4655,8 @@ try {
         if not text: return
         try:
             import subprocess
-            env = dict(os.environ); env["SPST_TTS_TEXT"] = text
-            ps = "Add-Type -AssemblyName System.Speech; $v = New-Object System.Speech.Synthesis.SpeechSynthesizer; $v.Speak($env:SPST_TTS_TEXT); $v.Dispose()"
+            env = dict(os.environ); env["KIVO_TTS_TEXT"] = text
+            ps = "Add-Type -AssemblyName System.Speech; $v = New-Object System.Speech.Synthesis.SpeechSynthesizer; $v.Speak($env:KIVO_TTS_TEXT); $v.Dispose()"
             self._tts_proc = subprocess.Popen(["powershell", "-NoProfile", "-NonInteractive", "-Command", ps],
                                               env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                                               creationflags=0x08000000)
@@ -4696,7 +4698,7 @@ try {
             stash(); test_var.set(self.t("ai_testing_img", "测试中 (发一张小图让模型读字)..."))
             import threading
             test_img = Image.new("RGB", (240, 90), "white")
-            ImageDraw.Draw(test_img).text((12, 30), "你好 SPST 2026", fill="black", font=self._font(24))
+            ImageDraw.Draw(test_img).text((12, 30), "你好 KIVO 2026", fill="black", font=self._font(24))
             k, m, b = store[cur["service"]]
             test_cfg = {"service": cur["service"], "key": k, "model": m, "base": b}  # 直接传窗里的值, 不碰 self.cfg (见 _ai_chat_image 说明)
             def work():
@@ -4901,7 +4903,7 @@ try {
     def _fx_fetch_rates():
         """拉美元基准的全部汇率: 返回 (rates, 更新时间UTC字符串)。免费接口, 数据每日更新 (面板上会标明更新时间)"""
         import urllib.request
-        req = urllib.request.Request("https://open.er-api.com/v6/latest/USD", headers={"User-Agent": "SPST"})
+        req = urllib.request.Request("https://open.er-api.com/v6/latest/USD", headers={"User-Agent": "KIVO"})
         with urllib.request.urlopen(req, timeout=20) as r:
             data = json.loads(r.read().decode("utf-8"))
         if data.get("result") != "success" or not isinstance(data.get("rates"), dict):
@@ -6030,7 +6032,7 @@ try {
         coords = None
         try:
             import urllib.request
-            req = urllib.request.Request("https://ipapi.co/json/", headers={"User-Agent": "SPST"})
+            req = urllib.request.Request("https://ipapi.co/json/", headers={"User-Agent": "KIVO"})
             with urllib.request.urlopen(req, timeout=10) as r:
                 d = json.loads(r.read().decode("utf-8"))
             if d.get("latitude") is not None: coords = (float(d["latitude"]), float(d["longitude"]))
@@ -6053,7 +6055,7 @@ try {
             import urllib.request, urllib.parse
             q = urllib.parse.quote(self._clock_zone_name(tzname))
             req = urllib.request.Request(f"https://geocoding-api.open-meteo.com/v1/search?name={q}&count=1&language=en",
-                                         headers={"User-Agent": "SPST"})
+                                         headers={"User-Agent": "KIVO"})
             with urllib.request.urlopen(req, timeout=12) as r:
                 d = json.loads(r.read().decode("utf-8"))
             res = d.get("results") or []
@@ -6081,7 +6083,7 @@ try {
         except Exception: pass
         try:
             url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m,weather_code"
-            req = urllib.request.Request(url, headers={"User-Agent": "SPST"})
+            req = urllib.request.Request(url, headers={"User-Agent": "KIVO"})
             with urllib.request.urlopen(req, timeout=12) as r:
                 d = json.loads(r.read().decode("utf-8"))
             cur = d.get("current") or {}
@@ -7432,7 +7434,7 @@ try {
         def via_mymemory(q):
             src = source or ("zh-CN" if has_cjk else "en")
             url = "https://api.mymemory.translated.net/get?" + urllib.parse.urlencode({"q": q, "langpair": f"{src}|{target}"})
-            req = urllib.request.Request(url, headers={"User-Agent": "SPST"})
+            req = urllib.request.Request(url, headers={"User-Agent": "KIVO"})
             with urllib.request.urlopen(req, timeout=10) as r:
                 d = _json.loads(r.read().decode("utf-8"))
             return (d.get("responseData") or {}).get("translatedText") or ""
@@ -8186,7 +8188,7 @@ try {
         self.withdraw()
         if not self._tray_notified:
             self._tray_notified = True
-            try: self._tray.notify(self.t("tray_still", "SPST 还在后台运行: 点托盘图标打开主窗口, 右键托盘图标可以退出"), self.t("tray_hidden", "已隐藏到托盘"))
+            try: self._tray.notify(self.t("tray_still", "KIVO 还在后台运行: 点托盘图标打开主窗口, 右键托盘图标可以退出"), self.t("tray_hidden", "已隐藏到托盘"))
             except Exception: pass
 
     def _quit_app(self):
@@ -8216,15 +8218,15 @@ try {
             self._quit_app()
 
 def _acquire_single_instance():
-    """单实例守卫: SPST 是常驻托盘工具, 重复打开会出现两个托盘图标、全局热键被两个进程同时响应
+    """单实例守卫: KIVO 是常驻托盘工具, 重复打开会出现两个托盘图标、全局热键被两个进程同时响应
     (按一次 F6 每条记录记两遍)、配置和记录文件互相覆盖。用 Windows 命名互斥体拦下第二个实例并弹窗提醒;
     非 Windows (开发调试) 或任何异常都放行, 守卫本身绝不能把正版启动拦死。"""
     if sys.platform != "win32": return True
     try:
         import ctypes
-        handle = ctypes.windll.kernel32.CreateMutexW(None, False, "SPST_SingleInstance_Mutex")
+        handle = ctypes.windll.kernel32.CreateMutexW(None, False, "KIVO_SingleInstance_Mutex")
         if not handle: return True
-        globals()["_SPST_MUTEX_HANDLE"] = handle  # 句柄必须留到进程结束: 关掉它就等于放行第二个实例
+        globals()["_KIVO_MUTEX_HANDLE"] = handle  # 句柄必须留到进程结束: 关掉它就等于放行第二个实例
         if ctypes.windll.kernel32.GetLastError() == 183:  # ERROR_ALREADY_EXISTS: 已经有一个在跑
             ctypes.windll.user32.MessageBoxW(None, "KIVO 已经在运行了 (看屏幕右下角的托盘图标), 不用重复打开。", "KIVO", 0x40)  # MB_ICONINFORMATION
             return False

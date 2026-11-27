@@ -1,4 +1,4 @@
-# SnapPaste / SPST
+# KIVO / KIVO
 
 轻量级 Windows 桌面工具：管理多条文字复制记录、顺序粘贴，并提供截图、标注、贴图和 OCR 等功能。
 
@@ -34,7 +34,7 @@ pip install opencv-python-headless
 
 ## 构建 Windows EXE
 
-仓库通过 GitHub Actions 工作流 `.github/workflows/build-exe.yml` 构建单文件 EXE。该工作流由 GitHub Actions 的 **Run workflow** 手动触发，使用 Python 3.12 和 PyInstaller。构建产物为 `SPST.exe`。
+仓库通过 GitHub Actions 工作流 `.github/workflows/build-exe.yml` 构建单文件 EXE。该工作流由 GitHub Actions 的 **Run workflow** 手动触发，使用 Python 3.12 和 PyInstaller。构建产物为 `KIVO.exe`。
 
 ## 项目结构
 
@@ -44,7 +44,7 @@ pip install opencv-python-headless
 | `Config.ini` | 默认热键、界面及服务配置 |
 | `Chinese.ini` / `English.ini` | 界面语言文件（源码运行时与打包版均支持） |
 | `requirements.txt` | Python 运行依赖 |
-| `SPST.ico` | Windows 应用图标 |
+| `KIVO.ico` | Windows 应用图标 |
 | `ding.wav` | 提示音资源 |
 | `.github/workflows/build-exe.yml` | Windows EXE 构建工作流 |
 
