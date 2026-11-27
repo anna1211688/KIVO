@@ -14,7 +14,7 @@ v1.3 二次审查修复 (详见 docs/二次审查报告.md):
 依赖: Pillow (截图必需); keyboard (全局热键, 可选); 其余见 requirements.txt
 运行: python main.py    打包: build_windows.bat (PyInstaller, 无加壳, 无联网)
 """
-import base64, configparser, ctypes, datetime, json, os, queue, re, sys, time
+import base64, configparser, ctypes, datetime, json, os, queue, re, sys, threading, time
 try:
     from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageGrab, ImageTk
     HAS_PIL = True
@@ -515,6 +515,10 @@ def _atomic_write(path, text):
     tmp = path + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f: f.write(text)
     os.replace(tmp, path)
+def _ini_scalar(v):
+    """配置值收成一行: 换行/制表/连续空白全压成单个空格。值里混进换行会把 Config.ini 写坏 —
+    值中的一行 "Evil=1" 下次读取就变成一个真键 (注入/损坏双防), 所有落盘值先过这里。"""
+    return " ".join(str(v).split())
 
 def _migrate_old_data():
     """老数据搬移 (新目录还没有 Config.ini 时才搬, 已存在的文件不覆盖):
@@ -879,11 +883,15 @@ class App(tk.Tk):
     def t(self, key, zh):
         return self._strings.get(key, zh).replace("\\n", "\n")  # ini 里多行文案写成 \n 转义, 这里还原
     def save_config(self):
-        # 保存配置绝不能把程序搞崩: 整个过程兜底, 失败就静默放弃这次保存 (下次改设置还会再存)
+        # 保存配置绝不能把程序搞崩: 整个过程兜底; 但失败不能静默 — 磁盘满/文件被占用时用户以为存上了,
+        # 重启才发现设置回滚且无从排查 (千问 2026-11-27 指出)。记进 crash.log, _log_crash 自带 60 秒去重不刷屏。
         try: self._save_config_inner()
-        except Exception: pass
+        except Exception: _log_crash("save-config", *sys.exc_info())
     def _save_config_inner(self):
         # v1.1 修复: 原地更新已有 key, 保住 Config.ini 里的注释和排版 (旧版 configparser.write 会全抹掉)
+        for _sec in self.cfg.sections():  # 落盘前把每个值收成一行: 防粘贴进来的值带换行把 ini 结构写坏
+            for _k, _v in list(self.cfg.items(_sec)):
+                if _v is not None and _ini_scalar(_v) != _v: self.cfg.set(_sec, _k, _ini_scalar(_v))
         if not os.path.exists(CONFIG_PATH):
             import io
             buf = io.StringIO(); self.cfg.write(buf); _atomic_write(CONFIG_PATH, buf.getvalue())
@@ -1920,7 +1928,7 @@ class App(tk.Tk):
             _atomic_write(PHRASES_PATH, text)
             try: _atomic_write(PHRASES_PATH + ".bak", text)
             except Exception: pass
-        except Exception: pass
+        except Exception: _log_crash("save-phrases", *sys.exc_info())  # 同 save_config: 落盘失败要留痕, 不能静默
     def open_phrases(self):
         self._nav_show("phrases")
         self._texttrans_on_hide()
@@ -2322,28 +2330,31 @@ class App(tk.Tk):
     # 对这类目标改走逐字打字 (与强力粘贴同路, 不依赖剪贴板和粘贴命令, 单元格里打字即输入)
     _WPS_PROCS = ("et.exe", "wps.exe", "wpp.exe")
     def _paste_text(self, text, enter=False):
+        """把文本粘进当前前台窗口, 返回是否真的粘出去了: 前台是本软件自己的窗口 (压根没往外粘)
+        或注入失败都算没粘成 — F7 消费模式靠这个返回值决定删不删记录, 粘失败就删等于白丢一条。"""
         self.clip_set(text)
-        if not self._foreground_is_self():
-            time.sleep(0.03)
-            if self._foreground_process_name() in self._WPS_PROCS:
-                self._type_text(text)  # WPS: 逐字打进目标窗口
-            else:
-                self._send_combo(0x56)  # Ctrl+V: 真的粘进目标窗口, 不只是放剪贴板
-            if enter:  # 粘完稍等目标程序处理完再回车确认 (太快回车会赶在粘贴落地之前)
-                time.sleep(0.15); self._send_enter()
-        self.beep()
+        if self._foreground_is_self(): return False
+        time.sleep(0.03)
+        if self._foreground_process_name() in self._WPS_PROCS:
+            pasted = bool(self._type_text(text))  # WPS: 逐字打进目标窗口
+        else:
+            pasted = bool(self._send_combo(0x56))  # Ctrl+V: 真的粘进目标窗口, 不只是放剪贴板
+        if pasted and enter:  # 粘完稍等目标程序处理完再回车确认 (太快回车会赶在粘贴落地之前)
+            time.sleep(0.15); self._send_enter()
+        if pasted: self.beep()  # 提示音只在真粘成功时响 (定版: 粘贴成功时响一声)
+        return pasted
     def paste_next(self):
         if not self.records: return
         if self.paste_index >= len(self.records): self.paste_index = 0
         rec = self.records[self.paste_index]
-        self._paste_text(rec["text"], enter=self.paste_enter_var.get())
-        if self.paste_remove_var.get() and not rec["locked"]:
+        ok = self._paste_text(rec["text"], enter=self.paste_enter_var.get())
+        if ok and self.paste_remove_var.get() and not rec["locked"]:
             # 粘完即删 (消费模式): 删掉刚粘的这条, 下一条自动顶到当前位置, 序号不用前进
             del self.records[self.paste_index]
             if self.paste_index >= len(self.records): self.paste_index = 0
             self.save_records()
-        else:
-            self.paste_index += 1
+        elif ok:
+            self.paste_index += 1  # 没粘成 (前台是自己/注入失败): 不删也不前进, 下次 F7 还粘这条
         self.refresh_list(); self.show_mini()
     def paste_all(self):
         if not self.records: return
@@ -3930,7 +3941,7 @@ class App(tk.Tk):
     # ---------- OCR / 扫码 (v1.2, 可选引擎, 没装时优雅提示) ----------
     _ocr_engine = None  # RapidOCR 实例缓存: 旧版每次识别都重建引擎、重加载模型 (数秒), 只建一次
     _ocr_engine_broken = False  # RapidOCR 加载失败过就不再重试: 坏的安装每次重试都要白等几秒
-    _ocr_engine_lock = None  # 引擎懒加载锁 (首次识别时建, 防两个后台线程同时建引擎)
+    _ocr_engine_lock = threading.Lock()  # 引擎懒加载锁: 必须在类定义时就建好 — 锁本身若也懒创建, 两个线程能各建一把锁、各进临界区、各建一次引擎 (千问 2026-11-27 用指令级复现证实, 窗口极窄但真实)
     _rapid_fail_count = 0  # RapidOCR 运行期连续异常计数: 偶发一次不判死刑, 连续 3 次才停用引擎走兜底
     _RAPID_MIN_SCORE = 0.45  # RapidOCR 行置信度下限: 再低多半是把纹理/边框认成了字, 丢弃免得污染译文
     # Windows 内置 OCR 脚本 (与 Snipaste 同款引擎 Windows.Media.Ocr, 零依赖, EXE 里也能用)
@@ -4104,8 +4115,6 @@ try {
         没装/加载失败返回 None 并记住, 不再反复重试。"""
         if cls._ocr_engine is not None: return cls._ocr_engine
         if cls._ocr_engine_broken: return None
-        import threading
-        if cls._ocr_engine_lock is None: cls._ocr_engine_lock = threading.Lock()
         with cls._ocr_engine_lock:
             if cls._ocr_engine is not None: return cls._ocr_engine
             if cls._ocr_engine_broken: return None
@@ -4188,8 +4197,9 @@ try {
                 joiner = "" if (deduped or not a or not b or cjk(a[-1]) or cjk(b[0])) else " "
                 cur["t"] = a + joiner + b
                 cur["w"] = max(cur["x"] + cur["w"], nxt["x"] + nxt["w"]) - cur["x"]
-                cur["h"] = max(cur["y"] + cur["h"], nxt["y"] + nxt["h"]) - cur["y"]
+                _bottom = max(cur["y"] + cur["h"], nxt["y"] + nxt["h"])  # 并集底边要先算: 旧版先用旧 y 算 h 再挪 y, 后一碎片更高时框底会算短一截 (仓库安全测试抓到)
                 cur["y"] = min(cur["y"], nxt["y"])
+                cur["h"] = _bottom - cur["y"]
             out.append(cur)
         return out
     @classmethod
@@ -4423,6 +4433,17 @@ try {
                         "请先看懂对话内容、双方关系和语境, 然后站在【我】的角度, 针对对方最后的消息, "
                         "生成 3 条可以直接发送的回复候选, 风格依次为: 1) 自然口语 2) 礼貌稳妥 3) 简短干练。"
                         "每条一行, 以序号开头 (如 1. xxx), 只输出这 3 条回复, 不要解释, 不要输出多余的话。")
+    @staticmethod
+    def _http_base(u):
+        """AI 接口地址校验 + 规整: 只许 http/https 且必须有主机名, 去掉尾部斜杠;
+        file:// 这类怪地址直接报错, 别让 urllib 去试奇怪的协议。"""
+        from urllib.parse import urlparse
+        u = (u or "").strip()
+        p = urlparse(u)
+        if p.scheme not in ("http", "https") or not p.netloc or any(c in u for c in " \t\r\n"):
+            raise RuntimeError("AI 接口地址不对 (只支持 http/https 地址): " + (u[:60] or "(空)"))
+        return u.rstrip("/")
+
     def _ai_cfg(self, svc=None):
         """读某个 AI 服务的配置 (缺省读当前选中的服务): 每家服务有自己的一套 key/模型/地址
         (ZhipuKey/BailianKey... 分开存), 切换服务不会把别家的 key 冲掉; 通用的 ApiKey/Model/BaseUrl
@@ -4500,7 +4521,7 @@ try {
                 except Exception: think = False
             payload["chat_template_kwargs"] = {"enable_thinking": think}  # Dots 的深度思考默认开着, 必须显式传开关 (文档支持此参数)
         def _send(pl):
-            req = urllib.request.Request(cfg["base"].rstrip("/") + "/chat/completions",
+            req = urllib.request.Request(self._http_base(cfg["base"]) + "/chat/completions",
                                          data=_json.dumps(pl).encode("utf-8"), headers=headers)
             try:
                 with urllib.request.urlopen(req, timeout=timeout) as r:
@@ -6555,7 +6576,15 @@ try {
         """分享文案里混着说明文字时, 只把第一个 http(s) 链接抠出来 (小红书/抖音的系统分享都是这种格式)"""
         import re as _re
         m = _re.search(r"https?://[^\s，。；]+", text or "")
-        return m.group(0) if m else (text or "").strip()
+        if not m: return (text or "").strip()
+        u = m.group(0)
+        # 尾巴要修: 文案常把链接裹进括号/句号 ("(https://youtu.be/x)."), 尾上的 ). 不是链接的一部分, 不剥 yt-dlp 解析必失败;
+        # 但链接内部成对的括号 (如维基百科 Foo_(bar)) 不能误删 — 只剥句末标点和落单的多余右括号
+        while u:
+            if u[-1] in ".,;:!?": u = u[:-1]; continue
+            if u[-1] == ")" and u.count(")") > u.count("("): u = u[:-1]; continue
+            break
+        return u
 
     def _dl_dir(self):
         d = ""
