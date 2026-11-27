@@ -181,9 +181,7 @@ class SafetyRegressionTests(unittest.TestCase):
 
 
 # ---- 2026-11-27 全面审查整改的回归测试: 验签/版本/资产挑选/http 护栏/语言键集/备份护栏 ----
-import json
-import re
-import textwrap
+import textwrap  # json/re 文件头已导入, 这里不重复 (ruff F811); textwrap 只有本节用得到
 import zipfile
 
 _TEST_RSA_N = 162981085384131595251459525080711306882316967772221501910582934700591271823244892151988469393288635764485989919236918997176280652681293961377027012749006280567381591256609187477820361021049637466040029980904342415982933389712807348934301863364505154817915230267915888885833079353119423640699467412558054054879
@@ -1037,3 +1035,50 @@ class UiRedesignPhase15Tests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class UiPhase2Tests(unittest.TestCase):
+    """UI P2 (2026-11-28): toast/撤销、主窗口真圆角卡片、常用语与画廊空状态。
+    仍是源码级断言: 无 GUI 环境下要保证「只动外观, 不动功能」。"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.src = open(os.path.join(ROOT, "main.py"), encoding="utf-8").read()
+
+    def test_toast_overlay_exists_and_does_not_steal_focus(self):
+        self.assertIn("def toast(self, text, action=None, action_text=None, ms=2400):", self.src)
+        self.assertIn("def _hide_toast(self, seq=None):", self.src)
+        i = self.src.index("def toast(self, text, action=None")
+        body = self.src[i:i + 2200]
+        self.assertIn('place(relx=0.5, rely=1.0, anchor="s"', body)  # 叠在主窗口底部, 不新开窗口
+        self.assertNotIn("grab_set", body)  # 不抢焦点
+        self.assertNotIn("wait_window", body)  # 不阻塞主线程
+        self.assertIn("self._toast_seq", body)  # 序号防旧定时器关掉新提示
+
+    def test_delete_has_undo_and_restores_paste_index(self):
+        i = self.src.index("def delete_sel(self):")
+        body = self.src[i:i + 1200]
+        self.assertIn("rec = self.records.pop(i)", body)
+        self.assertIn("self.records.insert(pos, rec)", body)
+        self.assertIn("self.paste_index = max(0, min(old_pi, len(self.records)))", body)
+        self.assertIn("action=_undo", body)
+        self.assertIn("save_records(); self.refresh_list()", body)
+        # 锁定记录仍然不许删
+        self.assertIn("msg_locked", body)
+
+    def test_main_cards_use_rounded_backing(self):
+        self.assertIn("card = tk.Frame(body, background=self.UI_BG)\n        self._rounded_backing(card, radius=self.R_CARD)", self.src)
+        self.assertIn("outer = tk.Frame(body, background=self.UI_BG)\n            self._rounded_backing(outer, radius=self.R_CARD)", self.src)
+        # 旧的方角描边卡片不能残留
+        self.assertNotIn('highlightbackground=self.UI_BORDER, highlightcolor=self.UI_BORDER)\n        card.pack', self.src)
+
+    def test_empty_states_present(self):
+        self.assertIn("gal_empty_title", self.src)
+        self.assertIn("self.t(\"empty_rec_btn\"", self.src)  # 画廊空态直接给「截一张图」入口
+        self.assertIn("phr_empty_title", self.src)
+        self.assertIn("_phr_empty.place_forget()", self.src)
+        self.assertIn("else: _phr_empty.place(relx=0.5, rely=0.34, anchor=\"center\")", self.src)
+
+    def test_ui_tokens_for_p2(self):
+        self.assertIn('UI_ACCENT_LINE = "#BFDBFE"', self.src)
+        self.assertIn("R_CARD", self.src)

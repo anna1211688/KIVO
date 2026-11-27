@@ -1394,7 +1394,10 @@ class App(tk.Tk):
         body = tk.Frame(self._content, background=self.UI_BG); body.pack(fill="both", expand=True)
         self._body = body
         # ---------- 记录卡片: 标题行内嵌操作按钮, 列表占满整卡 ----------
-        card = tk.Frame(body, background=W, highlightthickness=1, highlightbackground=self.UI_BORDER, highlightcolor=self.UI_BORDER)
+        # 圆角卡片 (2026-11-28 UI P2): 复用已有 _rounded_backing 垫圆角底, 外层背景与页面底一致, 四角才透出背景;
+        # 只换容器外观, 里面的控件层级/命令/绑定一律不动
+        card = tk.Frame(body, background=self.UI_BG)
+        self._rounded_backing(card, radius=self.R_CARD)
         card.pack(fill="both", expand=True, padx=12, pady=(10, 2))
         chead = tk.Frame(card, background=W); chead.pack(fill="x", padx=12, pady=(9, 2))
         tk.Label(chead, text=self.t("records_title", "复制记录"), font=self._ui_font(10, True), background=W, foreground=self.UI_TEXT).pack(side="left")
@@ -1457,7 +1460,8 @@ class App(tk.Tk):
         _ops_more_btn.pack(side="left", padx=3)
         # ---------- 白色卡片分区 (代替旧 LabelFrame) ----------
         def card_section(title):
-            outer = tk.Frame(body, background=W, highlightthickness=1, highlightbackground=self.UI_BORDER, highlightcolor=self.UI_BORDER)
+            outer = tk.Frame(body, background=self.UI_BG)
+            self._rounded_backing(outer, radius=self.R_CARD)
             outer.pack(fill="x", padx=12, pady=(10, 0))
             tk.Label(outer, text=title, font=self._ui_font(10, True), background=W, foreground=self.UI_TEXT).pack(anchor="w", padx=12, pady=(9, 0))
             inner = tk.Frame(outer, background=W); inner.pack(fill="x", padx=12, pady=(3, 10))
@@ -2360,6 +2364,14 @@ class App(tk.Tk):
         lst.heading("text", text=self.t("phr_content_col", "内容 (双击 = 直接粘贴到刚才的软件)")); lst.column("text", anchor="w")
         lst.tag_configure("odd", background=self.UI_STRIPE)
         lst.pack(fill="both", expand=True, padx=10, pady=(10, 2))
+        # 常用语空状态 (2026-11-28 UI P2): 一条都没有时给出「怎么开始」, 而不是一片空白表格
+        _zh = self.lang != "English"
+        _phr_empty = tk.Frame(card, background=W)
+        tk.Label(_phr_empty, text="💬", font=self._ui_font(20), background=W, foreground=self.UI_ACCENT_LINE).pack()
+        tk.Label(_phr_empty, text=self.t("phr_empty_title", "还没有常用语" if _zh else "No snippets yet"),
+                 font=self._ui_font(11, True), background=W, foreground=self.UI_TEXT).pack(pady=(4, 2))
+        tk.Label(_phr_empty, text=self.t("phr_empty_sub", "把常回的话存成一条，之后双击就能直接粘贴" if _zh else "Save a line you type often, then double-click to paste it"),
+                 font=self._ui_font(9), background=W, foreground=self.UI_MUTED).pack()
         tk.Label(card, text=self.t("phr_hint", "选中一条, 内容会填进下面的编辑区; 改完点「保存修改」。"), font=self._ui_font(9), background=W, foreground=self.UI_MUTED).pack(anchor="w", padx=10)
         ewrap = tk.Frame(card, background=W); ewrap.pack(fill="x", padx=10, pady=(4, 6))
         self._rounded_backing(ewrap, radius=8, fill=self.UI_SURFACE, bg=W)
@@ -2378,6 +2390,10 @@ class App(tk.Tk):
                 lst.insert("", "end", iid=str(i), values=(f"{i + 1}. {first[:58]}{suffix}",), tags=("odd",) if i % 2 else ())  # 显示带序号 (用户要求, 与 AI 回复候选一致); 序号只是显示, 数据和双击粘贴不受影响
             if keep is not None and 0 <= keep < len(self.phrases):
                 lst.selection_set(str(keep)); lst.see(str(keep))
+            try:  # 空态只在真的没有条目时压上去, 有条目时立刻撤掉
+                if self.phrases: _phr_empty.place_forget()
+                else: _phr_empty.place(relx=0.5, rely=0.34, anchor="center")
+            except Exception: pass
         self._phrases_refresh = rows_refresh
         def on_select(_e=None):
             i = sel_idx()
@@ -2594,10 +2610,52 @@ class App(tk.Tk):
     def delete_sel(self):
         i = self.selected_idx()
         if i >= 0 and not self.records[i]["locked"]:
-            del self.records[i]
+            rec = self.records.pop(i)  # 保留一份快照, toast 里的「撤销」把原位置和粘贴进度一起还原
+            old_pi = self.paste_index
             if i < self.paste_index: self.paste_index -= 1  # 删了已粘过的, 进度跟着退一格, 不跳条
             self.save_records(); self.refresh_list()
+            def _undo():
+                pos = max(0, min(i, len(self.records)))
+                self.records.insert(pos, rec)
+                self.paste_index = max(0, min(old_pi, len(self.records)))
+                self.save_records(); self.refresh_list()
+                self.toast(self.t("undo_done", "已恢复刚才删除的记录"), ms=1600)
+            self.toast(self.t("deleted_one", "已删除 1 条记录"), action=_undo,
+                       action_text=self.t("undo", "撤销"), ms=3200)
         elif i >= 0: messagebox.showinfo(self.t("msg_tip", "提示"), self.t("msg_locked", "该记录已锁定, 先解锁再删除"))
+    def toast(self, text, action=None, action_text=None, ms=2400):
+        """轻量提示条 (2026-11-28 UI P2): 深色圆角条叠在主窗口底部, 可带一个动作(如「撤销」)。
+        只 place 不抢焦点、不阻塞; 用序号防止旧定时器把新提示提前关掉。"""
+        try:
+            self._hide_toast()  # 同一时刻只留一条
+            self._toast_seq = getattr(self, "_toast_seq", 0) + 1
+            seq = self._toast_seq
+            bg = "#0F172A"
+            box = tk.Frame(self, background=bg, highlightthickness=0)
+            tk.Label(box, text=text, font=self._ui_font(10), background=bg, foreground="#FFFFFF").pack(
+                side="left", padx=(14, 6), pady=8)
+            if action is not None:
+                act = tk.Label(box, text=action_text or self.t("undo", "撤销"), font=self._ui_font(10, True),
+                               background=bg, foreground=self.UI_ACCENT_HOVER, cursor="hand2")
+                act.pack(side="left", padx=(4, 14))
+                def _run(_e=None):
+                    self._hide_toast(seq)
+                    try: action()
+                    except Exception: pass
+                act.bind("<Button-1>", _run)
+            box.place(relx=0.5, rely=1.0, anchor="s", y=-40)
+            try: box.lift()
+            except Exception: pass
+            self._toast_win = box
+            self.after(ms, lambda: self._hide_toast(seq))
+        except Exception: pass
+    def _hide_toast(self, seq=None):
+        if seq is not None and seq != getattr(self, "_toast_seq", 0): return
+        box = getattr(self, "_toast_win", None)
+        self._toast_win = None
+        if box is not None:
+            try: box.destroy()
+            except Exception: pass
     def delete_all(self):
         removable = [r for r in self.records if not r["locked"]]
         if removable and not messagebox.askyesno(self.t("gal_delall", "删除全部"), f"{self.t('msg_delall_pre', '确定删除全部')} {len(removable)} {self.t('msg_delall_suf', '条未锁定记录？锁定的会保留。')}"):
@@ -9550,7 +9608,18 @@ try {
         files = all_files[:60]  # 只展示最近 60 个, 防几百个时全量解码卡顿
         self._gallery_count_var.set(f"{self.t('gal_total_pre', '共')} {len(all_files)} {self.t('gal_total_suf', '个')}" + (self.t("gal_recent60", " (只显示最近 60 个)") if len(all_files) > 60 else ""))
         if not files:
-            ttk.Label(grid, text=self.t("gal_empty", "还没有截图, 先按 F1 截一张")).pack(padx=20, pady=20); return
+            # 空状态 (2026-11-28 UI P2): 图标 + 一句引导 + 直接截图的入口, 比一行灰字更像"有设计"的界面
+            _zh = self.lang != "English"
+            _box = tk.Frame(grid, background=self.UI_BG); _box.pack(padx=24, pady=32)
+            tk.Label(_box, text="🖼", font=self._ui_font(22), background=self.UI_BG,
+                     foreground=self.UI_ACCENT_LINE).pack()
+            tk.Label(_box, text=self.t("gal_empty_title", "还没有截图" if _zh else "No screenshots yet"),
+                     font=self._ui_font(11, True), background=self.UI_BG, foreground=self.UI_TEXT).pack(pady=(6, 2))
+            tk.Label(_box, text=self.t("gal_empty", "按 F1 截一张，截完会自动存在这里" if _zh else "Press F1 to capture — shots are saved here automatically"),
+                     font=self._ui_font(9), background=self.UI_BG, foreground=self.UI_MUTED).pack()
+            ttk.Button(_box, text=self.t("empty_rec_btn", "截一张图" if _zh else "Take a screenshot"),
+                       command=self.snip_region, style="Accent.TButton").pack(pady=(12, 0))
+            return
         cells = []
         for i, name in enumerate(files):
             cell = ttk.Frame(grid); cell.grid(row=i // 4, column=i % 4, padx=8, pady=8)
