@@ -14,7 +14,13 @@ v1.3 二次审查修复 (详见 docs/二次审查报告.md):
 依赖: Pillow (截图必需); keyboard (全局热键, 可选); 其余见 requirements.txt
 运行: python main.py    打包: build_windows.bat (PyInstaller, 无加壳, 无联网)
 """
-import base64, configparser, ctypes, datetime, json, os, queue, re, sys, threading, time
+import base64, collections, configparser, ctypes, datetime, json, os, queue, re, sys, threading, time
+
+# 翻译结果缓存 (v1.5.1 性能: 同一段文字重复翻译直接命中, 切语言再切回来/同一张图重译不再打网络)
+# 键 = (原文, 目标语言, 源语言); 值 = 译文。LRU 上限 256 条, 纯内存, 不落盘 (含用户截图文字, 不写文件)。
+_TRANS_CACHE = collections.OrderedDict()
+_TRANS_CACHE_LOCK = threading.Lock()
+_TRANS_CACHE_MAX = 256
 try:
     from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageGrab, ImageTk
     HAS_PIL = True
@@ -558,15 +564,58 @@ def _pdf_decode_text(b):
     try: return b.decode("utf-8")
     except Exception: return b.decode("latin-1", "ignore")
 
+# ---------- 附件解析安全上限 (v1.5.1): 12MB 的 docx/xlsx/pdf 解压后可以到几 GB ----------
+# 原始文件大小在 _read_attach_text 里已限 12MB, 但压缩包是"炸弹"的温床: 0.5MB 的 docx 实测能解出 267MB,
+# 12MB 上限放缩就是数 GB, 直接在解析线程里 OOM/卡死。这里对"解压后"和"提取出的文字"再各设一道闸。
+_ATTACH_INFLATE_LIMIT = 20 * 1024 * 1024   # 一次解析允许的解压总量
+_ATTACH_TEXT_LIMIT = 4 * 1024 * 1024       # 提取出的文字总量
+_ATTACH_ENTRY_LIMIT = 2000                 # 压缩包内条目数
+
+_SAFE_OPENER = None
+def _open_url(req, timeout=None):
+    """带重定向防护的 urlopen (v1.5.1): urllib 默认会把 Authorization/api-key 等请求头原样复制到 302 后的
+    新地址, 也不拦 https->http 降级。第三方中转/被接管的接口只要回一个跳转, API Key 就送到别人机器上了
+    (本次审计已用本地双端口实测复现)。这里只放行"同协议同主机"的跳转, 其余直接报错终止。"""
+    global _SAFE_OPENER
+    import urllib.request as _ur, urllib.error as _ue, urllib.parse as _up
+    if _SAFE_OPENER is None:
+        class _SameHostRedirect(_ur.HTTPRedirectHandler):
+            def redirect_request(self, rq, fp, code, msg, headers, newurl):
+                old, new = _up.urlsplit(rq.full_url), _up.urlsplit(newurl)
+                # 只比"协议+主机+端口"三元组 (端口也要比: 同主机的另一个端口可能就是别人起的代理)
+                _dflt = {"http": 80, "https": 443}
+                _o = (old.scheme, (old.hostname or "").lower(), old.port or _dflt.get(old.scheme))
+                _n = (new.scheme, (new.hostname or "").lower(), new.port or _dflt.get(new.scheme))
+                if _o != _n:
+                    raise _ue.HTTPError(newurl, code, "接口要求跳转到其他地址, 为保护密钥已中止", headers, fp)
+                return super().redirect_request(rq, fp, code, msg, headers, newurl)
+        _SAFE_OPENER = _ur.build_opener(_SameHostRedirect)
+    return _SAFE_OPENER.open(req, timeout=timeout)
+
+class _AttachLimit(Exception):
+    """附件解压/提取超过安全上限 (解压炸弹防护)"""
+
+def _zip_read_bytes(z, name, budget):
+    """读 zip 内单个条目, 先看元数据再流式读: 超预算抛 _AttachLimit, 不把整条解压进内存。"""
+    try: info = z.getinfo(name)
+    except KeyError: return None
+    if info.file_size > budget: raise _AttachLimit(name)
+    with z.open(name) as fp:
+        data = fp.read(budget + 1)
+    if len(data) > budget: raise _AttachLimit(name)
+    return data
+
 def _extract_pdf_text(data):
     """纯标准库提取 PDF 文字层 (不引第三方库): 解开 FlateDecode 内容流, 抓 Tj/TJ 算子里的字面/十六进制字符串。
     只对带文字层的 PDF 有效; 扫描版返回空串 (调用方提示改走图片提问)。"""
     import re as _re, zlib as _zlib
-    chunks = []
+    chunks, total = [], 0
     for m in _re.finditer(rb"stream\r?\n(.*?)endstream", data, _re.S):
         raw = m.group(1)
-        try: raw = _zlib.decompress(raw)
+        try: raw = _zlib.decompressobj().decompress(raw, 8 * 1024 * 1024)  # 单个流最多解 8MB, 防 zlib 炸弹
         except Exception: pass
+        total += len(raw)
+        if total > _ATTACH_INFLATE_LIMIT: raise _AttachLimit("pdf")
         if b"Tj" not in raw and b"TJ" not in raw: continue
         for tm in _re.finditer(rb"\((?:\\.|[^\\()])*\)\s*Tj|\[(?:\\.|[^\[\]])*\]\s*TJ|<([0-9A-Fa-f\s]+)>\s*Tj", raw):
             seg = tm.group(0)
@@ -581,13 +630,17 @@ def _extract_pdf_text(data):
                 else:
                     chunks.append(_pdf_decode_text(_pdf_unescape_literal(pm.group(0)[1:-1])))
             chunks.append("\n")
+        if sum(len(c) for c in chunks) > _ATTACH_TEXT_LIMIT: break
     return "".join(chunks).strip()
 
 def _extract_docx_text(data):
     """纯标准库提取 .docx 正文: 解包 word/document.xml, 段落变行、标签剥掉。"""
     import html as _html, io as _io, re as _re, zipfile as _zf
     with _zf.ZipFile(_io.BytesIO(data)) as z:
-        xml = z.read("word/document.xml").decode("utf-8", "ignore")
+        if len(z.namelist()) > _ATTACH_ENTRY_LIMIT: raise _AttachLimit("docx")
+        raw = _zip_read_bytes(z, "word/document.xml", 8 * 1024 * 1024)
+        if raw is None: return ""
+        xml = raw.decode("utf-8", "ignore")
     xml = _re.sub(r"<w:tab[^>]*/>", "\t", xml)
     xml = _re.sub(r"</w:p>", "\n", xml)
     xml = _re.sub(r"<[^>]+>", "", xml)
@@ -599,14 +652,18 @@ def _extract_xlsx_text(data):
     def _clean(s): return _html.unescape(_re.sub(r"<[^>]+>", "", s)).strip()
     with _zf.ZipFile(_io.BytesIO(data)) as z:
         names = set(z.namelist())
+        if len(names) > _ATTACH_ENTRY_LIMIT: raise _AttachLimit("xlsx")
         shared = []
         if "xl/sharedStrings.xml" in names:
-            sx = z.read("xl/sharedStrings.xml").decode("utf-8", "ignore")
+            _sraw = _zip_read_bytes(z, "xl/sharedStrings.xml", 8 * 1024 * 1024)
+            sx = (_sraw or b"").decode("utf-8", "ignore")
             shared = [_clean(si) for si in _re.findall(r"<si>(.*?)</si>", sx, _re.S)]
         out = []
         sheets = sorted(n for n in names if n.startswith("xl/worksheets/sheet") and n.endswith(".xml"))[:8]
         for sn in sheets:
-            sx = z.read(sn).decode("utf-8", "ignore")
+            _raw = _zip_read_bytes(z, sn, 6 * 1024 * 1024)
+            if _raw is None: continue
+            sx = _raw.decode("utf-8", "ignore")
             for row in _re.findall(r"<row[^>]*>(.*?)</row>", sx, _re.S):
                 cells = []
                 for cm in _re.finditer(r"<c[^>]*?(?:\st=\"(\w+)\")?[^>]*>(.*?)</c>", row, _re.S):
@@ -2912,14 +2969,28 @@ class App(tk.Tk):
                 except OSError: pass
         except Exception: pass
 
-    def save_shot(self, img):
+    def save_shot(self, img, background=False):
         if self.cfg.get("Snip", "HistorySave", fallback="1").strip() == "0":
             return None  # 系统设置里选了不保存历史截图: 截图照常用 (复制/贴图/翻译都不受影响), 只是不落盘进历史
         now = datetime.datetime.now()  # 带毫秒: 旧版只到秒, 1 秒内连截两张会同名互相覆盖
         name = now.strftime("shot_%Y%m%d_%H%M%S_") + f"{now.microsecond // 1000:03d}.png"
-        path = os.path.join(self.shots_dir, name); img.save(path)
-        self._prune_shots()
-        self.refresh_shots(); return path
+        path = os.path.join(self.shots_dir, name)
+        if background:
+            # 后台存: PNG 编码 + 写盘 + 列目录刷新历史在主线程要 0.2–0.5s (4K 选区更久),
+            # F4 框选完手一松会明显顿一下, 所以截图翻译/复制这类"紧接着就要出结果"的路径一律异步落盘
+            def work():
+                try: img.save(path)
+                except Exception: return
+                self._ui_queue.put(self._after_shot_saved)
+            threading.Thread(target=work, daemon=True).start()
+            return path
+        img.save(path)
+        self._after_shot_saved(); return path
+    def _after_shot_saved(self):
+        try: self._prune_shots()
+        except Exception: pass
+        try: self.refresh_shots()
+        except Exception: pass
     def open_shots_dir(self):
         if sys.platform == "win32": os.startfile(self.shots_dir)  # noqa: S606
         else: messagebox.showinfo(self.t("shots_folder", "截图文件夹"), self.shots_dir)
@@ -3224,7 +3295,15 @@ class App(tk.Tk):
                 zd.line([ccx + Z // 2, 0, ccx + Z // 2, zoom.height], fill=(30, 144, 255), width=2)
                 zd.line([0, ccy + Z // 2, zoom.width, ccy + Z // 2], fill=(30, 144, 255), width=2)
                 zd.rectangle([ccx, ccy, ccx + Z - 1, ccy + Z - 1], outline=(30, 144, 255), width=2)
-                state["loupe"] = ImageTk.PhotoImage(zoom)
+                # v1.5.1 性能: 复用同一个 Tk 图 (paste 就地更新)。旧版每帧 new 一个 PhotoImage,
+                # 30 帧/秒 × 每个约 90KB, 低配机上光图像对象回收就够抖的; 尺寸变了才重建。
+                _ph = state.get("loupe_ph")
+                if _ph is not None and (_ph.width(), _ph.height()) == zoom.size:
+                    try: _ph.paste(zoom)
+                    except Exception: _ph = None
+                if _ph is None or (_ph.width(), _ph.height()) != zoom.size:
+                    _ph = ImageTk.PhotoImage(zoom); state["loupe_ph"] = _ph
+                state["loupe"] = _ph
                 PH = 58  # 信息卡高度
                 pw = max(zoom.width, 216)  # 信息卡宽度: 要放得下拖动时的「选区 WxH」
                 total_h = zoom.height + PH
@@ -3293,7 +3372,7 @@ class App(tk.Tk):
                 if finish_mode == "copy":  # 截图并复制: 框选完直接出图进剪贴板, 不停留标注
                     final = full.crop(box); self.save_shot(final); close_overlay(); self._copy_image_to_clipboard(final)
                 elif finish_mode == "translate":  # 截图翻译: 框选完直接 OCR 并翻译到目标语言, 不停留标注
-                    final = full.crop(box); self.save_shot(final); close_overlay(); self.translate_image_inplace(final, self.trans_target(), anchor=box)
+                    final = full.crop(box); self.save_shot(final, background=True); close_overlay(); self.translate_image_inplace(final, self.trans_target(), anchor=box)  # 历史图后台落盘: 旧版同步存 PNG (4K 要 0.3–0.5s) 挡在「翻译中…」提示之前, 手一松会顿
                 elif finish_mode == "reply":  # 智能回复: 框选完直接让 AI 读对话给候选 (聊天截图不存历史, 免得堆一堆隐私图)
                     final = full.crop(box); close_overlay(); self.ai_smart_reply(final)
                 elif finish_mode == "ai":  # 看图翻译 (截图工具栏/贴图菜单入口): 框选完直接让 AI 读图翻译 (不存历史)
@@ -4558,6 +4637,7 @@ try {
                 "youdao_id": g("YoudaoAppId"), "youdao_secret": g("YoudaoSecret"),
                 "google_key": g("GoogleKey")}
     def _baidu_translate(self, q, target, appid, key, source=None):
+        _open = globals().get("_open_url") or urllib.request.urlopen
         """百度翻译开放平台: sign = md5(appid+q+salt+密钥), 成功返回译文, 出错抛异常 (带错误码)。"""
         import urllib.request, urllib.parse, json as _json, hashlib, random
         salt = str(random.randint(10000, 99999))
@@ -4566,11 +4646,12 @@ try {
             {"q": q, "from": ({"zh-CN": "zh", "zh-TW": "cht", "ja": "jp", "ko": "kor", "fr": "fra", "es": "spa", "vi": "vie"}.get(source, source) if source else "auto"), "to": {"zh-CN": "zh", "zh-TW": "cht", "ja": "jp", "ko": "kor", "fr": "fra", "es": "spa", "vi": "vie"}.get(target, target),
              "appid": appid, "salt": salt, "sign": sign})
         req = urllib.request.Request(url, headers={"User-Agent": "KIVO"})
-        with urllib.request.urlopen(req, timeout=12) as r:
+        with _open(req, timeout=12) as r:
             d = _json.loads(r.read().decode("utf-8"))
         if d.get("error_code"): raise RuntimeError(f"{self.t('tr_err_baidu', '百度翻译错误')} {d.get('error_code')}: {d.get('error_msg', '')}")
         return "\n".join(seg.get("dst", "") for seg in d.get("trans_result") or [])
     def _youdao_translate(self, q, target, appkey, secret, source=None):
+        _open = globals().get("_open_url") or urllib.request.urlopen
         """有道翻译 (网易智云) v3 签名: sha256(appKey+input+salt+curtime+密钥), 成功返回译文, 出错抛异常。"""
         import urllib.request, urllib.parse, json as _json, hashlib, time as _time, uuid
         salt = str(uuid.uuid4()); curtime = str(int(_time.time()))
@@ -4581,11 +4662,12 @@ try {
                                        "signType": "v3", "curtime": curtime}).encode("utf-8")
         req = urllib.request.Request("https://openapi.youdao.com/api", data=data,
                                      headers={"Content-Type": "application/x-www-form-urlencoded", "User-Agent": "KIVO"})
-        with urllib.request.urlopen(req, timeout=12) as r:
+        with _open(req, timeout=12) as r:
             d = _json.loads(r.read().decode("utf-8"))
         if str(d.get("errorCode", "0")) != "0": raise RuntimeError(f"{self.t('tr_err_youdao', '有道翻译错误码')} {d.get('errorCode')}")
         return "\n".join(d.get("translation") or [])
     def _google_translate(self, q, target, apikey, source=None):
+        _open = globals().get("_open_url") or urllib.request.urlopen
         """谷歌云翻译 API v2 (只需 API 密钥): 成功返回译文 (HTML 实体已还原), 出错抛异常。"""
         import urllib.request, urllib.parse, json as _json, html as _html
         url = "https://translation.googleapis.com/language/translate/v2?key=" + urllib.parse.quote(apikey)
@@ -4595,7 +4677,7 @@ try {
         req = urllib.request.Request(url, data=data,
                                      headers={"Content-Type": "application/x-www-form-urlencoded", "User-Agent": "KIVO"})
         try:
-            with urllib.request.urlopen(req, timeout=12) as r:
+            with _open(req, timeout=12) as r:
                 d = _json.loads(r.read().decode("utf-8"))
         except Exception as e:  # 异常文本里带着含 key 的 URL, 脱敏后再往上抛 (2026-11-27 GPT 审计 P1-06)
             raise RuntimeError(_redact_secrets(str(e))) from None
@@ -4733,12 +4815,13 @@ try {
         """从 OpenAI 兼容接口读取模型目录；不支持 /models 的服务可继续手动填写模型名。"""
         import urllib.request, urllib.error, json as _json
         base = self._http_base(cfg.get("base", ""))
+        _open = globals().get("_open_url") or urllib.request.urlopen  # 模块级重定向防护; 单测只 exec 本函数时退回原生
         if not base:
             raise RuntimeError(self.t("ai_mc_fetch_need_base", "请先填写接口地址"))
         headers = {"Authorization": "Bearer " + (cfg.get("key") or ""), "User-Agent": "KIVO"}
         req = urllib.request.Request(base + "/models", headers=headers, method="GET")
         try:
-            with urllib.request.urlopen(req, timeout=max(3, min(int(timeout), 30))) as resp:
+            with _open(req, timeout=max(3, min(int(timeout), 30))) as resp:
                 raw = resp.read(2 * 1024 * 1024 + 1)
             if len(raw) > 2 * 1024 * 1024:
                 raise RuntimeError(self.t("ai_mc_fetch_too_big", "模型列表响应过大"))
@@ -4880,6 +4963,7 @@ try {
         """把一组 OpenAI 格式消息发给当前 AI 服务, 返回回复纯文本 (看图/纯文本会话共用); 配置缺失/出错抛 RuntimeError。
         只用标准库 urllib; 调用方必须在后台线程里调。cfg 显式传入时用传入值 (设置窗测试用), 不碰 self.cfg。"""
         import urllib.request, urllib.error, json as _json
+        _open = globals().get("_open_url") or urllib.request.urlopen  # 模块级重定向防护: 302 到别的域名时带 Authorization 也算泄露
         cfg = cfg or (self._ai_cfg_for(route) if route else self._ai_cfg())
         if not cfg["key"]: raise RuntimeError("还没填 AI 接口的 API Key: 「系统设置」窗口的「AI 设置」区里选服务、填 key 即可 (智谱 GLM-4V-Flash 免费)。")
         if not cfg["base"] or not cfg["model"]: raise RuntimeError("AI 设置里的接口地址/模型名没填完整, 先到「系统设置」里的「AI 设置」区补上。")
@@ -4902,7 +4986,7 @@ try {
                                          data=_json.dumps(req_payload).encode("utf-8"), headers=headers)
             try:
                 open_timeout = min(timeout, 45) if stream_callback is not None else timeout
-                with urllib.request.urlopen(req, timeout=open_timeout) as r:
+                with _open(req, timeout=open_timeout) as r:
                     if stream_callback is None:
                         return _json.loads(r.read().decode("utf-8"))
                     chunks = []
@@ -5634,6 +5718,7 @@ try {
                     try: text = data.decode(enc); break
                     except Exception: text = None
                 if text is None: return "", fail
+        except _AttachLimit: return "", self.t("ai_file_inflate_big", "文件解压后体积远超正常范围 (疑似异常文件), 已中止解析")
         except Exception: return "", fail
         text = (text or "").strip()
         if not text: return "", self.t("ai_file_no_text", "没能从文件里提取到文字 (扫描版 PDF 请截图后用图片提问)")
@@ -8333,33 +8418,66 @@ try {
         """截图翻译的目标语言: [Snip] TransTarget (代码表见 _TRANS_TARGETS, 默认 zh-CN), 主窗口可改"""
         v = (self.cfg.get("Snip", "TransTarget", fallback="zh-CN") or "zh-CN").strip()
         return v if v in {c for _, c in self._TRANS_TARGETS} else "zh-CN"
-    def translate_text_to(self, text, target, source=None):
+    # 单段翻译的总预算 (秒): 通道并行竞速时最多等这么久, 到点有结果就用, 没结果算这段失败
+    _TRANS_BUDGET = 7.0
+    _TRANS_GROUP_CHARS = 450  # 单段字数上限 (免费接口的 q 长度限制决定)
+    @staticmethod
+    def _trans_cache_get(key):
+        with _TRANS_CACHE_LOCK:
+            if key in _TRANS_CACHE:
+                _TRANS_CACHE.move_to_end(key); return _TRANS_CACHE[key]
+        return None
+    @staticmethod
+    def _trans_cache_put(key, val):
+        with _TRANS_CACHE_LOCK:
+            _TRANS_CACHE[key] = val; _TRANS_CACHE.move_to_end(key)
+            while len(_TRANS_CACHE) > _TRANS_CACHE_MAX: _TRANS_CACHE.popitem(last=False)
+    def _trans_alive(self, name):
+        """通道熔断状态: 连续失败 3 次的通道 60s 内不参与竞速 (国内 Google 常年不通, 不熔断的话每次翻译都要陪它等到超时)"""
+        until, _ = (self.__dict__.get("_trans_dead") or {}).get(name, (0, 0))
+        return until < time.time()
+    def _trans_mark(self, name, ok, hard=False):
+        """hard=True: 超时/连接被拒这类硬失败, 直接熔断 8s (再陪它等只会让每次截图都慢一拍);
+        hard=False: 接口通了但没给译文, 连续 3 次才熔断 60s。"""
+        d = self.__dict__.get("_trans_dead")
+        if d is None: d = self._trans_dead = {}
+        if ok: d[name] = (0, 0); return
+        if hard: d[name] = (time.time() + 8, 0); return
+        until, cnt = d.get(name, (0, 0)); cnt += 1
+        d[name] = (time.time() + 60, 0) if cnt >= 3 else (0, cnt)
+    def translate_text_to(self, text, target, source=None, budget=None):
         """把文字翻译到指定目标语言, 源语言自动检测 (一键截图翻译 F4 用)。
-        设置了百度/有道接口时优先用它, 失败自动回退免费接口 (Google 主, MyMemory 备);
+        v1.5.1 提速: ① 结果进 LRU 缓存 (同图重译/切回原语言 0 延迟) ② 多段并行 (不再逐段串行)
+        ③ 各通道并行竞速, 谁先成功用谁 (旧版是串行 fallback: 国内 Google 不可达时每段都要先等
+        8s 连接超时再等 MyMemory 10s, 20 行截图实测 50s 且最终失败)。
         原文已是中文且目标也是中文时原样返回; 全部失败返回 None。"""
+        _budget = budget or self._TRANS_BUDGET
         import urllib.request, urllib.parse, json as _json
         text = (text or "").strip()
         if not text: return ""
         cjk = sum(1 for ch in text if "\u4e00" <= ch <= "\u9fff")
         if target == "zh-CN" and source in (None, "zh-CN") and cjk >= 3 and cjk * 2 >= len(text.replace(" ", "")): return text  # 基本已是中文且源语言没被指定成别的, 不必译
+        cache_key = (text, target, source)
+        hit = self._trans_cache_get(cache_key)
+        if hit is not None: return hit
         has_cjk = cjk > 0
         groups, cur = [], ""
         for line in text.splitlines():
-            if cur and len(cur) + len(line) + 1 > 450: groups.append(cur); cur = line
+            if cur and len(cur) + len(line) + 1 > self._TRANS_GROUP_CHARS: groups.append(cur); cur = line
             else: cur = (cur + "\n" + line) if cur else line
         if cur: groups.append(cur)
         def via_google(q):
             url = "https://translate.googleapis.com/translate_a/single?" + urllib.parse.urlencode(
                 {"client": "gtx", "sl": source or "auto", "tl": target, "dt": "t", "q": q})
             req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-            with urllib.request.urlopen(req, timeout=8) as r:
+            with urllib.request.urlopen(req, timeout=5) as r:  # 5s: 国内这条基本不通, 别让 8s 超时拖着整批
                 d = _json.loads(r.read().decode("utf-8"))
             return "".join(seg[0] for seg in (d[0] or []) if seg and seg[0])
         def via_mymemory(q):
             src = source or ("zh-CN" if has_cjk else "en")
             url = "https://api.mymemory.translated.net/get?" + urllib.parse.urlencode({"q": q, "langpair": f"{src}|{target}"})
             req = urllib.request.Request(url, headers={"User-Agent": "KIVO"})
-            with urllib.request.urlopen(req, timeout=10) as r:
+            with urllib.request.urlopen(req, timeout=6) as r:
                 d = _json.loads(r.read().decode("utf-8"))
             return (d.get("responseData") or {}).get("translatedText") or ""
         def via_api(q):
@@ -8371,22 +8489,46 @@ try {
             if tc["service"] == "google" and tc["google_key"]:
                 return self._google_translate(q, target, tc["google_key"], source)
             return ""
-        chans = [("api", via_api), ("google", via_google), ("mymemory", via_mymemory)]
-        sticky = getattr(self, "_trans_sticky", None)
-        if sticky and time.time() - sticky[1] < 120 and sticky[0] in ("google", "mymemory"):
-            chans.sort(key=lambda c: 0 if c[0] == sticky[0] else 1)  # 上次哪条免费通道通了优先走它: Google 通道在某些网络下连不上/极慢, 不黏住的话每次翻译都要先等它超时才落备用通道 (Jane 真机 F4 等约 10 秒的主因)
-        out = []
-        for g in groups:
-            t = ""
-            for name, fn in chans:
-                try: t = fn(g)
-                except Exception: t = ""
-                if t:
-                    self._trans_sticky = (name, time.time())
-                    break
-            if not t: return None
-            out.append(t)
-        return "\n".join(out)
+        try: _tc = self._trans_cfg()
+        except Exception: _tc = {}
+        _api_on = ((_tc.get("service") == "baidu" and _tc.get("baidu_id") and _tc.get("baidu_key"))
+                   or (_tc.get("service") == "youdao" and _tc.get("youdao_id") and _tc.get("youdao_secret"))
+                   or (_tc.get("service") == "google" and _tc.get("google_key")))
+        chans = [("google", via_google), ("mymemory", via_mymemory)] + ([("api", via_api)] if _api_on else [])  # 没配接口就根本不发这一路, 免得空结果把熔断计数堆满
+        def one_group(g):
+            """单段: 三条通道同时发, 第一个成功的直接采用 (省掉串行 fallback 的超时叠加)"""
+            from concurrent.futures import ThreadPoolExecutor, as_completed
+            use = [(n, f) for n, f in chans if self._trans_alive(n)]  # 熔断: 刚连续失败的通道 60s 内不再参与, 免得每次翻译都陪着它等超时
+            if not use: return ""  # 三条通道都在熔断期: 立刻失败, 不让用户干等
+            ex = ThreadPoolExecutor(max_workers=len(use))
+            futs = {ex.submit(fn, g): name for name, fn in use}
+            got = ""
+            try:
+                for fut in as_completed(futs, timeout=_budget):
+                    name = futs[fut]
+                    try:
+                        r = fut.result()
+                    except Exception:
+                        self._trans_mark(name, False, hard=True); continue  # 连接被拒/超时: 硬失败直接熔断
+                    if r:
+                        got = r; self._trans_sticky = (name, time.time()); self._trans_mark(name, True); break
+                    self._trans_mark(name, False)  # 通了但没给译文: 软失败, 攒够次数再熔断
+            except Exception: got = ""  # 预算内一个都没回来: 当作这段失败
+            finally:
+                for fut, name in futs.items():
+                    if not fut.done(): self._trans_mark(name, False, hard=True)  # 超时没回来的通道直接熔断, 否则熔断攒不够次数, 每次都陪它等到超时
+                ex.shutdown(wait=False)  # 慢通道留着自生自灭, 不等它 (daemon 线程)
+            return got
+        if len(groups) == 1:
+            out = [one_group(groups[0])]
+        else:
+            from concurrent.futures import ThreadPoolExecutor
+            with ThreadPoolExecutor(max_workers=min(4, len(groups))) as ex:  # 多段并行: 旧版逐段串行, 4 段就要叠加 4 倍等待
+                out = list(ex.map(one_group, groups))
+        if not out or any(not x for x in out): return None
+        res = "\n".join(out)
+        self._trans_cache_put(cache_key, res)
+        return res
     def translate_and_show(self, text):
         """后台线程翻译 (不冻结界面), 完成后回主线程弹结果窗"""
         import threading
@@ -8438,21 +8580,38 @@ try {
                 out = list(texts)
                 for i, p in zip(need, parts): out[i] = p
                 return out, True
-        translations, any_ok = list(texts), False  # 整段路不通: 逐行兜底 (行已合并成整行, 质量仍远好于碎片时代); 多行并发译, 不再逐行串行等通道超时链
-        def _one(i):
-            return i, self.translate_text_to(texts[i], target, source)
-        if len(need) == 1:
-            i, r = _one(need[0])
-            if r: translations[i] = r; any_ok = True
-        else:
+        translations, any_ok = list(texts), False  # 整段路不通/行数对不上: 按批兜底
+        # v1.5.1: 旧版这里是逐行翻译 (20 行 = 20+ 次请求, 每行还要各自跑完通道超时链, 真机实测 40–50s);
+        # 现在按 10 行一批拼成一段译再拆回来, 20 行最多 2 次请求, 而且批次之间并行。
+        # 有的接口会把换行吃掉 (整段回来一行): 这批再退回逐行, 但整轮兜底有 12s 总预算, 到点剩余行保留原文,
+        # 不会像旧版那样一行一行把通道超时链走一遍。
+        deadline = time.time() + 12.0
+        def _one_batch(idx):
+            chunk = "\n".join(texts[i] for i in idx)
+            r = self.translate_text_to(chunk, target, source)
+            if r:
+                ps = [p.strip() for p in r.replace("\r\n", "\n").split("\n") if p.strip() != ""]
+                if len(ps) == len(idx): return idx, ps
+            from concurrent.futures import ThreadPoolExecutor as _TP
+            def _one_line(i):
+                if time.time() > deadline: return None
+                return self.translate_text_to(texts[i], target, source, budget=3.0) or None
+            with _TP(max_workers=3) as ex2:  # 批内逐行也并行: 串行时 10 行要叠加 10 个往返 (真机 12s), 并行后约 3 个往返
+                out = list(ex2.map(_one_line, idx))
+            return idx, out
+        batches = [need[i:i + 10] for i in range(0, len(need), 10)]
+        if batches:
             from concurrent.futures import ThreadPoolExecutor
-            with ThreadPoolExecutor(max_workers=min(6, len(need))) as ex:
-                for i, r in ex.map(_one, need):
-                    if r: translations[i] = r; any_ok = True
+            with ThreadPoolExecutor(max_workers=min(3, len(batches))) as ex:
+                for idx, ps in ex.map(_one_batch, batches):
+                    if not ps: continue
+                    for i, p in zip(idx, ps):
+                        if p: translations[i] = p; any_ok = True
         return translations, any_ok
-    def _ai_vision_translate(self, img, target, route="vision"):
+    def _ai_vision_translate(self, img, target, route="vision", timeout=8):
         """F4 合并引擎的 AI 通道 (Jane 2026-11-25 13:41 定案): 配了 Key 先让视觉模型一次读图+翻译——不经 OCR 逐字认, 认字即译最准;
-        没配 Key / 接口出错 / 回复格式不对 / 图里没可译文字, 一律返回 None, 调用方立刻走 OCR 通道。必须在后台线程里调。"""
+        没配 Key / 接口出错 / 回复格式不对 / 图里没可译文字, 一律返回 None, 调用方立刻走 OCR 通道。必须在后台线程里调。
+        timeout: 调用方给的等待预算 (F4 传 6s, 见 translate_image_inplace) —— 旧版固定 20s, 接口一慢用户就干等 20 秒。"""
         cfg = self._ai_cfg_for(route)
         if not cfg["key"]: return None
         if target:
@@ -8461,7 +8620,7 @@ try {
         else:
             prompt = ("识别图片中的全部文字: 如果主要是中文就翻译成英文, 否则翻译成中文。输出格式严格如下, 不要输出任何其他内容, 也不要给原文和译文加任何标题或标签:\n"
                       "先输出识别到的原文 (保留原来的换行), 然后单独一行只写 ===, 最后输出译文 (换行尽量与原文一一对应)。")
-        try: r = self._ai_chat_image(img, prompt, timeout=20, route=route)
+        try: r = self._ai_chat_image(img, prompt, timeout=timeout, route=route)
         except Exception: return None
         if not r or "===" not in r: return None
         orig_part, tr_part = r.split("===", 1)
@@ -8506,6 +8665,7 @@ try {
         if w is not None:
             try: w.destroy()
             except Exception: pass
+    _F4_AI_BUDGET = 6.0  # F4 等 AI 读图翻译的上限 (秒): 到点还没回来就直接走 OCR 通道, 不能让一次慢请求把整条链路卡住
     def translate_image_inplace(self, img, target=None, anchor=None, route="vision"):
         """有道式截图翻译: OCR 每行文字+位置 -> 逐行翻译 -> 译文绘回原图 -> 弹翻译结果窗 (可切换目标语言/对照开关)。
         拿不到行坐标时回退到原来的纯文字翻译流程。"""
@@ -8520,9 +8680,16 @@ try {
                 self._ui_queue.put(_err)
         def work_body():
             import concurrent.futures
+            self._trans_dead = {}  # 每次新截图都重新探一次通道: 上一次的熔断不跨截图, 用户重试或被限流恢复后能立刻成功
             pool = concurrent.futures.ThreadPoolExecutor(max_workers=1)
             ocr_fut = pool.submit(self.ocr_lines, img)  # OCR 与 AI 并行先跑: AI 失效时回退零等待 (AI 成功则这份结果不用)
-            ai = self._ai_vision_translate(img, target, route=route)  # 合并引擎: AI 看图优先, 失效 (含没配 Key) 立刻回退下面的 OCR 通道; route 决定用哪家 AI (F4=vision, 标注栏/贴图=annotate)
+            # AI 只等 _F4_AI_BUDGET 秒 (v1.5.1): 旧版同步等 20s 超时, 接口慢或网络差时用户看着「翻译中…」干等 20 秒才有结果
+            ai_pool = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+            ai_fut = ai_pool.submit(self._ai_vision_translate, img, target, route, self._F4_AI_BUDGET)
+            ai = None
+            try: ai = ai_fut.result(timeout=self._F4_AI_BUDGET + 0.5)
+            except Exception: ai = None  # 超时/异常: 不等了, 走 OCR 通道 (AI 请求留在线程里自生自灭, 结果丢弃)
+            ai_pool.shutdown(wait=False)
             if ai is not None:
                 pool.shutdown(wait=False)
                 lines, translations, tgt = ai
@@ -8531,7 +8698,7 @@ try {
                     if anchor: self._show_translate_bar(img, lines, tgt, translations, anchor)
                     else: self.show_translate_compare(img, lines, tgt, translations)
                 self._ui_queue.put(deliver_ai); return
-            try: lines = ocr_fut.result()
+            try: lines = ocr_fut.result(timeout=30)
             except Exception: lines = []
             pool.shutdown(wait=False)
             if not lines:

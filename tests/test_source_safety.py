@@ -30,9 +30,40 @@ def method_text(name):
     return ast.get_source_segment(SOURCE, app_method(name))
 
 
+# 纯函数依赖 (不联网): 附件解析的上限常量/异常/读条目封装, 供被单独 exec 的函数使用
+PURE_MODULE_HELPERS = (
+    "_ATTACH_INFLATE_LIMIT", "_ATTACH_TEXT_LIMIT", "_ATTACH_ENTRY_LIMIT",
+    "_AttachLimit", "_zip_read_bytes",
+)
+
+
+def _helper_nodes():
+    out = []
+    for node in TREE.body:
+        if isinstance(node, (ast.FunctionDef, ast.ClassDef)) and node.name in PURE_MODULE_HELPERS:
+            out.append(node)
+        elif isinstance(node, ast.Assign):
+            for target in node.targets:
+                if isinstance(target, ast.Name) and target.id in PURE_MODULE_HELPERS:
+                    out.append(node)
+    return out
+
+
+def _base_ns():
+    ns = {"os": os}
+    for node in _helper_nodes():
+        exec(ast.get_source_segment(SOURCE, node), ns)
+    return ns
+
+
+def module_text(name):
+    node = next(n for n in TREE.body if isinstance(n, ast.FunctionDef) and n.name == name)
+    return ast.get_source_segment(SOURCE, node)
+
+
 def load_function(name):
     node = app_method(name)
-    ns = {"os": os}
+    ns = _base_ns()
     exec(ast.get_source_segment(SOURCE, node), ns)
     fn = ns[name]
     return fn.__func__ if isinstance(fn, staticmethod) else fn
@@ -40,7 +71,7 @@ def load_function(name):
 
 def load_module_function(name):
     node = next(n for n in TREE.body if isinstance(n, ast.FunctionDef) and n.name == name)
-    ns = {"os": os}
+    ns = _base_ns()
     exec(ast.get_source_segment(SOURCE, node), ns)
     return ns[name]
 
@@ -746,6 +777,41 @@ class AiMemoryAndFilesTests(unittest.TestCase):
         self.assertIn("_extract_docx_text", body)
         self.assertIn("_extract_xlsx_text", body)
         self.assertIn("12 * 1024 * 1024", body)
+
+    def test_docx_zip_bomb_rejected(self):
+        """0.5MB 的 docx 能解出几百 MB: 必须在解压前用元数据拦下 (v1.5.1)"""
+        import io, zipfile
+        fn = load_module_function("_extract_docx_text")
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+            z.writestr("word/document.xml", "<w:p>" + "<w:t>x</w:t>" * (9 * 1024 * 1024 // 12) + "</w:p>")
+        self.assertLess(len(buf.getvalue()), 1024 * 1024)  # 压缩后很小, 走"元数据拦截"路径
+        with self.assertRaises(fn.__globals__["_AttachLimit"]):
+            fn(buf.getvalue())
+
+    def test_zip_entry_bomb_rejected(self):
+        import io, zipfile
+        fn = load_module_function("_extract_docx_text")
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w") as z:
+            for i in range(2100):
+                z.writestr(f"junk{i}.bin", "")
+            z.writestr("word/document.xml", "<w:p><w:t>x</w:t></w:p>")
+        with self.assertRaises(fn.__globals__["_AttachLimit"]):
+            fn(buf.getvalue())
+
+    def test_pdf_stream_limit(self):
+        body = module_text("_extract_pdf_text")
+        self.assertIn("decompressobj()", body)
+        self.assertIn("_ATTACH_INFLATE_LIMIT", body)
+
+    def test_redirect_guard_on_ai_paths(self):
+        """302 到别的域名时 urllib 会把 Authorization 一起带过去: AI 请求必须走同主机校验的封装"""
+        for name in ("_ai_chat_messages", "_ai_fetch_models", "_baidu_translate", "_google_translate"):
+            self.assertIn('globals().get("_open_url")', method_text(name), name)
+        guard = module_text("_open_url")
+        self.assertIn("HTTPRedirectHandler", guard)
+        self.assertIn("hostname", guard)
 
 
 if __name__ == "__main__":
