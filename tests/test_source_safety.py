@@ -181,9 +181,7 @@ class SafetyRegressionTests(unittest.TestCase):
 
 
 # ---- 2026-11-27 全面审查整改的回归测试: 验签/版本/资产挑选/http 护栏/语言键集/备份护栏 ----
-import json
-import re
-import textwrap
+import textwrap  # json/re 文件头已导入, 这里不重复 (ruff F811); textwrap 只有本节用得到
 import zipfile
 
 _TEST_RSA_N = 162981085384131595251459525080711306882316967772221501910582934700591271823244892151988469393288635764485989919236918997176280652681293961377027012749006280567381591256609187477820361021049637466040029980904342415982933389712807348934301863364505154817915230267915888885833079353119423640699467412558054054879
@@ -464,7 +462,7 @@ class AiPanelBatch1Tests(unittest.TestCase):
 
     def test_ai_sidebar_224_blue_gray(self):
         body = method_text("_build_ai_panel")
-        self.assertIn('SIDE_BG = "#F2F6FB"', body)
+        self.assertIn('SIDE_BG = "#F7F9FD"', body)   # 2026-11-28: 会话列底色并入令牌, 与主内容底分层
         self.assertIn("width=224", body)
 
     def test_bubble_width_adaptive(self):
@@ -486,7 +484,8 @@ class AiPanelBatch1Tests(unittest.TestCase):
 class UiPhase1Tests(unittest.TestCase):
     def test_sidebar_dark_palette_is_consistent(self):
         body = method_text("build_ui")
-        self.assertIn('SIDE = "#172235"', body)
+        self.assertIn("SIDE = self.UI_SIDE", body)          # 2026-11-28: 边栏底色收敛到令牌
+        self.assertIn('UI_SIDE = "#111C2E"', SOURCE)
         self.assertIn("side = tk.Frame(self, background=SIDE", body)   # 外框必须同色 (PR #6 漏改处)
         self.assertIn("brand = tk.Frame(side, background=SIDE)", body)  # 品牌区框架必须同色 (PR #6 漏改处)
         seg_start = body.find("side = tk.Frame")
@@ -959,5 +958,185 @@ class ChatImageGcTests(unittest.TestCase):
         self.assertEqual((n, left), (0, ["README", "note.txt"]))
 
 
+class UiRedesignPhase1Tests(unittest.TestCase):
+    """2026-11-28 整套 UI 重设计 P1: 令牌层 + 信息层级 (一屏一个主按钮)"""
+
+    def test_design_tokens_exist(self):
+        for token in ("UI_TEXT_2", "UI_BORDER_STRONG", "UI_ACCENT_TINT", "UI_ACCENT_LINE",
+                      "UI_DANGER", "UI_DANGER_BG", "UI_SIDE", "UI_SIDE_TEXT", "UI_SIDE_ACTIVE_BG"):
+            self.assertIn(token + " = \"#", SOURCE, token)
+        for token in ("SP_1, SP_2, SP_3, SP_4, SP_5, SP_6 = 4, 8, 12, 16, 24, 32",
+                      "R_CARD, R_BTN, R_INPUT, R_PILL = 12, 8, 8, 999",
+                      "DUR_FAST, DUR_BASE = 120, 180"):
+            self.assertIn(token, SOURCE)
+
+    def test_type_scale_is_single_source(self):
+        self.assertIn('TYPE = {"brand": 18, "page": 15, "card": 11, "body": 10, "caption": 9, "micro": 8}', SOURCE)
+
+    def test_sidebar_selection_uses_tint_not_solid_blue(self):
+        seg = SOURCE[SOURCE.find("class _NavItem"):SOURCE.find("class App")]
+        self.assertIn('fill="#1C2C45"', seg)          # 选中=深色 tint 底
+        self.assertIn('create_rectangle(0, 10, 3, 30, fill="#3B82F6"', seg)  # 左侧 3px 指示条
+        self.assertNotIn('fill = "#3B82F6" if self._selected', seg)          # 不再是整块实心蓝
+
+    def test_records_header_has_one_menu_for_destructive_actions(self):
+        body = method_text("build_ui")
+        self.assertNotIn('for txt, cmd in [(self.t("lock_unlock"', body)  # 六按钮平铺已移除
+        self.assertIn("def _record_more(btn)", body)
+        self.assertIn('self.t("delete_all", "删除全部")', body)          # 功能仍可达
+        self.assertIn('"color": self.UI_DANGER', body)                      # 危险项用文字色区分
+
+    def test_action_row_keeps_one_primary(self):
+        body = method_text("build_ui")
+        row = body[body.find("act = tk.Frame(body"):body.find("def card_section")]
+        self.assertEqual(row.count("Accent.TButton"), 1)
+        for key in ("paste_selected", "import_txt", "export_txt"):
+            self.assertIn("self." + key, row)   # 收进「更多操作」后命令仍在
+
+    def test_list_rows_taller_and_softer_stripes(self):
+        self.assertIn("rowheight=34", SOURCE)
+        self.assertIn('UI_STRIPE = "#FAFBFE"', SOURCE)
+
+
+class UiRedesignPhase15Tests(unittest.TestCase):
+    """2026-11-28 全面统一 (P1.5): 行状态、空状态、旧色值清零"""
+
+    def test_list_rows_have_locked_and_hover_states(self):
+        body = method_text("build_ui")
+        self.assertIn('tag_configure("locked", foreground=self.UI_MUTED_2)', body)
+        self.assertIn('tag_configure("hover", background=self.UI_ACCENT_TINT)', body)
+        self.assertIn("self._bind_list_hover()", body)
+
+    def test_row_tags_helper_used_everywhere(self):
+        self.assertNotIn('tags=("odd",) if row % 2 else ()', SOURCE)   # 三处插入点都必须走 helper
+        self.assertIn("def _row_tags(self, row, locked):", SOURCE)
+        self.assertEqual(SOURCE.count("tags=self._row_tags("), 3)
+
+    def test_hover_does_not_touch_selection(self):
+        seg = SOURCE[SOURCE.find("def _bind_list_hover"):SOURCE.find("def _update_empty_state")]
+        self.assertIn('self.listbox.bind("<Motion>"', seg)
+        self.assertIn('t != "hover"', seg)          # 只摘 hover, 不动 odd/locked
+        self.assertNotIn("selection_set", seg)
+
+    def test_empty_state_created_and_toggled(self):
+        self.assertIn("self._empty_state = tk.Frame(mid, background=W)", method_text("build_ui"))
+        self.assertIn('empty_rec_title', SOURCE)
+        body = method_text("refresh_list")
+        self.assertEqual(body.count("self._update_empty_state()"), 2)   # 隐藏分支 + 正常分支都要刷新
+
+    def test_old_palette_literals_gone(self):
+        for legacy in ('"#5B6B7C"', '"#1C2634"', '"#1E90FF"', '"#0B3556"', '"#2F4B73"'):
+            self.assertNotIn(legacy, SOURCE, legacy)
+
+    def test_check_indicator_uses_brand_blue(self):
+        self.assertIn("(59, 130, 246, 255)", SOURCE)   # 勾选圆点 = 品牌蓝, 不再是绿色第二主色
+        self.assertNotIn("(34, 181, 115, 255)", SOURCE)
+
+
 if __name__ == "__main__":
     unittest.main()
+
+
+class UiPhase2Tests(unittest.TestCase):
+    """UI P2 (2026-11-28): toast/撤销、主窗口真圆角卡片、常用语与画廊空状态。
+    仍是源码级断言: 无 GUI 环境下要保证「只动外观, 不动功能」。"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.src = open(os.path.join(ROOT, "main.py"), encoding="utf-8").read()
+
+    def test_toast_overlay_exists_and_does_not_steal_focus(self):
+        self.assertIn("def toast(self, text, action=None, action_text=None, ms=2400):", self.src)
+        self.assertIn("def _hide_toast(self, seq=None):", self.src)
+        i = self.src.index("def toast(self, text, action=None")
+        body = self.src[i:i + 2200]
+        self.assertIn('place(relx=0.5, rely=1.0, anchor="s"', body)  # 叠在主窗口底部, 不新开窗口
+        self.assertNotIn("grab_set", body)  # 不抢焦点
+        self.assertNotIn("wait_window", body)  # 不阻塞主线程
+        self.assertIn("self._toast_seq", body)  # 序号防旧定时器关掉新提示
+
+    def test_delete_has_undo_and_restores_paste_index(self):
+        i = self.src.index("def delete_sel(self):")
+        body = self.src[i:i + 1200]
+        self.assertIn("rec = self.records.pop(i)", body)
+        self.assertIn("self.records.insert(pos, rec)", body)
+        self.assertIn("self.paste_index = max(0, min(old_pi, len(self.records)))", body)
+        self.assertIn("action=_undo", body)
+        self.assertIn("save_records(); self.refresh_list()", body)
+        # 锁定记录仍然不许删
+        self.assertIn("msg_locked", body)
+
+    def test_main_cards_use_rounded_backing(self):
+        self.assertIn("card = tk.Frame(body, background=self.UI_BG)\n        self._rounded_backing(card, radius=self.R_CARD)", self.src)
+        self.assertIn("outer = tk.Frame(body, background=self.UI_BG)\n            self._rounded_backing(outer, radius=self.R_CARD)", self.src)
+        # 旧的方角描边卡片不能残留
+        self.assertNotIn('highlightbackground=self.UI_BORDER, highlightcolor=self.UI_BORDER)\n        card.pack', self.src)
+
+    def test_empty_states_present(self):
+        self.assertIn("gal_empty_title", self.src)
+        self.assertIn("self.t(\"empty_rec_btn\"", self.src)  # 画廊空态直接给「截一张图」入口
+        self.assertIn("phr_empty_title", self.src)
+        self.assertIn("_phr_empty.place_forget()", self.src)
+        self.assertIn("else: _phr_empty.place(relx=0.5, rely=0.34, anchor=\"center\")", self.src)
+
+    def test_ui_tokens_for_p2(self):
+        self.assertIn('UI_ACCENT_LINE = "#BFDBFE"', self.src)
+        self.assertIn("R_CARD", self.src)
+
+
+class UiPhase3Tests(unittest.TestCase):
+    """UI P3 (2026-11-28): 全局控件交互态令牌化 + 旧灰文字收口 + 迷你窗口重排。"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.src = open(os.path.join(ROOT, "main.py"), encoding="utf-8").read()
+
+    def test_interaction_tokens_defined(self):
+        for tok, val in (("UI_HOVER", "#E8F1FE"), ("UI_PRESS", "#DBEAFE"),
+                         ("UI_DANGER_LINE", "#FCA5A5"), ("UI_DANGER_HOVER", "#FEE2E2"), ("UI_DANGER_PRESS", "#FECACA")):
+            self.assertIn(f'{tok} = "{val}"', self.src)
+
+    def test_theme_maps_use_tokens_not_old_tints(self):
+        self.assertNotIn('"#E3EEFF"', self.src)  # 旧 hover 底
+        self.assertNotIn('"#CFE2FF"', self.src)  # 旧按下底
+        self.assertNotIn('"#FDECEC"', self.src)  # 旧危险底
+        self.assertNotIn('bordercolor="#BCD6FF"', self.src)
+        self.assertIn('st.map("TButton", background=[("active", self.UI_HOVER), ("pressed", self.UI_PRESS)]', self.src)
+        self.assertIn('st.configure("Danger.TButton", background=self.UI_DANGER_BG, foreground=self.UI_DANGER', self.src)
+
+    def test_old_muted_gray_replaced(self):
+        self.assertNotIn('foreground="#888888"', self.src)
+
+    def test_mini_window_layout(self):
+        self.assertIn('w.geometry(f"320x400+', self.src)
+        self.assertIn('w.configure(background=self.UI_BG)', self.src)
+        self.assertIn('self.t("mini_hint", "双击一行 = 从这行开始粘贴")', self.src)
+        # 5 个按钮全部小号样式 (命令与文案没动)
+        for label in ("set_mini_lock", "cmn_delete", "set_mini_delall"):
+            line = [l for l in self.src.splitlines() if f'self.t("{label}"' in l and "ttk.Button(bar" in l and "width=" in l]
+            self.assertTrue(line and 'style="Small.TButton"' in line[0], label)
+
+
+class UiPhase4Tests(unittest.TestCase):
+    """UI P4 (2026-11-28): 全窗口底色统一 + toast 上滑微交互。"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.src = open(os.path.join(ROOT, "main.py"), encoding="utf-8").read()
+
+    def test_titled_dialogs_follow_page_bg(self):
+        # 7 个带标题栏的对话框都在创建语句后紧跟一行底色设置; 只数 Toplevel 行, 避开菜单里的同名文案
+        n = self.src.count("configure(background=self.UI_BG)")
+        self.assertGreaterEqual(n, 7)
+
+    def test_toast_slide_up(self):
+        i = self.src.index("def toast(self, text, action=None")
+        body = self.src[i:i + 2600]
+        self.assertIn("def _slide(step=0):", body)
+        self.assertIn("place_configure(y=-16 - 6 * step)", body)
+        self.assertIn('box.place(relx=0.5, rely=1.0, anchor="s", y=-16)', body)
+
+    def test_special_overlay_windows_kept(self):
+        # 复制即译的 1px 描边窗与透明翻译覆盖层是有意设计, 不能被"统一底色"误伤
+        self.assertIn("win.configure(background=self.UI_BORDER)", self.src)
+        self.assertIn('MAGIC = "#FF00FE"', self.src)
