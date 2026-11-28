@@ -16,6 +16,8 @@ import unittest
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 SOURCE = (ROOT / "main.py").read_text(encoding="utf-8")
 TREE = ast.parse(SOURCE)
+import importlib.util
+_HAS_PIL = importlib.util.find_spec("PIL") is not None  # 可选依赖: 干净 CI 未装 Pillow 时跳过真实图片测试, 不报错
 
 
 def app_method(name):
@@ -1741,6 +1743,7 @@ class UpdateMirrorTests(unittest.TestCase):
         self.assertIn("def _probe_latest_tag(self, page_url)", SOURCE)
 
 
+@unittest.skipUnless(_HAS_PIL, "Pillow 未安装，跳过图片批量处理的真实图片测试")
 class BatchImageTests(unittest.TestCase):
     """v1.6.2 图片批量处理: 尺寸计算、命名去重与真实图片端到端。"""
 
@@ -1929,6 +1932,7 @@ class PromptLibraryTests(unittest.TestCase):
         self.assertIn('ai_plus_prompt', SOURCE)
 
 
+@unittest.skipUnless(_HAS_PIL, "Pillow 未安装，跳过 AI 图片压缩的真实图片测试")
 class ImageCompressTests(unittest.TestCase):
     """v1.6.3 AI-5: 图片压缩规格、data URL 缓存与多图。"""
 
