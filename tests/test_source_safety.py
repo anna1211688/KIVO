@@ -2369,3 +2369,29 @@ class TranslateResultPaneTests(unittest.TestCase):
     def test_panes_no_longer_forced_equal_height(self):
         # 对照模式两框各自按内容定高, 旧的取 max 等高逻辑应已移除
         self.assertNotIn("h = max(_disp_lines(orig_txt, w_o), _disp_lines(tran_txt, w_t))", self.body)
+
+
+class ProjectNavMoveTests(unittest.TestCase):
+    """项目入口从主导航移到 AI 助手侧边栏「最近对话」上方。"""
+
+    def test_main_nav_no_longer_registers_project(self):
+        build = method_text("build_ui")
+        self.assertNotIn('_nav("project", self.t("project_title", "项目"), "project", self.open_projects)', build)
+        self.assertNotIn('_nav("project"', build)
+
+    def test_ai_panel_has_project_entry_above_recent(self):
+        ai = method_text("_build_ai_panel")
+        self.assertIn("pj_row = tk.Frame(side, background=SIDE_BG)", ai)
+        self.assertIn('wdg.bind("<Button-1>", lambda e: self.open_projects())', ai)
+        # 入口位置必须在「最近对话」标题之前
+        self.assertLess(ai.index("pj_row"), ai.index('side_head(self.t("ai_recent", "最近对话"))'))
+
+    def test_project_entry_uses_project_icon(self):
+        ai = method_text("_build_ai_panel")
+        self.assertIn('image=self._nav_icon("project")', ai)
+
+    def test_project_workbench_still_intact(self):
+        # 只是入口搬家, 工作台本体与功能不能被删
+        self.assertIn("def open_projects", SOURCE)
+        self.assertIn("def _build_project_panel", SOURCE)
+        self.assertIn("def create_project", SOURCE)
