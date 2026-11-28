@@ -434,8 +434,9 @@ _BTN_ICONS_B64 = {
     "gear": "iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAD5klEQVR4nLWUT4jVVRTHv+fce3/vvRnGHExpoj+LIOGBM8ErsSJ+o0VjOeXqB4ENisZr0yaGVlnDMIhItiiIYFCzhbaYwcVo5bgoZxGE+iCHHF1WJkOaZaH2fr977zkt5k9jTY4EneXhns+559+XcGdGaTpgAGBiYjDcYcz/Y7SYM8syM1KtanoSPDExGNZu3LIs59ZXEeLPZ0/s/wgApWlquru7ZWpqikZGRuIdgRfa6he3t5UKOp6UWp5QACG/+d7Dbb/3Lwa7HZgAoKtn+5vWlTfkzZt7nePL7Cqnfd5sMrMTifnk+P1tXRsvbWbrXhOff3l2/MCu2XidA/HC8gFoZ8+Ona7SOqSQ9TZJPpVIa3zR/I6ZS8RsQDjf+eyl5421Rwi6wVVahzp7duwEoLOMW8Ej1epcthckhBiKIocKQPohVFepikoIEUAXsYzF4DX4IpfgBUS9f2Ms+PHUFCHLDBHtBtSQ4ZKKKJhLRNTCbJitMwSyABEAEJFTVYLqHgCUnvyL94/hrVuXVW4ua0nZJKOq2gIVZZdw9MV5IrrGbB4XEUA1srVGYtF37Q8Z/X7i4+YiwxtgDACdX1/aayxvkxi+VaXHiJAY4zhqeMv+xHsajWHf+dwrvUw0qiIJQFDIaSZ+CKAzxlx/uXHsk6sAwGmaWmBQuk79uDUpl18XkXY2yVNEKDMbDuKnzn62b1ejMexrtbqb/HzfMRE9bGxCqiLGuLWqWGGTck/wlb0AFGlq+Pr11TP9EtwDACqSqwSoqhAzoPgNgNbqdedcq51ZKr1MRABBRSJUJVeJUOJ7F7aCAMWaTVuWm9hy1LjkSV/kV0DaTiBmNhQlbp48vv8oANR66w+EqGcIuFtVAOAXY90KEZkWCZsmjx/4ZgADRAsSaK1Wd9KBR6MPXcT8LlTLABEReVE5zMAVJdpGRCslSjTWmhh8vzP2qxvxxg8Xxg9Nz7Hm1kPTdMA2GsM+FvEuY5P3oagAIFUVVUmsS7axK71BmIESgSUGMdbt9iG2Xxg/NF2r1d3c9c3v3UQ3BAARY4gIRlUKADDWGYAQfB6CbwZVUWOtmU3qicgRYwhQavR2zOvHrQcCqCrG2Do2LimxsSTR9ynklDHOErFVxdUYfD8Rw7pSia0jVYwBpLOMRQ9kXoTYldZHX3wwOb7/SOfGHb8yuE00BuOSkhb5I0p0n3Xl/uCbXywmQkvK5oPp1vLyij3qyi3PSIyIobgSYqidO3Hw4u3i7GLOLMtMtVrVkzNC31z1dN9LnvkdEK9UlbfPnTh4sVaru0ZvR8z+Rej/qy1Z6ZIP5t5lWcbArDQODspSAX8Cm0TtanseiCAAAAAASUVORK5CYII=",
     "star": "iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAACeUlEQVR4nNWUQUhUURSG/3PfffNmTGdMxRQ3ErhoxsVkkW0EayEEtRxo0SIiWhRCRfvnrFyVqNUqaNUiWhpEKyMS2pQtzAgXtQkRLH0zOE/fu++cFk8Tx4EZI5DO6t7Lf7/733PPucDhhxBE6LBdNBKxy/Zr71ra7nztiZfqO1d1uYVYY5pbb5jIuACAMVj1ttXPmSsKANJrXz6CcDylg+6V+/mN+CYkjYPdWQ0Mx+NfSxbafkTp1a48OfZ7UtoiU7m4lll5je+9Gr29Jha+AYrnzMEcA2i9/fkp7OarEAaHlZelydylenu2wfG1Wm4ttquEvgMQi9kypEgBcCB0F4oSAEE48okwCWBLWJi0owFRHJiJ8qPszx3WrmNXFJY/WOlU6rrSqceUzEDCDYA0ZNMDsJ1OIpCTAcSA7COQTQ9s/Jsl33+C7lMRisQ1UhGflhn9dBKJ9CsCjklYCUHK3ivjkOwmW4AVBKUL3nR+vvoxq8qNBK5obzo/z+H6kEg0RzqpIcK7UGHSSS0SzXG4PuRN5+fhiq6ukP11XCSDwkKiPDWwpAJ/HNohEARABEgEQKAdUoE/Xp4aWEJhIYEimWpM7QbJ5hiuq1jrkdiJGLJTFjlpKz6AhLUegesqZHNcC1EbPIYIizkCR2chTJQ86nDgv5Wt8jNymhMgIjAPYjFHGEPUIFgUiKSjp7+T7KYzwpHHQWW0tHzivDeZvcJRcFnM5jLs1GBHT38niASQfZz94EJcKYHwsJCaEd44XZroe4gXYBTEKj3oex76qwMQmglku0ULjTUaAKDp3reuPxN3Vtca79EcLIR2PqG9y0I73+nfQf+J5n+J39QzDLg7vrq5AAAAAElFTkSuQmCC",
     "project": "iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAg0lEQVR4nO3YQQ6AIAwF0Wq8/5X1AkZaCIwk89ZV+gFJMEKSJHGOZN096b3DzkRNtfneZ7q0Aow0siTEVaidtd2GtJpa2syL5qRlZpUOEfHRZ+Yj/rXKFlp2NFbG334FDEAzAM0ANAPQDEAzAM0ANAPQtg/gpZ5WuagTK0H8SJAkaZ0HxmsMM1Zne3AAAAAASUVORK5CYII=",
+    "voice": "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAfElEQVR4nO2WwQrAIAxDrez/f9lddhgjnctapWLfqWBoQ4NoKUlioF1YelTLcFRPM+DFJwPsqhl91wC7ala/RgTTDHhcqzdQ/3o/RLXncFTHiiANpIG9DYiIoNoLrf+hiUaA+seJQIONhtb3BBrP9+JvfPEjCM3o/0OyBydhRVv+p1U1MAAAAABJRU5ErkJggg==",
 }  # 按钮小图标 (22px, PIL 手绘线条风: 图标+文字并排, 与常见软件一致)
-VERSION = "1.6.3"  # v1.6.3: AI 助手七项优化 — ①token 预算上下文裁剪+早期对话自动摘要 ②长期记忆按相关性注入 TopN ③429 按 Retry-After 自动退避重试 ④提示词库/角色预设(本地 ai_prompts.json, 按会话持久化) ⑤图片统一压到长边 1568/JPEG q85+data URL 缓存+一轮多图 ⑥流式中断后断点续写 ⑦跨对话搜索+首轮自动标题; 测试 197 项。历史: v1.6.2: 九个新功能 — ①全局快捷面板(F12, 搜索记录/常用语/安全算术, 回车即粘贴) ②划词 AI(Ctrl+Alt+A, 光标浮窗: 翻译/润色/总结/解释/换语气, 自动还原剪贴板) ③截图贴图增强(取色器历史色板 HEX/RGB/HSL+屏幕取色、屏幕标尺、二维码生成) ④开发者工具箱(时间戳/JSON/正则/Base64/单位换算, 纯标准库) ⑤深色模式(31 个深色令牌, 重启生效) ⑥番茄钟(25/5, 时长可配) ⑦窗口管理(置顶/半透明/分屏/居中) ⑧更新镜像通道(GitHub 兼容反代, 镜像优先) ⑨图片批量处理(缩放/格式/质量/水印, 后台线程); 测试 170 项。历史: v1.4.22: ①去掉内置浏览器整套 (Jane 真机定版不好用: 面板/书签/历史/菜单/pywebview 子进程全删, 工具栏回 8 按钮, 自检减为六项, 打包去 pywebview) ②世界时间加「刷新」(绕过天气 15 分钟节流立即重拉) ③文本翻译框自适应高度 (默认 8 行, 随内容长高至 24 行封顶, 按钮行跟随) ④系统设置/软件自检/历史截图/城市选择全部改为主窗口内面板 (Jane 定版「能收的都收」, 不再弹独立窗口, 重复开窗问题从结构上消除) ⑤启动时清理浏览器残留文件 (bookmarks/browser_history/browser_profile) ⑥工具栏改一行 8 按钮 ⑦截图翻译学有道: F4 出无边框浮动条 (原文区透明盖选区透出真实截图对照/译文框在选区下方、不够翻上方/大小随内容/源语言可选/条内复制原文·译文·AI 智能回复), 完整结果窗保留给无选区入口; v1.4.23: ①修真 bug: 配置解析关 % 插值 (分隔符/路径/接口地址带 % 不再抛错) ②备份导入加固 (JSON 先验货后落盘, 坏备份整包拒绝) + 备份说明去掉书签残留文案 ③英文模式运行时漏网文案两批全清 (汇率/托盘/取色器/下载提示/识别结果窗/AI 气泡与接口报错/测试连接结果/计算器/截图浮层, 三个翻译助手改实例方法并本地化报错) ④F4 纯数字/符号截图提示「没有可翻译的文字」不再误报失败 ⑤删死代码, 新增边缘测试套件; v1.4.24: 修 AI 聊天真机 400 (Jane 实测): 智谱 glm-4v-flash 的 max_tokens 上限 1024, 聊天面板传 2048 被拒 (code 1210); 已在 _ai_chat_messages 对智谱统一钳制 [1,1024], 别家不受影响, test_edge 扩至 17 项含此用例; v1.4.25: ①F4 截图翻译合并引擎 (Jane 定案): 配了 AI Key 先 AI 看图翻译 (一次读图+翻译, 尝试上限 20 秒), AI 失效/没配 Key 立刻回退 OCR 通道 ②F4 提速: 免费翻译通道黏性 (通的通道 120 秒内优先)、Google 超时 12→8 秒、MyMemory 12→10 秒、逐行兜底改并发 ③文本翻译源语言改下拉可选 (自动检测+13 种, 改选即重译并真传引擎) ④文本翻译接 AI 通道 + 「启用AI翻译」勾选 (默认开: 勾上才优先 AI、失效回退在线; 不勾绝不调 AI; 选择落盘 TTUseAI) ⑤_ai_chat_image/_ai_chat_messages 加 timeout 参数 (默认 90 不变); v1.4.26: ①F4 修 AI 回复把提示词的「第一部分/第二部分」标签回声进正文 (改提示词措辞+解析层剥标签兜底) ②全部勾选/单选改圆点指示 (选中绿点/未选空心圈, PIL 生成 Dot.indicator, 含经典 tk 城市勾选) ③工具栏 8 按钮统一样式 (AI 功能去掉蓝色描边款) ④F4 第二轮提速: OCR 与 AI 并行 (回退零等待, Jane 定案保持并行)、OCR 引擎启动预热、「翻译中…」占位浮签 ⑤马赛克/模糊加强: 强度随区域自适应 (旧版几乎无效), F1 编辑器预览改真效果 ⑥全面审查修复 18 项: 多显示器坐标校正、长截图/F4 后台线程兜底、备份验 Config.ini+导出原子写、迷你窗脏值兜底、天气失败负缓存改 60 秒、画廊/预览句柄泄漏、计算器英文错误态、AI 空白返回、强力粘贴验返回值、GlobalLock 判空、WinOCR 逐行容错、import_txt 支持 UTF-16、复制反馈存活守卫、配置双编码全新 parser、分隔符脏值校验; 两 ini 438 键同集 (新增 long_fail); v1.4.27: 功能与 1.4.26 相同, 首次提供安装版 (Inno Setup: 按用户安装/原地升级/开始菜单与桌面快捷方式/设置里可卸载; 发布页同时附 KIVO.exe 单文件版与 KIVO-Setup 安装包, Jane 2026-11-25 定案); v1.4.28: ①修任务栏恢复闪黑 (列表补刷推迟到窗口画出后, 不再同步重建堵第一帧) ②截图/贴图设置并入系统设置 (截图翻译目标语言/对照翻译/延时秒数/UI 检测, 与主窗口共用同一变量两处同步) ③F4 浮动条重做: 原文框全透明只留 1px 细边、与选区等大, 译文框独立白卡与原文框像素等宽左对齐, 功能条独立成条保持自然宽度 ④F4 截图翻译不使用 UI 检测 (纯自由框选, F1 等不受影响) ⑤UI 检测三招: 悬停常驻 UIA 桥实时查元素、假框过滤 (占整窗 85% 以上的容器矩形不要)、拖拽边缘 8px 磁吸 ⑥AI 分工: AI 聊天/看图翻译/标注栏 AI/智能回复/文本翻译五路可各选一家 (缺省跟随当前服务, 指定的那家没 Key 自动回退当前服务), 预设扩到 14 家 (新增 OpenAI/Gemini/Claude/DeepSeek/Kimi/火山豆包/腾讯混元/百度千帆/Grok/Ollama 本地自建), 修 _ai_cfg 镜像串扰真 bug (读别家配置会串到当前服务的 key/地址/模型, 分工会把请求发错地方) ⑦第五轮审查优化: UIA 桥读行加 2.5 秒超时杀桥 (防挂起应用堵死检测)、历史截图画廊缩略图分批渲染 (打开不冻结)、备份导入单文件 64MB 上限、记录/常用语落盘改紧凑 JSON (文件小三成读写更快); v1.4.29: ①品牌升级为 KIVO 启沃 (新 Logo/配色/功能改名/启动页/关于 KIVO) ②左侧边栏导航 (Jane 定序: AI 助手第一/翻译中心第二, 世界时钟与货币汇率分开) ③Dots.ai 第 15 家预设 + 深度思考开关 (实测: 正文被思考吃空时自动关思考重试一次) ④AI 聊天 GPT/豆包式改造 (+菜单附件/建议行/最近对话置顶重命名删除/圆角弹窗/气泡内豆包式图标行含朗读) ⑤迷你翻译 F10 + 复制即译 F11 (独立开关与热键, 跟随文本翻译的 AI 开关, 复制即译只按热键触发不监听剪贴板) ⑥约时间换算 (含单语复制模式)/对方作息提示/复制双语 ⑦计算器放大居中+计算历史/汇率 30 币种国旗/世界时钟天气图标+温馨提醒+分享 ⑧全局圆角 (主窗口外框直角除外)+KIVO 配色+弹窗美化, 标注默认矩形 ⑨设置内检查更新+一键更新 (下载字节数检/MZ 验头/SHA256+RSA 签名双重验证, 无 .sig 的版本拒装) ⑩第六轮深度审查: 边栏最小高度 600 防裁设置项 v1.4.30: 千问审查整改 — OCR 引擎锁竞态 (锁改为类定义时建好)、F7 消费模式只在粘成功时删记录、F4 碎片合并框并集底边、下载链接剥尾标点、恢复 _ini_scalar/_http_base 护栏、save_config/save_phrases 落盘失败记 crash.log。 v1.5.0: AI 助手全面升级 — 模型中心 (多服务商多模型档案/任务级选模型/连接测试/同服务商故障切换)、聊天流式输出与停止生成、图片上下文与图片备份、长期记忆、PDF/Word/Excel 附件解析、附件与历史读取上限、深色边栏与品牌蓝统一、备份事务回滚、热键冲突提示、AI 报错脱敏加固。
+VERSION = "1.7.0"  # v1.7.0: 新增语音翻译工作台 — 左侧导航独立项, 选音频文件(OGG/Opus、M4A/AAC、MP3、WAV、WEBM、FLAC 等, ≤25MB)后走 OpenAI 兼容 /audio/transcriptions 云端转写(标准库手写 multipart, 转写模型可改, 复用现有服务商 Key, 新增 RouteVoice 分工), 再用现有 AI 通道译成目标语言, 原文/译文双卡片展示并支持复制与 Windows TTS 朗读; 测试 216 项。历史: v1.6.3: AI 助手七项优化 — ①token 预算上下文裁剪+早期对话自动摘要 ②长期记忆按相关性注入 TopN ③429 按 Retry-After 自动退避重试 ④提示词库/角色预设(本地 ai_prompts.json, 按会话持久化) ⑤图片统一压到长边 1568/JPEG q85+data URL 缓存+一轮多图 ⑥流式中断后断点续写 ⑦跨对话搜索+首轮自动标题; 测试 197 项。历史: v1.6.2: 九个新功能 — ①全局快捷面板(F12, 搜索记录/常用语/安全算术, 回车即粘贴) ②划词 AI(Ctrl+Alt+A, 光标浮窗: 翻译/润色/总结/解释/换语气, 自动还原剪贴板) ③截图贴图增强(取色器历史色板 HEX/RGB/HSL+屏幕取色、屏幕标尺、二维码生成) ④开发者工具箱(时间戳/JSON/正则/Base64/单位换算, 纯标准库) ⑤深色模式(31 个深色令牌, 重启生效) ⑥番茄钟(25/5, 时长可配) ⑦窗口管理(置顶/半透明/分屏/居中) ⑧更新镜像通道(GitHub 兼容反代, 镜像优先) ⑨图片批量处理(缩放/格式/质量/水印, 后台线程); 测试 170 项。历史: v1.4.22: ①去掉内置浏览器整套 (Jane 真机定版不好用: 面板/书签/历史/菜单/pywebview 子进程全删, 工具栏回 8 按钮, 自检减为六项, 打包去 pywebview) ②世界时间加「刷新」(绕过天气 15 分钟节流立即重拉) ③文本翻译框自适应高度 (默认 8 行, 随内容长高至 24 行封顶, 按钮行跟随) ④系统设置/软件自检/历史截图/城市选择全部改为主窗口内面板 (Jane 定版「能收的都收」, 不再弹独立窗口, 重复开窗问题从结构上消除) ⑤启动时清理浏览器残留文件 (bookmarks/browser_history/browser_profile) ⑥工具栏改一行 8 按钮 ⑦截图翻译学有道: F4 出无边框浮动条 (原文区透明盖选区透出真实截图对照/译文框在选区下方、不够翻上方/大小随内容/源语言可选/条内复制原文·译文·AI 智能回复), 完整结果窗保留给无选区入口; v1.4.23: ①修真 bug: 配置解析关 % 插值 (分隔符/路径/接口地址带 % 不再抛错) ②备份导入加固 (JSON 先验货后落盘, 坏备份整包拒绝) + 备份说明去掉书签残留文案 ③英文模式运行时漏网文案两批全清 (汇率/托盘/取色器/下载提示/识别结果窗/AI 气泡与接口报错/测试连接结果/计算器/截图浮层, 三个翻译助手改实例方法并本地化报错) ④F4 纯数字/符号截图提示「没有可翻译的文字」不再误报失败 ⑤删死代码, 新增边缘测试套件; v1.4.24: 修 AI 聊天真机 400 (Jane 实测): 智谱 glm-4v-flash 的 max_tokens 上限 1024, 聊天面板传 2048 被拒 (code 1210); 已在 _ai_chat_messages 对智谱统一钳制 [1,1024], 别家不受影响, test_edge 扩至 17 项含此用例; v1.4.25: ①F4 截图翻译合并引擎 (Jane 定案): 配了 AI Key 先 AI 看图翻译 (一次读图+翻译, 尝试上限 20 秒), AI 失效/没配 Key 立刻回退 OCR 通道 ②F4 提速: 免费翻译通道黏性 (通的通道 120 秒内优先)、Google 超时 12→8 秒、MyMemory 12→10 秒、逐行兜底改并发 ③文本翻译源语言改下拉可选 (自动检测+13 种, 改选即重译并真传引擎) ④文本翻译接 AI 通道 + 「启用AI翻译」勾选 (默认开: 勾上才优先 AI、失效回退在线; 不勾绝不调 AI; 选择落盘 TTUseAI) ⑤_ai_chat_image/_ai_chat_messages 加 timeout 参数 (默认 90 不变); v1.4.26: ①F4 修 AI 回复把提示词的「第一部分/第二部分」标签回声进正文 (改提示词措辞+解析层剥标签兜底) ②全部勾选/单选改圆点指示 (选中绿点/未选空心圈, PIL 生成 Dot.indicator, 含经典 tk 城市勾选) ③工具栏 8 按钮统一样式 (AI 功能去掉蓝色描边款) ④F4 第二轮提速: OCR 与 AI 并行 (回退零等待, Jane 定案保持并行)、OCR 引擎启动预热、「翻译中…」占位浮签 ⑤马赛克/模糊加强: 强度随区域自适应 (旧版几乎无效), F1 编辑器预览改真效果 ⑥全面审查修复 18 项: 多显示器坐标校正、长截图/F4 后台线程兜底、备份验 Config.ini+导出原子写、迷你窗脏值兜底、天气失败负缓存改 60 秒、画廊/预览句柄泄漏、计算器英文错误态、AI 空白返回、强力粘贴验返回值、GlobalLock 判空、WinOCR 逐行容错、import_txt 支持 UTF-16、复制反馈存活守卫、配置双编码全新 parser、分隔符脏值校验; 两 ini 438 键同集 (新增 long_fail); v1.4.27: 功能与 1.4.26 相同, 首次提供安装版 (Inno Setup: 按用户安装/原地升级/开始菜单与桌面快捷方式/设置里可卸载; 发布页同时附 KIVO.exe 单文件版与 KIVO-Setup 安装包, Jane 2026-11-25 定案); v1.4.28: ①修任务栏恢复闪黑 (列表补刷推迟到窗口画出后, 不再同步重建堵第一帧) ②截图/贴图设置并入系统设置 (截图翻译目标语言/对照翻译/延时秒数/UI 检测, 与主窗口共用同一变量两处同步) ③F4 浮动条重做: 原文框全透明只留 1px 细边、与选区等大, 译文框独立白卡与原文框像素等宽左对齐, 功能条独立成条保持自然宽度 ④F4 截图翻译不使用 UI 检测 (纯自由框选, F1 等不受影响) ⑤UI 检测三招: 悬停常驻 UIA 桥实时查元素、假框过滤 (占整窗 85% 以上的容器矩形不要)、拖拽边缘 8px 磁吸 ⑥AI 分工: AI 聊天/看图翻译/标注栏 AI/智能回复/文本翻译五路可各选一家 (缺省跟随当前服务, 指定的那家没 Key 自动回退当前服务), 预设扩到 14 家 (新增 OpenAI/Gemini/Claude/DeepSeek/Kimi/火山豆包/腾讯混元/百度千帆/Grok/Ollama 本地自建), 修 _ai_cfg 镜像串扰真 bug (读别家配置会串到当前服务的 key/地址/模型, 分工会把请求发错地方) ⑦第五轮审查优化: UIA 桥读行加 2.5 秒超时杀桥 (防挂起应用堵死检测)、历史截图画廊缩略图分批渲染 (打开不冻结)、备份导入单文件 64MB 上限、记录/常用语落盘改紧凑 JSON (文件小三成读写更快); v1.4.29: ①品牌升级为 KIVO 启沃 (新 Logo/配色/功能改名/启动页/关于 KIVO) ②左侧边栏导航 (Jane 定序: AI 助手第一/翻译中心第二, 世界时钟与货币汇率分开) ③Dots.ai 第 15 家预设 + 深度思考开关 (实测: 正文被思考吃空时自动关思考重试一次) ④AI 聊天 GPT/豆包式改造 (+菜单附件/建议行/最近对话置顶重命名删除/圆角弹窗/气泡内豆包式图标行含朗读) ⑤迷你翻译 F10 + 复制即译 F11 (独立开关与热键, 跟随文本翻译的 AI 开关, 复制即译只按热键触发不监听剪贴板) ⑥约时间换算 (含单语复制模式)/对方作息提示/复制双语 ⑦计算器放大居中+计算历史/汇率 30 币种国旗/世界时钟天气图标+温馨提醒+分享 ⑧全局圆角 (主窗口外框直角除外)+KIVO 配色+弹窗美化, 标注默认矩形 ⑨设置内检查更新+一键更新 (下载字节数检/MZ 验头/SHA256+RSA 签名双重验证, 无 .sig 的版本拒装) ⑩第六轮深度审查: 边栏最小高度 600 防裁设置项 v1.4.30: 千问审查整改 — OCR 引擎锁竞态 (锁改为类定义时建好)、F7 消费模式只在粘成功时删记录、F4 碎片合并框并集底边、下载链接剥尾标点、恢复 _ini_scalar/_http_base 护栏、save_config/save_phrases 落盘失败记 crash.log。 v1.5.0: AI 助手全面升级 — 模型中心 (多服务商多模型档案/任务级选模型/连接测试/同服务商故障切换)、聊天流式输出与停止生成、图片上下文与图片备份、长期记忆、PDF/Word/Excel 附件解析、附件与历史读取上限、深色边栏与品牌蓝统一、备份事务回滚、热键冲突提示、AI 报错脱敏加固。
 # v1.4.20: 瘦身版, 功能零变化 — 打包侧剔除未用组件 (cv2 视频插件/级联数据、numpy 测试集、onnxruntime 的 transformers/tools/quantization/datasets/backend), 已模拟验证删除后 OCR 中英文识别正常
 # v1.4.19: ①AI 面板侧边栏去掉「AI 功能」快捷入口组 (功能本体全保留) ②修复 v1.4.18 的 F4 截图翻译主流程 (_translate_lines 误标 @staticmethod 致后台线程静默失败) ③记录上限改硬线 (全锁定时不再突破 2000) ④截图翻译目标语言扩到 13 种 ⑤内嵌微型浏览器 (WebView2 子进程收编: 谷歌翻译主页/书签栏前 8+书签管理/浏览历史/清除数据/页面缩放/下载说明) ⑥文本翻译面板 (打字停笔 350ms 自动翻译, 无缓存每次实时译) + 工具栏按序重排为两行并配线条图标 ⑦品牌头重排 (系统设置移左上挨着 KIVO, 副标题「多功能工作台」居中, 右上留空) + 软件图标换 Jane 的樱花小女孩原图 ⑧窗口最小高度解锁 (最大化/缩放恢复正常) ⑨全界面双语化补齐 (约 330 条文案入语言文件, 英文模式复检残留中文 0 条) + 第八轮深查 (线程/网络/浏览器生命周期/热键英文保存往返全过)
 # v1.4.18: ①截图翻译修复 (OCR 碎片合并+整段翻译, 结果窗改纯文本) ②翻译结果窗内嵌 AI 智能回复 ③AI/热键/翻译设置全并入系统设置 ④AI 功能改内嵌面板+豆包式侧边栏+最近对话存档 (圆角气泡) ⑤主窗口简约重设计 (方角) ⑥货币汇率 ⑦计算器 ⑧常用语库面板化+序号 ⑨世界时间 (全球城市自选+当地天气) ⑩无水印下载 (FB/IG/小红书等, 保存位置可每次询问或固定) ⑪历史截图保存设置 (张数/不保存, 含 GIF) ⑫移除网络搜索 ⑬三轮深查整改: AI 回复防串话/时钟计时链/天气失败重试/设置窗滚轮隔离/下载实际文件名/汇率过期刷新/AI 回复增量渲染 (320ms→24ms)/单实例保护/单对话存档封顶 200 条
@@ -1502,6 +1503,7 @@ class App(tk.Tk):
             tk.Label(side, text=text, font=self._ui_font(9, True), background=SIDE, foreground=self.UI_MUTED).pack(anchor="w", padx=18, pady=(10, 3))
         _nav("ai", self.t("ai_chat", "AI 助手"), "ai", self.open_ai_chat)
         _nav("project", self.t("project_title", "项目"), "project", self.open_projects)
+        _nav("voice", self.t("voice_title", "语音翻译"), "voice", self.open_voice)
         _nav("trans", self.t("nav_trans", "翻译中心"), "translate", self._show_texttrans_panel)
         _nav("clip", self.t("copy_paste", "剪贴板"), "copy", self._show_main_view)
         _nav("phrases", self.t("phrase_library", "常用语"), "phrases", self.open_phrases)
@@ -1883,7 +1885,7 @@ class App(tk.Tk):
             self._build_settings_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel", "_project_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel", "_project_panel", "_voice_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -2321,7 +2323,7 @@ class App(tk.Tk):
             self._build_selfcheck_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel", "_project_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel", "_project_panel", "_voice_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -2586,7 +2588,7 @@ class App(tk.Tk):
             self._build_phrases_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel", "_project_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel", "_project_panel", "_voice_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -5507,7 +5509,7 @@ try {
         return {"service": svc, "key": g(pre + "Key") or (g("ApiKey") if active else ""),
                 "base": g(pre + "Base") or (g("BaseUrl") if active else "") or pbase,
                 "model": g(pre + "Model") or (g("Model") if active else "") or pmodel}
-    _AI_ROUTES = {"chat": "RouteChat", "vision": "RouteVision", "reply": "RouteReply", "text": "RouteText", "annotate": "RouteAnnotate"}
+    _AI_ROUTES = {"chat": "RouteChat", "vision": "RouteVision", "reply": "RouteReply", "text": "RouteText", "annotate": "RouteAnnotate", "voice": "RouteVoice"}
     def _ai_cfg_for(self, route):
         """Resolve a task's provider AND optional model profile; invalid routes safely fall back to active service."""
         rk = self._AI_ROUTES.get(route or "")
@@ -7240,7 +7242,7 @@ try {
             self._build_calc_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_phrases_panel", "_clock_panel", "_dl_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel", "_project_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_phrases_panel", "_clock_panel", "_dl_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel", "_project_panel", "_voice_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -7563,7 +7565,7 @@ try {
             self._build_clock_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_dl_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel", "_project_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_dl_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel", "_project_panel", "_voice_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -7829,7 +7831,7 @@ try {
             self._build_clockset_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel", "_project_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel", "_project_panel", "_voice_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -8240,7 +8242,7 @@ try {
             self._build_texttrans_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_clock_panel", "_dl_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel", "_project_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_clock_panel", "_dl_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel", "_project_panel", "_voice_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -8564,7 +8566,7 @@ try {
             self._build_dl_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_clock_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel", "_project_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_phrases_panel", "_clock_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel", "_project_panel", "_voice_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -8831,6 +8833,9 @@ try {
             except Exception: pass
         if getattr(self, "_ai_panel", None) is not None:
             try: self._ai_panel.pack_forget()
+            except Exception: pass
+        if getattr(self, "_voice_panel", None) is not None:
+            try: self._voice_panel.pack_forget()
             except Exception: pass
         self._forget_aux_panels()
         try: self._body.pack(fill="both", expand=True, before=self._status_sep)
@@ -10425,7 +10430,7 @@ try {
             self._build_gallery_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel", "_project_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel", "_project_panel", "_voice_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -11053,7 +11058,7 @@ try {
             self._build_dev_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_project_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_project_panel", "_voice_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -11198,7 +11203,7 @@ try {
             self._build_pomo_panel()
         try: self._body.pack_forget()
         except Exception: pass
-        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel", "_project_panel"):
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel", "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel", "_project_panel", "_voice_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -11362,6 +11367,231 @@ try {
             self._win_move(hwnd, x0 + half_w, y0, full_w - half_w, full_h)
         else:  # center
             self._win_move(hwnd, x0 + half_w // 2, y0 + full_h // 4, half_w, full_h // 2)
+    # ===== 语音翻译: 云端语音转写 (OpenAI 兼容 /audio/transcriptions) + AI 翻译 =====
+    _VOICE_MAX_SIZE = 25 * 1024 * 1024  # 转写接口单文件上限 25MB
+    _VOICE_STT_DEFAULT = "whisper-1"    # 默认转写模型; 服务商若用别的名字可在面板里改
+    _VOICE_MIME = {".ogg": "audio/ogg", ".oga": "audio/ogg", ".opus": "audio/ogg",
+                   ".m4a": "audio/mp4", ".aac": "audio/aac", ".mp3": "audio/mpeg",
+                   ".wav": "audio/wav", ".webm": "audio/webm", ".flac": "audio/flac"}
+    def _voice_stt_model(self):
+        return (self.cfg.get("AI", "VoiceModel", fallback=self._VOICE_STT_DEFAULT)
+                or self._VOICE_STT_DEFAULT).strip()[:120]
+    def _voice_save_stt_model(self, val):
+        val = (val or "").strip()[:120] or self._VOICE_STT_DEFAULT
+        try:
+            if not self.cfg.has_section("AI"): self.cfg.add_section("AI")
+            self.cfg.set("AI", "VoiceModel", val); self.save_config()
+        except Exception: pass
+    @classmethod
+    def _voice_resolve_mime(cls, path):
+        """按扩展名确认是受支持的音频, 返回 (扩展名, MIME); 不认识的格式直接报错。"""
+        ext = os.path.splitext(path)[1].lower()
+        mime = cls._VOICE_MIME.get(ext)
+        if not mime:
+            raise RuntimeError("不支持这个音频格式 (支持 %s)。" % "、".join(sorted(cls._VOICE_MIME)))
+        return ext, mime
+    @staticmethod
+    def _safe_voice_filename(name, ext):
+        """multipart 里的文件名只留安全 ASCII, 避免引号/非 ASCII 破坏表单或触发服务端解析问题。"""
+        safe = "".join(ch for ch in os.path.basename(name) if ch.isalnum() or ch in "._-")
+        if not safe or "." not in safe: safe = "voice" + ext
+        return safe[:120]
+    @staticmethod
+    def _encode_multipart(boundary, fields, files):
+        """标准库手写 multipart/form-data: fields=[(name,value)], files=[(name,filename,mime,data)]。"""
+        out = bytearray(); b = boundary.encode("utf-8")
+        for name, value in fields:
+            out += b"--" + b + b"\r\n"
+            out += ('Content-Disposition: form-data; name="%s"\r\n\r\n' % name).encode("utf-8")
+            out += str(value).encode("utf-8") + b"\r\n"
+        for name, filename, mime, data in files:
+            out += b"--" + b + b"\r\n"
+            out += ('Content-Disposition: form-data; name="%s"; filename="%s"\r\n'
+                    % (name, filename)).encode("utf-8")
+            out += ('Content-Type: %s\r\n\r\n' % mime).encode("utf-8")
+            out += data + b"\r\n"
+        out += b"--" + b + b"--\r\n"
+        return bytes(out)
+    def _voice_transcribe(self, path, cfg, language="", timeout=120):
+        """上传音频到 /audio/transcriptions, 返回转写文本; 调用方须在后台线程。"""
+        import urllib.request, urllib.error, json as _json, uuid
+        ext, mime = self._voice_resolve_mime(path)
+        try: size = os.path.getsize(path)
+        except OSError as e: raise RuntimeError("读不到这个音频文件: " + str(e))
+        if size <= 0: raise RuntimeError("这个音频文件是空的 (0 字节)。")
+        if size > self._VOICE_MAX_SIZE:
+            raise RuntimeError("音频有 %.1f MB, 超过转写接口 25 MB 的上限, 请先裁剪或压缩。" % (size / 1048576))
+        with open(path, "rb") as f: data = f.read()
+        boundary = "----KIVOvoice" + uuid.uuid4().hex
+        fields = [("model", self._voice_stt_model())]
+        if language: fields.append(("language", language))
+        body = self._encode_multipart(boundary, fields,
+                                      [("file", self._safe_voice_filename(path, ext), mime, data)])
+        url = self._http_base(cfg["base"]) + "/audio/transcriptions"
+        headers = {"Content-Type": "multipart/form-data; boundary=" + boundary,
+                   "Authorization": "Bearer " + cfg["key"], "User-Agent": "KIVO"}
+        req = urllib.request.Request(url, data=body, headers=headers, method="POST")
+        _open = globals().get("_open_url") or urllib.request.urlopen
+        try:
+            with _open(req, timeout=max(5, min(int(timeout), 300))) as resp:
+                raw = resp.read(8 * 1024 * 1024 + 1)
+        except urllib.error.HTTPError as exc:
+            detail = ""
+            try: detail = exc.read(2048).decode("utf-8", "replace")
+            except Exception: pass
+            raise RuntimeError("语音转写失败 (HTTP %s): %s"
+                               % (exc.code, _redact_ai_detail(detail, cfg["key"])[:300])) from exc
+        except urllib.error.URLError as exc:
+            raise RuntimeError("连不上语音转写服务: " + str(exc.reason)) from exc
+        try: obj = _json.loads(raw.decode("utf-8"))
+        except Exception as e: raise RuntimeError("转写服务返回的内容不是有效 JSON。") from e
+        text = (obj.get("text") or "").strip() if isinstance(obj, dict) else ""
+        if not text:
+            raise RuntimeError("转写结果为空: 可能音频里没有可识别的人声, 或该服务商不支持当前转写模型。")
+        return text
+    def _voice_translate_text(self, text, target_code, timeout=90):
+        """把转写文本交给现有 AI 通道翻译成目标语言, 只返回译文。"""
+        messages = [
+            {"role": "system", "content": "你是专业口译/笔译。把用户提供的语音转写文本翻译成%s, "
+             "只输出译文本身, 保持自然通顺, 不要解释、不要附原文、不要加任何标记。" % self._tgt_name(target_code)},
+            {"role": "user", "content": text}]
+        return (self._ai_chat_messages(messages, temperature=0.3, max_tokens=2048,
+                                       timeout=timeout, route="voice") or "").strip()
+    def open_voice(self):
+        self._nav_show("voice")
+        self._show_voice_panel()
+    def _show_voice_panel(self):
+        self._texttrans_on_hide()
+        if getattr(self, "_voice_panel", None) is None:
+            self._build_voice_panel()
+        try: self._body.pack_forget()
+        except Exception: pass
+        for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel",
+                     "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel",
+                     "_project_panel", "_voice_panel"):
+            p = getattr(self, attr, None)
+            if p is not None:
+                try: p.pack_forget()
+                except Exception: pass
+        self._ai_view_on = False
+        self._forget_aux_panels()
+        self._voice_panel.pack(fill="both", expand=True, before=self._status_sep)
+    def _voice_card(self, parent):
+        """1px 细边白卡 (Sonoma): 外层细边 frame + 内层白底 padding frame。"""
+        outer = tk.Frame(parent, background=self.UI_BORDER)
+        inner = tk.Frame(outer, background="#FFFFFF")
+        inner.pack(fill="both", expand=True, padx=1, pady=1)
+        return outer, inner
+    def _build_voice_panel(self):
+        panel = tk.Frame(self._content, background="#FFFFFF"); self._voice_panel = panel
+        self._voice_path = ""; self._voice_busy = False
+        head = tk.Frame(panel, background="#FFFFFF"); head.pack(fill="x", padx=28, pady=(20, 8))
+        tk.Label(head, text=self.t("voice_title", "语音翻译"), font=self._ui_font(18, True),
+                 background="#FFFFFF", foreground=self.UI_TEXT).pack(anchor="w")
+        tk.Label(head, text=self.t("voice_sub", "选择聊天软件导出的语音消息, 自动转写成文字再翻译成目标语言。"),
+                 font=self._ui_font(10), background="#FFFFFF", foreground=self.UI_MUTED).pack(anchor="w", pady=(3, 0))
+        wrap = tk.Frame(panel, background="#FFFFFF"); wrap.pack(fill="both", expand=True, padx=28, pady=(4, 18))
+        # ---- 文件卡 ----
+        fcard, fin = self._voice_card(wrap); fcard.pack(fill="x")
+        row1 = tk.Frame(fin, background="#FFFFFF"); row1.pack(fill="x", padx=16, pady=(14, 6))
+        ttk.Button(row1, text=self.t("voice_pick", "选择音频文件"),
+                   command=self._voice_choose).pack(side="left")
+        self._voice_file_label = tk.StringVar(value=self.t("voice_no_file", "未选择文件"))
+        tk.Label(row1, textvariable=self._voice_file_label, font=self._ui_font(10),
+                 background="#FFFFFF", foreground=self.UI_TEXT).pack(side="left", padx=(12, 0))
+        tk.Label(fin, text=self.t("voice_fmt", "支持 OGG/Opus、M4A/AAC、MP3、WAV、WEBM、FLAC、AAC 等, 单个不超过 25 MB。"),
+                 font=self._ui_font(9), background="#FFFFFF", foreground=self.UI_MUTED).pack(anchor="w", padx=16, pady=(0, 10))
+        opt = tk.Frame(fin, background="#FFFFFF"); opt.pack(fill="x", padx=16, pady=(0, 12))
+        tk.Label(opt, text=self.t("voice_target", "目标语言"), font=self._ui_font(10),
+                 background="#FFFFFF", foreground=self.UI_TEXT).pack(side="left")
+        self._voice_target_var = tk.StringVar(value=self._tgt_name(self.cfg.get("Translate", "Target", fallback="zh-CN") or "zh-CN"))
+        ttk.Combobox(opt, textvariable=self._voice_target_var, width=10, state="readonly",
+                     values=[n for n, _ in self._TRANS_TARGETS]).pack(side="left", padx=(6, 18))
+        tk.Label(opt, text=self.t("voice_stt", "转写模型"), font=self._ui_font(10),
+                 background="#FFFFFF", foreground=self.UI_TEXT).pack(side="left")
+        self._voice_model_var = tk.StringVar(value=self._voice_stt_model())
+        ttk.Entry(opt, textvariable=self._voice_model_var, width=20).pack(side="left", padx=(6, 18))
+        tk.Label(opt, text=self.t("voice_srclang", "源语言(可选)"), font=self._ui_font(10),
+                 background="#FFFFFF", foreground=self.UI_TEXT).pack(side="left")
+        self._voice_lang_var = tk.StringVar()
+        ttk.Entry(opt, textvariable=self._voice_lang_var, width=8).pack(side="left", padx=(6, 0))
+        row2 = tk.Frame(fin, background="#FFFFFF"); row2.pack(fill="x", padx=16, pady=(0, 16))
+        ttk.Button(row2, text=self.t("voice_start", "开始转写翻译"), style="Accent.TButton",
+                   command=self._voice_start).pack(side="left")
+        self._voice_status = tk.StringVar(value="")
+        tk.Label(row2, textvariable=self._voice_status, font=self._ui_font(10),
+                 background="#FFFFFF", foreground=self.UI_MUTED).pack(side="left", padx=(14, 0))
+        # ---- 结果: 原文 / 译文 ----
+        self._voice_original_box = self._voice_result_block(wrap, self.t("voice_original", "原文 (转写)"))
+        self._voice_translated_box = self._voice_result_block(wrap, self.t("voice_translated", "译文"))
+    def _voice_result_block(self, parent, title):
+        card, inn = self._voice_card(parent); card.pack(fill="both", expand=True, pady=(12, 0))
+        top = tk.Frame(inn, background="#FFFFFF"); top.pack(fill="x", padx=14, pady=(12, 6))
+        tk.Label(top, text=title, font=self._ui_font(10, True),
+                 background="#FFFFFF", foreground=self.UI_TEXT).pack(side="left")
+        box = tk.Text(inn, height=7, wrap="word", font=self._ui_font(10), bg="#FBFBFD",
+                      relief="solid", borderwidth=1, highlightthickness=0, foreground=self.UI_TEXT)
+        box.pack(fill="both", expand=True, padx=14, pady=(0, 8))
+        ttk.Button(top, text=self.t("voice_copy", "复制"),
+                   command=lambda: self._voice_copy(box)).pack(side="right", padx=(6, 0))
+        ttk.Button(top, text=self.t("voice_speak", "朗读"),
+                   command=lambda: self._speak_text(box.get("1.0", "end").strip())).pack(side="right")
+        return box
+    def _voice_set_text(self, box, txt):
+        box.configure(state="normal"); box.delete("1.0", "end"); box.insert("1.0", txt)
+    def _voice_copy(self, box):
+        txt = box.get("1.0", "end").strip()
+        if not txt: return
+        self.clipboard_clear(); self.clipboard_append(txt); self.status.set(self.t("voice_copied", "已复制"))
+    def _voice_choose(self):
+        pat = " ".join("*" + e for e in self._VOICE_MIME)
+        path = filedialog.askopenfilename(title=self.t("voice_pick", "选择音频文件"),
+                                          filetypes=[(self.t("voice_title", "音频"), pat),
+                                                     (self.t("voice_all", "所有文件"), "*.*")])
+        if not path: return
+        try: self._voice_resolve_mime(path)
+        except RuntimeError as e:
+            messagebox.showerror(self.t("voice_title", "语音翻译"), str(e), parent=self); return
+        self._voice_path = path; self._voice_file_label.set(os.path.basename(path))
+    def _voice_start(self):
+        if getattr(self, "_voice_busy", False):
+            self.status.set(self.t("voice_busy", "正在处理中, 稍等…")); return
+        path = getattr(self, "_voice_path", "")
+        if not path or not os.path.exists(path):
+            messagebox.showwarning(self.t("voice_title", "语音翻译"),
+                                   self.t("voice_need_file", "请先选择一个音频文件。"), parent=self); return
+        code = "zh-CN"
+        for n, c in self._TRANS_TARGETS:
+            if n == self._voice_target_var.get(): code = c; break
+        self._voice_save_stt_model(self._voice_model_var.get())
+        self._voice_run(path, code, self._voice_lang_var.get().strip()[:10])
+    def _voice_run(self, path, target_code, language):
+        self._voice_busy = True
+        def post(msg): self._ui_queue.put(lambda m=msg: self._voice_status.set(m))
+        def work():
+            err = None; original = ""; translated = ""
+            try:
+                post(self.t("voice_transcribing", "正在上传并转写语音…"))
+                cfg = self._ai_cfg_for("voice")
+                if not cfg["key"]:
+                    raise RuntimeError(self.t("voice_need_key", "还没填 AI 接口的 API Key: 到「系统设置 → AI 模型中心」选服务、填 key 即可。"))
+                original = self._voice_transcribe(path, cfg, language=language)
+                post(self.t("voice_translating", "正在翻译…"))
+                translated = self._voice_translate_text(original, target_code)
+            except Exception as e:
+                err = e
+            def done():
+                self._voice_busy = False
+                if err is None:
+                    self._voice_set_text(self._voice_original_box, original)
+                    self._voice_set_text(self._voice_translated_box, translated)
+                    self._voice_status.set(self.t("voice_done", "完成") + ": " + os.path.basename(path))
+                    self.status.set(self.t("voice_done", "语音翻译完成"))
+                else:
+                    self._voice_status.set(self.t("voice_failed", "失败"))
+                    messagebox.showerror(self.t("voice_title", "语音翻译"), str(err), parent=self)
+            self._ui_queue.put(done)
+        threading.Thread(target=work, daemon=True, name="kivo-voice").start()
     def open_projects(self):
         self._nav_show("project")
         self._show_project_panel()
@@ -11373,7 +11603,7 @@ try {
         except Exception: pass
         for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel",
                      "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel",
-                     "_project_panel"):
+                     "_project_panel", "_voice_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()
@@ -11622,7 +11852,7 @@ try {
         except Exception: pass
         for attr in ("_ai_panel", "_fx_panel", "_calc_panel", "_clock_panel", "_dl_panel",
                      "_phrases_panel", "_dev_panel", "_pomo_panel", "_winman_panel", "_batch_panel",
-                     "_project_panel"):
+                     "_project_panel", "_voice_panel"):
             p = getattr(self, attr, None)
             if p is not None:
                 try: p.pack_forget()

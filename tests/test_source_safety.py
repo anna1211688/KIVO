@@ -2148,3 +2148,194 @@ class ProjectFeatureTests(unittest.TestCase):
         self.assertIn('self.open_projects', SOURCE)
         self.assertIn('"_project_panel"', SOURCE)        # 互斥隐藏
         self.assertIn('PROJECTS_PATH', SOURCE)
+
+
+def _voice_constants():
+    app_node = next(n for n in TREE.body if isinstance(n, ast.ClassDef) and n.name == "App")
+    out = {}
+    for node in app_node.body:
+        if isinstance(node, ast.Assign):
+            for t in node.targets:
+                if isinstance(t, ast.Name) and t.id in ("_VOICE_MIME", "_VOICE_MAX_SIZE", "_VOICE_STT_DEFAULT"):
+                    out[t.id] = eval(compile(ast.Expression(node.value), "<x>", "eval"))
+    return out
+
+
+def _voice_stub(opener=None, max_size=None, redact=None, stt_model="whisper-1"):
+    """带语音方法的轻量 stub: 不建 Tk、不联网 (opener 可注入)。"""
+    app_node = next(n for n in TREE.body if isinstance(n, ast.ClassDef) and n.name == "App")
+    ns = {"os": os, "re": re, "json": json, "time": time,
+          "_redact_ai_detail": redact or (lambda d, s="": d)}
+    if opener is not None:
+        ns["_open_url"] = opener
+    wanted = ("_voice_stt_model", "_voice_resolve_mime", "_safe_voice_filename",
+              "_encode_multipart", "_voice_transcribe", "_voice_translate_text",
+              "_http_base", "_tgt_name")
+    decor_kind = {}
+    for name in wanted:
+        node = next(n for n in app_node.body
+                    if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and n.name == name)
+        exec(ast.get_source_segment(SOURCE, node), ns)
+        decs = [d.func.id if isinstance(d, ast.Call) else d.id
+                for d in node.decorator_list if isinstance(d, (ast.Name, ast.Call))]
+        decor_kind[name] = "staticmethod" if "staticmethod" in decs else (
+            "classmethod" if "classmethod" in decs else "method")
+    consts = _voice_constants()
+    tnode = next(n for n in app_node.body if isinstance(n, ast.Assign)
+                 and any(isinstance(t, ast.Name) and t.id == "_TRANS_TARGETS" for t in n.targets))
+    trans_targets = eval(compile(ast.Expression(tnode.value), "<x>", "eval"))
+
+    class Stub:
+        _VOICE_MIME = consts["_VOICE_MIME"]
+        _VOICE_MAX_SIZE = max_size if max_size is not None else consts["_VOICE_MAX_SIZE"]
+        _VOICE_STT_DEFAULT = consts["_VOICE_STT_DEFAULT"]
+        _TRANS_TARGETS = trans_targets
+        def _voice_stt_model(self):
+            return stt_model
+
+    for nm in ("_voice_resolve_mime", "_safe_voice_filename", "_encode_multipart",
+               "_http_base", "_tgt_name", "_voice_transcribe", "_voice_translate_text"):
+        kind = decor_kind[nm]
+        if kind == "staticmethod":
+            setattr(Stub, nm, staticmethod(ns[nm]))
+        elif kind == "classmethod":
+            setattr(Stub, nm, classmethod(ns[nm]))
+        else:
+            setattr(Stub, nm, ns[nm])
+    return Stub()
+
+
+class _FakeResp:
+    def __init__(self, payload):
+        self.payload = payload
+    def __enter__(self):
+        return self
+    def __exit__(self, *a):
+        return False
+    def read(self, n=-1):
+        return self.payload
+
+
+def _recording_opener(payload):
+    def opener(req, timeout=None):
+        opener.request = req
+        return _FakeResp(payload)
+    opener.request = None
+    return opener
+
+
+class VoiceTranslationTests(unittest.TestCase):
+    """语音翻译: 格式校验、手写 multipart、云端转写与翻译接线。"""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(); self.dir = self.tmp.name
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def _audio(self, name, data=b"0" * 16):
+        p = os.path.join(self.dir, name)
+        with open(p, "wb") as f:
+            f.write(data)
+        return p
+
+    def test_screenshot_formats_supported(self):
+        # 截图点名的 Telegram/WhatsApp(OGG/Opus) 与 LINE/Kakao(M4A/AAC) 必须在列
+        for ext in (".ogg", ".opus", ".m4a", ".aac"):
+            self.assertIn(ext, _voice_constants()["_VOICE_MIME"])
+
+    def test_resolve_mime_ok(self):
+        stub = _voice_stub()
+        self.assertEqual(stub._voice_resolve_mime("a.ogg")[1], "audio/ogg")
+        self.assertEqual(stub._voice_resolve_mime("a.m4a")[1], "audio/mp4")
+        self.assertEqual(stub._voice_resolve_mime("x.WEBM")[1], "audio/webm")  # 大小写不敏感
+
+    def test_resolve_mime_rejects_unknown(self):
+        with self.assertRaises(RuntimeError):
+            _voice_stub()._voice_resolve_mime("note.txt")
+
+    def test_safe_filename(self):
+        stub = _voice_stub()
+        self.assertEqual(stub._safe_voice_filename('a"b?.ogg', ".ogg"), "ab.ogg")
+        self.assertEqual(stub._safe_voice_filename("???", ".ogg"), "voice.ogg")
+
+    def test_multipart_structure(self):
+        boundary = "bnd123"
+        body = _voice_stub()._encode_multipart(
+            boundary, [("model", "whisper-1"), ("language", "en")],
+            [("file", "v.ogg", "audio/ogg", b"PCM-BYTES")])
+        self.assertTrue(body.startswith(("--" + boundary).encode()))
+        self.assertTrue(body.endswith(("--" + boundary + "--\r\n").encode()))
+        self.assertIn(b'name="model"', body); self.assertIn(b"whisper-1", body)
+        self.assertIn(b'filename="v.ogg"', body)
+        self.assertIn(b"Content-Type: audio/ogg", body); self.assertIn(b"PCM-BYTES", body)
+        # 用标准库 email 还原, 确认服务端能正确解析
+        import email
+        packed = (b"Content-Type: multipart/form-data; boundary=" + boundary.encode()
+                  + b"\r\n\r\n" + body)
+        msg = email.message_from_bytes(packed)
+        file_part = next(p for p in msg.walk() if p.get_filename() == "v.ogg")
+        self.assertEqual(file_part.get_content_type(), "audio/ogg")
+        self.assertEqual(file_part.get_payload(decode=True), b"PCM-BYTES")
+
+    def test_transcribe_success(self):
+        opener = _recording_opener(json.dumps({"text": "你好世界"}).encode("utf-8"))
+        stub = _voice_stub(opener=opener)
+        out = stub._voice_transcribe(self._audio("msg.ogg"),
+                                     {"base": "https://api.x.com/v1", "key": "sk-secret"})
+        self.assertEqual(out, "你好世界")
+        req = opener.request
+        self.assertEqual(req.full_url, "https://api.x.com/v1/audio/transcriptions")
+        self.assertEqual(req.get_header("Authorization"), "Bearer sk-secret")
+        self.assertTrue(req.get_header("Content-type").startswith("multipart/form-data"))
+        self.assertIn(b'name="model"', req.data)
+
+    def test_transcribe_empty_raises(self):
+        opener = _recording_opener(json.dumps({"text": "  "}).encode("utf-8"))
+        with self.assertRaises(RuntimeError):
+            _voice_stub(opener=opener)._voice_transcribe(
+                self._audio("a.ogg"), {"base": "https://a/v1", "key": "k"})
+
+    def test_transcribe_oversize_raises(self):
+        big = self._audio("big.m4a", b"0" * 100)
+        stub = _voice_stub(opener=lambda *a, **k: None, max_size=50)
+        with self.assertRaises(RuntimeError):
+            stub._voice_transcribe(big, {"base": "https://a/v1", "key": "k"})
+
+    def test_transcribe_missing_file(self):
+        with self.assertRaises(RuntimeError):
+            _voice_stub()._voice_transcribe(os.path.join(self.dir, "nope.ogg"),
+                                           {"base": "https://a/v1", "key": "k"})
+
+    def test_transcribe_http_error_redacted(self):
+        import io, urllib.error
+        detail = '{"error":{"message":"bad key sk-secret in header"}}'
+        def opener(req, timeout=None):
+            raise urllib.error.HTTPError(req.full_url, 401, "Unauthorized", {},
+                                        io.BytesIO(detail.encode()))
+        stub = _voice_stub(opener=opener,
+                           redact=lambda d, s="": d.replace("sk-secret", "***"))
+        with self.assertRaises(RuntimeError) as cm:
+            stub._voice_transcribe(self._audio("a.ogg"),
+                                   {"base": "https://a/v1", "key": "sk-secret"})
+        self.assertIn("401", str(cm.exception)); self.assertIn("***", str(cm.exception))
+        self.assertNotIn("sk-secret", str(cm.exception))
+
+    def test_translate_uses_ai_route(self):
+        stub = _voice_stub(); captured = {}
+        def fake_ai(messages, temperature=None, max_tokens=None, timeout=None, route=None):
+            captured.update(messages=messages, route=route); return "  hello there  "
+        stub._ai_chat_messages = fake_ai
+        out = stub._voice_translate_text("你好", "en")
+        self.assertEqual(out, "hello there")  # 去空白
+        self.assertEqual(captured["route"], "voice")
+        self.assertEqual(captured["messages"][1]["content"], "你好")
+        self.assertIn("English", captured["messages"][0]["content"])
+
+    def test_wiring(self):
+        self.assertIn("def open_voice", SOURCE)
+        self.assertIn("def _build_voice_panel", SOURCE)
+        self.assertIn('"voice": "RouteVoice"', SOURCE)
+        self.assertIn('"/audio/transcriptions"', SOURCE)
+        self.assertIn('"_voice_panel"', SOURCE)
+        self.assertIn('"voice"', SOURCE)
