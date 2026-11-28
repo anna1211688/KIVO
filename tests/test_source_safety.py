@@ -2339,3 +2339,33 @@ class VoiceTranslationTests(unittest.TestCase):
         self.assertIn('"/audio/transcriptions"', SOURCE)
         self.assertIn('"_voice_panel"', SOURCE)
         self.assertIn('"voice"', SOURCE)
+
+
+class TranslateResultPaneTests(unittest.TestCase):
+    """截图翻译结果窗: 中文译文显示不完整修复 + 浅灰底/高度随内容。"""
+
+    def setUp(self):
+        self.body = method_text("show_translate_compare")
+
+    def test_text_pane_takes_fill_arg(self):
+        self.assertIn("def text_pane(title, content, height_lines, width_chars, fill)", self.body)
+
+    def test_height_uses_real_displaylines(self):
+        # 手算只是初始值, 必须用 Tk 真实折行兜底, 否则中文最后一行会被裁
+        self.assertIn('t.count("1.0", "end", "displaylines")', self.body)
+        self.assertIn("t.configure(height=max(1, min(24, real)))", self.body)
+
+    def test_min_height_is_one(self):
+        # 内容少就矮: 不再强制最小 3 行
+        self.assertIn("height=max(1, min(24, height_lines))", self.body)
+        self.assertNotIn("height=max(3, min(24, height_lines))", self.body)
+
+    def test_translation_soft_fill_original_surface(self):
+        # 译文浅灰底 UI_SOFT, 原文白底 UI_SURFACE
+        self.assertIn("self.UI_SOFT", self.body)
+        self.assertIn("self.UI_SURFACE", self.body)
+        self.assertIn("w_t, self.UI_SOFT)", self.body)
+
+    def test_panes_no_longer_forced_equal_height(self):
+        # 对照模式两框各自按内容定高, 旧的取 max 等高逻辑应已移除
+        self.assertNotIn("h = max(_disp_lines(orig_txt, w_o), _disp_lines(tran_txt, w_t))", self.body)
